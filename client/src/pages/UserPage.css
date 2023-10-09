@@ -1,0 +1,19 @@
+div {
+   font-family: 'DM Serif Display', serif; 
+}
+
+.ips-font {
+   color: rgb(8, 244, 27);
+}
+
+@media (max-width: 768px){
+   .rowstyle {
+       display: flex;
+       flex-direction: row !important;
+   }
+}
+ 
+.my-btn {
+   width: 75%;
+
+}  

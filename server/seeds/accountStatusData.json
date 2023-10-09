@@ -1,0 +1,11 @@
+[
+    {
+      "accountstatus": "Requested"
+    },
+    {
+      "accountstatus": "Active"
+    },
+    {
+      "accountstatus": "Inactive"
+    }
+  ]
