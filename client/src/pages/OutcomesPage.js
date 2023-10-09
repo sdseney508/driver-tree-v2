@@ -3,10 +3,10 @@ import React, { useState, useContext, useEffect } from "react";
 // import Select from "react-select";
 import { stateContext } from "../App";
 import { Container, Row, Col, Button} from "react-bootstrap";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { getUser, loggedIn, getToken } from "../utils/auth";
 import { createOutcome, getOutcome } from "../utils/drivers";
-import "./DriversPage.css";
+import "./DriverTreePage.module.css";
 import OutcomeTable from "../components/OutcomeTable";
 
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form
@@ -61,10 +61,10 @@ const OutcomesPage = () => {
 
   //this function gets everyone with an assigened role and sets the state for the drop down lists
 
-  const newOutcome = () => {
+  const newOutcome = async () => {
     createOutcome().then((data) => {
-      console.log(data);
-      navigate("/driver", { state: { outcomeID: data.data.id } });
+      setState({...state, outcomeID: data.data.id});
+      navigate("/drivertree", { state: { outcomeID: data.data.id } });
     });
   }
 

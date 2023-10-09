@@ -10,6 +10,7 @@ import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
 import {
   allDrivers,
   allOutcomes,
+  getDriver,
   getDriverByOutcome, 
   getOutcome
 } from "../utils/drivers";
@@ -31,38 +32,18 @@ function OutcomeTable({
 }) {
   let location = useLocation();
   let navigate = useNavigate();
+  const [selDriver, setSelDriver] = useState({}); // Set rowData to Array of Objects
   const [state, setState] = useContext(stateContext);
   const [rowData, setRowData] = useState([]); // Set rowData to Array of Objects
   var rowD =[];
 
-  async function fetchData() {
-    await allOutcomes().then((data) => {
-      rowD = data.data;
-      console.log('rowD', rowD);
-      setSelOutcome(rowD[0]);
-      console.log("selOutcome", selOutcome);
-    });
-
-    setRowData(rowD);
-    return rowD;
-  }
-
-  // async function fetchOneOutcome(outcomeId) {
-  //   await getOutcome(outcomeId).then((data) => {
-  //     let top = data.data;
-  //     console.log("outcome", top);
-  //     setSelOutcome(top);
-  //   });
-  // };
   const gridRef = useRef(); // Optional - for accessing Grid's API
 
   //this runs on the initial to fetch the data for the table
   useEffect(() => {
     const fetchData= async() =>{
-      await allOutcomes().then((data) => {
+      await getDriverByOutcome(state.outcomeID).then((data) => {
         rowD = data.data;
-        console.log('rowD', rowD);
-        setSelOutcome(rowD[0]);
       });
       setRowData(rowD);
     };
@@ -71,6 +52,13 @@ function OutcomeTable({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+
+  const getSelDriver = async (id) => {
+    await getDriver(id).then((data) => {
+      let top = data.data;
+      setSelDriver(top);
+    });
+  };
 
   // Each Column Definition results in one Column.  For now, we are only going to set the 7 key columns that the users might search on
   const [columnDefs, setColumnDefs] = useState([

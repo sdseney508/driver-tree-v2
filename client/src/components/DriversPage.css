@@ -1,0 +1,28 @@
+.centered {
+   text-align: center;
+  }
+
+.welcome-btn {
+   width: 25%;
+
+}  
+
+/* .splitscreen {
+   display: "flex";
+   flexdirection: "row";
+ } */
+ 
+ /* .toppane {
+   width: "75%";
+ }
+ 
+ .bottompane {
+   width: "25%";
+ } */
+
+@media (max-width: 768px){
+   .rowstyle {
+       display: flex;
+       flex-direction: row !important;
+   }
+}

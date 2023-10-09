@@ -6,6 +6,8 @@
     "node": "18.18.0"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.4.2",
+    "@fortawesome/free-solid-svg-icons": "^6.4.2",
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
@@ -13,6 +15,7 @@
     "ag-grid-community": "^27.3.0",
     "ag-grid-react": "^27.3.0",
     "axios": "^0.27.2",
+    "bootstrap-icons": "^1.11.1",
     "html2canvas": "^1.4.1",
     "jwt-decode": "^3.1.2",
     "multiselect-react-dropdown": "^2.0.25",
@@ -20,8 +23,8 @@
     "react-bootstrap": "^2.4.0",
     "react-dom": "^18.2.0",
     "react-multi-select-component": "^4.3.4",
-    "react-router": "^6.3.0",
-    "react-router-dom": "^6.3.0",
+    "react-router": "^6.4.0",
+    "react-router-dom": "^6.4.0",
     "react-scripts": "^5.0.1",
     "react-select": "^5.6.1",
     "react-typewriter-effect": "^1.1.0",

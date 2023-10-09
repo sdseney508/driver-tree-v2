@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { Row, Card } from "react-bootstrap";
 import {  stateContext } from "../App";
-import "./PageFooter.css";
+import styles from "./PageFooter.module.css"
 
 const PageHeader = () => {
   const [state, setState] = useContext(stateContext);
@@ -9,16 +9,16 @@ const PageHeader = () => {
   return (
     <>
       <Row className="d-flex justify-content-center">
-        <Card className="p-1 rounded-lg m-3 CUI-card">
-          <p className="CUI">Controlled by: Department of the Navy</p>
-          <p className="CUI">Controlled by: NAVAIRSYSCOM; {state.selectedPEO}; {state.selectedPMA}</p>
-          <p className="CUI">CUI Category: Controlled Technical Information</p>
-          <p className="CUI">
+        <Card className={styles.CUIcard}>
+          <p className={styles.CUI}>Controlled by: Department of the Navy</p>
+          <p className={styles.CUI}>Controlled by: NAVAIRSYSCOM, {state.selectedPEO}, {state.selectedPMA}</p>
+          <p className={styles.CUI}>CUI Category: Controlled Technical Information</p>
+          <p className={styles.CUI}>
             This document contains Controlled Unclassified Information (CUI),
             which is for official use only.
           </p>
           <br></br>
-          <p className="CUI">
+          <p className={styles.CUI}>
             DISTRIBUTION STATEMENT <br></br>
             Distribution Statement D: Distribution authorized to the DoD and
             U.S. DOD contractors only to protect proprietary and/or critical
@@ -26,7 +26,7 @@ const PageHeader = () => {
             referred to {state.selectedPMA}, Naval Air Systems Command, Patuxent
             River, Maryland 20670
           </p>
-          <p className="CUI">
+          <p className={styles.CUI}>
             WARNING: This document contains technical data whose export is
             restricted by the Arms Export Control Act (Title 22, U.S.C., Sec
             2751, et seq.) or the Export Administration Act of 1979, as amended,

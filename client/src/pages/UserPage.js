@@ -37,8 +37,7 @@ const UserPage = () => {
           lastName: user.lastName,
           email: user.email,
           id: user.id,
-          userRole: user.userRole,
-          functionalArea: user.functional,
+          userRole: user.userRole
         });
         let userDataLength = Object.keys(user).length;
         //if the user isnt logged in with an unexpired token, send them to the login page

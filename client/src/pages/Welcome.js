@@ -13,7 +13,7 @@ import {
 import "../assets/fonts.css";
 import SignUpForm from "../components/SignUpForm";
 import ForgotPass from "../components/ForgotPass";
-import "./Welcome.css";
+import styles from "./Welcome.module.css";
 import { login, loginUser } from "../utils/auth";
 import { useNavigate } from "react-router";
 import Typewriter from "../components/Typewriter";
@@ -133,15 +133,16 @@ const Welcome = () => {
 
   return (
     <>
-      <div className="welcome-page" style={{height: "135vh"}}>
+      <div className={styles.welcome_page} style={{height: "135vh"}}>
         <PageHeader />
         <Container>
           <Col className="">
             <Row>
-              <h5 className="display-5 fw-bolder text-center welcome-header">
+              <h3 className={styles.welcome_header}>
                 Welcome to {state.selectedPEO}'s Driver Tree Database
-              </h5>
+              </h3>
             </Row>
+
             <Row display="flex">
               <Col sm={1} md={2} lg={3} className="justify-content-center">
                 {" "}
@@ -171,7 +172,7 @@ const Welcome = () => {
                       className="font-weight-bold font-italic"
                     >
                       <h3
-                        className="fw-bold form-header"
+                        className={styles.welcome_h3}
                       >
                         {" "}
                         E-mail{" "}
@@ -195,7 +196,7 @@ const Welcome = () => {
                     <Form.Label>
                       {" "}
                       <h3
-                        className="fw-bolder form-header"
+                        className={styles.welcome_h3}
                       >
                         Password{" "}
                       </h3>
@@ -214,9 +215,10 @@ const Welcome = () => {
                     </Form.Control.Feedback>
                   </Form.Group>
                 </Form>
+
                 <Row className="justify-content-center">
                   <Button
-                    className="my-btn mt-3"
+                    className={styles.my_btn}
                     disabled={!(userFormData.email && userFormData.password)}
                     type="submit"
                     variant="success"
@@ -225,9 +227,10 @@ const Welcome = () => {
                     Login
                   </Button>
                 </Row>
+
                 <Row className="justify-content-center">
                   <Button
-                    className="my-btn justify-content-center rounded-lg mt-3"
+                    className={styles.my_btn}
                     id="requestAccount"
                     variant="secondary"
                     onClick={() => setSignupModal(true)}
@@ -237,7 +240,7 @@ const Welcome = () => {
                 </Row>
                 <Row className="justify-content-center">
                   <Button
-                    className="my-btn rounded-lg mt-3"
+                    className={styles.my_btn}
                     id="passReset"
                     variant="warning"
                     onClick={() => setResetModal(true)}
@@ -248,7 +251,7 @@ const Welcome = () => {
 
                 <Row className="justify-content-center">
                   <Button
-                    className="my-btn rounded-lg mt-3"
+                    className={styles.my_btn}
                     id="admin"
                     variant="danger"
                     name="admin"

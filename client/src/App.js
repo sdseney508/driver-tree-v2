@@ -12,6 +12,7 @@ import AdminDatabaseManage from "./pages/AdminDatabaseManagementPage";
 import AdminDriversPage from "./pages/AdminDriversPage";
 import OutcomesPage from "./pages/OutcomesPage";
 import DriverNavbar from "./components/DriverNavbar";
+import DrPage from "./pages/DriverPage";
 import DriverTreePage from "./pages/DriverTreePage";
 import "./App.css";
 
@@ -40,7 +41,8 @@ function App() {
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/accountmanage" element={<AccountManagementPage />} />
               <Route path="/allOutcomes" element={<OutcomesPage />} />
-              <Route path="/drivers" element={<DriverTreePage />} />
+              <Route path="/drivertree" element={<DriverTreePage />} />
+              <Route path="/drpage" element={<DrPage />} />
               <Route path="/user" element={<UserPage />} />
               <Route
                 path="*"

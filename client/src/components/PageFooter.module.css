@@ -1,0 +1,16 @@
+.CUI {
+   text-align: center;
+   font-size: 1rem;
+  }
+  
+.CUIcard {
+   display: flex !important;
+   margin: 0 auto !important;
+   height: auto !important;
+   width: 80% !important;
+   padding: 20px !important;
+   border-radius: 5px !important;
+   background-color: rgba(255, 255, 255, 0.447);
+   color: rgb(0, 0, 0);
+   box-shadow: 0px 0px 10px #888888;
+   } 

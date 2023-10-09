@@ -18,7 +18,7 @@ const createOutcome = () => {
 };
 
 const getDriver = (id) => { 
-  return axios.get(apiURL + "/drivers/getOne" + id);
+  return axios.get(apiURL + "/drivers/getOne/" + id);
 };
 
 const getDrivers = () => {

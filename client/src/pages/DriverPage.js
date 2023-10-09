@@ -1,39 +1,26 @@
 //page for viewing and updating op limits
 import React, { useState, useContext, useEffect } from "react";
-// import Select from "react-select";
 import { stateContext } from "../App";
-import { Container, Row, Col, Button, Card } from "react-bootstrap";
-import {
-  createOutcome,
-  getOutcome,
-  getDrivers,
-  getDriverByOutcome,
-  updateDriver
-} from "../utils/drivers";
-import { useNavigate, useLocation } from "react-router";
 import { getUser, loggedIn, getToken } from "../utils/auth";
-import "./DriversPage.css";
-import { Form } from "react-router-dom";
+import { Container, Row, Col, Button, Form } from "react-bootstrap";
+import { getDriver, getDriverByOutcome } from "../utils/drivers";
+import { useNavigate } from "react-router-dom";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faArrowRight, faArrowLeft, faArrowUp, faArrowDown} from "@fortawesome/free-solid-svg-icons";
+import styles from "./DriverPage.module.css";
 
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form
 
-const DriverTreePage = () => {
-  // debugger;
-  let recordLockState = false;
+const DriverPage = () => {
   const [state, setState] = useContext(stateContext);
-  const [selOutcome, setSelOutcome] = useState({});
-  const [selDrivers, setSelDrivers] = useState({});
-  const [driverTreeObj, setDriverTreeObj] = useState([]);
-  //These are the initial states for the select boxes.  They are set to the first value in the array, which is the default value
-  let location = useLocation();
-  let navigate = useNavigate();
-  // let driverTreeObj = [[], [], [], [], []];
-  //using the initial useEffect hook to open up the draft oplimits and prefill the form
+  const [selDrivers, setSelDrivers] = useState([]);
+  const [selDriver, setSelDriver] = useState({});
+  const navigate = useNavigate();
+
+  // this is getting the user data from the database to properly populate the form.  None of the form data is being updated in the database. until after you hit submit.
   useEffect(() => {
     const getUserData = async () => {
-      //this first part just ensures they whoever is on this page is an authenticated user; prevents someone from typing in the url and gaining access
       try {
-        //these comes from the utils section of the code
         const token = loggedIn() ? getToken() : null;
         if (!token) {
           navigate("/");
@@ -44,13 +31,13 @@ const DriverTreePage = () => {
           throw new Error("something went wrong!");
         }
         const user = response.data;
-        //used to make sure they have permissions to make changes
         setState({
           ...state,
           firstName: user.firstName,
           lastName: user.lastName,
-          Role: user.userRole,
-          userID: user.id,
+          email: user.email,
+          id: user.id,
+          userRole: user.userRole,
         });
         let userDataLength = Object.keys(user).length;
         //if the user isnt logged in with an unexpired token, send them to the login page
@@ -61,101 +48,137 @@ const DriverTreePage = () => {
         console.error(err);
       }
     };
-    getUserData();
-    //this one gets the initial draftOL for the form
-  }, []);
 
-  //this useEffect hook gets the data for the driver it was sent and sets the state for the form.
-  //TODO:  add a driver table at the bottom that has all of the drivers for the currently selected outcome.  Use a drop down to select the outcome then fill in the table with the drivers for that outcome
-  useEffect(() => {
-    let dtree = [[], [], [], [], []];
-    const getDriversData = async () => {
-      console.log(selOutcome.id);
-      await getDriverByOutcome(selOutcome.id).then((data) => {
-        // console.log(data.data);
-        setSelDrivers(data.data);
-        //TODO set up an object that will calc how many levels and only display the correct number of columns
-        // function drivertiers() {
-        for (let i = 0; i < data.data.length; i++) {
-          let level = data.data[i].tierLevel - 1; //tier level is 1 based, array is 0 based
-          dtree[level].unshift(data.data[i]);
-        }
-        console.log(driverTreeObj);
+    const getAppData = async () => {
+      let outcomeID = state.outcomeID;
+      let selDriver = state.selDriver;
+      if(!state.outcomeID){
+        await setState({...state, outcomeID: 1})
+        outcomeID = 1;
+
+      };
+      if(!state.selDriver){
+        await setState({...state, selDriver: 1})
+        selDriver = 1;
+      };
+      console.log("state: ", state)
+      await getDriverByOutcome(outcomeID).then((data) => {
+        let top = data.data;
+        setSelDrivers(top);
+      });
+      await getDriver(selDriver).then((data) => {
+        let top = data.data;
+        console.log("top: ", top);
+        setSelDriver(top);
       });
     };
-    selOutcome
-      ? getDriversData(selOutcome.id)
-      : console.log("no outcome selected");
-    console.log(dtree);
 
-    setDriverTreeObj(dtree);
-    console.log(driverTreeObj);
-    //setting up a brute force for drivers in each driver tree level
+    getUserData();
+    getAppData();
+    console.log("state", state);
+  }, []);
 
-    //   }
-    // }
-  }, [selOutcome]);
+  const handleInputChange = (event) => {};
 
-  //sets the initial selection of the drop down lists for the signatures, i couldnt get the map function to work, so brute force here we go.
+  const handleFormSubmit = async (event) => {};
 
-  //this function gets everyone with an assigened role and sets the state for the drop down lists
-
-  const newOutcome = () => {
-    createOutcome().then((data) => {
-      console.log(data);
-      setSelOutcome(data.data);
-      navigate("/drivers", { selOutcome });
-    });
-  };
-
-  //creates the cards for each of the columns.  the cards will have a listener that will open a separate page for the specific driver.  each teir gets a map
-  //TODO make this a callable function in the utils folder and import just the function then call it by tiers.
-
-  const handleChange = (e) => {
-
-
-
+  const buttonClicked = () => {
+    alert ("button clicked");
+  }
 
   return (
     <>
-      {/* will contain two rows that each have two columns to split the the form into fours.   */}
-      <div className="">
-        <Form>
-          <Row>
-            <Col>
-            <Form.Group>
-                        <Form.Label htmlFor="olconfiguration">
-                          Configuration*
-                        </Form.Label>
-                        <Form.Control
-                          as="select"
-                          id="olconfiguration"
-                          onBlur={handleChange}
-                          readOnly={recordLockState}
-                          value=""
-                        >
-                  
-                        </Form.Control>
-                      </Form.Group>
-            </Col>
+      <div className={styles.driver_page}>
+        <Container className={styles.driver_page}>
+          <div className={styles.driver_page}>
+            <h2
+              className="text-center fw-bolder"
+              style={{ "text-shadow": "1px 1px 1px grey" }}
+            >
+              Driver Details
+            </h2>
+            <FontAwesomeIcon icon={faArrowLeft} className={styles.arrows} onClick={buttonClicked}/>
+            <FontAwesomeIcon icon={faArrowRight} className={styles.arrows}/>
+            <FontAwesomeIcon icon={faArrowUp} className={styles.arrows}/>
+            <FontAwesomeIcon icon={faArrowDown} className={styles.arrows}/>
+                <br/>
+              Driver Tier: {selDriver.tierLevel}
+          </div>
+          <Form className={styles.my_form}>
+            <Row className={styles.quad_format + styles.my_row}>
+                <Col className={styles.my_col}>
+                  <Form.Group style={{ width: "100%" }}>
+                    <Form.Label>Problem Statement</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      value={selDriver.problemStatement || ""}
+                      name="driverName"
+                      onChange={handleInputChange}
+                    />
+                  </Form.Group>
 
-            <Col>
-              <Button onClick={newOutcome}>New Outcome</Button>
-            </Col>
-          </Row>
-          <Row>
-            <Col>
-              <Button onClick={newOutcome}>New Outcome</Button>
-            </Col>
-
-            <Col>
-              <Button onClick={newOutcome}>New Outcome</Button>
-            </Col>
-          </Row>
-        </Form>
+                  <Form.Group style={{ width: "100%" }}>
+                    <Form.Label>Barriers</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      value={selDriver.barriers || ""}
+                      name="driverName"
+                      onChange={handleInputChange}
+                    />
+                  </Form.Group>
+                </Col>
+              
+              <Col className={styles.my_col}>
+                <Form.Group>
+                  <Form.Label>Background</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    value={selDriver.background || ""}
+                    name="driverName"
+                    style={{ width: "100%" }}
+                    onChange={handleInputChange}
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+            <Row className={styles.quad_format + styles.my_row}>
+              <Col className={styles.my_col}>
+                <Form.Group>
+                  <Form.Label>Barriers</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    value={selDriver.barrier || ""}
+                    name="driverName"
+                    onChange={handleInputChange}
+                  />
+                </Form.Group>
+              </Col>
+              <Col className={styles.my_col}>
+                <Form.Group>
+                  <Form.Label>Deliverables</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    value={selDriver.deliverables || ""}
+                    name="driverName"
+                    onChange={handleInputChange}
+                  />
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Desired Outcomes</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    value={selDriver.desiredOutcomes || ""}
+                    name="driverName"
+                    onChange={handleInputChange}
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+          </Form>
+        </Container>
       </div>
     </>
   );
 };
 
-export default DriverTreePage;
+export default DriverPage;

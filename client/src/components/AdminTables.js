@@ -7,14 +7,7 @@ import React, {
   useContext,
 } from "react";
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
-import {
-  activeOL,
-  getDraft,
-getAircraft,
-getConfigurations,
-getFunctional,
-getSystems
-} from "../utils/drivers";
+import {} from "../utils/drivers";
 import { stateContext } from "../App";
 import "ag-grid-community/dist/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CSS
@@ -31,10 +24,10 @@ function AdminTables({selectedTable, setSelectedTable}) {
   let columnInfo;
 
 
-  useEffect(() => {
-    fetchData(selectedTable);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedTable]);
+  // useEffect(() => {
+  //   fetchData(selectedTable);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [selectedTable]);
 
 
 const getColumnInfo = (data) => {
@@ -48,32 +41,32 @@ const getColumnInfo = (data) => {
   return cols;
 }
 
-  async function fetchData(tableType) {
-    if (tableType === "aircraft") {
-      await getAircraft().then((data) => {
-        rowD = data.data;
-        columnInfo = getColumnInfo(data.data[0]);
-      });
-    } else if (tableType === "system") {
-      await getSystems().then((data) => {
-        columnInfo = getColumnInfo(data.data[0]);
-        rowD = data.data;
-      });
-    } else if (tableType === "configuration") {
-      await getConfigurations().then((data) => {
-        rowD = data.data;
-        columnInfo = getColumnInfo(data.data[0]);
-      });
-    } else if (tableType === "functional"){
-      await getFunctional().then((data) => {
-        console.log(data.data)
-        rowD = data.data.functionalAreaData;
-        columnInfo = getColumnInfo(rowD[0]);
-      });
-    }
-    setRowData(rowD);
-    setColumnDefs(columnInfo);
-  }
+  // async function fetchData(tableType) {
+  //   if (tableType === "aircraft") {
+  //     await getAircraft().then((data) => {
+  //       rowD = data.data;
+  //       columnInfo = getColumnInfo(data.data[0]);
+  //     });
+  //   } else if (tableType === "system") {
+  //     await getSystems().then((data) => {
+  //       columnInfo = getColumnInfo(data.data[0]);
+  //       rowD = data.data;
+  //     });
+  //   } else if (tableType === "configuration") {
+  //     await getConfigurations().then((data) => {
+  //       rowD = data.data;
+  //       columnInfo = getColumnInfo(data.data[0]);
+  //     });
+  //   } else if (tableType === "functional"){
+  //     await getFunctional().then((data) => {
+  //       console.log(data.data)
+  //       rowD = data.data.functionalAreaData;
+  //       columnInfo = getColumnInfo(rowD[0]);
+  //     });
+  //   }
+  //   setRowData(rowD);
+  //   setColumnDefs(columnInfo);
+  // }
 
   const gridRef = useRef(); // Optional - for accessing Grid's API
   // Each Column Definition results in one Column.  For now, we are only going to set the 7 key columns that the users might search on
