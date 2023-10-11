@@ -4,9 +4,15 @@ import { stateContext } from "../App";
 import { getUser, loggedIn, getToken } from "../utils/auth";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { getDriver, getDriverByOutcome } from "../utils/drivers";
+import DriverTable from "../components/DriverTable";
 import { useNavigate } from "react-router-dom";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faArrowRight, faArrowLeft, faArrowUp, faArrowDown} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faArrowRight,
+  faArrowLeft,
+  faArrowUp,
+  faArrowDown,
+} from "@fortawesome/free-solid-svg-icons";
 import styles from "./DriverPage.module.css";
 
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form
@@ -15,6 +21,7 @@ const DriverPage = () => {
   const [state, setState] = useContext(stateContext);
   const [selDrivers, setSelDrivers] = useState([]);
   const [selDriver, setSelDriver] = useState({});
+  const [selOutcome, setSelOutcome] = useState({});
   const navigate = useNavigate();
 
   // this is getting the user data from the database to properly populate the form.  None of the form data is being updated in the database. until after you hit submit.
@@ -52,16 +59,15 @@ const DriverPage = () => {
     const getAppData = async () => {
       let outcomeID = state.outcomeID;
       let selDriver = state.selDriver;
-      if(!state.outcomeID){
-        await setState({...state, outcomeID: 1})
+      if (!state.outcomeID) {
+        await setState({ ...state, outcomeID: 1 });
         outcomeID = 1;
-
-      };
-      if(!state.selDriver){
-        await setState({...state, selDriver: 1})
+      }
+      if (!state.selDriver) {
+        await setState({ ...state, selDriver: 1 });
         selDriver = 1;
-      };
-      console.log("state: ", state)
+      }
+      console.log("state: ", state);
       await getDriverByOutcome(outcomeID).then((data) => {
         let top = data.data;
         setSelDrivers(top);
@@ -83,34 +89,40 @@ const DriverPage = () => {
   const handleFormSubmit = async (event) => {};
 
   const buttonClicked = () => {
-    alert ("button clicked");
-  }
+    alert("button clicked");
+  };
 
   return (
     <>
       <div className={styles.driver_page}>
         <Container className={styles.driver_page}>
-          <div className={styles.driver_page}>
-            <h2
-              className="text-center fw-bolder"
-              style={{ "text-shadow": "1px 1px 1px grey" }}
-            >
-              Driver Details
-            </h2>
-            <FontAwesomeIcon icon={faArrowLeft} className={styles.arrows} onClick={buttonClicked}/>
-            <FontAwesomeIcon icon={faArrowRight} className={styles.arrows}/>
-            <FontAwesomeIcon icon={faArrowUp} className={styles.arrows}/>
-            <FontAwesomeIcon icon={faArrowDown} className={styles.arrows}/>
-                <br/>
+          <div>
+            <div className={styles.driver_page}>
+              <h2
+                className="text-center fw-bolder"
+                style={{ "text-shadow": "1px 1px 1px grey" }}
+              >
+                Driver Details
+              </h2>
+              <FontAwesomeIcon
+                icon={faArrowLeft}
+                className={styles.arrows}
+                onClick={buttonClicked}
+              />
+              <FontAwesomeIcon icon={faArrowRight} className={styles.arrows} />
+              <FontAwesomeIcon icon={faArrowUp} className={styles.arrows} />
+              <FontAwesomeIcon icon={faArrowDown} className={styles.arrows} />
+              <br />
               Driver Tier: {selDriver.tierLevel}
-          </div>
-          <Form className={styles.my_form}>
-            <Row className={styles.quad_format + styles.my_row}>
+            </div>
+            <Form className={styles.my_form}>
+              <Row className={styles.quad_format + styles.my_row}>
                 <Col className={styles.my_col}>
                   <Form.Group style={{ width: "100%" }}>
                     <Form.Label>Problem Statement</Form.Label>
                     <Form.Control
                       as="textarea"
+                      className={styles.my_text_area}
                       value={selDriver.problemStatement || ""}
                       name="driverName"
                       onChange={handleInputChange}
@@ -127,54 +139,65 @@ const DriverPage = () => {
                     />
                   </Form.Group>
                 </Col>
-              
-              <Col className={styles.my_col}>
-                <Form.Group>
-                  <Form.Label>Background</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    value={selDriver.background || ""}
-                    name="driverName"
-                    style={{ width: "100%" }}
-                    onChange={handleInputChange}
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-            <Row className={styles.quad_format + styles.my_row}>
-              <Col className={styles.my_col}>
-                <Form.Group>
-                  <Form.Label>Barriers</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    value={selDriver.barrier || ""}
-                    name="driverName"
-                    onChange={handleInputChange}
-                  />
-                </Form.Group>
-              </Col>
-              <Col className={styles.my_col}>
-                <Form.Group>
-                  <Form.Label>Deliverables</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    value={selDriver.deliverables || ""}
-                    name="driverName"
-                    onChange={handleInputChange}
-                  />
-                </Form.Group>
-                <Form.Group>
-                  <Form.Label>Desired Outcomes</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    value={selDriver.desiredOutcomes || ""}
-                    name="driverName"
-                    onChange={handleInputChange}
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-          </Form>
+
+                <Col className={styles.my_col}>
+                  <Form.Group>
+                    <Form.Label>Background</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      className={styles.my_text_area}
+                      value={selDriver.background || ""}
+                      name="driverName"
+                      style={{ width: "100%" }}
+                      onChange={handleInputChange}
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+              <Row className={styles.quad_format + styles.my_row}>
+                <Col className={styles.my_col}>
+                  <Form.Group>
+                    <Form.Label>Barriers</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      value={selDriver.barrier || ""}
+                      name="driverName"
+                      onChange={handleInputChange}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col className={styles.my_col}>
+                  <Form.Group>
+                    <Form.Label>Deliverables</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      value={selDriver.deliverables || ""}
+                      name="driverName"
+                      onChange={handleInputChange}
+                    />
+                  </Form.Group>
+                  <Form.Group>
+                    <Form.Label>Desired Outcomes</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      value={selDriver.desiredOutcomes || ""}
+                      name="driverName"
+                      onChange={handleInputChange}
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+            </Form>
+          </div>
+
+          <div>
+            <DriverTable 
+            selDriver={selDriver}
+            setSelDriver={setSelDriver}
+            selOutcome={selOutcome}
+            setSelOutcome={setSelOutcome}
+            />
+          </div>
         </Container>
       </div>
     </>

@@ -24,6 +24,15 @@
    height: 40vh;
 }
 
+.my_text_area {
+   display: list-item;
+   margin-left : 1em;
+   outline: none;
+ }
+ 
+ .my_text_area div {
+   display: list-item;
+ }
 
 .arrows {
    margin: 10px;

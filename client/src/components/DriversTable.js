@@ -24,15 +24,15 @@ import { useNavigate, useLocation } from "react-router";
 //when a user selects a row, the row data is passed to the parent component
 //and displayed in the form.
 //this is using the community edition and react hooks to selectively render the table
-function OutcomeTable({
-  selDrivers,
-  setSelDrivers,
+function DriverTable({
+  selDriver,
+  setSelDriver,
   selOutcome,
   setSelOutcome
 }) {
   let location = useLocation();
   let navigate = useNavigate();
-  const [selDriver, setSelDriver] = useState({}); // Set rowData to Array of Objects
+
   const [state, setState] = useContext(stateContext);
   const [rowData, setRowData] = useState([]); // Set rowData to Array of Objects
   var rowD =[];
@@ -42,6 +42,7 @@ function OutcomeTable({
   //this runs on the initial to fetch the data for the table
   useEffect(() => {
     const fetchData= async() =>{
+      console.log("outcomeID: " + state.outcomeID);
       await getDriverByOutcome(state.outcomeID).then((data) => {
         rowD = data.data;
       });
@@ -63,13 +64,6 @@ function OutcomeTable({
   // Each Column Definition results in one Column.  For now, we are only going to set the 7 key columns that the users might search on
   const [columnDefs, setColumnDefs] = useState([
     {
-      field: "outcomeTitle",
-      filter: true,
-      headerName: "Outcomes",
-      width: 400,
-      resizable: true,
-    },
-    {
       field: "problemStatement",
       filter: true,
       headerName: "Problem Statement",
@@ -77,16 +71,23 @@ function OutcomeTable({
       resizable: true,
     },
     {
-      field: "state",
+      field: "barrier",
       filter: true,
-      headerName: "State",
+      headerName: "Barrier",
+      width: 400,
+      resizable: true,
+    },
+    {
+      field: "background",
+      filter: true,
+      headerName: "Background",
       width: 125,
       resizable: true,
     },
     {
-      field: "status",
+      field: "desiredOutcomes",
       filter: true,
-      headerName: "status",
+      headerName: "Desired Outcomes",
       width: 125,
       resizable: true,
     },
@@ -104,22 +105,17 @@ function OutcomeTable({
 
   // const handleCallBack = () => useCallback(state);
 
-  async function fetchDriverInfo(outcomeID) {
-    await getDriverByOutcome(outcomeID).then((data) => {
+  async function fetchDriverInfo(driverID) {
+    await getDriver(driverID).then((data) => {
       let top = data.data;
-      setSelDrivers(top);
+      setSelDriver(top);
     });
-    await setState({...state, outcomeID: outcomeID});
-    await getOutcome(outcomeID).then((data) => {
-      setSelOutcome(data.data);
-      navigate("/drivertree", { selOutcome });
-  });
   };
 
   const cellClickedListener = useCallback(async (event) => {
     // debugger;
-    let outcomeID = event.data.id;
-    await fetchDriverInfo(outcomeID);
+    let driverID = event.data.id;
+    await fetchDriverInfo(driverID);
   });
 
 
@@ -142,4 +138,4 @@ function OutcomeTable({
   );
 }
 
-export default OutcomeTable;
+export default DriverTable;
