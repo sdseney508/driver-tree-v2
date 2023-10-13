@@ -10,10 +10,10 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 var corsOptions = {
   //for online use
-  // origin: "https://operations-limit-database.herokuapp.com",
+  origin: "https://driver-tree-demo-e11a6a8cff02.herokuapp.com/",
 
   //for local use
-  origin: "http://localhost:3000"
+  // origin: "http://localhost:3000"
 
 };
 app.use(cors(corsOptions));
