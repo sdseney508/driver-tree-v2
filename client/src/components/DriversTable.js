@@ -30,10 +30,11 @@ function DriverTable({
   selOutcome,
   setSelOutcome
 }) {
+  const [state, setState] = useContext(stateContext);
+  console.log("selOutcome", selOutcome);
   let location = useLocation();
   let navigate = useNavigate();
 
-  const [state, setState] = useContext(stateContext);
   const [rowData, setRowData] = useState([]); // Set rowData to Array of Objects
   var rowD =[];
 
@@ -42,16 +43,15 @@ function DriverTable({
   //this runs on the initial to fetch the data for the table
   useEffect(() => {
     const fetchData= async() =>{
-      console.log("outcomeID: " + state.outcomeID);
-      await getDriverByOutcome(state.outcomeID).then((data) => {
+      console.log(selOutcome);
+      await getDriverByOutcome(selOutcome.id).then((data) => {
         rowD = data.data;
       });
       setRowData(rowD);
     };
-
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [selOutcome]);
 
 
   const getSelDriver = async (id) => {

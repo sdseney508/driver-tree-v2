@@ -122,6 +122,9 @@ router.put("/adminlog/:id", async (req, res) => {
 //update drivers info
 router.put("/update/:id", async (req, res) => {
   try {
+    console.log("in the driver update by id route");
+    console.log(req.params.id);
+    console.log(req.body);
     const driversData = await drivers.update(req.body, {
       where: {
         id: req.params.id,

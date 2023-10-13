@@ -3,8 +3,8 @@ import React, { useState, useContext, useEffect } from "react";
 import { stateContext } from "../App";
 import { getUser, loggedIn, getToken } from "../utils/auth";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
-import { getDriver, getDriverByOutcome } from "../utils/drivers";
-import DriverTable from "../components/DriverTable";
+import { getDriver, getDriverByOutcome, getOutcome, updateDriver } from "../utils/drivers";
+import DriverTable from "../components/DriversTable";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -17,15 +17,16 @@ import styles from "./DriverPage.module.css";
 
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form
 
-const DriverPage = () => {
+const DriverPage = (outcomeID, driverID) => {
   const [state, setState] = useContext(stateContext);
   const [selDrivers, setSelDrivers] = useState([]);
   const [selDriver, setSelDriver] = useState({});
   const [selOutcome, setSelOutcome] = useState({});
   const navigate = useNavigate();
-
+  let outcomeId = outcomeID;
+  let driverId = driverID;
   // this is getting the user data from the database to properly populate the form.  None of the form data is being updated in the database. until after you hit submit.
-  useEffect(() => {
+  useEffect((outcomeID, driverID) => {
     const getUserData = async () => {
       try {
         const token = loggedIn() ? getToken() : null;
@@ -57,36 +58,51 @@ const DriverPage = () => {
     };
 
     const getAppData = async () => {
-      let outcomeID = state.outcomeID;
-      let selDriver = state.selDriver;
-      if (!state.outcomeID) {
-        await setState({ ...state, outcomeID: 1 });
+      // console.log("outcomeID", outcomeID, "driverID", driverID);
+      if (!outcomeID) {
         outcomeID = 1;
+      } else {
+        outcomeID = selOutcome.id;
       }
-      if (!state.selDriver) {
-        await setState({ ...state, selDriver: 1 });
-        selDriver = 1;
+      if (!driverID) {
+        driverID = 1;
+      } else {
+        driverID = selDriver.id;
       }
-      console.log("state: ", state);
       await getDriverByOutcome(outcomeID).then((data) => {
         let top = data.data;
         setSelDrivers(top);
       });
-      await getDriver(selDriver).then((data) => {
+      await getOutcome(outcomeID).then((data) => {
         let top = data.data;
-        console.log("top: ", top);
+        setSelOutcome(top);
+        console.log(top);
+      });
+      await getDriver(driverID).then((data) => {
+        let top = data.data;
         setSelDriver(top);
       });
     };
+    console.log("state", state);
 
     getUserData();
     getAppData();
-    console.log("state", state);
   }, []);
 
-  const handleInputChange = (event) => {};
 
-  const handleFormSubmit = async (event) => {};
+
+  const handleInputChange = (e) => {
+    e.preventDefault();
+    console.log("event.target.name: ", e.target.name);
+    setSelDriver({ ...selDriver, [e.target.name]: e.target.value });
+  };
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    let body = { [e.target.name]: e.target.value };
+    console.log("body: ", body);
+    updateDriver(selDriver.id, body);
+  };
 
   const buttonClicked = () => {
     alert("button clicked");
@@ -108,6 +124,7 @@ const DriverPage = () => {
                 icon={faArrowLeft}
                 className={styles.arrows}
                 onClick={buttonClicked}
+                onBlur={handleFormSubmit}
               />
               <FontAwesomeIcon icon={faArrowRight} className={styles.arrows} />
               <FontAwesomeIcon icon={faArrowUp} className={styles.arrows} />
@@ -124,8 +141,10 @@ const DriverPage = () => {
                       as="textarea"
                       className={styles.my_text_area}
                       value={selDriver.problemStatement || ""}
-                      name="driverName"
+                      //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                      name="problemStatement"
                       onChange={handleInputChange}
+                      onBlur={handleFormSubmit}
                     />
                   </Form.Group>
 
@@ -133,9 +152,11 @@ const DriverPage = () => {
                     <Form.Label>Barriers</Form.Label>
                     <Form.Control
                       as="textarea"
-                      value={selDriver.barriers || ""}
-                      name="driverName"
+                      value={selDriver.barrier || ""}
+                      //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                      name="barrier"
                       onChange={handleInputChange}
+                      onBlur={handleFormSubmit}
                     />
                   </Form.Group>
                 </Col>
@@ -147,9 +168,11 @@ const DriverPage = () => {
                       as="textarea"
                       className={styles.my_text_area}
                       value={selDriver.background || ""}
-                      name="driverName"
+                      //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                      name="background"
                       style={{ width: "100%" }}
                       onChange={handleInputChange}
+                      onBlur={handleFormSubmit}
                     />
                   </Form.Group>
                 </Col>
@@ -157,12 +180,14 @@ const DriverPage = () => {
               <Row className={styles.quad_format + styles.my_row}>
                 <Col className={styles.my_col}>
                   <Form.Group>
-                    <Form.Label>Barriers</Form.Label>
+                    <Form.Label>Progress</Form.Label>
                     <Form.Control
                       as="textarea"
-                      value={selDriver.barrier || ""}
-                      name="driverName"
+                      value={selDriver.progress || ""}
+                      //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                      name="progress"
                       onChange={handleInputChange}
+                      onBlur={handleFormSubmit}
                     />
                   </Form.Group>
                 </Col>
@@ -172,8 +197,10 @@ const DriverPage = () => {
                     <Form.Control
                       as="textarea"
                       value={selDriver.deliverables || ""}
-                      name="driverName"
+                      name="Deliverables"
+                      //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                       onChange={handleInputChange}
+                      onBlur={handleFormSubmit}
                     />
                   </Form.Group>
                   <Form.Group>
@@ -181,8 +208,10 @@ const DriverPage = () => {
                     <Form.Control
                       as="textarea"
                       value={selDriver.desiredOutcomes || ""}
-                      name="driverName"
+                      name="desiredOutcomes"
+                      //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                       onChange={handleInputChange}
+                      onBlur={handleFormSubmit}
                     />
                   </Form.Group>
                 </Col>
@@ -191,11 +220,11 @@ const DriverPage = () => {
           </div>
 
           <div>
-            <DriverTable 
-            selDriver={selDriver}
-            setSelDriver={setSelDriver}
-            selOutcome={selOutcome}
-            setSelOutcome={setSelOutcome}
+            <DriverTable
+              selDrivers={selDrivers}
+              setSelDrivers={setSelDrivers}
+              selOutcome={selOutcome}
+              setSelOutcome={setSelOutcome}
             />
           </div>
         </Container>

@@ -2,6 +2,7 @@
     {
       "outcome Title": "CAPT Guerre is too awesome to be contained by a mere title.",
       "problemStatement": "This is a barrier",
+      "baselinePerformance": "make this work right",
       "rootCauses":  1,
       "assumptions": "Everything is tracking to plan",
       "scope": "This is the where the background bullets will fall",

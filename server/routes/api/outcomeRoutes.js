@@ -4,19 +4,20 @@ const sequelize = require("../../config/connection");
 const {Op} = require("sequelize");
 
 // use /api/outcomes
-//create a new outcomes; Searches the database for the highest limit number and adds 1 to it then opens a new limit.  This new limit can then be passed to the createOpLimit page as part of the state variable.
+//create new outcomes; also logs the creation in the admin poriton of the database
 router.post("/new", async (req, res) => {
   try {
     const outcomesData = await outcomes.create();
     let id = outcomesData.id;
-    const ol = await outcomes.update(
-      { admin_log: req.body.log },
-      {
-        where: {
-          id: id, 
-        },
-      }
-    );
+    //TODO:  add the admin log to the outcomes table and add the creation marker to the top level admin table
+    // const outcomeupdate = await outcomes.update(
+    //   { admin_log: req.body.log },
+    //   {
+    //     where: {
+    //       id: id, 
+    //     },
+    //   }
+    // );
     res.status(200).json(outcomesData);
   } catch (err) {
     res.status(400).json(err);
@@ -100,7 +101,7 @@ router.get("/retired", async (req, res) => {
   }
 });
 
-//append the admin log with what was changed
+//TODO:  Still needs to be finished and tested. append the admin log with what was changed
 router.put("/adminlog/:id", async (req, res) => {
   try {
     let comment = req.body.log;
@@ -123,6 +124,7 @@ router.put("/adminlog/:id", async (req, res) => {
 });
 
 //update outcomes info
+//TODO add in the call to update the admin log as well
 router.put("/update/:id", async (req, res) => {
   try {
     const outcomesData = await outcomes.update(req.body, {
@@ -142,6 +144,7 @@ router.put("/update/:id", async (req, res) => {
 });
 
 //delete outcomes, this should only be used on the admin page
+//TODO:  add in a call to note the action in the admin log table
 router.delete("/:id", async (req, res) => {
   try {
     const outcomesData = await outcomes.destroy({

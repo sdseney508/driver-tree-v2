@@ -20,32 +20,38 @@ outcomes.init(
         //Todo:  move this to its own table with a link to the outcome
         problemStatement: {
             type: DataTypes.TEXT,
-            allowNull: false,
+            allowNull: true,
             defaultValue: 'No one can keep up with him',
+        },
+
+        baselinePerformance: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+            defaultValue: 'Draft',
         },
 
         //TODO:  move this to its own table with a link to the outcome
         rootCauses: {
             type: DataTypes.TEXT,
-            allowNull: false,
+            allowNull: true,
             defaultValue: 'He outworks everyone'
         },
         assumptions: {
             type: DataTypes.TEXT,
-            allowNull: false,
+            allowNull: true,
             defaultValue: 'Draft',
 
         },
         
         scope: {    
             type: DataTypes.TEXT,
-            allowNull: false,
+            allowNull: true,
             defaultValue: 'Draft',
         },
 
         goals: {
             type: DataTypes.TEXT,
-            allowNull: false,
+            allowNull: true,
             defaultValue: 'Draft',
         },
 
@@ -79,7 +85,7 @@ outcomes.init(
 
         status: {   
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: true,
             defaultValue: 'Green',
         },
         state: {

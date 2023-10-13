@@ -24,8 +24,6 @@ import { useNavigate, useLocation } from "react-router";
 //and displayed in the form.
 //this is using the community edition and react hooks to selectively render the table
 function OutcomeTable({
-  selDrivers,
-  setSelDrivers,
   selOutcome,
   setSelOutcome
 }) {
@@ -38,9 +36,6 @@ function OutcomeTable({
   async function fetchData() {
     await allOutcomes().then((data) => {
       rowD = data.data;
-      console.log('rowD', rowD);
-      setSelOutcome(rowD[0]);
-      console.log("selOutcome", selOutcome);
     });
 
     setRowData(rowD);
@@ -54,22 +49,13 @@ function OutcomeTable({
   //     setSelOutcome(top);
   //   });
   // };
-  const gridRef = useRef(); // Optional - for accessing Grid's API
+  const gridRef = useRef(); // Optional - for accessing Grid's AP
 
   //this runs on the initial to fetch the data for the table
   useEffect(() => {
-    const fetchData= async() =>{
-      await allOutcomes().then((data) => {
-        rowD = data.data;
-        console.log('rowD', rowD);
-        setSelOutcome(rowD[0]);
-      });
-      setRowData(rowD);
-    };
-
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [,selOutcome]);
 
 
   // Each Column Definition results in one Column.  For now, we are only going to set the 7 key columns that the users might search on
@@ -116,22 +102,16 @@ function OutcomeTable({
 
   // const handleCallBack = () => useCallback(state);
 
-  async function fetchDriverInfo(outcomeID) {
-    await getDriverByOutcome(outcomeID).then((data) => {
-      let top = data.data;
-      setSelDrivers(top);
-    });
-    await setState({...state, outcomeID: outcomeID});
+  async function fetchOutcomeInfo(outcomeID) {
     await getOutcome(outcomeID).then((data) => {
       setSelOutcome(data.data);
-      navigate("/drivertree", { selOutcome });
   });
   };
 
   const cellClickedListener = useCallback(async (event) => {
     // debugger;
     let outcomeID = event.data.id;
-    await fetchDriverInfo(outcomeID);
+    await fetchOutcomeInfo(outcomeID);
   });
 
 
@@ -139,7 +119,7 @@ function OutcomeTable({
   return (
     <div>
       {/* On div wrapping Grid a) specify theme CSS Class Class and b) sets Grid size */}
-      <div className="ag-theme-alpine" style={{ width: "100%", height: 400 }}>
+      <div className="ag-theme-alpine" style={{ width: "100%", height: "100%" }}>
         <AgGridReact
           ref={gridRef} // Ref for accessing Grid's API
           rowData={rowData} // Row Data for Rows

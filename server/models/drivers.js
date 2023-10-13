@@ -73,6 +73,13 @@ drivers.init(
             defaultValue: 'Draft Stakeholders For Demo',
         },
 
+        //todo: make this fed by the stakeholder table
+        supportedCommanders: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+            defaultValue: 'Draft Stakeholders For Demo',
+        },
+
         status: {
             type: DataTypes.STRING,
             allowNull: false,

@@ -62,10 +62,13 @@ const getUsers = () => {
   return axios.get(apiURL + "/users");
 };
 
-const updateDriver = (id, {body}) => {
-  return axios.put(apiURL + "/drivers/update/" + id, { body });
+const updateDriver = (id, body) => {
+  return axios.put(apiURL + "/drivers/update/" + id, body);
 };
 
+const updateOutcome = (id, body) => {
+  return axios.put(apiURL + "/outcomes/update/" + id, body);
+};
 
 export {
   allDrivers,
@@ -82,5 +85,6 @@ export {
   getEmails,
   getOutcome,
   getUsers,
-  updateDriver
+  updateDriver,
+  updateOutcome
 };

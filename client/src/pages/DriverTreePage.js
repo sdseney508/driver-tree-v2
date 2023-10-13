@@ -17,10 +17,10 @@ import OutcomeTable from "../components/OutcomeTable";
 
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form
 
-const DriverTreePage = () => {
+const DriverTreePage = ({outcome}) => {
   // debugger;
   const [state, setState] = useContext(stateContext);
-  const [selOutcome, setSelOutcome] = useState({});
+  const [selOutcome, setSelOutcome] = useState({outcome});
   const [selDrivers, setSelDrivers] = useState({});
   const [driverTreeObj, setDriverTreeObj] = useState([]);
   //These are the initial states for the select boxes.  They are set to the first value in the array, which is the default value
@@ -69,7 +69,10 @@ const DriverTreePage = () => {
   useEffect(() => {
     let dtree = [[], [], [], [], []];
     const getDriversData = async () => {
-      console.log(selOutcome.id);
+      console.log(selOutcome);
+      if(!selOutcome.id){
+        selOutcome.id = 1;
+      };
       await getDriverByOutcome(selOutcome.id).then((data) => {
         // console.log(data.data);
         setSelDrivers(data.data);
@@ -85,7 +88,9 @@ const DriverTreePage = () => {
       ? getDriversData(selOutcome.id)
       : console.log("no outcome selected");
     setDriverTreeObj(dtree);
-  }, [selOutcome]);
+    setState({ ...state, selOutcome: selOutcome });
+    console.log("state", state);
+  }, [,selOutcome]);
 
   //sets the initial selection of the drop down lists for the signatures, i couldnt get the map function to work, so brute force here we go.
 
@@ -93,15 +98,15 @@ const DriverTreePage = () => {
 
   const newOutcome = () => {
     createOutcome().then((data) => {
-      console.log(data);
       setSelOutcome(data.data);
-      navigate("/drivers", { selOutcome });
     });
   };
 
   const goToDriver = async (e) => {
-    await setState({ ...state, selDriver: e.target.id });
-    navigate("/drpage");
+    console.log(e.target.outcomeID);
+    await setState({ ...state, selDriver: e.target.id, selOutcome: selOutcome.id });
+    console.log(state);
+    navigate("/drpage", {state: {selDriver: e.target.id, selOutcome: selOutcome.id}});
   };
 
   //creates the cards for each of the columns.  the cards will have a listener that will open a separate page for the specific driver.  each teir gets a map
@@ -265,7 +270,7 @@ const DriverTreePage = () => {
               </Col>
             </Row>
 
-            <Row className="mt-5">
+            <Row className="mt-5" style={{ height: "20vh" }}>
               <OutcomeTable
                 selDrivers={selDrivers}
                 setSelDrivers={setSelDrivers}
