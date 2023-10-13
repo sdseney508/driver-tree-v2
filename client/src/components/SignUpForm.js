@@ -1,15 +1,9 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, Button } from "react-bootstrap";
-import { stateContext } from "../App";
 import "./modals.css";
 import { register } from "../utils/auth";
-import { getFunctional, getRoles } from "../utils/sign-up";
-import CreatableSelect from "react-select/creatable";
+import { getRoles } from "../utils/sign-up";
 
-// interface Option {
-//   readonly label: string;
-//   readonly value: string;
-// }
 
 const SignupForm = ({onModalSubmit}) => {
   const [roleState, setRoleState] = useState([]);
@@ -43,10 +37,6 @@ const SignupForm = ({onModalSubmit}) => {
       return data.data;
     });
     setRoleState(rolesOpts);
-    let funcOptions = await getFunctional().then((data) => {
-      return data.data.functionalAreaData;
-    });
-    setFunctionalState(funcOptions);
   }
 
   //creates the options for the role dropdown
@@ -60,16 +50,6 @@ const SignupForm = ({onModalSubmit}) => {
     });
   }
 
-  //creates the options for the functional area dropdown
-  function functionalOptions() {
-    return functionalState.map((f, index) => {
-      return (
-        <option key={index} value={f.id}>
-          {f.functionalArea}
-        </option>
-      );
-    });
-  }
 
     //this is the function that is called when the form is submitted.  Please note, that since bcrypt is hashing the password, it will increase the password length well beyond the 14 character minimum and uses special characters so it will always pass the sequqlize validation.  If you are using bcrypt, you will need to use the regex below to validate the password.
   const handleFormSubmit = async (event) => {
@@ -172,23 +152,6 @@ const SignupForm = ({onModalSubmit}) => {
         </Form.Group>
 
         <Form.Group>
-          <Form.Label htmlFor="functionalArea">Functional Area</Form.Label>
-          <Form.Select
-            name="functionalArea"
-            aria-label="functionalArea"
-            onChange={handleInputChange}
-          >
-            <option disabled selected="selected">
-              --Select a Functional Area--
-            </option>
-            {functionalOptions()}
-          </Form.Select>
-          <Form.Control.Feedback type="invalid">
-            Functional Area is required!
-          </Form.Control.Feedback>
-        </Form.Group>
-
-        <Form.Group>
           <Form.Label htmlFor="role">Role</Form.Label>
           <Form.Select
             name="userRole"
@@ -239,7 +202,6 @@ const SignupForm = ({onModalSubmit}) => {
               userFormData.firstName &&
               userFormData.lastName &&
               userFormData.email &&
-              userFormData.functionalArea &&
               userFormData.userRole &&
               userFormData.password &&
               userFormData.passVal

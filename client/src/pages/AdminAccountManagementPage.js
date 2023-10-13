@@ -2,7 +2,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { stateContext } from "../App";
 import { getUser, loggedIn, getToken } from "../utils/auth";
-import { getAccountStatus, getFunctional, getRoles } from "../utils/sign-up";
+import { getAccountStatus, getRoles } from "../utils/sign-up";
 import { getUsers } from "../utils/drivers";
 import { Container, Row, Button, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
@@ -88,12 +88,6 @@ const AdminAccountManagement = () => {
       });
       setRoleState(rolesOpts);
 
-      //get the initial state data for Functional Areas
-      let funcOptions = await getFunctional().then((data) => {
-        return data.data.functionalAreaData;
-      });
-      setFunctionalState(funcOptions);
-
       //get the initial state data for Account Status
       let accStatus = await getAccountStatus().then((data) => {
         return data.data.accountStatusData;
@@ -130,16 +124,6 @@ const AdminAccountManagement = () => {
     });
   }
 
-  //this function sets the initial values for the functional area dropdown
-  function functionalOptions() {
-    return functionalState.map((f, index) => {
-      return (
-        <option key={index} value={f.functionalArea}>
-          {f.functionalArea}
-        </option>
-      );
-    });
-  }
 
   function accountStatusOptions() {
     console.log(selectedAccountStatus);
@@ -287,23 +271,6 @@ const AdminAccountManagement = () => {
                   </Form.Control>
                   <Form.Control.Feedback type="invalid">
                     Account Status is required.
-                  </Form.Control.Feedback>
-                </Form.Group>
-
-                <Form.Group>
-                  <Form.Label htmlFor="functionalArea">
-                    Functional Area
-                  </Form.Label>
-                  <Form.Control
-                    as="select"
-                    name="functionalArea"
-                    onChange={handleSelectChange}
-                    value={selectedFunctional}
-                  >
-                    {functionalOptions()}
-                  </Form.Control>
-                  <Form.Control.Feedback type="invalid">
-                    Functional Area is required!
                   </Form.Control.Feedback>
                 </Form.Group>
 

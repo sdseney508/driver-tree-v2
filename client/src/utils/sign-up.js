@@ -6,14 +6,10 @@ const getAccountStatus = () => {
     return axios.get(apiURL + "/accountStatus");
   };
 
-const getFunctional = () => {
-  return axios.get(apiURL + "/functionalArea");
-};
-
 const getRoles = () => {
     // debugger;
     return axios.get(apiURL + "/roles");
   };
 
 
-export { getAccountStatus, getFunctional, getRoles };
+export { getAccountStatus, getRoles };

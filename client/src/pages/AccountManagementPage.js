@@ -1,7 +1,7 @@
 //page for viewing and updating op limits
 import React, { useState, useContext, useEffect } from "react";
 import { stateContext } from "../App";
-import { getFunctional, getRoles } from "../utils/sign-up";
+import { getRoles } from "../utils/sign-up";
 import { getUser, loggedIn, getToken } from "../utils/auth";
 import { Container, Row, Button, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
@@ -58,10 +58,6 @@ const AccountManagement = () => {
         return data.data;
       });
       setRoleState(rolesOpts);
-      let funcOptions = await getFunctional().then((data) => {
-        return data.data.functionalAreaData;
-      });
-      setFunctionalState(funcOptions);
     };
     getUserData();
   }, []);
@@ -160,16 +156,6 @@ const AccountManagement = () => {
             ></Form.Control>
           </Form.Group>
 
-          {/* this is just to display the Functional Area, no changes are allowed */}
-          <Form.Group>
-            <Form.Label htmlFor="functionalArea">Functional Area</Form.Label>
-            <Form.Control
-              type="string"
-              name="functionalArea"
-              aria-label="functionalArea"
-              value={state.functionalArea}
-            ></Form.Control>
-          </Form.Group>
 
           {/* this is just to display the Role, no changes are allowed. */}
           <Form.Group>
