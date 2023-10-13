@@ -12,7 +12,7 @@ var corsOptions = {
   //for online use
   origin: "https://driver-tree-demo-e11a6a8cff02.herokuapp.com/",
 
-  //for local use
+  //for local use try again
   // origin: "http://localhost:3000"
 
 };
