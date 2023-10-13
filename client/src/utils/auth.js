@@ -2,13 +2,6 @@ import axios from "axios";
 import decode from "jwt-decode";
 import apiURL from "./apiURL";
 
-
-// //for local testing
-// const apiURL = "http://localhost:8080/api";
-
-// //for deployed build
-// // const apiURL = "https://operations-limit-database.herokuapp.com/api";
-
 const authHeader = () => {
   let id_token = localStorage.getItem("id_token");
 
