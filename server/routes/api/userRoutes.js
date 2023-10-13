@@ -5,7 +5,7 @@ const { signToken } = require("../../utils/auth");
 //import middleware
 // put authMiddleware anywhere we need to send a token for verification of user. this will maintain their login for up to 2 hours.
 const { authMiddleware } = require("../../utils/auth");
-const secret = "oplimits";
+const secret = "drivertree";
 const expiration = "2h";
 // use /api/users for all the axios calls
 
