@@ -61,7 +61,7 @@ outcomes.init(
         },
 
         //TODO:  move this to its own table with a link to the outcome or make this a JSON fed by a multi-select on a form.
-        supportingCommanders: {
+        supportedCommanders: {
             type: DataTypes.TEXT,
             allowNull: true,
         },

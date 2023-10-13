@@ -307,9 +307,9 @@ const OutcomesPage = () => {
                   <Form.Control
                     as="textarea"
                     className={styles.my_text_area}
-                    value={selOutcome.supportedCommanders || ""}
+                    value={selOutcome.supportingCommanders || ""}
                     //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-                    name="supportedCommanders"
+                    name="supportingCommanders"
                     onChange={handleInputChange}
                     onBlur={handleFormSubmit}
                   />

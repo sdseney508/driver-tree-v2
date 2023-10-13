@@ -8,7 +8,7 @@
       "scope": "This is the where the background bullets will fall",
       "goals": "This is where the deliverables bullets will fall",
       "measurements": "This is where the desired outcomes bullets will fall",
-      "supporting Commanders": "This is where the stakeholders bullets will fall, will be selected from a form field populated by the stakeholder list",
+      "supportedCommanders": "This is where the stakeholders bullets will fall, will be selected from a form field populated by the stakeholder list",
       "stakeholders": "Green",
       "relatedEfforts": "This is where the related efforts bullets will fall",
       "barriers": "This is where the barriers bullets will fall",
