@@ -10,13 +10,14 @@ import {
   getDrivers,
   getDriverByOutcome,
 } from "../utils/drivers";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircle } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate, useLocation } from "react-router";
 
 import { getUser, loggedIn, getToken } from "../utils/auth";
 
 import styles from "./DriverTreePage.module.css";
 import OutcomeTable from "../components/OutcomeTable";
-
 
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form
 
@@ -67,7 +68,14 @@ const DriverTreePage = () => {
       }
     };
     const getOutcomeData = async () => {
-      await getOutcome(location.state.selOutcome.id).then((data) => {
+      //todo:  Clean this up so that the navbar always has the correct outcome selected
+      let outcomeID;
+      if (location.state) {
+        outcomeID = location.state.selOutcome.id;
+      } else {
+        outcomeID = 1;
+      }
+      await getOutcome(outcomeID).then((data) => {
         setSelOutcome(data.data);
       });
     };
@@ -123,16 +131,16 @@ const DriverTreePage = () => {
     });
   };
 
-  const goToDriver = async (e) => {
-    console.log(e.target.outcomeID);
-    console.log(selOutcome);
-    await setState({
-      ...state,
-      selDriver: e.target.id,
-      selOutcome: selOutcome.id,
+  const goToOutcome = async (e) => {
+    navigate("/allOutcomes", {
+      state: { selOutcome: selOutcome.id },
     });
+  };
+
+
+  const goToDriver = async (e) => {
     navigate("/drpage", {
-      state: { selDriver: e.target.id, selOutcome: selOutcome.id },
+      state: { selOutcome: selOutcome.id },
     });
   };
 
@@ -143,11 +151,34 @@ const DriverTreePage = () => {
       return <div></div>;
     } else {
       return driverTreeObj[0].map((f, index) => {
+        let dColor;
+        switch (driverTreeObj[0][index].status) {
+          case "Green":
+            dColor = "#00ff00";
+            break;
+          case "Yellow":
+            dColor = "#ffff00";
+            break;
+          case "Red":
+            dColor = "#ff0000";
+            break;
+          default:
+        }
         return (
           <Card className={styles.card} onClick={goToDriver}>
-            <Card.Body id={driverTreeObj[0][index].id}>
-              <Card.Text> {driverTreeObj[0][index].problemStatement}</Card.Text>
-            </Card.Body>
+            <Col>
+              <FontAwesomeIcon
+                position="top"
+                icon={faCircle}
+                style={{ color: dColor }}
+                className={styles.card_status}
+              />
+            </Col>
+              <Card.Body>
+                <Card.Text id={driverTreeObj[0][index].id}>
+                  {driverTreeObj[0][index].problemStatement}
+                </Card.Text>
+              </Card.Body>
           </Card>
         );
       });
@@ -155,15 +186,38 @@ const DriverTreePage = () => {
   }
 
   function tierTwoCards() {
-    if (!driverTreeObj[1]) {
+    if (!driverTreeObj[0]) {
       return <div></div>;
     } else {
       return driverTreeObj[1].map((f, index) => {
+        let dColor;
+        switch (driverTreeObj[1][index].status) {
+          case "Green":
+            dColor = "#00ff00";
+            break;
+          case "Yellow":
+            dColor = "#ffff00";
+            break;
+          case "Red":
+            dColor = "#ff0000";
+            break;
+          default:
+        }
         return (
-          <Card className={styles.card}>
-            <Card.Body>
-              <Card.Text> {driverTreeObj[1][index].problemStatement}</Card.Text>
-            </Card.Body>
+          <Card className={styles.card} onClick={goToDriver}>
+            <Col>
+              <FontAwesomeIcon
+                position="top"
+                icon={faCircle}
+                style={{ color: dColor }}
+                className={styles.card_status}
+              />
+            </Col>
+              <Card.Body id={driverTreeObj[1][index].id}>
+                <Card.Text>
+                  {driverTreeObj[1][index].problemStatement}
+                </Card.Text>
+              </Card.Body>
           </Card>
         );
       });
@@ -175,11 +229,34 @@ const DriverTreePage = () => {
       return <div></div>;
     } else {
       return driverTreeObj[2].map((f, index) => {
+        let dColor;
+        switch (driverTreeObj[2][index].status) {
+          case "Green":
+            dColor = "#00ff00";
+            break;
+          case "Yellow":
+            dColor = "#ffff00";
+            break;
+          case "Red":
+            dColor = "#ff0000";
+            break;
+          default:
+        }
         return (
-          <Card className={styles.card}>
-            <Card.Body>
-              <Card.Text> {driverTreeObj[2][index].problemStatement}</Card.Text>
-            </Card.Body>
+          <Card className={styles.card} onClick={goToDriver}>
+            <Col>
+              <FontAwesomeIcon
+                position="top"
+                icon={faCircle}
+                style={{ color: dColor }}
+                className={styles.card_status}
+              />
+            </Col>
+              <Card.Body id={driverTreeObj[2][index].id}>
+                <Card.Text>
+                  {driverTreeObj[2][index].problemStatement}
+                </Card.Text>
+              </Card.Body>
           </Card>
         );
       });
@@ -191,11 +268,34 @@ const DriverTreePage = () => {
       return <div></div>;
     } else {
       return driverTreeObj[3].map((f, index) => {
+        let dColor;
+        switch (driverTreeObj[3][index].status) {
+          case "Green":
+            dColor = "#00ff00";
+            break;
+          case "Yellow":
+            dColor = "#ffff00";
+            break;
+          case "Red":
+            dColor = "#ff0000";
+            break;
+          default:
+        }
         return (
-          <Card className={styles.card}>
-            <Card.Body>
-              <Card.Text> {driverTreeObj[3][index].problemStatement}</Card.Text>
-            </Card.Body>
+          <Card className={styles.card} onClick={goToDriver}>
+            <Col>
+              <FontAwesomeIcon
+                position="top"
+                icon={faCircle}
+                style={{ color: dColor }}
+                className={styles.card_status}
+              />
+            </Col>
+              <Card.Body id={driverTreeObj[3][index].id}>
+                <Card.Text>
+                  {driverTreeObj[3][index].problemStatement}
+                </Card.Text>
+              </Card.Body>
           </Card>
         );
       });
@@ -207,11 +307,34 @@ const DriverTreePage = () => {
       return <div></div>;
     } else {
       return driverTreeObj[4].map((f, index) => {
+        let dColor;
+        switch (driverTreeObj[4][index].status) {
+          case "Green":
+            dColor = "#00ff00";
+            break;
+          case "Yellow":
+            dColor = "#ffff00";
+            break;
+          case "Red":
+            dColor = "#ff0000";
+            break;
+          default:
+        }
         return (
-          <Card className={styles.card}>
-            <Card.Body>
-              <Card.Text> {driverTreeObj[4][index].problemStatement}</Card.Text>
-            </Card.Body>
+          <Card className={styles.card} onClick={goToDriver}>
+            <Col>
+              <FontAwesomeIcon
+                position="top"
+                icon={faCircle}
+                style={{ color: dColor }}
+                className={styles.card_status}
+              />
+            </Col>
+              <Card.Body >
+                <Card.Text id={driverTreeObj[4][index].id}>
+                  {driverTreeObj[4][index].problemStatement}
+                </Card.Text>
+              </Card.Body>
           </Card>
         );
       });
@@ -236,7 +359,7 @@ const DriverTreePage = () => {
 
             <Row className={styles.outcome} style={{ height: "85vh" }}>
               <Col className={styles.outcome}>
-                <Card className={styles.card}>
+                <Card className={styles.card} onClick={goToOutcome}>
                   <Card.Body>
                     <Card.Text>{selOutcome.outcomeTitle}</Card.Text>
                   </Card.Body>

@@ -17,6 +17,7 @@ import {
   faArrowLeft,
   faArrowUp,
   faArrowDown,
+  faCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import styles from "./DriverPage.module.css";
 
@@ -64,30 +65,37 @@ const DriverPage = () => {
 
     const getAppData = async () => {
       console.log(location.state);
-      // let outcomeID = location.state.outcome.id;
-      // let driverID = location.state.driver.id;
-      await getDriverByOutcome(1).then((data) => {
+      let driverid;
+      let id;
+      if (!location.state) {
+        id=1;
+        driverid=1;
+      }else{
+        id= location.state.selOutcome;
+        driverid=location.state.selDriver;
+      }
+      console.log("id: ", id)
+      console.log("driverid: ", driverid)
+      await getDriverByOutcome(id).then((data) => {
         let top = data.data;
         setSelDrivers(top);
       });
-      await getOutcome(1).then((data) => {
+      await getOutcome(id).then((data) => {
         let top = data.data;
         setSelOutcome(top);
       });
-      await getDriver(1).then((data) => {
+      await getDriver(driverid).then((data) => {
         let top = data.data;
         setSelDriver(top);
       });
+    
     };
-    console.log("state", state);
 
     getUserData();
     getAppData();
   }, []);
 
-  useEffect(() => {
-  },
-  [selDriver]);
+  useEffect(() => {}, [selDriver]);
 
   const handleInputChange = (e) => {
     setSelDriver({ ...selDriver, [e.target.name]: e.target.value });
@@ -115,27 +123,33 @@ const DriverPage = () => {
         <Container className={styles.driver_page}>
           <div>
             <Form className={styles.my_form}>
-            <div className={styles.driver_page}>
-              <h2
-                className="text-center fw-bolder"
-                style={{ "text-shadow": "1px 1px 1px grey" }}
-              >
-                Driver Details
-              </h2>
-              <FontAwesomeIcon
-                icon={faArrowLeft}
-                className={styles.arrows}
-                onClick={buttonClicked}
-                onBlur={handleFormSubmit}
-              />
-              <FontAwesomeIcon icon={faArrowRight} className={styles.arrows} />
-              <FontAwesomeIcon icon={faArrowUp} className={styles.arrows} />
-              <FontAwesomeIcon icon={faArrowDown} className={styles.arrows} />
-              <Button className={styles.back_button} onClick={backToDriverTree}>
-                Back to Driver Tree
-              </Button>
-              <br />
-            </div>
+              <div className={styles.driver_page}>
+                <h2
+                  className="text-center fw-bolder"
+                  style={{ "text-shadow": "1px 1px 1px grey" }}
+                >
+                  Driver Details
+                </h2>
+                <FontAwesomeIcon
+                  icon={faArrowLeft}
+                  className={styles.arrows}
+                  onClick={buttonClicked}
+                  onBlur={handleFormSubmit}
+                />
+                <FontAwesomeIcon
+                  icon={faArrowRight}
+                  className={styles.arrows}
+                />
+                <FontAwesomeIcon icon={faArrowUp} className={styles.arrows} />
+                <FontAwesomeIcon icon={faArrowDown} className={styles.arrows} />
+                <Button
+                  className={styles.back_button}
+                  onClick={backToDriverTree}
+                >
+                  Back to Driver Tree
+                </Button>
+                <br />
+              </div>
               <Form.Group>
                 <Row>
                   Driver Tier
@@ -199,7 +213,57 @@ const DriverPage = () => {
 
                 <Col className={styles.my_col}>
                   <Form.Group>
-                    <Form.Label>Background</Form.Label>
+                    <Col>
+                      {/* <Row className={styles.my_row}> */}
+                      <Row >
+                      <Form.Label className={styles.background_label}>
+                        Background
+                      </Form.Label>
+                        <Form.Label className={styles.status_label}>
+                          Status
+                        </Form.Label>
+                        <Form.Control
+                          as="select"
+                          id="status"
+                          value={selDriver.status}
+                          className={
+                            selDriver.status === "Green"
+                              ? styles.green_status
+                              : selDriver.status === "Yellow"
+                              ? styles.yellow_status
+                              : styles.red_status
+                          }
+                          //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                          name="status"
+                          onChange={handleInputChange}
+                          onBlur={handleFormSubmit}
+                          style={{ width: "100px" }}
+                        >
+                          <option
+                            key={1}
+                            value={"Green"}
+                            className={styles.green_status}
+                          >
+                            Green
+                          </option>
+                          <option
+                            key={2}
+                            value={"Yellow"}
+                            className={styles.yellow_status}
+                          >
+                            Yellow
+                          </option>
+                          <option
+                            key={3}
+                            value={"Red"}
+                            className={styles.red_status}
+                          >
+                            Red
+                          </option>
+                        </Form.Control>
+                      </Row>
+                      {/* </Row> */}
+                    </Col>
                     <Form.Control
                       as="textarea"
                       className={styles.my_text_area}

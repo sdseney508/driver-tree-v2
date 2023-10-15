@@ -8,6 +8,8 @@ import { useNavigate, useLocation } from "react-router";
 const DriverNavbar = () => {
   let location = useLocation();
   let navigate = useNavigate();
+  let locstate = location.state;
+  // console.log("location state is: ", locstate);
   const [state, setState] = useContext(stateContext);
 
   let pName = location.pathname.slice(0, 6);
@@ -49,11 +51,8 @@ const DriverNavbar = () => {
                 <Nav.Link onClick={allOutcomes} className={styles.nav_link}>
                   Outcomes
                 </Nav.Link>
-                <Nav.Link as={Link} to="/drpage" className={styles.nav_link}>
-                  Drivers
-                </Nav.Link>
                 <Nav.Link as={Link} to="/drivertree" className={styles.nav_link}>
-                  Driver Tree
+                  Driver Trees
                 </Nav.Link>
                 <Nav.Link
                   as={Link}

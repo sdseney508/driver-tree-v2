@@ -61,8 +61,8 @@ const OutcomesPage = () => {
 
     const getOutcomeData = async () => {
       let outcomeID;
-      if (state.outcomeID) {
-        outcomeID = state.outcomeID;
+      if (location.state.selOutcome) {
+        outcomeID = location.state.selOutcome;
       } else {
         outcomeID = 1;
       }
@@ -110,7 +110,7 @@ const OutcomesPage = () => {
         } else {
           return (
             <div>
-              <Link to="/drpage" state={{ selOutcome, selDriver:1 }}>
+              <Link to="/drpage" state={{ selOutcome: selOutcome.id, selDriver:selDrivers[index].id }}>
               <p>{selDrivers[index].problemStatement}</p></Link>
             </div>
           );

@@ -29,12 +29,24 @@
 }  
 
 .card {
+   position: relative;
+   display: inline-flex;
    background-color: #f8f7f7;
    color: rgb(0, 0, 0);
    font-size: .75em;
    height: 10vh;
    padding: 1px;
    width: 100%;
+}
+
+.card_status {
+   position: absolute;
+   position: absolute;
+   top: 0;
+   right: 0;
+   z-index: 1;
+   width: 12px !important;
+   height: 12px !important;
 }
 
 .card_title {

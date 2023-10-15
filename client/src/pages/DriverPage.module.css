@@ -113,6 +113,33 @@
    font-weight: bold;
 }
 
+.background_label {
+   width: 150px;
+}
+
+.status_label {
+width: 100px;
+margin-left: 100px;
+}
+
+.red_status {
+   color: rgb(255, 2, 2);
+   width: 50px;
+   height: 29.6px;
+}
+
+.yellow_status {
+   color: rgb(251, 255, 2);
+   width: 50px;
+   height: 29.6px;
+}
+
+.green_status {
+   color: rgb(44, 255, 2);
+   width: 50px;
+   height: 29.6px;
+}
+
 @media (max-width: 768px){
    .rowstyle {
        display: flex;
