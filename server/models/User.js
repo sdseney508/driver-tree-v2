@@ -50,7 +50,7 @@ User.init(
     userStatus: {
       type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: "Active",
+      defaultValue: "Requested",
   //     references: {
   //       model: 'accountstatus',
   //       key: 'accountstatus_id',

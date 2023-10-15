@@ -8,7 +8,7 @@ import {
 import { useNavigate } from "react-router";
 import { getUser, loggedIn, getToken } from "../utils/auth";
 import { allDrivers } from "../utils/drivers";
-import OpLimitTable from "../components/DriverTable";
+import DriversTable from "../components/DriversTable";
 import "./DriverTreePage.module.css";
 
 const AdminDriversPage = () => {

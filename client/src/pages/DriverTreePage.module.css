@@ -29,11 +29,12 @@
 }  
 
 .card {
-   background-color: #ded8d8;
+   background-color: #f8f7f7;
    color: rgb(0, 0, 0);
    font-size: .75em;
-   margin: 5px;
-   height: 125px;
+   height: 10vh;
+   padding: 1px;
+   width: 100%;
 }
 
 .card_title {

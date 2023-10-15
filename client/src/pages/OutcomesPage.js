@@ -4,6 +4,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { stateContext } from "../App";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { useNavigate, useLocation } from "react-router";
+import { Link } from "react-router-dom";
 import { getUser, loggedIn, getToken } from "../utils/auth";
 import {
   createOutcome,
@@ -58,50 +59,49 @@ const OutcomesPage = () => {
       }
     };
 
+    const getOutcomeData = async () => {
+      let outcomeID;
+      if (state.outcomeID) {
+        outcomeID = state.outcomeID;
+      } else {
+        outcomeID = 1;
+      }
+      console.log("outcomeID", outcomeID);
+      await getOutcome(outcomeID).then((data) => {
+        setSelOutcome(data.data);
+      });
+      await getDriverByOutcome(outcomeID).then((data) => {
+        let top = data.data;
+
+        setSelDrivers(top);
+        console.log("selDrivers", selDrivers);
+      });
+    };
+
     getUserData();
     getOutcomeData();
-    getDriversData();
+    getDrivers();
     //this one gets the initial draftOL for the form
   }, []);
-  const getOutcomeData = async () => {
-    let outcomeID;
-    if (state.outcomeID) {
-      outcomeID = state.outcomeID;
-    } else {
-      outcomeID = 1;
-    }
-    await getOutcome(outcomeID).then((data) => {
-      setSelOutcome(data.data);
-    });
-  };
 
-  const getDriversData = async () => {
-    let outcomeID;
-    if (state.outcomeID) {
-      outcomeID = state.outcomeID;
-    } else {
-      outcomeID = 1;
-    }
-    await getDriverByOutcome(outcomeID).then((data) => {
+
+  const getDrivers = async() => { 
+    await getDriverByOutcome(selOutcome.id).then((data) => {
       let top = data.data;
-      console.log("outcome", top);
       setSelDrivers(top);
       console.log("selDrivers", selDrivers);
     });
-  };
+  }
+
   //sets the initial selection of the drop down lists for the signatures, i couldnt get the map function to work, so brute force here we go.
   useEffect(() => {
-    getOutcomeData();
-    getDriversData();
-  }, []);
+    getDrivers();
+  }, [selOutcome]);
 
   //this function gets everyone with an assigened role and sets the state for the drop down lists
 
   const barriers = () => {
-    if (!selDrivers) {
-    } else {
-    }
-    if (!selDrivers.id) {
+    if (!selDrivers[0]) {
       return <div></div>;
     } else {
       return selDrivers.map((f, index) => {
@@ -110,7 +110,8 @@ const OutcomesPage = () => {
         } else {
           return (
             <div>
-              <p>{selDrivers[index].problemStatement}</p>
+              <Link to="/drpage" state={{ selOutcome, selDriver:1 }}>
+              <p>{selDrivers[index].problemStatement}</p></Link>
             </div>
           );
         }
@@ -120,22 +121,22 @@ const OutcomesPage = () => {
 
   const newOutcome = async () => {
     createOutcome().then((data) => {
+      console.log("data: ", data.data);
       setState({ ...state, outcomeID: data.data.id });
-      navigate("/drivertree", { state: { outcomeID: data.data.id } });
+      setSelOutcome(data.data);
     });
   };
 
   const handleInputChange = (e) => {
-    e.preventDefault();
-    console.log("event.target.name: ", e.target.name);
     setSelOutcome({ ...selOutcome, [e.target.name]: e.target.value });
   };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     let body = { [e.target.name]: e.target.value };
-    console.log("body: ", body);
+    console.log("body for update call: ", body);
     updateOutcome(selOutcome.id, body);
+    setSelOutcome({ ...selOutcome, [e.target.name]: e.target.value });
   };
 
   const buttonClicked = () => {
@@ -144,7 +145,7 @@ const OutcomesPage = () => {
 
   const driverPage = () => {
     console.log(selOutcome);
-    navigate("/drivertree", { selOutcome });
+    navigate("/drivertree", {state: { selOutcome }});
   };
 
   return (
@@ -176,7 +177,7 @@ const OutcomesPage = () => {
                       name="outcomeTitle"
                       onChange={handleInputChange}
                       onBlur={handleFormSubmit}
-                    />
+                    ></Form.Control>
                   </Form.Group>
                 </Col>
                 <Col sm={10} md={6} lg={3} className={styles.commander_name}>
@@ -334,7 +335,7 @@ const OutcomesPage = () => {
                   <Form.Label className={styles.form_label}>
                     Tier 1 Drivers/Barriers
                   </Form.Label>
-                  {/* {barriers()} */}
+                  {barriers()}
                 </Form.Group>
               </Col>
             </Row>

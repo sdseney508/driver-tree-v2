@@ -9,8 +9,8 @@ const allOutcomes = () => {
   return axios.get(apiURL + "/outcomes");
 };
 
-const createDriver = () => {
-  return axios.post(apiURL + "/drivers/new");
+const createDriver = (body) => {
+  return axios.post(apiURL + "/drivers/new", body);
 };
 
 const createOutcome = () => {

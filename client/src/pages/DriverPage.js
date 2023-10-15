@@ -3,9 +3,14 @@ import React, { useState, useContext, useEffect } from "react";
 import { stateContext } from "../App";
 import { getUser, loggedIn, getToken } from "../utils/auth";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
-import { getDriver, getDriverByOutcome, getOutcome, updateDriver } from "../utils/drivers";
+import {
+  getDriver,
+  getDriverByOutcome,
+  getOutcome,
+  updateDriver,
+} from "../utils/drivers";
 import DriverTable from "../components/DriversTable";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowRight,
@@ -17,16 +22,16 @@ import styles from "./DriverPage.module.css";
 
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form
 
-const DriverPage = (outcomeID, driverID) => {
+const DriverPage = () => {
   const [state, setState] = useContext(stateContext);
   const [selDrivers, setSelDrivers] = useState([]);
   const [selDriver, setSelDriver] = useState({});
   const [selOutcome, setSelOutcome] = useState({});
   const navigate = useNavigate();
-  let outcomeId = outcomeID;
-  let driverId = driverID;
+  const location = useLocation();
+
   // this is getting the user data from the database to properly populate the form.  None of the form data is being updated in the database. until after you hit submit.
-  useEffect((outcomeID, driverID) => {
+  useEffect(() => {
     const getUserData = async () => {
       try {
         const token = loggedIn() ? getToken() : null;
@@ -58,27 +63,18 @@ const DriverPage = (outcomeID, driverID) => {
     };
 
     const getAppData = async () => {
-      // console.log("outcomeID", outcomeID, "driverID", driverID);
-      if (!outcomeID) {
-        outcomeID = 1;
-      } else {
-        outcomeID = selOutcome.id;
-      }
-      if (!driverID) {
-        driverID = 1;
-      } else {
-        driverID = selDriver.id;
-      }
-      await getDriverByOutcome(outcomeID).then((data) => {
+      console.log(location.state);
+      // let outcomeID = location.state.outcome.id;
+      // let driverID = location.state.driver.id;
+      await getDriverByOutcome(1).then((data) => {
         let top = data.data;
         setSelDrivers(top);
       });
-      await getOutcome(outcomeID).then((data) => {
+      await getOutcome(1).then((data) => {
         let top = data.data;
         setSelOutcome(top);
-        console.log(top);
       });
-      await getDriver(driverID).then((data) => {
+      await getDriver(1).then((data) => {
         let top = data.data;
         setSelDriver(top);
       });
@@ -89,11 +85,11 @@ const DriverPage = (outcomeID, driverID) => {
     getAppData();
   }, []);
 
-
+  useEffect(() => {
+  },
+  [selDriver]);
 
   const handleInputChange = (e) => {
-    e.preventDefault();
-    console.log("event.target.name: ", e.target.name);
     setSelDriver({ ...selDriver, [e.target.name]: e.target.value });
   };
 
@@ -102,10 +98,15 @@ const DriverPage = (outcomeID, driverID) => {
     let body = { [e.target.name]: e.target.value };
     console.log("body: ", body);
     updateDriver(selDriver.id, body);
+    setSelDriver({ ...selDriver, [e.target.name]: e.target.value });
   };
 
   const buttonClicked = () => {
     alert("button clicked");
+  };
+
+  const backToDriverTree = () => {
+    navigate("/drivertree", { state: { selOutcome: selOutcome } });
   };
 
   return (
@@ -113,6 +114,7 @@ const DriverPage = (outcomeID, driverID) => {
       <div className={styles.driver_page}>
         <Container className={styles.driver_page}>
           <div>
+            <Form className={styles.my_form}>
             <div className={styles.driver_page}>
               <h2
                 className="text-center fw-bolder"
@@ -129,10 +131,44 @@ const DriverPage = (outcomeID, driverID) => {
               <FontAwesomeIcon icon={faArrowRight} className={styles.arrows} />
               <FontAwesomeIcon icon={faArrowUp} className={styles.arrows} />
               <FontAwesomeIcon icon={faArrowDown} className={styles.arrows} />
+              <Button className={styles.back_button} onClick={backToDriverTree}>
+                Back to Driver Tree
+              </Button>
               <br />
-              Driver Tier: {selDriver.tierLevel}
             </div>
-            <Form className={styles.my_form}>
+              <Form.Group>
+                <Row>
+                  Driver Tier
+                  <Form.Control
+                    as="select"
+                    id="tierLevel"
+                    value={selDriver.tierLevel}
+                    //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                    name="tierLevel"
+                    onChange={handleInputChange}
+                    onBlur={handleFormSubmit}
+                    style={{ width: "40px" }}
+                  >
+                    <option key={1} value={1}>
+                      1
+                    </option>
+                    <option key={2} value={2}>
+                      2
+                    </option>
+                    <option key={3} value={3}>
+                      3
+                    </option>
+                    <option key={4} value={4}>
+                      4
+                    </option>
+                    <option key={5} value={5}>
+                      5
+                    </option>
+                  </Form.Control>
+                </Row>
+              </Form.Group>
+
+              {/* Driver Tier: {selDriver.tierLevel} */}
               <Row className={styles.quad_format + styles.my_row}>
                 <Col className={styles.my_col}>
                   <Form.Group style={{ width: "100%" }}>
@@ -223,6 +259,8 @@ const DriverPage = (outcomeID, driverID) => {
             <DriverTable
               selDrivers={selDrivers}
               setSelDrivers={setSelDrivers}
+              selDriver={selDriver}
+              setSelDriver={setSelDriver}
               selOutcome={selOutcome}
               setSelOutcome={setSelOutcome}
             />

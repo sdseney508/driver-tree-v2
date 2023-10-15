@@ -11,39 +11,29 @@ import {
   allDrivers,
   allOutcomes,
   getDriver,
-  getDriverByOutcome, 
-  getOutcome
+  getDriverByOutcome,
+  getOutcome,
 } from "../utils/drivers";
 import { stateContext } from "../App";
 import "ag-grid-community/dist/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CSS
-import { useNavigate, useLocation } from "react-router";
 
 //This component is used to display the limits in a table.
 //it also provides the capability to sort and filter the data.
 //when a user selects a row, the row data is passed to the parent component
 //and displayed in the form.
 //this is using the community edition and react hooks to selectively render the table
-function DriverTable({
-  selDriver,
-  setSelDriver,
-  selOutcome,
-  setSelOutcome
-}) {
+function DriverTable({ selDriver, setSelDriver, selOutcome, setSelOutcome }) {
   const [state, setState] = useContext(stateContext);
-  console.log("selOutcome", selOutcome);
-  let location = useLocation();
-  let navigate = useNavigate();
 
   const [rowData, setRowData] = useState([]); // Set rowData to Array of Objects
-  var rowD =[];
+  let rowD;
 
   const gridRef = useRef(); // Optional - for accessing Grid's API
 
   //this runs on the initial to fetch the data for the table
   useEffect(() => {
-    const fetchData= async() =>{
-      console.log(selOutcome);
+    const fetchData = async () => {
       await getDriverByOutcome(selOutcome.id).then((data) => {
         rowD = data.data;
       });
@@ -51,15 +41,7 @@ function DriverTable({
     };
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selOutcome]);
-
-
-  const getSelDriver = async (id) => {
-    await getDriver(id).then((data) => {
-      let top = data.data;
-      setSelDriver(top);
-    });
-  };
+  }, [selOutcome, selDriver]);
 
   // Each Column Definition results in one Column.  For now, we are only going to set the 7 key columns that the users might search on
   const [columnDefs, setColumnDefs] = useState([
@@ -81,6 +63,13 @@ function DriverTable({
       field: "background",
       filter: true,
       headerName: "Background",
+      width: 125,
+      resizable: true,
+    },
+    {
+      field: "outcomeID",
+      filter: true,
+      headerName: "Outcome",
       width: 125,
       resizable: true,
     },
@@ -108,16 +97,16 @@ function DriverTable({
   async function fetchDriverInfo(driverID) {
     await getDriver(driverID).then((data) => {
       let top = data.data;
+      console.log(top);
       setSelDriver(top);
     });
-  };
+  }
 
   const cellClickedListener = useCallback(async (event) => {
     // debugger;
     let driverID = event.data.id;
     await fetchDriverInfo(driverID);
   });
-
 
   //the return just builds the table
   return (

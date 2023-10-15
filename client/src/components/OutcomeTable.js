@@ -51,11 +51,16 @@ function OutcomeTable({
   // };
   const gridRef = useRef(); // Optional - for accessing Grid's AP
 
+  useEffect(() => {
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   //this runs on the initial to fetch the data for the table
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [,selOutcome]);
+  }, [selOutcome]);
 
 
   // Each Column Definition results in one Column.  For now, we are only going to set the 7 key columns that the users might search on
@@ -109,7 +114,6 @@ function OutcomeTable({
   };
 
   const cellClickedListener = useCallback(async (event) => {
-    // debugger;
     let outcomeID = event.data.id;
     await fetchOutcomeInfo(outcomeID);
   });

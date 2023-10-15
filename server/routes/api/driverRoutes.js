@@ -7,16 +7,16 @@ const {Op} = require("sequelize");
 //create a new drivers; 
 router.post("/new", async (req, res) => {
   try {
-    const driversData = await drivers.create({outcomeID: req.body.outcomeID});
-    let id = driversData.id;
-    const ol = await drivers.update(
-      { admin_log: req.body.log },
-      {
-        where: {
-          id: id, 
-        },
-      }
-    );
+    const driversData = await drivers.create(req.body);
+    // let id = driversData.id;
+    // const ol = await drivers.update(
+    //   { admin_log: req.body.log },
+    //   {
+    //     where: {
+    //       id: id, 
+    //     },
+    //   }
+    // );
     res.status(200).json(driversData);
   } catch (err) {
     res.status(400).json(err);

@@ -4,27 +4,31 @@ import React, { useState, useContext, useEffect } from "react";
 import { stateContext } from "../App";
 import { Container, Row, Col, Button, Card } from "react-bootstrap";
 import {
+  createDriver,
   createOutcome,
   getOutcome,
   getDrivers,
   getDriverByOutcome,
 } from "../utils/drivers";
 import { useNavigate, useLocation } from "react-router";
+
 import { getUser, loggedIn, getToken } from "../utils/auth";
 
 import styles from "./DriverTreePage.module.css";
 import OutcomeTable from "../components/OutcomeTable";
 
+
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form
 
-const DriverTreePage = ({outcome}) => {
+const DriverTreePage = () => {
   // debugger;
   const [state, setState] = useContext(stateContext);
-  const [selOutcome, setSelOutcome] = useState({outcome});
-  const [selDrivers, setSelDrivers] = useState({});
+  const [selOutcome, setSelOutcome] = useState({});
+  const [selDrivers, setSelDrivers] = useState([]);
+  const [selDriver, setSelDriver] = useState({});
   const [driverTreeObj, setDriverTreeObj] = useState([]);
   //These are the initial states for the select boxes.  They are set to the first value in the array, which is the default value
-  
+
   let location = useLocation();
   let navigate = useNavigate();
 
@@ -62,19 +66,28 @@ const DriverTreePage = ({outcome}) => {
         console.error(err);
       }
     };
+    const getOutcomeData = async () => {
+      await getOutcome(location.state.selOutcome.id).then((data) => {
+        setSelOutcome(data.data);
+      });
+    };
+
     getUserData();
+    getOutcomeData();
     //this one gets the initial draftOL for the form
   }, []);
 
   useEffect(() => {
+    let selOutcomeID;
     let dtree = [[], [], [], [], []];
     const getDriversData = async () => {
-      console.log(selOutcome);
-      if(!selOutcome.id){
-        selOutcome.id = 1;
-      };
-      await getDriverByOutcome(selOutcome.id).then((data) => {
-        // console.log(data.data);
+      if (!selOutcome) {
+        selOutcomeID = location.state.selOutcome.id;
+      } else {
+        selOutcomeID = selOutcome.id;
+      }
+      await getDriverByOutcome(selOutcomeID).then((data) => {
+        console.log(data.data);
         setSelDrivers(data.data);
         //TODO set up an object that will calc how many levels and only display the correct number of columns
         // function drivertiers() {
@@ -89,8 +102,7 @@ const DriverTreePage = ({outcome}) => {
       : console.log("no outcome selected");
     setDriverTreeObj(dtree);
     setState({ ...state, selOutcome: selOutcome });
-    console.log("state", state);
-  }, [,selOutcome]);
+  }, [selOutcome]);
 
   //sets the initial selection of the drop down lists for the signatures, i couldnt get the map function to work, so brute force here we go.
 
@@ -102,11 +114,26 @@ const DriverTreePage = ({outcome}) => {
     });
   };
 
+  const newDriver = (e) => {
+    e.preventDefault();
+    let body = { outcomeID: selOutcome.id, tierLevel: e.target.id };
+    createDriver(body);
+    getOutcome(selOutcome.id).then((data) => {
+      setSelOutcome(data.data);
+    });
+  };
+
   const goToDriver = async (e) => {
     console.log(e.target.outcomeID);
-    await setState({ ...state, selDriver: e.target.id, selOutcome: selOutcome.id });
-    console.log(state);
-    navigate("/drpage", {state: {selDriver: e.target.id, selOutcome: selOutcome.id}});
+    console.log(selOutcome);
+    await setState({
+      ...state,
+      selDriver: e.target.id,
+      selOutcome: selOutcome.id,
+    });
+    navigate("/drpage", {
+      state: { selDriver: e.target.id, selOutcome: selOutcome.id },
+    });
   };
 
   //creates the cards for each of the columns.  the cards will have a listener that will open a separate page for the specific driver.  each teir gets a map
@@ -215,13 +242,16 @@ const DriverTreePage = ({outcome}) => {
                   </Card.Body>
                 </Card>
               </Col>
-              <Col className={styles.driver}>
+
+              <Col className={styles.driver} key="1">
                 <Row style={{ height: "80vh" }} className="m-1">
                   <p>Tier 1 Drivers</p>
                   {tierOneCards()}
                 </Row>
                 <Row style={{ height: "10vh" }}>
-                  <Button className={styles.my_btn}>+</Button>
+                  <Button className={styles.my_btn} onClick={newDriver} id="1">
+                    +
+                  </Button>
                 </Row>
               </Col>
 
@@ -231,7 +261,9 @@ const DriverTreePage = ({outcome}) => {
                   {tierTwoCards()}
                 </Row>
                 <Row style={{ height: "10vh" }}>
-                  <Button className={styles.my_btn}>+</Button>
+                  <Button className={styles.my_btn} onClick={newDriver} id="2">
+                    +
+                  </Button>
                 </Row>
               </Col>
 
@@ -241,7 +273,9 @@ const DriverTreePage = ({outcome}) => {
                   {tierThreeCards()}
                 </Row>
                 <Row style={{ height: "10vh" }}>
-                  <Button className={styles.my_btn}>+</Button>
+                  <Button className={styles.my_btn} onClick={newDriver} id="3">
+                    +
+                  </Button>
                 </Row>
               </Col>
 
@@ -251,7 +285,9 @@ const DriverTreePage = ({outcome}) => {
                   {tierFourCards()}
                 </Row>
                 <Row style={{ height: "10vh" }}>
-                  <Button className={styles.my_btn}>+</Button>
+                  <Button className={styles.my_btn} onClick={newDriver} id="4">
+                    +
+                  </Button>
                 </Row>
               </Col>
 
@@ -261,7 +297,9 @@ const DriverTreePage = ({outcome}) => {
                   {tierFiveCards()}
                 </Row>
                 <Row style={{ height: "10vh" }}>
-                  <Button className={styles.my_btn}>+</Button>
+                  <Button className={styles.my_btn} onClick={newDriver} id="5">
+                    +
+                  </Button>
                 </Row>
               </Col>
 
@@ -272,8 +310,8 @@ const DriverTreePage = ({outcome}) => {
 
             <Row className="mt-5" style={{ height: "20vh" }}>
               <OutcomeTable
-                selDrivers={selDrivers}
-                setSelDrivers={setSelDrivers}
+                selDriver={selDriver}
+                setSelDriver={setSelDriver}
                 selOutcome={selOutcome}
                 setSelOutcome={setSelOutcome}
               />
