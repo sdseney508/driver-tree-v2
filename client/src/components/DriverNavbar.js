@@ -4,6 +4,7 @@ import { stateContext } from "../App";
 import { Navbar, Nav, Container, NavDropdown } from "react-bootstrap";
 import styles from "./DriverNavbar.module.css";
 import { useNavigate, useLocation } from "react-router";
+import Typewriter from "../components/Typewriter";
 
 const DriverNavbar = () => {
   let location = useLocation();
@@ -62,6 +63,7 @@ const DriverNavbar = () => {
                   Account Mngmt
                 </Nav.Link>
               </Nav>  
+              <Typewriter />
             </Container>
           </Navbar>
         ) : (

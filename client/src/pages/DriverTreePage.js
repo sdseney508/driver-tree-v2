@@ -13,6 +13,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate, useLocation } from "react-router";
+import Legend from "../components/legend";
 
 import { getUser, loggedIn, getToken } from "../utils/auth";
 
@@ -140,7 +141,7 @@ const DriverTreePage = () => {
 
   const goToDriver = async (e) => {
     navigate("/drpage", {
-      state: { selOutcome: selOutcome.id },
+      state: { selDriver: e.target.id, selOutcome: selOutcome.id },
     });
   };
 
@@ -427,7 +428,8 @@ const DriverTreePage = () => {
               </Col>
 
               <Col className="justify-content-center driver" sm={10} md={3}>
-                Legend Goes Here
+                <Legend
+                stakeholders={selOutcome.stakeholders}/>
               </Col>
             </Row>
 
