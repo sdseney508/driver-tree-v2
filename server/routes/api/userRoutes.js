@@ -25,15 +25,12 @@ router.get("/userbyID/:id", async (req, res) => {
 
 router.get("/me", authMiddleware, async (req, res) => {
   try {
-    console.log("i'm in the me route");
-    console.log(req.id);
     const userData = await User.findByPk(req.id);
     if (!userData) {
       return res
         .status(400)
         .json({ message: "Cannot find a user with this id!" });
     }
-    console.log(userData);
     res.status(200).send(userData);
   } catch (err) {
     console.log(err);

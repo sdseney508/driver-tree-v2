@@ -132,6 +132,7 @@ const DriverTreePage = () => {
   const newDriver = (e) => {
     e.preventDefault();
     let body = { outcomeID: selOutcome.id, tierLevel: e.target.dataset.tier };
+    console.log(body);
     createDriver(body);
     getOutcome(selOutcome.id).then((data) => {
       setSelOutcome(data.data);

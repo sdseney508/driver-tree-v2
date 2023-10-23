@@ -8,7 +8,7 @@ const ForgotPass = ({onModalSubmit}) => {
   
   useEffect(() => {
     getEmailAdds();
-    setFormData({ ...formData, subject: "Op Limit Database Password Reset" });
+    setFormData({ ...formData, subject: "Driver Tree Database Password Reset" });
   }, []);
 
   async function getEmailAdds() {

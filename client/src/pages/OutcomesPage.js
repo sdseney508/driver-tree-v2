@@ -139,7 +139,6 @@ const OutcomesPage = () => {
   };
 
   const driverPage = () => {
-    console.log(selOutcome);
     navigate("/drivertree", {state: { selOutcome }});
   };
 

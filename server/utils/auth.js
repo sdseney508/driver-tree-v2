@@ -18,17 +18,14 @@ module.exports = {
     if (!token) {
       return res.status(400).json({ message: 'You have no token!' });
     }
-    console.log(token);
+
     // verify token and get user data out of it
     try {
-      console.log("verifying token");
+
       const { data } = jwt.verify(token, secret, { maxAge: expiration });
       // id = data.user.id;
       req.id = data.id;
-      console.log(req.id);
-      console.log('token good');
     } catch {
-      console.log("Invalid token");
       return res.status(400).json({ message: 'invalid token!' });
     }
     // send to next endpoint
@@ -43,9 +40,7 @@ module.exports = {
     functional,
     userRole,
   }) {
-    console.log("Homeschool the token has been signed!");
-    const payload = { email, id, firstName, lastName, functional, userRole };
-    console.log(payload);
+    const payload = { email, id, firstName, lastName, userRole };
     return jwt.sign({ data: payload }, secret, { expiresIn: expiration });
   },
 };

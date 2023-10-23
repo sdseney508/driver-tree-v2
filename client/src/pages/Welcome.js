@@ -55,7 +55,7 @@ const Welcome = () => {
           "Your account isn't active yet.  Please contact your Driver Tree Admins."
         );
         return;
-      } else if (userData.userRole !== "Coordinator") {
+      } else if (userData.userRole !== "Administrator") {
         alert(
           "You are not authorized to access this page.  Please contact your local Admins."
         );
