@@ -36,7 +36,7 @@ const AdminPage = () => {
         });       
         let userDataLength = Object.keys(user).length;
         //if the user isnt logged in with an unexpired token, send them to the login page
-        if (!userDataLength>0 || user.userRole !== "Coordinator") {
+        if (!userDataLength>0 || user.userRole !== "Administrator") {
           navigate('/');
         }
 
