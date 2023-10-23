@@ -89,7 +89,7 @@ function OutcomeTable({
     {
       field: "status",
       filter: true,
-      headerName: "status",
+      headerName: "Status",
       width: 125,
       resizable: true,
     },

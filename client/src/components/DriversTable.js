@@ -119,7 +119,7 @@ function DriverTable({ selDriver, setSelDriver, selOutcome, setSelOutcome }) {
   return (
     <div>
       {/* On div wrapping Grid a) specify theme CSS Class Class and b) sets Grid size */}
-      <div className="ag-theme-alpine" style={{ width: "100%", height: 400 }}>
+      <div className="ag-theme-alpine" style={{ width: "100%" }}>
         <AgGridReact
           ref={gridRef} // Ref for accessing Grid's API
           rowData={rowData} // Row Data for Rows

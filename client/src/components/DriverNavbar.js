@@ -1,15 +1,15 @@
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import { stateContext } from "../App";
-import { Navbar, Nav, Container, NavDropdown } from "react-bootstrap";
+import { Navbar, Nav, Container } from "react-bootstrap";
 import styles from "./DriverNavbar.module.css";
 import { useNavigate, useLocation } from "react-router";
-import Typewriter from "../components/Typewriter";
+// import Typewriter from "../components/Typewriter";
 
 const DriverNavbar = () => {
   let location = useLocation();
   let navigate = useNavigate();
-  let locstate = location.state;
+
   // console.log("location state is: ", locstate);
   const [state, setState] = useContext(stateContext);
 
@@ -32,9 +32,9 @@ const DriverNavbar = () => {
   };
 
   //TODO:  bonus feature to be done later, pre-filter drivers by user
-  const myLimits = () => {
-    navigate("/mydrivers", { state: { driverType: "My" } });
-  };
+  // const myLimits = () => {
+  //   navigate("/mydrivers", { state: { driverType: "My" } });
+  // };
 
   return (
     <>
@@ -63,7 +63,7 @@ const DriverNavbar = () => {
                   Account Mngmt
                 </Nav.Link>
               </Nav>  
-              <Typewriter />
+              {/* <Typewriter /> */}
             </Container>
           </Navbar>
         ) : (

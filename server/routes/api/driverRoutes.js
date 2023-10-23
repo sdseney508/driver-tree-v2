@@ -7,16 +7,18 @@ const {Op} = require("sequelize");
 //create a new drivers; 
 router.post("/new", async (req, res) => {
   try {
+    //first check for the highest subTier number under a tier and
+    //outcome and increment it by 1
+    let subTier = await drivers.max("subTier", {
+      where: {
+        tierLevel: req.body.tierLevel,
+        outcomeID: req.body.outcomeID,
+      },
+    });
+    let body = req.body;
+    body.subTier = subTier + 1;
+    console.log(body);
     const driversData = await drivers.create(req.body);
-    // let id = driversData.id;
-    // const ol = await drivers.update(
-    //   { admin_log: req.body.log },
-    //   {
-    //     where: {
-    //       id: id, 
-    //     },
-    //   }
-    // );
     res.status(200).json(driversData);
   } catch (err) {
     res.status(400).json(err);
@@ -141,9 +143,10 @@ router.put("/update/:id", async (req, res) => {
 });
 
 //delete drivers
-//TODO:  make sure you put an "Are you sure" prompt and only let this be done to an outcome marked as Draft, button should disappear if it is not draft.when it goes ACtive or Retired
+//TODO:  make sure you put an "Are you sure" prompt and only let this be done to an outcome marked as Draft, button should disappear if it is not draft.  When it goes ACtive or Retired
 router.delete("/:id", async (req, res) => {
   try {
+    console.log("in the delete driver route, id: "+req.params.id);
     const driversData = await drivers.destroy({
       where: {
         id: req.params.id,

@@ -66,7 +66,6 @@ const OutcomesPage = () => {
       } else {
         outcomeID = 1;
       }
-      console.log("outcomeID", outcomeID);
       await getOutcome(outcomeID).then((data) => {
         setSelOutcome(data.data);
       });
@@ -74,7 +73,6 @@ const OutcomesPage = () => {
         let top = data.data;
 
         setSelDrivers(top);
-        console.log("selDrivers", selDrivers);
       });
     };
 
@@ -89,7 +87,6 @@ const OutcomesPage = () => {
     await getDriverByOutcome(selOutcome.id).then((data) => {
       let top = data.data;
       setSelDrivers(top);
-      console.log("selDrivers", selDrivers);
     });
   }
 
@@ -121,7 +118,6 @@ const OutcomesPage = () => {
 
   const newOutcome = async () => {
     createOutcome().then((data) => {
-      console.log("data: ", data.data);
       setState({ ...state, outcomeID: data.data.id });
       setSelOutcome(data.data);
     });
@@ -134,7 +130,6 @@ const OutcomesPage = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     let body = { [e.target.name]: e.target.value };
-    console.log("body for update call: ", body);
     updateOutcome(selOutcome.id, body);
     setSelOutcome({ ...selOutcome, [e.target.name]: e.target.value });
   };

@@ -93,6 +93,12 @@ outcomes.init(
             allowNull: false,
             defaultValue: 'Draft',
         },
+
+        // legend: {
+        //     type: DataTypes.TEXT,
+        //     allowNull: true,
+        //     defaultValue: 'Empty Legend',
+        // },
     },
     {
         sequelize,

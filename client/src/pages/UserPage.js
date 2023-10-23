@@ -1,11 +1,10 @@
 //page for viewing and updating op limits
 import React, { useState, useContext, useEffect, setState } from "react";
 import { stateContext } from "../App";
-import { Container, Row, Col, Button, Alert } from "react-bootstrap";
+import { Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { getMyOl } from "../utils/drivers";
 import { getUser, loggedIn, getToken } from "../utils/auth";
-import { getCarousel } from "../utils/carousel";
+// import { getCarousel } from "../utils/carousel";
 import UserCarousel from "../components/UserCarousel";
 import "./UserPage.css";
 import "./button.css";

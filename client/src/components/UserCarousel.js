@@ -13,23 +13,23 @@ function UserCarousel() {
     setIndex(selectedIndex);
   };
 
-  useEffect(() => {
-    const getCarouselData = async () => {
-      try {
-        const response = await getCarousel();
-        if (!response.data) {
-          throw new Error("something went wrong!");
-        }
-        const carousel = response.data;
-        console.log(carousel);
-        setCarousels(carousel);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    getCarouselData();
-    console.log("carousel data", carousels)
-  }, []);
+  // useEffect(() => {
+  //   const getCarouselData = async () => {
+  //     try {
+  //       const response = await getCarousel();
+  //       if (!response.data) {
+  //         throw new Error("something went wrong!");
+  //       }
+  //       const carousel = response.data;
+  //       console.log(carousel);
+  //       setCarousels(carousel);
+  //     } catch (err) {
+  //       console.error(err);
+  //     }
+  //   };
+  //   getCarouselData();
+  //   console.log("carousel data", carousels)
+  // }, []);
 
 
   function carouselItems() {

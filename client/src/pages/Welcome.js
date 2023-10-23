@@ -264,7 +264,7 @@ const Welcome = () => {
                 </Row>
               </Col>
               <Col sm={1} md={2} lg={3} className="justify-content-end">
-                <Typewriter loop={true}/>
+                {/* <Typewriter loop={true}/> */}
               </Col>
             </Row>
           </Col>

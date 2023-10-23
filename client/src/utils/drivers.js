@@ -17,6 +17,12 @@ const createOutcome = () => {
   return axios.post(apiURL + "/outcomes/new");
 };
 
+const deleteDriver = (id) => {
+  console.log(id);
+  console.log(apiURL + "/drivers/delete/" + id);
+  return axios.delete(apiURL + "/drivers/" + id);
+};
+
 const getDriver = (id) => { 
   return axios.get(apiURL + "/drivers/getOne/" + id);
 };
@@ -76,6 +82,7 @@ export {
   appendAdminLog,
   createDriver,
   createOutcome,
+  deleteDriver,
   findUser,
   getCoords,
   getDraft,
