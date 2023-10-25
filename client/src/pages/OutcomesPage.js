@@ -4,7 +4,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { stateContext } from "../App";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { useNavigate, useLocation } from "react-router";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { getUser, loggedIn, getToken } from "../utils/auth";
 import {
   createOutcome,
@@ -24,7 +24,7 @@ const OutcomesPage = () => {
   //These are the initial states for the select boxes.  They are set to the first value in the array, which is the default value
   let navigate = useNavigate();
   let location = useLocation();
-
+  const { outcomeID } = useParams();
   //using the initial useEffect hook to open up the draft oplimits and prefill the form
   useEffect(() => {
     const getUserData = async () => {
@@ -60,14 +60,13 @@ const OutcomesPage = () => {
     };
 
     const getOutcomeData = async () => {
-      let outcomeID;
-      if (location.state.selOutcome) {
-        outcomeID = location.state.selOutcome;
-      } else {
+      if (!outcomeID) {
         outcomeID = 1;
       }
       await getOutcome(outcomeID).then((data) => {
+        console.log(data.data);
         setSelOutcome(data.data);
+        // location.state.selOutcome = selOutcome;
       });
       await getDriverByOutcome(outcomeID).then((data) => {
         let top = data.data;
@@ -93,6 +92,8 @@ const OutcomesPage = () => {
   //sets the initial selection of the drop down lists for the signatures, i couldnt get the map function to work, so brute force here we go.
   useEffect(() => {
     getDrivers();
+    setState({ ...state, selOutcome: selOutcome });
+    navigate("/allOutcomes/"+selOutcome.id);
   }, [selOutcome]);
 
   //this function gets everyone with an assigened role and sets the state for the drop down lists

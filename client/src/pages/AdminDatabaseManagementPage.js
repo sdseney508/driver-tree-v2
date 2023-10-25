@@ -10,10 +10,9 @@ const AdminCarouselManage = () => {
   const [state, setState] = useContext(stateContext);
   const [selectedTable, setSelectedTable] = useState("system");
 
-  let id;
-
   const handleClick = (e) => {
     e.preventDefault();
+    console.log(e.target.id);
     setSelectedTable(e.target.id);
   };
 
@@ -23,43 +22,38 @@ const AdminCarouselManage = () => {
         <div className="op-limits-page">
           <Row className="justify-content-center">
             <Col sm={10} md={10} lg={10} className="justify-content-center">
-              <h1 className="text-center">Admin Database Management - Database Insertions and Deletions Disabled For Demo</h1>
+              <h1 className="text-center">Admin Database Management</h1>
+              <h3 className="text-center" >Database Insertions and Deletions Disabled For Demo</h3>
               <Button
                 className="welcome-btn p-1 rounded-lg m-3"
-                id="aircraft"
+                id="outcomes"
                 onClick={handleClick}
               >
-                Aircraft Table
+                Outcomes Table
               </Button>
+
               <Button
                 className="welcome-btn p-1 rounded-lg m-3"
-                id="system"
+                id="drivers"
                 onClick={handleClick}
               >
-                Systems Table
+                Drivers Table
               </Button>
+
               <Button
                 className="welcome-btn p-1 rounded-lg m-3"
-                id="configuration"
+                id="stakeholder"
                 onClick={handleClick}
               >
-                Configurations Table
-              </Button>
-              <Button
-                className="welcome-btn p-1 rounded-lg m-3"
-                id="functional"
-                onClick={handleClick}
-              >
-                Functional Roles Table
+                Stakeholders Table
               </Button>
             </Col>
           </Row>
-   
+
           <AdminTables
             selectedTable={selectedTable}
             setSelectedTable={setSelectedTable}
           />
-  
         </div>
       </Container>
     </>

@@ -9,8 +9,6 @@ const SignupForm = ({onModalSubmit}) => {
   const [roleState, setRoleState] = useState([]);
   const [functionalState, setFunctionalState] = useState([]);
   const [showSignupModal, setSignupModal] = useState(true);
-  const [funcOptions, setFuncOptions] = useState([]);
-  // const [value, setValue] = useState<Option | null>();
 
   useEffect(() => {
     getModalData();
@@ -43,7 +41,7 @@ const SignupForm = ({onModalSubmit}) => {
   function roleOptions() {
     return roleState.map((f, index) => {
       return (
-        <option key={index} value={f.id}>
+        <option key={index} value={f.role}>
           {f.role}
         </option>
       );
@@ -73,7 +71,7 @@ const SignupForm = ({onModalSubmit}) => {
     const lastName = userFormData.lastName;
     const email = userFormData.email;
     const password = userFormData.password;
-    const userStatus = "Active";
+    const userStatus = "Requested";
     const userRole = userFormData.userRole;
     const functionalArea = userFormData.function;
 
@@ -92,7 +90,7 @@ const SignupForm = ({onModalSubmit}) => {
       .catch((err) => console.log(err));
 
     alert(
-      "Op Limit Admins will review your request once submitted. If you don't receive an email notification within one week, please contact your local Op Limit Coordinator."
+      "Driver Tree Admins will review your request once submitted. If you don't receive an email notification within one week, please contact your local Driver Tree Admin."
     );
     //this could also be done by setting setSignupModal to false, but i didnt want to deal with passing the props down
     onModalSubmit(event);
@@ -140,7 +138,7 @@ const SignupForm = ({onModalSubmit}) => {
           <Form.Label htmlFor="email">E-mail</Form.Label>
           <Form.Control
             type="email"
-            placeholder="john.smith@I-Do-Op-Limits.com"
+            placeholder="john.smith@I-Do-Driver-Trees.com"
             name="email"
             onChange={handleInputChange}
             // value={userFormData.email}

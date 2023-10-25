@@ -45,7 +45,6 @@ function UserTable({ selUser, setSelUser }) {
     { field: "userStatus", filter: true, headerName: "Account Status", width: 300, resizable: true},
     { field: "email", filter: true, headerName: "email", width: 300, resizable: true },
     { field: "userRole", filter: true, headerName: "Role", width: 125, resizable: true },
-    { field: "functional", filter: true, headerName: "Functional Area", width: 150, resizable: true },
     { field: "userStatus", filter: true, headerName: "Account Status", width: 300, resizable: true },
   ]);
 

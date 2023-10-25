@@ -14,7 +14,7 @@ var corsOptions = {
 // 
   //for local use try again
   // origin: "http://localhost:3000"
-
+// 
 };
 app.use(cors(corsOptions));
 

@@ -67,11 +67,9 @@ const AdminAccountManagement = () => {
           email: user.email,
           userStatus: user.userStatus,
           userRole: user.userRole,
-          functionalArea: user.functional,
         });
         // sets the intial values for the role and functional area dropdowns
         setuserRole(user.userRole);
-        setfunctionalArea(user.functional);
         setAccountStatus(user.userStatus);
         let userDataLength = Object.keys(user).length;
         //if the user isnt logged in with an unexpired token, send them to the login page
@@ -162,7 +160,7 @@ const AdminAccountManagement = () => {
 
   const handleFormSubmit = async (event) => {
     event.preventDefault();
-    alert("Disbaled for demo purposes");
+    // alert("Disabled for demo purposes");
     let body;
     if (userFormData.password !== userFormData.passVal) {
       setShowPassAlert(true);
@@ -188,7 +186,6 @@ const AdminAccountManagement = () => {
     const email = userFormData.email;
     const password = userFormData.password;
     const userRole = userFormData.userRole;
-    const functional = userFormData.functionalArea;
     const userStatus = userFormData.accountStatus;
 
     if (password) {
@@ -199,10 +196,9 @@ const AdminAccountManagement = () => {
         userStatus,
         password,
         userRole,
-        functional,
       };
     } else {
-      body = { firstName, lastName, email, userStatus, userRole, functional };
+      body = { firstName, lastName, email, userStatus, userRole };
     }
 
     // await updateUser(body, id)

@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { stateContext } from "../App";
 import { Navbar, Nav, Container } from "react-bootstrap";
 import styles from "./DriverNavbar.module.css";
@@ -12,10 +12,29 @@ const DriverNavbar = () => {
 
   // console.log("location state is: ", locstate);
   const [state, setState] = useContext(stateContext);
-
+  let {outcomeID, driverID} = useParams();
   let pName = location.pathname.slice(0, 6);
+  let selOutcome = location.state ? location.state.selOutcome : null;
   const allOutcomes = () => {
-    navigate("/allOutcomes", { state: { driverState: "All" } });
+    if(!outcomeID) {
+      //TODO:  make this a fetch call for the user's default outcome
+      outcomeID = 1;
+    }
+    navigate("/allOutcomes/"+outcomeID);
+  };
+
+  const gotoDriverTree = () => {
+    if(!state.selOutcome) {
+      //TODO:  make this a fetch call for the user's default outcome
+      outcomeID = 1;
+    } else {
+      outcomeID = state.selOutcome.id;
+    }
+    // console.log('selOutcome'+selOutcome)
+    // console.log("location: " + location);
+    // console.log("location.state: " + location.state)
+    // console.log("selOutcome", selOutcome);
+    navigate("/driverTree/"+state.selOutcome.id);
   };
 
   const adminAccountManage = () => {
@@ -52,7 +71,7 @@ const DriverNavbar = () => {
                 <Nav.Link onClick={allOutcomes} className={styles.nav_link}>
                   Outcomes
                 </Nav.Link>
-                <Nav.Link as={Link} to="/drivertree" className={styles.nav_link}>
+                <Nav.Link onClick={gotoDriverTree} className={styles.nav_link}>
                   Driver Trees
                 </Nav.Link>
                 <Nav.Link

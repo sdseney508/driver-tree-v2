@@ -56,9 +56,14 @@ const AdminPage = () => {
     setcontactModal(false);
   };
 
-  const opLimitManagement = () => {
+  const outcomesManagement = () => {
     // 👇️ navigate to oplimit management page.  this is where the administrator can add, remove, and update op limits.
-    navigate("/adminoplimitmanage", {state});
+    alert("This feature is disabled for demo.");
+  };
+
+  const driverManagement = () => {
+    // 👇️ navigate to oplimit management page.  this is where the administrator can add, remove, and update op limits.
+    alert("This feature is disabled for demo.");
   };
 
   const accountManagement = () => {
@@ -89,9 +94,19 @@ const AdminPage = () => {
                   className="welcome-btn p-1 rounded-lg m-3"
                   id="createLimit"
                   variant="success"
-                  onClick={opLimitManagement}
+                  onClick={outcomesManagement}
                 >
-                  Op Limit Management{" "}
+                  Outcomes Management{" "}
+                </Button>
+              </Row>
+              <Row className="justify-content-center">
+                <Button
+                  className="welcome-btn p-1 rounded-lg m-3"
+                  id="createLimit"
+                  variant="success"
+                  onClick={driverManagement}
+                >
+                  Driver Management{" "}
                 </Button>
               </Row>
               <Row className="justify-content-center">

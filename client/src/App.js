@@ -1,5 +1,5 @@
 import React, { useState, createContext } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useParams, BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 //pages and components
 import Welcome from "./pages/Welcome";
@@ -24,6 +24,7 @@ function App() {
   const [state, setState] = useState({
     selectedPMA: "PMA-262",
     selectedPEO: "PEO(U&W)",
+    selOutcome: null
   });
 
   return (
@@ -40,9 +41,9 @@ function App() {
               <Route path="/admindrivermanage" element={<AdminDriversPage />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/accountmanage" element={<AccountManagementPage />} />
-              <Route path="/allOutcomes" element={<OutcomesPage />} />
-              <Route path="/drivertree" element={<DriverTreePage />} />
-              <Route path="/drpage" element={<DrPage />} />
+              <Route path="/allOutcomes/:outcomeID" element={<OutcomesPage />} />
+              <Route path="/drivertree/:outcomeID" element={<DriverTreePage />} />
+              <Route path="/drpage/:outcomeID/:driverID" element={<DrPage />} />
               <Route path="/user" element={<UserPage />} />
               <Route
                 path="*"

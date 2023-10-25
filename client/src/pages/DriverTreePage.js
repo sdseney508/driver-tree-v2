@@ -13,11 +13,12 @@ import {
   updateDriver,
 } from "../utils/drivers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircle, faTrash, faSquare } from "@fortawesome/free-solid-svg-icons";
+import { faCircle, faSquare } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate, useLocation } from "react-router";
+import { useParams } from "react-router";
+// import DriverCards from "../components/driverCards";
 import Legend from "../components/legend";
 import { getUser, loggedIn, getToken } from "../utils/auth";
-
 import styles from "./DriverTreePage.module.css";
 import OutcomeTable from "../components/OutcomeTable";
 
@@ -33,6 +34,28 @@ const DriverTreePage = () => {
 
   let location = useLocation();
   let navigate = useNavigate();
+
+  let {outcomeID} = useParams();
+
+  let tierOne = {
+    tier: 1,
+  };
+
+  let tierTwo = {
+    tier: 2,
+  };
+
+  let tierThree = {
+    tier: 3,
+  };
+
+  let tierFour = {
+    tier: 4,
+  };
+
+  let tierFive = {
+    tier: 5,
+  };
 
   //using the initial useEffect hook to open up the draft oplimits and prefill the form
   useEffect(() => {
@@ -68,24 +91,21 @@ const DriverTreePage = () => {
       }
     };
     //set location state if sent there by the table
-  
+
     // location.state.selOutcome.id=selOutcome.id;
     let dtree = [];
     const getOutcomeData = async () => {
       //todo:  Clean this up so that the navbar always has the correct outcome selected
-      let outcomeID;
-      if (location.state) {
-        outcomeID = location.state.selOutcome.id;
-      } else {
+      if (!outcomeID) {
         outcomeID = 1;
       }
       await getOutcome(outcomeID).then((data) => {
         setSelOutcome(data.data);
       });
     };
-
-    const getDriversData = async () => {
-      await getDriverByOutcome(location.state.selOutcome.id).then((data) => {
+    //TODO: update to use useParams and put the outcomeID and driverID in the URL
+    const getDriversData = async (outcomeID) => {
+      await getDriverByOutcome(outcomeID).then((data) => {
         setDriverTreeObj(data.data);
       });
     };
@@ -98,9 +118,7 @@ const DriverTreePage = () => {
   }, []);
 
   useEffect(() => {
-    let dtree;  
-    // console.log("location: "+JSON.stringify(location.state));
-    // console.log("location state v2: "+ JSON.stringify(location.state));
+    let dtree;
     const getDriversData = async () => {
       await getDriverByOutcome(selOutcome.id).then((data) => {
         setSelDrivers(data.data);
@@ -116,7 +134,7 @@ const DriverTreePage = () => {
 
     getDriversData();
     setState({ ...state, selOutcome: selOutcome });
-    // window.location.reload(false);
+    navigate("/drivertree/" + selOutcome.id);
   }, [selOutcome]);
 
   //sets the initial selection of the drop down lists for the signatures, i couldnt get the map function to work, so brute force here we go.
@@ -166,7 +184,7 @@ const DriverTreePage = () => {
   function tierOneCards() {
     const arr = [];
     if (!driverTreeObj) {
-      return <div>Nuts</div>;
+      return <div key="nuts1"></div>;
     } else {
       // for (let i = 0; i < 10; i++) {
       //   let t = i+1; //the subtiers for the users start at 1 not 0
@@ -192,6 +210,7 @@ const DriverTreePage = () => {
               className={styles.my_div}
               data-tier={1}
               data-subtier={index + 1}
+              key={"driver" + index + 1}
               id={"tier1subTier" + (index + 1)}
               onDragOver={allowDrop}
               onDrop={drop}
@@ -216,6 +235,7 @@ const DriverTreePage = () => {
               className={styles.my_div}
               data-tier={1}
               data-subtier={index + 1}
+              key={"driver" + index + 1}
               id={"tier1subTier" + (index + 1)}
               onDragOver={allowDrop}
               onDrop={drop}
@@ -248,12 +268,12 @@ const DriverTreePage = () => {
                     {arr[index].problemStatement}
                   </Card.Text>
                 </Card.Body>
-                <Card.Footer className={styles.card_footer}>
-                  <Button
-                    className={styles.card_trash}
-                    onClick={delDriver}
-                    id={arr[index].id}
-                  ></Button>
+                <Card.Footer
+                  className={styles.card_footer}
+                  onClick={delDriver}
+                  id={arr[index].id}
+                >
+                  Delete
                 </Card.Footer>
               </Card>
             </div>
@@ -266,7 +286,7 @@ const DriverTreePage = () => {
   function tierTwoCards() {
     const arr = [];
     if (!driverTreeObj) {
-      return <div>Nuts</div>;
+      return <div key="nuts2">Nuts</div>;
     } else {
       // for (let i = 0; i < 10; i++) {
       //   let t = i+1; //the subtiers for the users start at 1 not 0
@@ -293,6 +313,7 @@ const DriverTreePage = () => {
               data-tier={2}
               data-subtier={index + 1}
               id={"tier2subTier" + (index + 1)}
+              key={"driver" + index + 1}
               onDragOver={allowDrop}
               onDrop={drop}
             ></div>
@@ -317,6 +338,7 @@ const DriverTreePage = () => {
               data-tier={2}
               data-subtier={index + 1}
               id={"tier2subTier" + (index + 1)}
+              key={"driver" + index + 1}
               onDragOver={allowDrop}
               onDrop={drop}
             >
@@ -366,7 +388,7 @@ const DriverTreePage = () => {
   function tierThreeCards() {
     const arr = [];
     if (!driverTreeObj) {
-      return <div>Nuts</div>;
+      return <div key="nuts3">Nuts</div>;
     } else {
       // for (let i = 0; i < 10; i++) {
       //   let t = i+1; //the subtiers for the users start at 1 not 0
@@ -393,6 +415,7 @@ const DriverTreePage = () => {
               data-tier={3}
               data-subtier={index + 1}
               id={"tier3subTier" + (index + 1)}
+              key={"driver" + index + 1}
               onDragOver={allowDrop}
               onDrop={drop}
             ></div>
@@ -417,6 +440,7 @@ const DriverTreePage = () => {
               data-tier={3}
               data-subtier={index + 1}
               id={"tier3subTier" + (index + 1)}
+              key={"driver" + index + 1}
               onDragOver={allowDrop}
               onDrop={drop}
             >
@@ -466,7 +490,7 @@ const DriverTreePage = () => {
   function tierFourCards() {
     const arr = [];
     if (!driverTreeObj) {
-      return <div>Nuts</div>;
+      return <div key="nuts4">Nuts</div>;
     } else {
       // for (let i = 0; i < 10; i++) {
       //   let t = i+1; //the subtiers for the users start at 1 not 0
@@ -493,6 +517,7 @@ const DriverTreePage = () => {
               data-tier="4"
               data-subtier={index + 1}
               id={"tier4subTier" + (index + 1)}
+              key={"driver" + index + 1}
               onDragOver={allowDrop}
               onDrop={drop}
             ></div>
@@ -517,6 +542,7 @@ const DriverTreePage = () => {
               data-tier="4"
               data-subtier={index + 1}
               id={"tier4subTier" + (index + 1)}
+              key={"driver" + index + 1}
               onDragOver={allowDrop}
               onDrop={drop}
             >
@@ -566,7 +592,7 @@ const DriverTreePage = () => {
   function tierFiveCards() {
     const arr = [];
     if (!driverTreeObj) {
-      return <div>Nuts</div>;
+      return <div key="nuts5">Nuts</div>;
     } else {
       // for (let i = 0; i < 10; i++) {
       //   let t = i+1; //the subtiers for the users start at 1 not 0
@@ -592,7 +618,7 @@ const DriverTreePage = () => {
               className={styles.my_div}
               data-tier="5"
               data-subtier={index + 1}
-              id={index + 1}
+              id={"tier5subTier" + (index + 1)}
               onDragOver={allowDrop}
               onDrop={drop}
             ></div>
@@ -616,7 +642,8 @@ const DriverTreePage = () => {
               className={styles.my_div}
               data-tier="5"
               data-subtier={index + 1}
-              id={index + 1}
+              id={"tier5subTier" + (index + 1)}
+              key={"driver" + index + 1}
               onDragOver={allowDrop}
               onDrop={drop}
             >
@@ -676,22 +703,119 @@ const DriverTreePage = () => {
   function drop(e) {
     //on drop, sets the drivers new Tier and subTier as required.  The driver is then updated in the database so it will be placed in its new place on the next render
     e.preventDefault();
-    console.log("drop target: " + e.target.dataset.tier);
-    console.log("drop target subtier: " + e.target.dataset.subtier);
     var data = e.dataTransfer.getData("text");
-    console.log("drag target: " + data);
     e.target.appendChild(document.getElementById(data));
     let body = {
       tierLevel: e.target.dataset.tier,
       subTier: e.target.dataset.subtier,
     };
     updateDriver(data, body);
-    // window.location.reload(false);
+    window.location.reload(false);
+  }
+
+  function tierCards({ tier }, { driverTreeObj }) {
+    const arr = [];
+    if (!driverTreeObj) {
+      return <div></div>;
+    } else {
+      // for (let i = 0; i < 10; i++) {
+      //   let t = i+1; //the subtiers for the users start at 1 not 0
+      for (let i = 0; i < 10; i++) {
+        //needs a nested loop for those instances when the driverTreeObj is smaller than 10
+        // logic as follows:  insert a placeholder row, then check to see if there should be a card, if yes, pop that row and insert card
+        arr.push("skip");
+        for (let j = 0; j < driverTreeObj.length; j++) {
+          let t = i + 1; //the subtiers for the users start at 1 not 0
+          if (
+            driverTreeObj[j].tierLevel === tier &&
+            driverTreeObj[j].subTier === t
+          ) {
+            arr[i] = driverTreeObj[j];
+          }
+        }
+      }
+
+      return arr.map((f, index) => {
+        if (arr[index] === "skip") {
+          return (
+            <div
+              className={styles.my_div}
+              data-tier={tier}
+              data-subtier={index + 1}
+              id={"tier1subTier" + (index + 1)}
+              onDragOver={allowDrop}
+              onDrop={drop}
+            ></div>
+          );
+        } else {
+          let dColor;
+          switch (arr[index].status) {
+            case "Green":
+              dColor = "#00ff00";
+              break;
+            case "Yellow":
+              dColor = "#ffff00";
+              break;
+            case "Red":
+              dColor = "#ff0000";
+              break;
+            default:
+          }
+          return (
+            <div
+              className={styles.my_div}
+              data-tier={tier}
+              data-subtier={index + 1}
+              id={"tier1subTier" + (index + 1)}
+              onDragOver={allowDrop}
+              onDrop={drop}
+            >
+              <Card
+                className={styles.my_card}
+                id={arr[index].id}
+                draggable="true"
+                onDragStart={drag}
+              >
+                <Card.Header className={styles.card_header}>
+                  <FontAwesomeIcon
+                    position="top"
+                    icon={faSquare}
+                  ></FontAwesomeIcon>
+                  <FontAwesomeIcon
+                    position="top"
+                    icon={faCircle}
+                    style={{ color: dColor }}
+                    className={styles.card_status}
+                  />
+                </Card.Header>
+
+                <Card.Body className={styles.my_card_body} id={arr[index].id}>
+                  <Card.Text
+                    className={styles.my_card_text}
+                    id={arr[index].id}
+                    onClick={goToDriver}
+                  >
+                    {arr[index].problemStatement}
+                  </Card.Text>
+                </Card.Body>
+                <Card.Footer
+                  className={styles.card_footer}
+                  onClick={delDriver}
+                  id={arr[index].id}
+                >
+                  Delete
+                </Card.Footer>
+              </Card>
+            </div>
+          );
+        }
+      });
+    }
   }
 
   return (
     <>
-      <div className={styles.driver_page}>
+      <div className={styles.driver_page} id="driver_parent" key='topleveldiv'>
         <Container fluid className="justify-content-center">
           <Col className={styles.my_col}>
             <Row
@@ -712,7 +836,10 @@ const DriverTreePage = () => {
               <Col className={styles.outcome}>
                 <Card className={styles.my_card} onClick={goToOutcome}>
                   <Card.Body className={styles.my_card_body}>
-                    <Card.Text className={styles.my_card_text}>{selOutcome.outcomeTitle}</Card.Text>
+                    <Card.Header className={styles.card_header}></Card.Header>
+                    <Card.Text className={styles.my_card_text}>
+                      {selOutcome.outcomeTitle}
+                    </Card.Text>
                   </Card.Body>
                 </Card>
               </Col>
@@ -725,8 +852,10 @@ const DriverTreePage = () => {
                     width: "100%",
                   }}
                   className="m-1"
+                  id="tier1Cards"
+                  key="tier1cards"
                 >
-                  {tierOneCards()}
+                  {tierCards(tierOne, {driverTreeObj})}
                 </Row>
                 <Row style={{ height: "50px" }}>
                   <Button
@@ -741,8 +870,14 @@ const DriverTreePage = () => {
 
               <Col className={styles.driver}>
                 <p>Tier 2 Drivers</p>
-                <Row style={{ height: "700px" }} className="m-1">
-                  {tierTwoCards()}
+                <Row
+                  style={{ height: "700px", width: "100%" }}
+                  className="m-1"
+                  id="tier2Cards"
+                  key="tier2cards"
+                >
+                  {/* {tierTwoCards()} */}
+                  {tierCards(tierTwo, { driverTreeObj })}
                 </Row>
                 <Row style={{ height: "50px", padding: "1px" }}>
                   <Button
@@ -757,8 +892,14 @@ const DriverTreePage = () => {
 
               <Col className={styles.driver}>
                 <p>Tier 3 Drivers</p>
-                <Row style={{ height: "700px" }} className="m-1">
-                  {tierThreeCards()}
+                <Row
+                  style={{ height: "700px", width: "100%" }}
+                  className="m-1"
+                  id="tier3Cards"
+                  key="tier3cards"
+                >
+                  {/* {tierThreeCards()} */}
+                  {tierCards(tierThree, { driverTreeObj })}
                 </Row>
                 <Row style={{ height: "50px" }}>
                   <Button
@@ -773,8 +914,14 @@ const DriverTreePage = () => {
 
               <Col className={styles.driver}>
                 <p>Tier 4 Drivers</p>
-                <Row style={{ height: "700px" }} className="m-1">
-                  {tierFourCards()}
+                <Row
+                  style={{ height: "700px", width: "100%" }}
+                  className="m-1"
+                  id="tier4Cards"
+                  key="tier4cards"
+                >
+                  {/* {tierFourCards()} */}
+                  {tierCards(tierFour, { driverTreeObj })}
                 </Row>
                 <Row style={{ height: "50px" }}>
                   <Button
@@ -789,8 +936,14 @@ const DriverTreePage = () => {
 
               <Col className={styles.driver}>
                 <p>Tier 5 Drivers</p>
-                <Row style={{ height: "700px" }} className="m-1">
-                  {tierFiveCards()}
+                <Row
+                  style={{ height: "700px", width: "100%" }}
+                  className="m-1"
+                  id="tier5Cards"
+                  key="tier5cards"
+                >
+                  {/* {tierFiveCards()} */}
+                  {tierCards(tierFive, { driverTreeObj })}
                 </Row>
                 <Row style={{ height: "50px" }}>
                   <Button
@@ -803,7 +956,7 @@ const DriverTreePage = () => {
                 </Row>
               </Col>
 
-              <Col className="justify-content-center driver" sm={10} md={3}>
+              <Col className="justify-content-center driver" sm={10} md={3} id='legend' key='legendColumn'>
                 <Row>
                   <Legend stakeholders={selOutcome.legend} />
                 </Row>
