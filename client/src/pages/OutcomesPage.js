@@ -108,7 +108,7 @@ const OutcomesPage = () => {
         } else {
           return (
             <div>
-              <Link to="/drpage" state={{ selOutcome: selOutcome.id, selDriver:selDrivers[index].id }}>
+              <Link to={`/drpage/${selOutcome.id}/${selDrivers[index].id}`}>
               <p>{selDrivers[index].problemStatement}</p></Link>
             </div>
           );
@@ -140,7 +140,7 @@ const OutcomesPage = () => {
   };
 
   const driverPage = () => {
-    navigate("/drivertree", {state: { selOutcome }});
+    navigate("/drivertree/"+selOutcome.id);
   };
 
   return (
@@ -334,7 +334,8 @@ const OutcomesPage = () => {
                 </Form.Group>
               </Col>
             </Row>
-            <Row style={{ height: "25vh" }}>
+
+            <Row style={{ height: "250px" }}>
               <OutcomeTable
                 selOutcome={selOutcome}
                 setSelOutcome={setSelOutcome}

@@ -4,10 +4,15 @@ import { Col, Card, Row, Button } from "react-bootstrap";
 import styles from "../pages/DriverTreePage.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle, faSquare } from "@fortawesome/free-solid-svg-icons";
-import { useNavigate, useLocation } from "react-router";
-import { deleteDriver, getOutcome, updateDriver } from "../utils/drivers";
+import { useNavigate, useLocation, useParams } from "react-router";
+import {
+  createDriver,
+  deleteDriver,
+  getOutcome,
+  updateDriver,
+} from "../utils/drivers";
 
-const DriverCards = ({ tier, driverTreeObj, selOutcome, setSelOutcome, newDriver }) => {
+const DriverCards = ({ tier, driverTreeObj, selOutcome, setSelOutcome }) => {
   //This module has three functions:
   //1.  It creates the divs that go into the driver tree columns
   //2.  It creates the individual cards in the correct divs
@@ -15,6 +20,7 @@ const DriverCards = ({ tier, driverTreeObj, selOutcome, setSelOutcome, newDriver
   //The arrow function is contained in the arrows.js module.  It creates the arrows that connect the cards
 
   console.log("driverTreeObj", driverTreeObj);
+  console.log("tier: ", tier.tier);
   let location = useLocation();
   let navigate = useNavigate();
 
@@ -25,7 +31,6 @@ const DriverCards = ({ tier, driverTreeObj, selOutcome, setSelOutcome, newDriver
   }
 
   function drag(e) {
-    console.log(e.target);
     e.dataTransfer.setData("text", e.target.id);
   }
 
@@ -39,6 +44,7 @@ const DriverCards = ({ tier, driverTreeObj, selOutcome, setSelOutcome, newDriver
       subTier: e.target.dataset.subtier,
     };
     updateDriver(data, body);
+    window.location.reload(false);
   }
 
   const delDriver = (e) => {
@@ -52,15 +58,24 @@ const DriverCards = ({ tier, driverTreeObj, selOutcome, setSelOutcome, newDriver
   };
 
   const goToDriver = async (e) => {
-    navigate("/drpage", {
-      state: { selDriver: e.target.id, selOutcome: selOutcome.id },
-    });
+    navigate("/drpage/" + selOutcome.id + "/" + e.target.id);
   };
 
-  function tierCards({ tier }, { driverTreeObj }) {
+  const newDriver = (e) => {
+    e.preventDefault();
+    let body = { outcomeID: selOutcome.id, tierLevel: e.target.dataset.tier };
+    console.log(body);
+    createDriver(body);
+    getOutcome(selOutcome.id).then((data) => {
+      setSelOutcome(data.data);
+    });
+    window.location.reload(false);
+  };
+
+  function tierCards(tier, { driverTreeObj }) {
     const arr = [];
     if (!driverTreeObj) {
-      return <div>nuts and</div>;
+      return <div></div>;
     } else {
       // for (let i = 0; i < 10; i++) {
       //   let t = i+1; //the subtiers for the users start at 1 not 0
@@ -160,15 +175,17 @@ const DriverCards = ({ tier, driverTreeObj, selOutcome, setSelOutcome, newDriver
   return (
     <>
       <Col className={styles.driver} key="1">
-        <p>Tier 1 Drivers</p>
+        <p>{`Tier ${tier.tier} Drivers`}</p>
         <Row
           style={{
             height: "700px",
             width: "100%",
           }}
           className="m-1"
+          id={`tier${tier.tier}Cards`}
+          key={`tier${tier.tier}Cards`}
         >
-          {tierCards(tier, { driverTreeObj })}
+          {tierCards(tier.tier, { driverTreeObj })}
         </Row>
         <Row style={{ height: "50px" }}>
           <Button className={styles.my_btn} onClick={newDriver} data-tier="1">

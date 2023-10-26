@@ -10,7 +10,7 @@ import {
   updateDriver,
 } from "../utils/drivers";
 import DriverTable from "../components/DriversTable";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowRight,
@@ -31,6 +31,7 @@ const DriverPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  let { outcomeID, driverID } = useParams();
   // this is getting the user data from the database to properly populate the form.  None of the form data is being updated in the database. until after you hit submit.
   useEffect(() => {
     const getUserData = async () => {
@@ -64,38 +65,33 @@ const DriverPage = () => {
     };
 
     const getAppData = async () => {
-      console.log(location.state);
-      let driverid;
-      let id;
-      if (!location.state) {
-        id=1;
-        driverid=1;
-      }else{
-        id= location.state.selOutcome;
-        driverid=location.state.selDriver;
+      if (!outcomeID) {
+        outcomeID = 1;
       }
-      console.log("id: ", id)
-      console.log("driverid: ", driverid)
-      await getDriverByOutcome(id).then((data) => {
+      await getDriverByOutcome(outcomeID).then((data) => {
         let top = data.data;
         setSelDrivers(top);
       });
-      await getOutcome(id).then((data) => {
+      await getOutcome(outcomeID).then((data) => {
         let top = data.data;
         setSelOutcome(top);
       });
-      await getDriver(driverid).then((data) => {
+      if (!driverID) {
+        driverID = selDrivers[0].id;
+      }
+      await getDriver(driverID).then((data) => {
         let top = data.data;
         setSelDriver(top);
       });
-    
     };
 
     getUserData();
     getAppData();
   }, []);
 
-  useEffect(() => {}, [selDriver]);
+  useEffect(() => {
+    navigate("/drpage/" + outcomeID + "/" + selDriver.id);
+  }, [selDriver]);
 
   const handleInputChange = (e) => {
     setSelDriver({ ...selDriver, [e.target.name]: e.target.value });
@@ -114,7 +110,7 @@ const DriverPage = () => {
   };
 
   const backToDriverTree = () => {
-    navigate("/drivertree", { state: { selOutcome: selOutcome } });
+    navigate("/drivertree/" + selOutcome.id);
   };
 
   return (
@@ -215,10 +211,10 @@ const DriverPage = () => {
                   <Form.Group>
                     <Col>
                       {/* <Row className={styles.my_row}> */}
-                      <Row >
-                      <Form.Label className={styles.background_label}>
-                        Background
-                      </Form.Label>
+                      <Row>
+                        <Form.Label className={styles.background_label}>
+                          Background
+                        </Form.Label>
                         <Form.Label className={styles.status_label}>
                           Status
                         </Form.Label>
@@ -319,7 +315,7 @@ const DriverPage = () => {
             </Form>
           </div>
 
-          <div>
+          <Row style={{ height: "250px" }}>
             <DriverTable
               selDrivers={selDrivers}
               setSelDrivers={setSelDrivers}
@@ -328,7 +324,7 @@ const DriverPage = () => {
               selOutcome={selOutcome}
               setSelOutcome={setSelOutcome}
             />
-          </div>
+          </Row>
         </Container>
       </div>
     </>

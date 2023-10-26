@@ -4,19 +4,13 @@ import React, { useState, useContext, useEffect } from "react";
 import { stateContext } from "../App";
 import { Container, Row, Col, Button, Card } from "react-bootstrap";
 import {
-  createDriver,
   createOutcome,
-  deleteDriver,
   getOutcome,
-  getDrivers,
   getDriverByOutcome,
-  updateDriver,
 } from "../utils/drivers";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircle, faSquare } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate, useLocation } from "react-router";
 import { useParams } from "react-router";
-// import DriverCards from "../components/driverCards";
+import DriverCards from "../components/driverCards";
 import Legend from "../components/legend";
 import { getUser, loggedIn, getToken } from "../utils/auth";
 import styles from "./DriverTreePage.module.css";
@@ -35,7 +29,9 @@ const DriverTreePage = () => {
   let location = useLocation();
   let navigate = useNavigate();
 
-  let {outcomeID} = useParams();
+  //grabs the outcomeID from the URL; allows someone to email someone a direct link to a specific driver tree.
+  //TODO:  Make it so that this pops an error if someone doesnt have access to that specific Outcome's Driver Tree
+  let { outcomeID } = useParams();
 
   let tierOne = {
     tier: 1,
@@ -57,7 +53,7 @@ const DriverTreePage = () => {
     tier: 5,
   };
 
-  //using the initial useEffect hook to open up the draft oplimits and prefill the form
+  //using the initial useEffect hook to open up the driver trees and prefill the table at the bottom of the page
   useEffect(() => {
     const getUserData = async () => {
       //this first part just ensures they whoever is on this page is an authenticated user; prevents someone from typing in the url and gaining access
@@ -117,6 +113,7 @@ const DriverTreePage = () => {
     //this one gets the initial draftOL for the form
   }, []);
 
+  //this useeffect is there to refresh the driver tree elements whenever the selOutcome state is changed.
   useEffect(() => {
     let dtree;
     const getDriversData = async () => {
@@ -137,685 +134,38 @@ const DriverTreePage = () => {
     navigate("/drivertree/" + selOutcome.id);
   }, [selOutcome]);
 
-  //sets the initial selection of the drop down lists for the signatures, i couldnt get the map function to work, so brute force here we go.
+  const card1Pos = { x: 0, y: 0 };
+  const card2Pos = { x: 100, y: 100 };
 
-  //this function gets everyone with an assigened role and sets the state for the drop down lists
+  //this function draws an arrow between two selected cards.
+  const createArrow = () => {
+    const canvas = document.getElementById("arrows");
+    const ctx = canvas.getContext("2d");
 
+    ctx.moveTo(90, 130);
+    ctx.lineTo(95, 25);
+    ctx.lineTo(150, 80);
+    ctx.lineTo(205, 25);
+    ctx.lineTo(210, 130);
+    ctx.lineWidth = 15;
+    ctx.stroke();
+  };
+
+  //creates new outcome and then resets the selOutcome state.  This cause a a useEffect fire and refreshes the page.
   const newOutcome = () => {
     createOutcome().then((data) => {
       setSelOutcome(data.data);
     });
   };
 
-  const newDriver = (e) => {
-    e.preventDefault();
-    let body = { outcomeID: selOutcome.id, tierLevel: e.target.dataset.tier };
-    console.log(body);
-    createDriver(body);
-    getOutcome(selOutcome.id).then((data) => {
-      setSelOutcome(data.data);
-    });
-    window.location.reload(false);
-  };
-
-  const delDriver = (e) => {
-    e.preventDefault();
-    console.log(e.target.id);
-    deleteDriver(e.target.id);
-    getOutcome(selOutcome.id).then((data) => {
-      setSelOutcome(data.data);
-    });
-    window.location.reload(false);
-  };
-
   const goToOutcome = async (e) => {
-    navigate("/allOutcomes", {
-      state: { selOutcome: selOutcome.id },
-    });
+    navigate("/allOutcomes/" + selOutcome.id);
   };
-
-  const goToDriver = async (e) => {
-    console.log(e.target);
-    navigate("/drpage", {
-      state: { selDriver: e.target.id, selOutcome: selOutcome.id },
-    });
-  };
-
-  function tierOneCards() {
-    const arr = [];
-    if (!driverTreeObj) {
-      return <div key="nuts1"></div>;
-    } else {
-      // for (let i = 0; i < 10; i++) {
-      //   let t = i+1; //the subtiers for the users start at 1 not 0
-      for (let i = 0; i < 10; i++) {
-        //needs a nested loop for those instances when the driverTreeObj is smaller than 10
-        // logic as follows:  insert a placeholder row, then check to see if there should be a card, if yes, pop that row and insert card
-        arr.push("skip");
-        for (let j = 0; j < driverTreeObj.length; j++) {
-          let t = i + 1; //the subtiers for the users start at 1 not 0
-          if (
-            driverTreeObj[j].tierLevel === 1 &&
-            driverTreeObj[j].subTier === t
-          ) {
-            arr[i] = driverTreeObj[j];
-          }
-        }
-      }
-
-      return arr.map((f, index) => {
-        if (arr[index] === "skip") {
-          return (
-            <div
-              className={styles.my_div}
-              data-tier={1}
-              data-subtier={index + 1}
-              key={"driver" + index + 1}
-              id={"tier1subTier" + (index + 1)}
-              onDragOver={allowDrop}
-              onDrop={drop}
-            ></div>
-          );
-        } else {
-          let dColor;
-          switch (arr[index].status) {
-            case "Green":
-              dColor = "#00ff00";
-              break;
-            case "Yellow":
-              dColor = "#ffff00";
-              break;
-            case "Red":
-              dColor = "#ff0000";
-              break;
-            default:
-          }
-          return (
-            <div
-              className={styles.my_div}
-              data-tier={1}
-              data-subtier={index + 1}
-              key={"driver" + index + 1}
-              id={"tier1subTier" + (index + 1)}
-              onDragOver={allowDrop}
-              onDrop={drop}
-            >
-              <Card
-                className={styles.my_card}
-                id={arr[index].id}
-                draggable="true"
-                onDragStart={drag}
-              >
-                <Card.Header className={styles.card_header}>
-                  <FontAwesomeIcon
-                    position="top"
-                    icon={faSquare}
-                  ></FontAwesomeIcon>
-                  <FontAwesomeIcon
-                    position="top"
-                    icon={faCircle}
-                    style={{ color: dColor }}
-                    className={styles.card_status}
-                  />
-                </Card.Header>
-
-                <Card.Body className={styles.my_card_body} id={arr[index].id}>
-                  <Card.Text
-                    className={styles.my_card_text}
-                    id={arr[index].id}
-                    onClick={goToDriver}
-                  >
-                    {arr[index].problemStatement}
-                  </Card.Text>
-                </Card.Body>
-                <Card.Footer
-                  className={styles.card_footer}
-                  onClick={delDriver}
-                  id={arr[index].id}
-                >
-                  Delete
-                </Card.Footer>
-              </Card>
-            </div>
-          );
-        }
-      });
-    }
-  }
-
-  function tierTwoCards() {
-    const arr = [];
-    if (!driverTreeObj) {
-      return <div key="nuts2">Nuts</div>;
-    } else {
-      // for (let i = 0; i < 10; i++) {
-      //   let t = i+1; //the subtiers for the users start at 1 not 0
-      for (let i = 0; i < 10; i++) {
-        //needs a nested loop for those instances when the driverTreeObj is smaller than 10
-        // logic as follows:  insert a placeholder row, then check to see if there should be a card, if yes, pop that row and insert card
-        arr.push("skip");
-        for (let j = 0; j < driverTreeObj.length; j++) {
-          let t = i + 1; //the subtiers for the users start at 1 not 0
-          if (
-            driverTreeObj[j].tierLevel === 2 &&
-            driverTreeObj[j].subTier === t
-          ) {
-            arr[i] = driverTreeObj[j];
-          }
-        }
-      }
-
-      return arr.map((f, index) => {
-        if (arr[index] === "skip") {
-          return (
-            <div
-              className={styles.my_div}
-              data-tier={2}
-              data-subtier={index + 1}
-              id={"tier2subTier" + (index + 1)}
-              key={"driver" + index + 1}
-              onDragOver={allowDrop}
-              onDrop={drop}
-            ></div>
-          );
-        } else {
-          let dColor;
-          switch (arr[index].status) {
-            case "Green":
-              dColor = "#00ff00";
-              break;
-            case "Yellow":
-              dColor = "#ffff00";
-              break;
-            case "Red":
-              dColor = "#ff0000";
-              break;
-            default:
-          }
-          return (
-            <div
-              className={styles.my_div}
-              data-tier={2}
-              data-subtier={index + 1}
-              id={"tier2subTier" + (index + 1)}
-              key={"driver" + index + 1}
-              onDragOver={allowDrop}
-              onDrop={drop}
-            >
-              <Card
-                className={styles.my_card}
-                id={arr[index].id}
-                draggable="true"
-                onDragStart={drag}
-              >
-                <Card.Header className={styles.card_header}>
-                  <FontAwesomeIcon
-                    position="top"
-                    icon={faSquare}
-                  ></FontAwesomeIcon>
-                  <FontAwesomeIcon
-                    position="top"
-                    icon={faCircle}
-                    style={{ color: dColor }}
-                    className={styles.card_status}
-                  />
-                </Card.Header>
-
-                <Card.Body className={styles.my_card_body} id={arr[index].id}>
-                  <Card.Text
-                    className={styles.my_card_text}
-                    id={arr[index].id}
-                    onClick={goToDriver}
-                  >
-                    {arr[index].problemStatement}
-                  </Card.Text>
-                </Card.Body>
-                <Card.Footer className={styles.card_footer}>
-                  <Button
-                    className={styles.card_trash}
-                    onClick={delDriver}
-                    id={arr[index].id}
-                  ></Button>
-                </Card.Footer>
-              </Card>
-            </div>
-          );
-        }
-      });
-    }
-  }
-
-  function tierThreeCards() {
-    const arr = [];
-    if (!driverTreeObj) {
-      return <div key="nuts3">Nuts</div>;
-    } else {
-      // for (let i = 0; i < 10; i++) {
-      //   let t = i+1; //the subtiers for the users start at 1 not 0
-      for (let i = 0; i < 10; i++) {
-        //needs a nested loop for those instances when the driverTreeObj is smaller than 10
-        // logic as follows:  insert a placeholder row, then check to see if there should be a card, if yes, pop that row and insert card
-        arr.push("skip");
-        for (let j = 0; j < driverTreeObj.length; j++) {
-          let t = i + 1; //the subtiers for the users start at 1 not 0
-          if (
-            driverTreeObj[j].tierLevel === 3 &&
-            driverTreeObj[j].subTier === t
-          ) {
-            arr[i] = driverTreeObj[j];
-          }
-        }
-      }
-
-      return arr.map((f, index) => {
-        if (arr[index] === "skip") {
-          return (
-            <div
-              className={styles.my_div}
-              data-tier={3}
-              data-subtier={index + 1}
-              id={"tier3subTier" + (index + 1)}
-              key={"driver" + index + 1}
-              onDragOver={allowDrop}
-              onDrop={drop}
-            ></div>
-          );
-        } else {
-          let dColor;
-          switch (arr[index].status) {
-            case "Green":
-              dColor = "#00ff00";
-              break;
-            case "Yellow":
-              dColor = "#ffff00";
-              break;
-            case "Red":
-              dColor = "#ff0000";
-              break;
-            default:
-          }
-          return (
-            <div
-              className={styles.my_div}
-              data-tier={3}
-              data-subtier={index + 1}
-              id={"tier3subTier" + (index + 1)}
-              key={"driver" + index + 1}
-              onDragOver={allowDrop}
-              onDrop={drop}
-            >
-              <Card
-                className={styles.my_card}
-                id={arr[index].id}
-                draggable="true"
-                onDragStart={drag}
-              >
-                <Card.Header className={styles.card_header}>
-                  <FontAwesomeIcon
-                    position="top"
-                    icon={faSquare}
-                  ></FontAwesomeIcon>
-                  <FontAwesomeIcon
-                    position="top"
-                    icon={faCircle}
-                    style={{ color: dColor }}
-                    className={styles.card_status}
-                  />
-                </Card.Header>
-
-                <Card.Body className={styles.my_card_body} id={arr[index].id}>
-                  <Card.Text
-                    className={styles.my_card_text}
-                    id={arr[index].id}
-                    onClick={goToDriver}
-                  >
-                    {arr[index].problemStatement}
-                  </Card.Text>
-                </Card.Body>
-                <Card.Footer className={styles.card_footer}>
-                  <Button
-                    className={styles.card_trash}
-                    onClick={delDriver}
-                    id={arr[index].id}
-                  ></Button>
-                </Card.Footer>
-              </Card>
-            </div>
-          );
-        }
-      });
-    }
-  }
-
-  function tierFourCards() {
-    const arr = [];
-    if (!driverTreeObj) {
-      return <div key="nuts4">Nuts</div>;
-    } else {
-      // for (let i = 0; i < 10; i++) {
-      //   let t = i+1; //the subtiers for the users start at 1 not 0
-      for (let i = 0; i < 10; i++) {
-        //needs a nested loop for those instances when the driverTreeObj is smaller than 10
-        // logic as follows:  insert a placeholder row, then check to see if there should be a card, if yes, pop that row and insert card
-        arr.push("skip");
-        for (let j = 0; j < driverTreeObj.length; j++) {
-          let t = i + 1; //the subtiers for the users start at 1 not 0
-          if (
-            driverTreeObj[j].tierLevel === 4 &&
-            driverTreeObj[j].subTier === t
-          ) {
-            arr[i] = driverTreeObj[j];
-          }
-        }
-      }
-
-      return arr.map((f, index) => {
-        if (arr[index] === "skip") {
-          return (
-            <div
-              className={styles.my_div}
-              data-tier="4"
-              data-subtier={index + 1}
-              id={"tier4subTier" + (index + 1)}
-              key={"driver" + index + 1}
-              onDragOver={allowDrop}
-              onDrop={drop}
-            ></div>
-          );
-        } else {
-          let dColor;
-          switch (arr[index].status) {
-            case "Green":
-              dColor = "#00ff00";
-              break;
-            case "Yellow":
-              dColor = "#ffff00";
-              break;
-            case "Red":
-              dColor = "#ff0000";
-              break;
-            default:
-          }
-          return (
-            <div
-              className={styles.my_div}
-              data-tier="4"
-              data-subtier={index + 1}
-              id={"tier4subTier" + (index + 1)}
-              key={"driver" + index + 1}
-              onDragOver={allowDrop}
-              onDrop={drop}
-            >
-              <Card
-                className={styles.my_card}
-                id={arr[index].id}
-                draggable="true"
-                onDragStart={drag}
-              >
-                <Card.Header className={styles.card_header}>
-                  <FontAwesomeIcon
-                    position="top"
-                    icon={faSquare}
-                  ></FontAwesomeIcon>
-                  <FontAwesomeIcon
-                    position="top"
-                    icon={faCircle}
-                    style={{ color: dColor }}
-                    className={styles.card_status}
-                  />
-                </Card.Header>
-
-                <Card.Body className={styles.my_card_body} id={arr[index].id}>
-                  <Card.Text
-                    className={styles.my_card_text}
-                    id={arr[index].id}
-                    onClick={goToDriver}
-                  >
-                    {arr[index].problemStatement}
-                  </Card.Text>
-                </Card.Body>
-                <Card.Footer className={styles.card_footer}>
-                  <Button
-                    className={styles.card_trash}
-                    onClick={delDriver}
-                    id={arr[index].id}
-                  ></Button>
-                </Card.Footer>
-              </Card>
-            </div>
-          );
-        }
-      });
-    }
-  }
-
-  function tierFiveCards() {
-    const arr = [];
-    if (!driverTreeObj) {
-      return <div key="nuts5">Nuts</div>;
-    } else {
-      // for (let i = 0; i < 10; i++) {
-      //   let t = i+1; //the subtiers for the users start at 1 not 0
-      for (let i = 0; i < 10; i++) {
-        //needs a nested loop for those instances when the driverTreeObj is smaller than 10
-        // logic as follows:  insert a placeholder row, then check to see if there should be a card, if yes, pop that row and insert card
-        arr.push("skip");
-        for (let j = 0; j < driverTreeObj.length; j++) {
-          let t = i + 1; //the subtiers for the users start at 1 not 0
-          if (
-            driverTreeObj[j].tierLevel === 5 &&
-            driverTreeObj[j].subTier === t
-          ) {
-            arr[i] = driverTreeObj[j];
-          }
-        }
-      }
-
-      return arr.map((f, index) => {
-        if (arr[index] === "skip") {
-          return (
-            <div
-              className={styles.my_div}
-              data-tier="5"
-              data-subtier={index + 1}
-              id={"tier5subTier" + (index + 1)}
-              onDragOver={allowDrop}
-              onDrop={drop}
-            ></div>
-          );
-        } else {
-          let dColor;
-          switch (arr[index].status) {
-            case "Green":
-              dColor = "#00ff00";
-              break;
-            case "Yellow":
-              dColor = "#ffff00";
-              break;
-            case "Red":
-              dColor = "#ff0000";
-              break;
-            default:
-          }
-          return (
-            <div
-              className={styles.my_div}
-              data-tier="5"
-              data-subtier={index + 1}
-              id={"tier5subTier" + (index + 1)}
-              key={"driver" + index + 1}
-              onDragOver={allowDrop}
-              onDrop={drop}
-            >
-              <Card
-                className={styles.my_card}
-                id={arr[index].id}
-                draggable="true"
-                onDragStart={drag}
-              >
-                <Card.Header className={styles.card_header}>
-                  <FontAwesomeIcon
-                    position="top"
-                    icon={faSquare}
-                  ></FontAwesomeIcon>
-                  <FontAwesomeIcon
-                    position="top"
-                    icon={faCircle}
-                    style={{ color: dColor }}
-                    className={styles.card_status}
-                  />
-                </Card.Header>
-
-                <Card.Body className={styles.my_card_body} id={arr[index].id}>
-                  <Card.Text
-                    className={styles.my_card_text}
-                    id={arr[index].id}
-                    onClick={goToDriver}
-                  >
-                    {arr[index].problemStatement}
-                  </Card.Text>
-                </Card.Body>
-                <Card.Footer className={styles.card_footer}>
-                  <Button
-                    className={styles.card_trash}
-                    onClick={delDriver}
-                    id={arr[index].id}
-                  ></Button>
-                </Card.Footer>
-              </Card>
-            </div>
-          );
-        }
-      });
-    }
-  }
-
-  function allowDrop(e) {
-    //this property gets set on the individual divs onDragOver property to limit where a card can be dropped
-    e.preventDefault();
-  }
-
-  function drag(e) {
-    console.log("farg target: " + e.target.id);
-    e.dataTransfer.setData("text", e.target.id);
-  }
-
-  function drop(e) {
-    //on drop, sets the drivers new Tier and subTier as required.  The driver is then updated in the database so it will be placed in its new place on the next render
-    e.preventDefault();
-    var data = e.dataTransfer.getData("text");
-    e.target.appendChild(document.getElementById(data));
-    let body = {
-      tierLevel: e.target.dataset.tier,
-      subTier: e.target.dataset.subtier,
-    };
-    updateDriver(data, body);
-    window.location.reload(false);
-  }
-
-  function tierCards({ tier }, { driverTreeObj }) {
-    const arr = [];
-    if (!driverTreeObj) {
-      return <div></div>;
-    } else {
-      // for (let i = 0; i < 10; i++) {
-      //   let t = i+1; //the subtiers for the users start at 1 not 0
-      for (let i = 0; i < 10; i++) {
-        //needs a nested loop for those instances when the driverTreeObj is smaller than 10
-        // logic as follows:  insert a placeholder row, then check to see if there should be a card, if yes, pop that row and insert card
-        arr.push("skip");
-        for (let j = 0; j < driverTreeObj.length; j++) {
-          let t = i + 1; //the subtiers for the users start at 1 not 0
-          if (
-            driverTreeObj[j].tierLevel === tier &&
-            driverTreeObj[j].subTier === t
-          ) {
-            arr[i] = driverTreeObj[j];
-          }
-        }
-      }
-
-      return arr.map((f, index) => {
-        if (arr[index] === "skip") {
-          return (
-            <div
-              className={styles.my_div}
-              data-tier={tier}
-              data-subtier={index + 1}
-              id={"tier1subTier" + (index + 1)}
-              onDragOver={allowDrop}
-              onDrop={drop}
-            ></div>
-          );
-        } else {
-          let dColor;
-          switch (arr[index].status) {
-            case "Green":
-              dColor = "#00ff00";
-              break;
-            case "Yellow":
-              dColor = "#ffff00";
-              break;
-            case "Red":
-              dColor = "#ff0000";
-              break;
-            default:
-          }
-          return (
-            <div
-              className={styles.my_div}
-              data-tier={tier}
-              data-subtier={index + 1}
-              id={"tier1subTier" + (index + 1)}
-              onDragOver={allowDrop}
-              onDrop={drop}
-            >
-              <Card
-                className={styles.my_card}
-                id={arr[index].id}
-                draggable="true"
-                onDragStart={drag}
-              >
-                <Card.Header className={styles.card_header}>
-                  <FontAwesomeIcon
-                    position="top"
-                    icon={faSquare}
-                  ></FontAwesomeIcon>
-                  <FontAwesomeIcon
-                    position="top"
-                    icon={faCircle}
-                    style={{ color: dColor }}
-                    className={styles.card_status}
-                  />
-                </Card.Header>
-
-                <Card.Body className={styles.my_card_body} id={arr[index].id}>
-                  <Card.Text
-                    className={styles.my_card_text}
-                    id={arr[index].id}
-                    onClick={goToDriver}
-                  >
-                    {arr[index].problemStatement}
-                  </Card.Text>
-                </Card.Body>
-                <Card.Footer
-                  className={styles.card_footer}
-                  onClick={delDriver}
-                  id={arr[index].id}
-                >
-                  Delete
-                </Card.Footer>
-              </Card>
-            </div>
-          );
-        }
-      });
-    }
-  }
 
   return (
     <>
-      <div className={styles.driver_page} id="driver_parent" key='topleveldiv'>
+      <div className={styles.driver_page} id="driver_parent" key="topleveldiv">
+        <canvas id="arrows" width="100%" height= "100%"></canvas>
         <Container fluid className="justify-content-center">
           <Col className={styles.my_col}>
             <Row
@@ -832,6 +182,8 @@ const DriverTreePage = () => {
               {/* </Col> */}
             </Row>
 
+            <Button onClick={() => createArrow()}>Create Arrows</Button>
+
             <Row className={styles.outcome}>
               <Col className={styles.outcome}>
                 <Card className={styles.my_card} onClick={goToOutcome}>
@@ -840,124 +192,54 @@ const DriverTreePage = () => {
                     <Card.Text className={styles.my_card_text}>
                       {selOutcome.outcomeTitle}
                     </Card.Text>
+                    <Card.Footer className={styles.card_footer}></Card.Footer>
                   </Card.Body>
                 </Card>
               </Col>
 
-              <Col className={styles.driver} key="1">
-                <p>Tier 1 Drivers</p>
-                <Row
-                  style={{
-                    height: "700px",
-                    width: "100%",
-                  }}
-                  className="m-1"
-                  id="tier1Cards"
-                  key="tier1cards"
-                >
-                  {tierCards(tierOne, {driverTreeObj})}
-                </Row>
-                <Row style={{ height: "50px" }}>
-                  <Button
-                    className={styles.my_btn}
-                    onClick={newDriver}
-                    data-tier="1"
-                  >
-                    +
-                  </Button>
-                </Row>
-              </Col>
+              <DriverCards
+                tier={tierOne}
+                driverTreeObj={driverTreeObj}
+                selOutcome={selOutcome}
+                selDriver={selDriver}
+              />
 
-              <Col className={styles.driver}>
-                <p>Tier 2 Drivers</p>
-                <Row
-                  style={{ height: "700px", width: "100%" }}
-                  className="m-1"
-                  id="tier2Cards"
-                  key="tier2cards"
-                >
-                  {/* {tierTwoCards()} */}
-                  {tierCards(tierTwo, { driverTreeObj })}
-                </Row>
-                <Row style={{ height: "50px", padding: "1px" }}>
-                  <Button
-                    className={styles.my_btn}
-                    onClick={newDriver}
-                    data-tier="2"
-                  >
-                    +
-                  </Button>
-                </Row>
-              </Col>
+              <DriverCards
+                tier={tierTwo}
+                driverTreeObj={driverTreeObj}
+                selOutcome={selOutcome}
+                selDriver={selDriver}
+              />
 
-              <Col className={styles.driver}>
-                <p>Tier 3 Drivers</p>
-                <Row
-                  style={{ height: "700px", width: "100%" }}
-                  className="m-1"
-                  id="tier3Cards"
-                  key="tier3cards"
-                >
-                  {/* {tierThreeCards()} */}
-                  {tierCards(tierThree, { driverTreeObj })}
-                </Row>
-                <Row style={{ height: "50px" }}>
-                  <Button
-                    className={styles.my_btn}
-                    onClick={newDriver}
-                    data-tier="3"
-                  >
-                    +
-                  </Button>
-                </Row>
-              </Col>
+              <DriverCards
+                tier={tierThree}
+                driverTreeObj={driverTreeObj}
+                selOutcome={selOutcome}
+                selDriver={selDriver}
+              />
 
-              <Col className={styles.driver}>
-                <p>Tier 4 Drivers</p>
-                <Row
-                  style={{ height: "700px", width: "100%" }}
-                  className="m-1"
-                  id="tier4Cards"
-                  key="tier4cards"
-                >
-                  {/* {tierFourCards()} */}
-                  {tierCards(tierFour, { driverTreeObj })}
-                </Row>
-                <Row style={{ height: "50px" }}>
-                  <Button
-                    className={styles.my_btn}
-                    onClick={newDriver}
-                    data-tier="4"
-                  >
-                    +
-                  </Button>
-                </Row>
-              </Col>
+              <DriverCards
+                tier={tierFour}
+                driverTreeObj={driverTreeObj}
+                selOutcome={selOutcome}
+                selDriver={selDriver}
+              />
 
-              <Col className={styles.driver}>
-                <p>Tier 5 Drivers</p>
-                <Row
-                  style={{ height: "700px", width: "100%" }}
-                  className="m-1"
-                  id="tier5Cards"
-                  key="tier5cards"
-                >
-                  {/* {tierFiveCards()} */}
-                  {tierCards(tierFive, { driverTreeObj })}
-                </Row>
-                <Row style={{ height: "50px" }}>
-                  <Button
-                    className={styles.my_btn}
-                    onClick={newDriver}
-                    data-tier="5"
-                  >
-                    +
-                  </Button>
-                </Row>
-              </Col>
+              <DriverCards
+                tier={tierFive}
+                driverTreeObj={driverTreeObj}
+                selOutcome={selOutcome}
+                selDriver={selDriver}
+              />
 
-              <Col className="justify-content-center driver" sm={10} md={3} id='legend' key='legendColumn'>
-                <Row>
+              <Col
+                className="justify-content-center driver"
+                sm={10}
+                md={3}
+                id="legend"
+                key="legendColumn"
+              >
+                <Row style={{ height: "700px" }}>
                   <Legend stakeholders={selOutcome.legend} />
                 </Row>
               </Col>
