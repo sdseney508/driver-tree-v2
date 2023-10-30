@@ -24,6 +24,17 @@ const DriverTreePage = () => {
   const [selDrivers, setSelDrivers] = useState([]);
   const [selDriver, setSelDriver] = useState({});
   const [driverTreeObj, setDriverTreeObj] = useState([]);
+  const [selectedCards, setSelectedCards] = useState([]);
+  const [lineCoordinates, setLineCoordinates] = useState({
+    x1: 0,
+    y1: 0,
+    x2: 0,
+    y2: 0,
+    x3: 0,
+    y3: 0,
+    x4: 0,
+    y4: 0,
+  });
   //These are the initial states for the select boxes.  They are set to the first value in the array, which is the default value
 
   let location = useLocation();
@@ -137,19 +148,32 @@ const DriverTreePage = () => {
   const card1Pos = { x: 0, y: 0 };
   const card2Pos = { x: 100, y: 100 };
 
-  //this function draws an arrow between two selected cards.
-  const createArrow = () => {
-    const canvas = document.getElementById("arrows");
-    const ctx = canvas.getContext("2d");
+  // lineCoordinates.x1 = 50;
+  // lineCoordinates.y1 = 50;
 
-    ctx.moveTo(90, 130);
-    ctx.lineTo(95, 25);
-    ctx.lineTo(150, 80);
-    ctx.lineTo(205, 25);
-    ctx.lineTo(210, 130);
-    ctx.lineWidth = 15;
-    ctx.stroke();
-  };
+  // lineCoordinates.x4 = 400;
+  // lineCoordinates.y4 = 400;
+
+  // lineCoordinates.x2 = (lineCoordinates.x1 + lineCoordinates.x4) / 2;
+  // lineCoordinates.y2 = lineCoordinates.y1;
+  // lineCoordinates.x3 = lineCoordinates.x2;
+  // lineCoordinates.y3 = lineCoordinates.y4;
+
+  //this function draws an arrow between two selected cards.
+  // const createArrow = () => {
+  //   console.log("createArrow");
+  //   lineCoordinates.x1 = 50;
+  //   lineCoordinates.y1 = 50;
+
+  //   lineCoordinates.x4 = 400;
+  //   lineCoordinates.y4 = 400;
+
+  //   lineCoordinates.x2 = (lineCoordinates.x1 + lineCoordinates.x4) / 2;
+  //   lineCoordinates.y2 = lineCoordinates.y1;
+  //   lineCoordinates.x3 = lineCoordinates.x2;
+  //   lineCoordinates.y3 = lineCoordinates.y4;
+  //   console.log(lineCoordinates);
+  // };
 
   //creates new outcome and then resets the selOutcome state.  This cause a a useEffect fire and refreshes the page.
   const newOutcome = () => {
@@ -165,7 +189,6 @@ const DriverTreePage = () => {
   return (
     <>
       <div className={styles.driver_page} id="driver_parent" key="topleveldiv">
-        <canvas id="arrows" width="100%" height= "100%"></canvas>
         <Container fluid className="justify-content-center">
           <Col className={styles.my_col}>
             <Row
@@ -179,10 +202,17 @@ const DriverTreePage = () => {
               >
                 Create New Outcome
               </Button>
-              {/* </Col> */}
+              {/* <Button
+                className={styles.my_btn}
+                onClick={createArrow}
+                style={{ width: "200px", height: "50px" }}
+              >
+                Create Arrows
+              </Button> */}
+  
             </Row>
 
-            <Button onClick={() => createArrow()}>Create Arrows</Button>
+            <div></div>
 
             <Row className={styles.outcome}>
               <Col className={styles.outcome}>
@@ -203,7 +233,6 @@ const DriverTreePage = () => {
                 selOutcome={selOutcome}
                 selDriver={selDriver}
               />
-
               <DriverCards
                 tier={tierTwo}
                 driverTreeObj={driverTreeObj}

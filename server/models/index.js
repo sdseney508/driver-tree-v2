@@ -1,4 +1,5 @@
 const accountStatus = require('./accountStatus');
+const arrows = require('./arrows');
 const attachments = require('./attachments');
 const audit = require('./audit');
 const carousel = require('./carousel');
@@ -21,4 +22,4 @@ drivers.belongsTo(outcomes, {
     
 });
 
-module.exports = { accountStatus, attachments, audit, carousel, deliverables, drivers, outcomes, role, stakeholder, state, status, User };
+module.exports = { accountStatus, arrows, attachments, audit, carousel, deliverables, drivers, outcomes, role, stakeholder, state, status, User };

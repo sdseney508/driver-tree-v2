@@ -34,7 +34,7 @@ const DriverNavbar = () => {
     // console.log("location: " + location);
     // console.log("location.state: " + location.state)
     // console.log("selOutcome", selOutcome);
-    navigate("/driverTree/"+state.selOutcome.id);
+    navigate("/driverTree/"+outcomeID);
   };
 
   const adminAccountManage = () => {

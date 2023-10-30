@@ -131,7 +131,7 @@ const DriverCards = ({ tier, driverTreeObj, selOutcome, setSelOutcome }) => {
             >
               <Card
                 className={styles.my_card}
-                id={arr[index].id}
+                id={"card"+arr[index].id}
                 draggable="true"
                 onDragStart={drag}
               >

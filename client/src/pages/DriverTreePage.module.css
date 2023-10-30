@@ -71,13 +71,17 @@
 }
 
 .card_footer {
-  background-color: #f8f7f7;
+  background-color: #ffc0c0;
   border: none;
   font-size: 10px;
   padding: 0px;
   align-items: center;
   justify-content: center;
   text-align: center;
+}
+
+.card_footer:hover {
+  cursor: pointer;
 }
 
 .card_outcome {
