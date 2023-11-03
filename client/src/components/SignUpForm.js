@@ -51,7 +51,6 @@ const SignupForm = ({onModalSubmit}) => {
 
     //this is the function that is called when the form is submitted.  Please note, that since bcrypt is hashing the password, it will increase the password length well beyond the 14 character minimum and uses special characters so it will always pass the sequqlize validation.  If you are using bcrypt, you will need to use the regex below to validate the password.
   const handleFormSubmit = async (event) => {
-    debugger;
     event.preventDefault();
     if (userFormData.password !== userFormData.passVal) {
       setShowPassAlert(true);

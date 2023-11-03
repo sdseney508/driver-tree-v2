@@ -11,8 +11,6 @@ import "./button.css";
 
 const UserPage = () => {
   const [state, setState] = useContext(stateContext);
-  const [myWorkAlert, setMyWorkAlert] = useState(false);
-  const [myOL, setMyOL] = useState(false);
 
   const navigate = useNavigate();
 
@@ -61,26 +59,6 @@ const UserPage = () => {
         <div style={{ height: "100vh" }}>
           <UserCarousel />
         </div>
-
-        <Alert
-          dismissible
-          onClose={() => setMyWorkAlert(false)}
-          show={myWorkAlert}
-          variant="danger"
-        >
-          You dont have any Op Limits in Draft or Awaiting your signature.
-          Contact your Op Limit coordinator if you believe this to be an error.
-        </Alert>
-
-        <Alert
-          dismissible
-          onClose={() => setMyOL(false)}
-          show={myOL}
-          variant="danger"
-        >
-          You dont have any Op Limits assigned to you. Contact your Op Limit
-          coordinator if you believe this to be an error.
-        </Alert>
       </div>
     </>
   );

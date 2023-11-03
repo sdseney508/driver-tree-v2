@@ -17,19 +17,6 @@ stakeholder.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    stakeholderPOC: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    stakeholderEmail: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-      validate: {
-        isEmail: true,
-      },
-    },
-
   },
   {
     

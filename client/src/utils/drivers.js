@@ -23,6 +23,10 @@ const deleteDriver = (id) => {
   return axios.delete(apiURL + "/drivers/" + id);
 };
 
+const getCluster = (id, body) => {
+  return axios.get(apiURL + "/drivers/byOutcomeByTier/" + id, body);
+}
+
 const getDriver = (id) => { 
   return axios.get(apiURL + "/drivers/getOne/" + id);
 };
@@ -64,8 +68,16 @@ const getEmails = () => {
   return axios.get(apiURL + "/users/emails");
 };
 
+const getStakeholders = (id) => {
+  return axios.get(apiURL + "/stakeholders/"+id);
+}
+
 const getUsers = () => {
   return axios.get(apiURL + "/users");
+};
+
+const updateCluster = (id, body) => {
+  return axios.put(apiURL + "/drivers/clusterUpdate/" + id, body);
 };
 
 const updateDriver = (id, body) => {
@@ -84,6 +96,7 @@ export {
   createOutcome,
   deleteDriver,
   findUser,
+  getCluster,
   getCoords,
   getDraft,
   getDriver,
@@ -91,7 +104,9 @@ export {
   getDriverByOutcome,
   getEmails,
   getOutcome,
+  getStakeholders,
   getUsers,
+  updateCluster,
   updateDriver,
   updateOutcome
 };

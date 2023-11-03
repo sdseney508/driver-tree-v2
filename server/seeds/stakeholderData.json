@@ -1,18 +1,12 @@
 [
   {
-    "stakeholderName": "PEO (U&W)",
-    "stakeholderPOC":"CAPT Guerre",
-    "stakeholderEmail": "josh.guerre@hotmail.com"
+    "stakeholderName": "PEO (U&W)"
   },
   {
-    "stakeholderName": "PMA-262",
-    "stakeholderPOC":"CDR Monger",
-    "stakeholderEmail": "brad.monger@hotmail.com"
+    "stakeholderName": "PMA-262"
   },
   {
-    "stakeholderName": "OPNAV",
-    "stakeholderPOC":"N98",
-    "stakeholderEmail": "john.doe@hotmail.com"
+    "stakeholderName": "OPNAV"
   }
 
 ]

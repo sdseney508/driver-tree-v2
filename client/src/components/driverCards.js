@@ -4,11 +4,12 @@ import { Col, Card, Row, Button } from "react-bootstrap";
 import styles from "../pages/DriverTreePage.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle, faSquare } from "@fortawesome/free-solid-svg-icons";
-import { useNavigate, useLocation, useParams } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import {
   createDriver,
   deleteDriver,
   getOutcome,
+  updateCluster,
   updateDriver,
 } from "../utils/drivers";
 
@@ -19,8 +20,6 @@ const DriverCards = ({ tier, driverTreeObj, selOutcome, setSelOutcome }) => {
   //3.  It houses the drag and drop functionality for the cards.  this requires the use of the onDragOver, onDragStart, draggable, and onDrop properties in the divs and cards
   //The arrow function is contained in the arrows.js module.  It creates the arrows that connect the cards
 
-  console.log("driverTreeObj", driverTreeObj);
-  console.log("tier: ", tier.tier);
   let location = useLocation();
   let navigate = useNavigate();
 
@@ -30,8 +29,16 @@ const DriverCards = ({ tier, driverTreeObj, selOutcome, setSelOutcome }) => {
     e.preventDefault();
   }
 
+  function createCluster(e) {
+    //this function creates the cluster divs that go into the driver tree columns
+    e.preventDefault();
+
+    let body = { outcomeID: selOutcome.id, tierLevel: e.target.dataset.tier };
+    updateDriver(e.target.dataset.cardid, body);
+  }
+
   function drag(e) {
-    e.dataTransfer.setData("text", e.target.id);
+    e.dataTransfer.setData("text", e.target.dataset.cardid);
   }
 
   function drop(e) {
@@ -49,7 +56,6 @@ const DriverCards = ({ tier, driverTreeObj, selOutcome, setSelOutcome }) => {
 
   const delDriver = (e) => {
     e.preventDefault();
-    console.log(e.target.id);
     deleteDriver(e.target.id);
     getOutcome(selOutcome.id).then((data) => {
       setSelOutcome(data.data);
@@ -64,7 +70,6 @@ const DriverCards = ({ tier, driverTreeObj, selOutcome, setSelOutcome }) => {
   const newDriver = (e) => {
     e.preventDefault();
     let body = { outcomeID: selOutcome.id, tierLevel: e.target.dataset.tier };
-    console.log(body);
     createDriver(body);
     getOutcome(selOutcome.id).then((data) => {
       setSelOutcome(data.data);
@@ -72,16 +77,32 @@ const DriverCards = ({ tier, driverTreeObj, selOutcome, setSelOutcome }) => {
     window.location.reload(false);
   };
 
+  const deleteCluster = (e) => {
+    e.preventDefault();
+    let sures = window.confirm("Are you sure you want to delete this cluster?");
+    if (!sures) {return}
+    let body = { cluster: 0 };
+    updateCluster(e.target.dataset.cluster, body);
+    window.location.reload(false);
+  };
+
+  function tierButtons(tier) {
+    return (
+      <Button className={styles.my_btn} onClick={newDriver} data-tier={tier}>
+        +
+      </Button>
+    );
+  }
+
   function tierCards(tier, { driverTreeObj }) {
     const arr = [];
+    let clusterNumber;
     if (!driverTreeObj) {
       return <div></div>;
     } else {
-      // for (let i = 0; i < 10; i++) {
-      //   let t = i+1; //the subtiers for the users start at 1 not 0
-      for (let i = 0; i < 10; i++) {
-        //needs a nested loop for those instances when the driverTreeObj is smaller than 10
-        // logic as follows:  insert a placeholder row, then check to see if there should be a card, if yes, pop that row and insert card
+      for (let i = 0; i < 15; i++) {
+        //needs a nested loop for those instances when the driverTreeObj is smaller than 15
+        // logic as follows:  insert a placeholder row, then check to see if there should be a card or a cluster, if yes, pop that row and insert card
         arr.push("skip");
         for (let j = 0; j < driverTreeObj.length; j++) {
           let t = i + 1; //the subtiers for the users start at 1 not 0
@@ -106,7 +127,97 @@ const DriverCards = ({ tier, driverTreeObj, selOutcome, setSelOutcome }) => {
               onDrop={drop}
             ></div>
           );
-        } else {
+        } else if (
+          arr[index].cluster > 0 &&
+          arr[index].cluster !== clusterNumber
+        ) {
+          //check to see how large the cluster is, then create a div for each card in the cluster
+          //create a new array for each driver in the cluster then map the array to create the cards
+          clusterNumber = arr[index].cluster;
+          let clusterArr = [];
+          for (let j = index; j < arr.length; j++) {
+            if (arr[j].cluster === clusterNumber) {
+              clusterArr.push(arr[j]);
+              index++;
+            } else {
+              j = arr.length;
+              index++;
+            }
+          }
+
+          return (
+            <div
+              className={styles.my_cluster}
+              data-tier={tier}
+              data-subtier={index + 1}
+              data-clusterid={`tier${tier}cluster`+ index+1}
+              data-cluster={clusterNumber}
+              id={`tier${tier}subTier` + (index + 1)} //need to fix this
+              onDragOver={allowDrop}
+              onDrop={drop}
+              onClick={deleteCluster}
+            >
+              {clusterArr.map((f, ind) => {
+                let dColor;
+                switch (clusterArr[ind].status) {
+                  case "Green":
+                    dColor = "#00ff00";
+                    break;
+                  case "Yellow":
+                    dColor = "#ffff00";
+                    break;
+                  case "Red":
+                    dColor = "#ff0000";
+                    break;
+                  default:
+                }
+                return (
+                  <Card
+                    className={styles.my_card}
+                    id={"card" + clusterArr[ind].id}
+                    data-cardid={clusterArr[ind].id}
+                    draggable="true"
+                    onDragStart={drag}
+                  >
+                    <Card.Header className={styles.card_header}>
+                      <div className={styles.my_card_abb}>
+                        {clusterArr[ind].stakeholderAbbreviation
+                          ? clusterArr[ind].stakeholderAbbreviation
+                          : "-"}
+                      </div>
+                      <FontAwesomeIcon
+                        position="top"
+                        icon={faCircle}
+                        style={{ color: dColor }}
+                        className={styles.card_status}
+                      />
+                    </Card.Header>
+
+                    <Card.Body
+                      className={styles.my_card_body}
+                      id={clusterArr[ind].id}
+                    >
+                      <Card.Text
+                        className={styles.my_card_text}
+                        id={clusterArr[ind].id}
+                        onClick={goToDriver}
+                      >
+                        {clusterArr[ind].problemStatement}
+                      </Card.Text>
+                    </Card.Body>
+                    <Card.Footer
+                      className={styles.card_footer}
+                      onClick={delDriver}
+                      id={clusterArr[ind].id}
+                    >
+                      Delete
+                    </Card.Footer>
+                  </Card>
+                );
+              })}
+            </div>
+          );
+        } else if (arr[index].cluster !== clusterNumber) {
           let dColor;
           switch (arr[index].status) {
             case "Green":
@@ -131,15 +242,17 @@ const DriverCards = ({ tier, driverTreeObj, selOutcome, setSelOutcome }) => {
             >
               <Card
                 className={styles.my_card}
-                id={"card"+arr[index].id}
+                id={"card" + arr[index].id}
+                data-cardid={arr[index].id}
                 draggable="true"
                 onDragStart={drag}
               >
                 <Card.Header className={styles.card_header}>
-                  <FontAwesomeIcon
-                    position="top"
-                    icon={faSquare}
-                  ></FontAwesomeIcon>
+                  <div className={styles.my_card_abb}>
+                    {arr[index].stakeholderAbbreviation
+                      ? arr[index].stakeholderAbbreviation
+                      : "-"}
+                  </div>
                   <FontAwesomeIcon
                     position="top"
                     icon={faCircle}
@@ -178,20 +291,16 @@ const DriverCards = ({ tier, driverTreeObj, selOutcome, setSelOutcome }) => {
         <p>{`Tier ${tier.tier} Drivers`}</p>
         <Row
           style={{
-            height: "700px",
+            height: "750px",
             width: "100%",
           }}
-          className="m-1"
           id={`tier${tier.tier}Cards`}
           key={`tier${tier.tier}Cards`}
+          className={styles.my_row}
         >
           {tierCards(tier.tier, { driverTreeObj })}
         </Row>
-        <Row style={{ height: "50px" }}>
-          <Button className={styles.my_btn} onClick={newDriver} data-tier="1">
-            +
-          </Button>
-        </Row>
+        <Row style={{ height: "50px" }}>{tierButtons(tier.tier)}</Row>
       </Col>
     </>
   );

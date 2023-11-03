@@ -286,6 +286,32 @@ const DriverPage = () => {
                       onBlur={handleFormSubmit}
                     />
                   </Form.Group>
+                  <Row
+                  className={styles.abbrev_row}>
+
+                  <Form.Group>
+                    <Form.Label>Stakeholder</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      value={selDriver.stakeholders || ""}
+                      style={{ width: "30%" }}
+                      //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                      name="stakeholders"
+                      onChange={handleInputChange}
+                      onBlur={handleFormSubmit}
+                      />
+                        <Form.Label>Abbreviation</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      value={selDriver.stakeholderAbbreviation || ""}
+                      style={{ width: "30%" }}
+                      //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                      name="stakeholderAbbreviation"
+                      onChange={handleInputChange}
+                      onBlur={handleFormSubmit}
+                      />
+                  </Form.Group>
+                                        </Row>
                 </Col>
                 <Col className={styles.my_col}>
                   <Form.Group>

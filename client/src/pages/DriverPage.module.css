@@ -14,7 +14,13 @@
 
 }
 
-
+.abbrev_row{
+   display: flex;
+   flex-direction: row;
+   width: 100%;
+   justify-content: center;
+   align-items: center;
+}
 .my_col {
    display: flex;
    flex-direction: column;

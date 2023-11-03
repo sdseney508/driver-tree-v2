@@ -66,11 +66,6 @@ outcomes.init(
             allowNull: true,
         },
 
-        stakeholders: {  
-            type: DataTypes.TEXT,
-            allowNull: true,
-        },
-
             //TODO:  make this a JSON so we can turn it into a bullet selected list
         relatedEfforts: {
             type: DataTypes.STRING,

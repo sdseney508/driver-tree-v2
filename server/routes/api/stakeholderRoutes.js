@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const { User } = require("../../models");
+const { stakeholder } = require("../../models");
 const { signToken } = require("../../utils/auth");
 
 //import middleware
@@ -24,13 +24,13 @@ router.get("/stakeholderByID/:id", async (req, res) => {
 //get all stakeholders
 router.get("/", async (req, res) => {
   try {
-    const userData = await User.findByPk(req.id);
+    const stakeholderData = await stakeholder.findByPk(req.id);
     if (!userData) {
       return res
         .status(400)
         .json({ message: "Cannot find a user with this id!" });
     }
-    res.status(200).send(userData);
+    res.status(200).send(stakeholderData);
   } catch (err) {
     console.log(err);
     res.status(500).send(err);
@@ -41,10 +41,10 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const stakeholderData = await stakeholder.create(req.body);
-    if (!User) {
+    if (!stakeholderData) {
       return res.status(400).json({ message: "Something went wrong!" });
     }
-    res.status(200).json({ token, userData });
+    res.status(200).json(stakeholderData);
   } catch (err) {
     console.log(err);
     res.status(400).json(err);
@@ -61,7 +61,7 @@ router.put("/:id", async (req, res) => {
     } else {
       await stakeholder.findByPk(req.params.id).then((results) => {results.update(req.body)})
     }
-    res.status(200).json(userData);
+    res.status(200).json(stakeholderData);
   } catch (err) {
     console.log(err);
     res.status(400).json(err);

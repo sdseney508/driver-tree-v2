@@ -2,11 +2,12 @@
 import React, { useState, useContext, useEffect } from "react";
 // import Select from "react-select";
 import { stateContext } from "../App";
-import { Container, Row, Col, Button, Card } from "react-bootstrap";
+import { Container, Row, Col, Button, Card, Modal } from "react-bootstrap";
 import {
   createOutcome,
   getOutcome,
   getDriverByOutcome,
+  getStakeholders,
 } from "../utils/drivers";
 import { useNavigate, useLocation } from "react-router";
 import { useParams } from "react-router";
@@ -15,26 +16,20 @@ import Legend from "../components/legend";
 import { getUser, loggedIn, getToken } from "../utils/auth";
 import styles from "./DriverTreePage.module.css";
 import OutcomeTable from "../components/OutcomeTable";
+import ClusterModal from "../components/ClusterModal";
 
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form
 
 const DriverTreePage = () => {
   const [state, setState] = useContext(stateContext);
+  const [showClusterModal, setClusterModal] = useState(false);
   const [selOutcome, setSelOutcome] = useState({});
   const [selDrivers, setSelDrivers] = useState([]);
   const [selDriver, setSelDriver] = useState({});
   const [driverTreeObj, setDriverTreeObj] = useState([]);
   const [selectedCards, setSelectedCards] = useState([]);
-  const [lineCoordinates, setLineCoordinates] = useState({
-    x1: 0,
-    y1: 0,
-    x2: 0,
-    y2: 0,
-    x3: 0,
-    y3: 0,
-    x4: 0,
-    y4: 0,
-  });
+  const [stakeholders, setStakeholders] = useState([]);
+
   //These are the initial states for the select boxes.  They are set to the first value in the array, which is the default value
 
   let location = useLocation();
@@ -117,9 +112,17 @@ const DriverTreePage = () => {
       });
     };
 
+    // const getStakeholderData = async (outcomeID) => {
+    //   await getStakeholders(outcomeID).then((data) => {
+    //     console.log(data.data);
+    //     setStakeholders(data.data);
+    //   });
+    // };
+
     getUserData();
     getOutcomeData();
     getDriversData();
+    // getStakeholderData();
     setState({ ...state, selOutcome: selOutcome });
     //this one gets the initial draftOL for the form
   }, []);
@@ -145,36 +148,6 @@ const DriverTreePage = () => {
     navigate("/drivertree/" + selOutcome.id);
   }, [selOutcome]);
 
-  const card1Pos = { x: 0, y: 0 };
-  const card2Pos = { x: 100, y: 100 };
-
-  // lineCoordinates.x1 = 50;
-  // lineCoordinates.y1 = 50;
-
-  // lineCoordinates.x4 = 400;
-  // lineCoordinates.y4 = 400;
-
-  // lineCoordinates.x2 = (lineCoordinates.x1 + lineCoordinates.x4) / 2;
-  // lineCoordinates.y2 = lineCoordinates.y1;
-  // lineCoordinates.x3 = lineCoordinates.x2;
-  // lineCoordinates.y3 = lineCoordinates.y4;
-
-  //this function draws an arrow between two selected cards.
-  // const createArrow = () => {
-  //   console.log("createArrow");
-  //   lineCoordinates.x1 = 50;
-  //   lineCoordinates.y1 = 50;
-
-  //   lineCoordinates.x4 = 400;
-  //   lineCoordinates.y4 = 400;
-
-  //   lineCoordinates.x2 = (lineCoordinates.x1 + lineCoordinates.x4) / 2;
-  //   lineCoordinates.y2 = lineCoordinates.y1;
-  //   lineCoordinates.x3 = lineCoordinates.x2;
-  //   lineCoordinates.y3 = lineCoordinates.y4;
-  //   console.log(lineCoordinates);
-  // };
-
   //creates new outcome and then resets the selOutcome state.  This cause a a useEffect fire and refreshes the page.
   const newOutcome = () => {
     createOutcome().then((data) => {
@@ -184,6 +157,16 @@ const DriverTreePage = () => {
 
   const goToOutcome = async (e) => {
     navigate("/allOutcomes/" + selOutcome.id);
+  };
+
+  const onModalSubmit = (e) => {
+    e.preventDefault();
+    handleClose();
+  };
+
+  //close the modal
+  const handleClose = () => {
+    setClusterModal(false);
   };
 
   return (
@@ -197,34 +180,47 @@ const DriverTreePage = () => {
             >
               <Button
                 className={styles.my_btn}
-                style={{ width: "200px", height: "50px" }}
+                style={{ width: "150px", height: "30px", margin: "10px" }}
                 onClick={newOutcome}
               >
-                Create New Outcome
+                New Outcome
               </Button>
-              {/* <Button
+              <Button
                 className={styles.my_btn}
-                onClick={createArrow}
-                style={{ width: "200px", height: "50px" }}
+                onClick={() => setClusterModal(true)}
+                style={{ width: "150px", height: "30px", margin: "10px" }}
               >
-                Create Arrows
-              </Button> */}
-  
+                Create Cluster
+              </Button>
             </Row>
 
             <div></div>
 
             <Row className={styles.outcome}>
-              <Col className={styles.outcome}>
-                <Card className={styles.my_card} onClick={goToOutcome}>
-                  <Card.Body className={styles.my_card_body}>
+              <Col className={styles.driver} key="0">
+                <p>Tier 0</p>
+                <Row
+                  style={{
+                    height: "800px",
+                    width: "100%",
+                  }}
+                  className="m-1"
+                  id="outcomeColumn"
+                  key="outcomeColumn1"
+                >
+                  <Card className={styles.my_card} onClick={goToOutcome}>
                     <Card.Header className={styles.card_header}></Card.Header>
-                    <Card.Text className={styles.my_card_text}>
-                      {selOutcome.outcomeTitle}
-                    </Card.Text>
+                    <Card.Body className={styles.my_card_body}>
+                      <Card.Text className={styles.my_card_text}>
+                        {selOutcome.outcomeTitle}
+                      </Card.Text>
+                    </Card.Body>
                     <Card.Footer className={styles.card_footer}></Card.Footer>
-                  </Card.Body>
-                </Card>
+                  </Card>
+                  <Row style={{ height: "700px" }}>
+                    <Legend driverTreeObj={driverTreeObj} />
+                  </Row>
+                </Row>
               </Col>
 
               <DriverCards
@@ -232,12 +228,14 @@ const DriverTreePage = () => {
                 driverTreeObj={driverTreeObj}
                 selOutcome={selOutcome}
                 selDriver={selDriver}
+                setSelOutcome={setSelOutcome}
               />
               <DriverCards
                 tier={tierTwo}
                 driverTreeObj={driverTreeObj}
                 selOutcome={selOutcome}
                 selDriver={selDriver}
+                setSelOutcome={setSelOutcome}
               />
 
               <DriverCards
@@ -245,6 +243,7 @@ const DriverTreePage = () => {
                 driverTreeObj={driverTreeObj}
                 selOutcome={selOutcome}
                 selDriver={selDriver}
+                setSelOutcome={setSelOutcome}
               />
 
               <DriverCards
@@ -252,6 +251,7 @@ const DriverTreePage = () => {
                 driverTreeObj={driverTreeObj}
                 selOutcome={selOutcome}
                 selDriver={selDriver}
+                setSelOutcome={setSelOutcome}
               />
 
               <DriverCards
@@ -259,9 +259,10 @@ const DriverTreePage = () => {
                 driverTreeObj={driverTreeObj}
                 selOutcome={selOutcome}
                 selDriver={selDriver}
+                setSelOutcome={setSelOutcome}
               />
 
-              <Col
+              {/* <Col
                 className="justify-content-center driver"
                 sm={10}
                 md={3}
@@ -271,7 +272,7 @@ const DriverTreePage = () => {
                 <Row style={{ height: "700px" }}>
                   <Legend stakeholders={selOutcome.legend} />
                 </Row>
-              </Col>
+              </Col> */}
             </Row>
 
             <Row style={{ height: "250px" }}>
@@ -285,6 +286,36 @@ const DriverTreePage = () => {
           </Col>
         </Container>
       </div>
+
+      <Modal
+        name="clusterModal"
+        show={showClusterModal}
+        size="lg"
+        aria-labelledby="contained-modal-title-vcenter"
+        centered
+        backdrop="static"
+        keyboard={false}
+        onHide={() => setClusterModal(false)}
+        // className={styles.cluster_modal}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title id="cluster-modal">Create Cluster</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {/*change everything in the signup form components*/}
+          <ClusterModal
+            onModalSubmit={onModalSubmit}
+            selDriver={selDriver}
+            setSelDriver={setSelDriver}
+            selOutcome={selOutcome}
+            setSelOutcome={setSelOutcome}
+            driverTreeObj={driverTreeObj}
+          />
+          <Button variant="secondary" onClick={handleClose}>
+            Close
+          </Button>
+        </Modal.Body>
+      </Modal>
     </>
   );
 };

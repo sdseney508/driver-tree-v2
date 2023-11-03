@@ -1,28 +1,48 @@
 .driver_page {
+  display: flex;
+  background-color: white;
+  font-weight: bold;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.cluster_modal {
+  display: flex;
+  color: blue;
+  flex-direction: column;
   background-color: white;
   font-weight: bold;
   align-items: center;
   justify-content: center;
-}
-.my_col {
-  position: relative !important;
+  width: 750px;
+  height: auto;
 }
 
 .my_div {
-  width: 100%;
-  height: 70px;
+  width: 97%;
+  height: 50px;
   display: flex;
+}
+
+.my_cluster {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #0f0e0e;
+  align-items: flex-start;
+  align-content: flex-start;
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
 
 .my_row {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  width: 90%;
-  justify-content: center;
-  align-items: center;
-  margin: 0.25rem;
-  min-height: 10vh;
+  width: 100%;
+  justify-content: flex-start;
+  align-items: flex-start;
+  align-content: flex-start;
 }
 
 .welcome_btn {
@@ -41,11 +61,16 @@
   position: relative;
   display: inline-flex;
   background-color: #f8f7f7;
-  /* color: rgb(0, 0, 0); */
   font-size: 0.75em;
-  height: 70px;
+  height: 50px;
   width: 100%;
-  padding: 0px;
+}
+
+.my_card_abb {
+  position: relative;
+  top: 0;
+  left: 1;
+  font: size 0.75em;
 }
 
 .my_card_body {
@@ -54,10 +79,8 @@
 
 .card_status {
   position: absolute;
-  position: absolute;
   top: 0;
   right: 0;
-  z-index: 1;
   width: 12px !important;
   height: 12px !important;
 }
@@ -65,9 +88,8 @@
 .card_header {
   background-color: #f8f7f7;
   border: none;
+  padding: 0px;
   font-size: 8px;
-  padding: 1px;
-  margin: 3px;
 }
 
 .card_footer {
@@ -120,8 +142,8 @@
   background-color: white;
   color: rgb(0, 0, 0);
   font-weight: normal;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-start;
+  align-items: flex-start;
 }
 
 .driver {
@@ -130,11 +152,10 @@
   background-color: white;
   color: rgb(0, 0, 0);
   font-weight: normal;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
-  padding-bottom: 5px;
-  /* text-align: center; */
 }
+
 
 @media (max-width: 768px) {
   .rowstyle {

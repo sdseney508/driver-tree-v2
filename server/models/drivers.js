@@ -40,6 +40,12 @@ drivers.init(
             allowNull: true,
         },
 
+        cluster: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            defaultValue: 0,
+        },
+
         //todo:  make this into a JSON for an indentured list of progress
         progress: {
             type: DataTypes.TEXT,
@@ -66,18 +72,10 @@ drivers.init(
             allowNull: true,
             defaultValue: 'Draft Outcomes For Demo',
         },
-        //todo: make this fed by the stakeholder table
-        stakeholders: {
-            type: DataTypes.TEXT,
-            allowNull: true,
-            defaultValue: 'Draft Stakeholders For Demo',
-        },
 
-        //todo: make this fed by the stakeholder table
         supportedCommanders: {
             type: DataTypes.TEXT,
             allowNull: true,
-            defaultValue: 'Draft Stakeholders For Demo',
         },
 
         status: {
@@ -90,6 +88,15 @@ drivers.init(
             allowNull: false,
             defaultValue: 'Draft',
         },
+        stakeholders: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        stakeholderAbbreviation: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+
         outcomeID: {
             type: DataTypes.INTEGER,
             allowNull: false,

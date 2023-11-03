@@ -1,0 +1,15 @@
+.modal_h {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dropdown-menu {
+  --bs-dropdown-bg: #23262e;
+  --bs-dropdown-border-color: #23262e;
+  --bs-dropdown-link-hover-color: #fff;
+}
+
+.nav_link {
+  width: auto;
+}

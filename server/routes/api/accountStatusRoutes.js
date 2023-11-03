@@ -5,9 +5,8 @@ const { accountStatus } = require('../../models');
 //create a status.  This should almost never be used
 router.post('/', async (req, res) => {
   try {
-    console.log(req.body);
     const accountStatusData = await accountStatus.create(req.body);
-
+    res.status(200).json(accountStatusData);
   } catch (err) {
     console.log(err);
     res.status(400).json(err);
@@ -18,7 +17,6 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
     try {
         const accountStatusData = await accountStatus.findAll();
-        console.log(accountStatusData);
         res.status(200).json({accountStatusData});
     } catch (err) {
         console.log(err);

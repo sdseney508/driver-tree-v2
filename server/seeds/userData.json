@@ -21,7 +21,7 @@
     "email": "shannonseney508@gmail.com",
     "password": "P@assword12345",
     "userstatus": "Active",
-    "userRole": "Stakeholder"
+    "userRole": "User"
   },
   {
     "firstName": "Josh",
@@ -29,7 +29,7 @@
     "email": "josh.guerre@gmail.com",
     "password": "P@assword12345",
     "userstatus": "Active",
-    "userRole": "Stakeholder"
+    "userRole": "User"
   }
   ,
  
