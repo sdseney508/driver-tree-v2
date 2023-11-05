@@ -2,9 +2,7 @@ import React, {
   useState,
   useRef,
   useEffect,
-  useMemo,
-  useCallback,
-  useContext,
+  useMemo
 } from "react";
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
 import {
@@ -30,6 +28,7 @@ function DriverTable({ selDriver, setSelDriver, selOutcome, setSelOutcome }) {
   useEffect(() => {
     const fetchData = async () => {
       await getDriverByOutcome(selOutcome.id).then((data) => {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         rowD = data.data;
       });
       setRowData(rowD);
@@ -98,9 +97,9 @@ function DriverTable({ selDriver, setSelDriver, selOutcome, setSelOutcome }) {
   ]);
 
   // DefaultColDef sets props common to all Columns
-  const defaultColDef = useMemo(() => ({
+  const defaultColDef = {
     sortable: true,
-  }));
+  };
 
   // sets a listener on the grid to detect when a row is selected.  From there,
   //it executes a fetch request back to the driver table

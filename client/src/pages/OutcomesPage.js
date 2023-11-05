@@ -61,6 +61,7 @@ const OutcomesPage = () => {
 
     const getOutcomeData = async () => {
       if (!outcomeID) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps, no-const-assign
         outcomeID = 1;
       }
       await getOutcome(outcomeID).then((data) => {
@@ -92,6 +93,7 @@ const OutcomesPage = () => {
     getDrivers();
     setState({ ...state, selOutcome: selOutcome });
     navigate("/allOutcomes/" + selOutcome.id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome]);
 
   //this function gets everyone with an assigened role and sets the state for the drop down lists

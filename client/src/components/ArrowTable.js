@@ -14,16 +14,21 @@ function ArrowTable({ selDriver, setSelDriver, selOutcome, setSelOutcome, select
   const [rowData, setRowData] = useState([]); // Set rowData to Array of Objects
   //for the additional modal for using cluser or driver:
   const [show, setShow] = useState(false);
+
   const handleClose = () => {
     setShow(false);
   };
 
+  //this just sets whether to connect to the driver or cluster 
   const handleSelect = (e) => {
-
+    if (e.target.id === "driver" && selectedElements.length === 1) {
+      selectedElements[0].cluster = 0;
+    } else if (e.target.id === "driver" && selectedElements.length ===2) {
+      selectedElements[1].cluster = 0;
+    }
     setShow(false);
   };
 
-  const handleShow = (e) => setShow(true);
   let rowD = [];
   const gridRef = useRef(); // Optional - for accessing Grid's API
 
@@ -31,6 +36,7 @@ function ArrowTable({ selDriver, setSelDriver, selOutcome, setSelOutcome, select
   useEffect(() => {
     const fetchData = async () => {
       await getDriverByOutcome(selOutcome.id).then((data) => {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         rowD = data.data;
       });
       await getOutcome(selOutcome.id).then((data) => {
@@ -89,23 +95,6 @@ function ArrowTable({ selDriver, setSelDriver, selOutcome, setSelOutcome, select
 
   }));
 
-  const gridOptions = {
-    columnDefs: columnDefs,
-    defaultColDef: {
-      sortable: true,
-    },
-  }
-
-  function sortByTierThenSubTier() {
-    gridOptions.columnApi.applyColumnState({
-      state: [
-        { colId: 'tierLevel', sort: 'asc', sortIndex: 0 },
-        { colId: 'subTier', sort: 'asc', sortIndex: 1 },
-      ],
-      defaultState: { sort: null },
-    });};
-  
-
   // sets a listener on the grid to detect when a row is selected.  From there,
   //it sets the state of selectedDrivers that can be used to create the cluster when the create cluster button is selected
   function onRowSelected(event) {
@@ -145,16 +134,16 @@ function ArrowTable({ selDriver, setSelDriver, selOutcome, setSelOutcome, select
         </div>
       </div>
 
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} size="sm">
         <Modal.Header closeButton>
-          <Modal.Title>Modal heading</Modal.Title>
+          <Modal.Title></Modal.Title>
         </Modal.Header>
-        <Modal.Body>Woohoo, you are reading this text in a modal!</Modal.Body>
+        <Modal.Body style={{textAlign: "center"}}>Coonect to:</Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" id="driver" onClick={handleSelect}>
+          <Button variant="secondary" id="driver" onClick={handleSelect} style={{position: "absolute", left: '25px'}}>
             Driver
           </Button>
-          <Button variant="primary" id="cluster" onClick={handleSelect}>
+          <Button variant="primary" id="cluster" onClick={handleSelect} tyle={{position: "absolute", right: '25px'}}>
             Cluster
           </Button>
         </Modal.Footer>

@@ -1,24 +1,21 @@
 //page for viewing and updating op limits
 import React, { useState, useContext, useEffect } from "react";
-import Xarrow, { useXarrow, Xwrapper } from "react-xarrows"; //for the arrows
 import { stateContext } from "../App";
-import { Container, Row, Col, Button, Card, Modal } from "react-bootstrap";
+import { Container, Row, Col, Button, Modal } from "react-bootstrap";
 import {
   createOutcome,
   getOutcome,
   getDriverByOutcome,
 } from "../utils/drivers";
 import { getArrows } from "../utils/arrows";
-import { useNavigate, useLocation } from "react-router";
+import { useNavigate } from "react-router";
 import { useParams } from "react-router"; //to store state in the URL
 import DriverCards from "../components/driverCards";
-import Legend from "../components/legend";
 import { getUser, loggedIn, getToken } from "../utils/auth";
 import styles from "./DriverTreePage.module.css";
 import OutcomeTable from "../components/OutcomeTable";
 import ClusterModal from "../components/ClusterModal";
 import ArrowModal from "../components/ArrowModal";
-import DriverArrows from "../components/DrawArrows";
 import ModArrows from "../components/ModArrows";
 
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form
@@ -31,41 +28,15 @@ const DriverTreePage = () => {
   const [showArrowModal, setArrowModal] = useState(false);
   const [showArrowMod, setArrowMod] = useState(false);
   const [selOutcome, setSelOutcome] = useState({});
-  const [selDrivers, setSelDrivers] = useState([]);
   const [selDriver, setSelDriver] = useState({});
   const [driverTreeObj, setDriverTreeObj] = useState([]);
-  const [selectedCards, setSelectedCards] = useState([]);
-  const [stakeholders, setStakeholders] = useState([]);
+
 
   const { outcomeID } = useParams();
 
   //These are the initial states for the select boxes.  They are set to the first value in the array, which is the default value
 
-  let location = useLocation();
   let navigate = useNavigate();
-
-  //grabs the outcomeID from the URL; allows someone to email someone a direct link to a specific driver tree.
-  //TODO:  Make it so that this pops an error if someone doesnt have access to that specific Outcome's Driver Tree
-
-  // let tierOne = {
-  //   tier: 1,
-  // };
-
-  // let tierTwo = {
-  //   tier: 2,
-  // };
-
-  // let tierThree = {
-  //   tier: 3,
-  // };
-
-  // let tierFour = {
-  //   tier: 4,
-  // };
-
-  // let tierFive = {
-  //   tier: 5,
-  // };
 
   //using the initial useEffect hook to open up the driver trees and prefill the table at the bottom of the page
   useEffect(() => {
@@ -105,6 +76,7 @@ const DriverTreePage = () => {
       //TODO:
       //in here for error handling only; this needs to be updated and removed
       if (!outcomeID) {
+        // eslint-disable-next-line no-const-assign, react-hooks/exhaustive-deps
         outcomeID = 1;
       }
       await getOutcome(outcomeID).then((data) => {
@@ -133,12 +105,9 @@ const DriverTreePage = () => {
 
   //this useeffect is there to refresh the driver tree elements whenever the selOutcome state is changed.
   useEffect(() => {
-    let dtree;
     const getDriversData = async () => {
       await getDriverByOutcome(selOutcome.id).then((data) => {
-        setSelDrivers(data.data);
-        dtree = data.data;
-        setDriverTreeObj(dtree);
+        setDriverTreeObj(data.data);
       });
     };
     const getArrowsData = async () => {
@@ -152,6 +121,7 @@ const DriverTreePage = () => {
     setState({ ...state, selOutcome: selOutcome });
 
     navigate("/drivertree/" + selOutcome.id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome]);
 
   //creates new outcome and then resets the selOutcome state.  This cause a a useEffect fire and refreshes the page.
@@ -159,11 +129,6 @@ const DriverTreePage = () => {
     createOutcome().then((data) => {
       setSelOutcome(data.data);
     });
-  };
-
-  //navigate to the outcome page
-  const goToOutcome = async (e) => {
-    navigate("/allOutcomes/" + selOutcome.id);
   };
 
   //used to handle the submit of the modals for clusters and arrows
@@ -176,30 +141,7 @@ const DriverTreePage = () => {
   const handleClose = () => {
     setClusterModal(false);
     setArrowModal(false);
-  };
-
-  const myArrow = (array) => {
-    return array.map((f, index) => {
-      return (<div>
-        <Xarrow
-          start={array[index].start}
-          color={array[index].color}
-          end={array[index].end}
-          path={array[index].path}
-          startAnchor={array[index].startAnchor}
-          endAnchor={array[index].endAnchor}
-          strokeWidth={array[index].strokeWidth}
-          headSize={array[index].headSize}
-          gridBreak={array[index].gridBreak}
-          showTail={array[index].showTail}
-          showHead={array[index].showHead}
-          dashness={array[index].dashness}
-          arrowBodyProps={array[index].arrowBodyProps}
-          passProps={array[index].arrowBodyProps}
-          id={array[index].id}
-        />
-      </div>)
-  });
+    setArrowMod(false);
   };
 
   return (
@@ -236,38 +178,12 @@ const DriverTreePage = () => {
             </Row>
 
             <Row className={styles.outcome}>
-              {/* <Col className={styles.driver} key="0">
-                <p>Tier 0</p>
-                <Row
-                  style={{
-                    height: "800px",
-                    width: "100%",
-                  }}
-                  className="m-1"
-                  id="outcomeColumn"
-                  key="outcomeColumn1"
-                >
-                  <Card className={styles.my_card} onClick={goToOutcome} id={`outcomeID${selOutcome.id}`}>
-                    <Card.Header className={styles.card_header}></Card.Header>
-                    <Card.Body className={styles.my_card_body}>
-                      <Card.Text className={styles.my_card_text}>
-                        {selOutcome.outcomeTitle}
-                      </Card.Text>
-                    </Card.Body>
-                    <Card.Footer className={styles.card_footer}></Card.Footer>
-                  </Card>
-                  <Row style={{ height: "700px" }}>
-                    <Legend driverTreeObj={driverTreeObj} />
-                  </Row>
-                </Row>
-              </Col> */}
-
               <DriverCards
                 driverTreeObj={driverTreeObj}
                 selOutcome={selOutcome}
-                selDriver={selDriver}
                 setSelOutcome={setSelOutcome}
                 arrows={arrows}
+                setArrows={setArrows} 
                 showArrowMod={showArrowMod}
                 setArrowMod={setArrowMod}
                 arrowID={arrowID}
@@ -286,7 +202,7 @@ const DriverTreePage = () => {
           </Col>
         </Container>
       </div>
-
+      {/* for craeting a cluster */}
       <Modal
         name="clusterModal"
         show={showClusterModal}
@@ -317,6 +233,7 @@ const DriverTreePage = () => {
         </Modal.Body>
       </Modal>
 
+      {/* for creating new arrows */}
       <Modal
         name="arrowModal"
         show={showArrowModal}
@@ -345,11 +262,11 @@ const DriverTreePage = () => {
           </Button>
         </Modal.Body>
       </Modal>
-
+      {/* for modifying arrows */}
       <Modal
         name="arrowModModal"
         show={showArrowMod}
-        size="lg"
+        size="md"
         centered
         backdrop="static"
         keyboard={false}

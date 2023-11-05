@@ -277,7 +277,7 @@ const DriverPage = () => {
                             <Form.Control
                               as="textarea"
                               value={selDriver.stakeholders || ""}
-                              style={{ width: "30%", height: "30px" }}
+                              style={{ width: "40%", height: "30px" }}
                               //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                               name="stakeholders"
                               onChange={handleInputChange}
@@ -290,7 +290,7 @@ const DriverPage = () => {
                             <Form.Control
                               as="textarea"
                               value={selDriver.stakeholderAbbreviation || ""}
-                              style={{ width: "30%", height: "30px" }}
+                              style={{ width: "40%", height: "30px" }}
                               //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                               name="stakeholderAbbreviation"
                               onChange={handleInputChange}

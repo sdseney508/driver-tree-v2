@@ -1,7 +1,9 @@
 import React, { useRef, useEffect, useState } from "react";
 // import Select from "react-select";
 import { Col, Card, Row, Button } from "react-bootstrap";
-import Xarrow, { useXarrow, Xwrapper } from "react-xarrows"; //for the arrows
+import Xarrow from "react-xarrows"; //for the arrows
+import { getArrows } from "../utils/arrows";
+import DriverArrows from "./DrawArrows";
 import styles from "../pages/DriverTreePage.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-solid-svg-icons";
@@ -15,7 +17,17 @@ import {
   updateDriver,
 } from "../utils/drivers";
 
-const DriverCards = ({ driverTreeObj, selOutcome, setSelOutcome, arrows, showArrowMod, setArrowMod, arrowID, setArrowID }) => {
+const DriverCards = ({
+  driverTreeObj,
+  selOutcome,
+  setSelOutcome,
+  arrows,
+  setArrows,
+  showArrowMod,
+  setArrowMod,
+  arrowID,
+  setArrowID,
+}) => {
   //This module has four functions:
   //1.  It creates the divs that go into the driver tree columns
   //2.  It creates the individual cards in the correct divs
@@ -26,6 +38,19 @@ const DriverCards = ({ driverTreeObj, selOutcome, setSelOutcome, arrows, showArr
   let navigate = useNavigate();
 
   //very simple drag and drop functionality.  The card is assigned an id in the database, and that id is passed to the drop function
+
+  //adding in a useEffect feature to better handle arrow rendering on the page
+  useEffect(() => {
+    const fetchData = async () => {
+      await getArrows(selOutcome.id).then((data) => {
+        setArrows(data.data);
+      });
+    };
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selOutcome]);
+
+
   function allowDrop(e) {
     //this property gets set on the individual divs onDragOver property to limit where a card can be dropped
     e.preventDefault();
@@ -289,28 +314,28 @@ const DriverCards = ({ driverTreeObj, selOutcome, setSelOutcome, arrows, showArr
     setArrowMod(true);
   }
 
-  const myArrow = (array) => {
-    return array.map((f, index) => {
-      return (<div onClick={(e) => ArrowModal(e, array[index].id)}>
-        <Xarrow
-          start={array[index].start}
-          color={array[index].color}
-          end={array[index].end}
-          path={array[index].path}
-          startAnchor={array[index].startAnchor}
-          endAnchor={array[index].endAnchor}
-          strokeWidth={array[index].strokeWidth}
-          headSize={array[index].headSize}
-          gridBreak={array[index].gridBreak}
-          showTail={array[index].showTail}
-          showHead={array[index].showHead}
-          dashness={array[index].dashness}
-          arrowBodyProps={array[index].arrowBodyProps}
-          passProps={array[index].arrowBodyProps}
-          id={array[index].id}
-        />
-      </div>)
-  });
+  const myArrow = () => {
+    return arrows.map((f, index) => {
+      return (
+        <div onClick={(e) => ArrowModal(e, arrows[index].id)}>
+          <Xarrow
+            start={arrows[index].start}
+            color={arrows[index].color}
+            end={arrows[index].end}
+            path={arrows[index].path}
+            startAnchor={arrows[index].startAnchor}
+            endAnchor={arrows[index].endAnchor}
+            strokeWidth={arrows[index].strokeWidth}
+            headSize={arrows[index].headSize}
+            gridBreak={arrows[index].gridBreak}
+            showTail={arrows[index].showTail}
+            showHead={arrows[index].showHead}
+            dashness={arrows[index].dashness}
+            id={arrows[index].id}
+          />
+        </div>
+      );
+    });
   };
 
   return (
@@ -345,7 +370,6 @@ const DriverCards = ({ driverTreeObj, selOutcome, setSelOutcome, arrows, showArr
           </Row>
         </Row>
       </Col>
-
       <Col className={styles.driver} sm={6} md={6} lg={2} key="1">
         <p>{`Tier 1 Drivers`}</p>
         <Row
@@ -361,7 +385,6 @@ const DriverCards = ({ driverTreeObj, selOutcome, setSelOutcome, arrows, showArr
         </Row>
         <Row style={{ height: "50px" }}>{tierButtons(1)}</Row>
       </Col>
-
       <Col className={styles.driver} sm={6} md={6} lg={2} key="2">
         <p>{`Tier 2 Drivers`}</p>
         <Row
@@ -377,7 +400,6 @@ const DriverCards = ({ driverTreeObj, selOutcome, setSelOutcome, arrows, showArr
         </Row>
         <Row style={{ height: "50px" }}>{tierButtons(2)}</Row>
       </Col>
-
       <Col className={styles.driver} sm={6} md={6} lg={2} key="3">
         <p>{`Tier 3 Drivers`}</p>
         <Row
@@ -393,7 +415,6 @@ const DriverCards = ({ driverTreeObj, selOutcome, setSelOutcome, arrows, showArr
         </Row>
         <Row style={{ height: "50px" }}>{tierButtons(3)}</Row>
       </Col>
-
       <Col className={styles.driver} sm={6} md={6} lg={2} key="4">
         <p>{`Tier 4 Drivers`}</p>
         <Row
@@ -409,7 +430,6 @@ const DriverCards = ({ driverTreeObj, selOutcome, setSelOutcome, arrows, showArr
         </Row>
         <Row style={{ height: "50px" }}>{tierButtons(4)}</Row>
       </Col>
-
       <Col className={styles.driver} sm={6} md={6} lg={2} key="5">
         <p>{`Tier 5 Drivers`}</p>
         <Row
@@ -425,7 +445,11 @@ const DriverCards = ({ driverTreeObj, selOutcome, setSelOutcome, arrows, showArr
         </Row>
         <Row style={{ height: "50px" }}>{tierButtons(5)}</Row>
       </Col>
-      {myArrow(arrows)}
+      <DriverArrows
+        selOutcome={selOutcome}
+        arrows={arrows}
+        setArrows={setArrows}
+      />
     </>
   );
 };

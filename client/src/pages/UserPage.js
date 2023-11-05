@@ -1,7 +1,6 @@
 //page for viewing and updating op limits
-import React, { useState, useContext, useEffect, setState } from "react";
+import React, { useContext, useEffect } from "react";
 import { stateContext } from "../App";
-import { Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { getUser, loggedIn, getToken } from "../utils/auth";
 // import { getCarousel } from "../utils/carousel";
@@ -45,13 +44,7 @@ const UserPage = () => {
       }
     };
     getUserData();
-  }, []);
-
-  const mgmt = () => {
-    // 👇️ navigate to /contacts
-    navigate("/accountmanage");
-  };
-
+  }, [navigate, setState, state]);
 
   return (
     <>

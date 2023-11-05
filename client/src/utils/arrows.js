@@ -10,10 +10,6 @@ const getArrows = (id) => {
   return axios.get(apiURL + "/arrows/outcomeID/" + id);
 }
 
-const getSingleArrow = (id) => {
-  return axios.get(apiURL + "/arrows/" + id);
-}
-
 const updateArrow = (id, body) => {
   return axios.put(apiURL + "/arrows/update/" + id, body);
 };

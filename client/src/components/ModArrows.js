@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button, Row, Form } from "react-bootstrap";
 import styles from "./ClusterModal.module.css";
 import { deleteArrow, updateArrow } from "../utils/arrows";
 import { getOutcome } from "../utils/drivers";
 
 const ModArrows = ({ onModalSubmit, arrowID, setArrowMod, selOutcome, setSelOutcome }) => {
-  const [selectedElements, setSelectedElements] = useState([]);
   const [arrowProps, setArrowProps] = useState([]);
 
   //takes the arrowProps from the modal and sets them to the arrowProps state
@@ -45,6 +44,7 @@ const ModArrows = ({ onModalSubmit, arrowID, setArrowMod, selOutcome, setSelOutc
               >
                 <option value="black">Black</option>
                 <option value="blue">Blue</option>
+                <option value="green">Green</option>
                 <option value="red">Red</option>
               </Form.Select>
 
