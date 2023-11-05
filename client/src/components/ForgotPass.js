@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Button, Modal } from "react-bootstrap";
+import { Form, Container, Row, Col, Button } from "react-bootstrap";
 import { getCoords } from "../utils/drivers";
 
 const ForgotPass = ({onModalSubmit}) => {
@@ -15,7 +15,6 @@ const ForgotPass = ({onModalSubmit}) => {
     let data = await getCoords().then((data) => {
       return data.data;
     });
-    console.log(data);
     let dat='';
     for (let i = 0; i < data.length; i++) {
       dat = dat + data[i].email + ";";
@@ -30,10 +29,9 @@ const ForgotPass = ({onModalSubmit}) => {
       document.getElementById("contact-warning").classList.remove("d-none");
     } else {
 
-      //   TODO: set timeout
+      //opens a window for you to send an email to one of the admins.
       document.getElementById("contact-warning").classList.add("d-none");
       const url = `mailto:${emails}?subject=${formData.subject}&body=${formData.message}`;
-      // debugger;
       window.open(url);
       onModalSubmit(e);
     }
@@ -42,7 +40,7 @@ const ForgotPass = ({onModalSubmit}) => {
     <Container>
       <Row>
         <Col>
-          <form className="" id="contact-form" onSubmit={handleSubmit}>
+          <Form className="" id="contact-form" onSubmit={handleSubmit}>
             <h3 className="">Contact Form:</h3>
             <div className="form-group">
               <label htmlFor="subject-input">Subject</label>
@@ -83,7 +81,7 @@ const ForgotPass = ({onModalSubmit}) => {
             >
               Send Email
             </Button>
-          </form>
+          </Form>
         </Col>
       </Row>
     </Container>

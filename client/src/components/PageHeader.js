@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { Row, Card } from "react-bootstrap";
-import {  stateContext } from "../App";
+import { stateContext } from "../App";
 import styles from "./PageFooter.module.css"
 
 const PageHeader = () => {

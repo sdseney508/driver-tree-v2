@@ -2,19 +2,29 @@ import axios from "axios";
 import apiURL from "./apiURL";
 
 const createArrow = (body) => {
-  return axios.post(apiURL + "arrows/new/", body);
+  console.log(body);
+  return axios.post(apiURL + "/arrows/new/", body);
 };
 
+const getArrows = (id) => {
+  return axios.get(apiURL + "/arrows/outcomeID/" + id);
+}
+
+const getSingleArrow = (id) => {
+  return axios.get(apiURL + "/arrows/" + id);
+}
+
 const updateArrow = (id, body) => {
-  return axios.put(apiURL + "arrows/update/" + id, body);
+  return axios.put(apiURL + "/arrows/update/" + id, body);
 };
 
 const deleteArrow = (id) => {
-  return axios.delete(apiURL + "arrows/delete/" + id);
+  return axios.delete(apiURL + "/arrows/delete/" + id);
 };
 
 export {
   createArrow,
+  getArrows,
   updateArrow,
   deleteArrow
 };

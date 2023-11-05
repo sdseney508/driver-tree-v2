@@ -8,13 +8,9 @@ import React, {
 } from "react";
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
 import {
-  allDrivers,
-  allOutcomes,
   getDriver,
   getDriverByOutcome,
-  getOutcome,
 } from "../utils/drivers";
-import { stateContext } from "../App";
 import "ag-grid-community/dist/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CSS
 
@@ -24,7 +20,6 @@ import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CS
 //and displayed in the form.
 //this is using the community edition and react hooks to selectively render the table
 function DriverTable({ selDriver, setSelDriver, selOutcome, setSelOutcome }) {
-  const [state, setState] = useContext(stateContext);
 
   const [rowData, setRowData] = useState([]); // Set rowData to Array of Objects
   let rowD;
@@ -65,7 +60,20 @@ function DriverTable({ selDriver, setSelDriver, selOutcome, setSelOutcome }) {
       headerName: "Tier Level",
       width: 125,
       resizable: true,
+      sort: "asc",
+      sortIndex: 1,
     },
+    {
+      field: "subTier",
+      filter: true,
+      headerName: "Sub Tier",
+      width: 125,
+      resizable: true,
+      sort: "asc",
+      sortIndex: 1,
+    },
+
+
     {
       field: "background",
       filter: true,
@@ -95,11 +103,9 @@ function DriverTable({ selDriver, setSelDriver, selOutcome, setSelOutcome }) {
   }));
 
   // sets a listener on the grid to detect when a row is selected.  From there,
-  //it executes a fetch request back to the opLimit table and the signatures
-  //table to get the full record for the selected row.
+  //it executes a fetch request back to the driver table
+  //to get the full record for the selected row.
   // It then passes the data to the parent component to be displayed in the form.
-
-  // const handleCallBack = () => useCallback(state);
 
   async function fetchDriverInfo(driverID) {
     await getDriver(driverID).then((data) => {
@@ -109,11 +115,11 @@ function DriverTable({ selDriver, setSelDriver, selOutcome, setSelOutcome }) {
     });
   }
 
-  const cellClickedListener = useCallback(async (event) => {
+  const cellClickedListener = async (event) => {
     // debugger;
     let driverID = event.data.id;
     await fetchDriverInfo(driverID);
-  });
+  };
 
   //the return just builds the table
   return (
@@ -125,9 +131,9 @@ function DriverTable({ selDriver, setSelDriver, selOutcome, setSelOutcome }) {
           rowData={rowData} // Row Data for Rows
           columnDefs={columnDefs} // Column Defs for Columns
           defaultColDef={defaultColDef} // Default Column Properties
-          animateRows={true} // Optional - set to 'true' to have rows animate when sorted
-          rowSelection="multiple" // Options - allows click selection of rows
-          onCellClicked={cellClickedListener} // Optional - registering for Grid Event
+          animateRows={true} // set to 'true' to have rows animate when sorted
+          rowSelection="single" // since the table feeds the form, only allow selection of a single row
+          onCellClicked={cellClickedListener} // call the fetch driver info function and reseeds the table
         />
       </div>
     </div>

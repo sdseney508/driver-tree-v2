@@ -3,13 +3,11 @@ import React, {
   useRef,
   useEffect,
   useMemo,
-  useContext,
 } from "react";
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
 import {
   getDriverByOutcome,
 } from "../utils/drivers";
-import { stateContext } from "../App";
 import "ag-grid-community/dist/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CSS
 
@@ -19,7 +17,6 @@ import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CS
 //and displayed in the form.
 //this is using the community edition and react hooks to selectively render the table
 function ClusterTable({ selDriver, setSelDriver, selOutcome, setSelOutcome, selectedDrivers, setSelectedDrivers }) {
-  const [state, setState] = useContext(stateContext);
 
   const [rowData, setRowData] = useState([]); // Set rowData to Array of Objects
   let rowD;
@@ -56,6 +53,8 @@ function ClusterTable({ selDriver, setSelDriver, selOutcome, setSelOutcome, sele
       headerName: "Tier Level",
       width: 125,
       resizable: true,
+      sort: "asc",
+      sortIndex: 0,
     },
     {
       field: "subTier",
@@ -63,6 +62,8 @@ function ClusterTable({ selDriver, setSelDriver, selOutcome, setSelOutcome, sele
       headerName: "Sub Tier",
       width: 200,
       resizable: true,
+      sort: "asc",
+      sortIndex: 0,
     }
   ]);
 
@@ -72,20 +73,13 @@ function ClusterTable({ selDriver, setSelDriver, selOutcome, setSelOutcome, sele
   }));
 
   // sets a listener on the grid to detect when a row is selected.  From there,
-  //it executes a fetch request back to the opLimit table and the signatures
-  //table to get the full record for the selected row.
-  // It then passes the data to the parent component to be displayed in the form.
-
-  // const handleCallBack = () => useCallback(state);
-
+  //it sets the state of selectedDrivers that can be used to create the cluster when the create cluster button is selected
   function onRowSelected(event) {
-    var rowCount = event.api.getSelectedNodes().length;
     var selectedRows = event.api.getSelectedRows();
     setSelectedDrivers(selectedRows);
   }
   
   function onSelectionChanged(event) {
-    var rowCount = event.api.getSelectedNodes().length;
     var selectedRows = event.api.getSelectedRows();
     setSelectedDrivers(selectedRows);
   }
@@ -104,8 +98,8 @@ function ClusterTable({ selDriver, setSelDriver, selOutcome, setSelOutcome, sele
           rowSelection="multiple" // Optional - for row selection; can be "single", "multiple" or "false" (to disable)
           suppressRowClickSelection= {true} // Options - allows click selection of rows
           onRowSelected= {onRowSelected}
-          onSelectionChanged= {onSelectionChanged} // Optional - registering for Grid Event
-          multiSortKey="ctrl" // Optional - allows multi column sorting using 'ctrl' key
+          onSelectionChanged= {onSelectionChanged} // goes to the onselectionchanged function to change the selecteddrivers state
+          multiSortKey="ctrl" // allows multi column sorting using 'ctrl' key
         />
       </div>
     </div>

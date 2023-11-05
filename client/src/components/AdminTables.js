@@ -3,13 +3,10 @@ import React, {
   useRef,
   useEffect,
   useMemo,
-  useCallback,
-  useContext,
 } from "react";
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
-import {allStakeholders, createStakeholder, deleteStakeholder, updateStakeholder} from "../utils/stakeholders";
-import {allOutcomes, createOutcome, updateOutcome, allDrivers, createDriver, updateDriver} from "../utils/drivers";
-import { stateContext } from "../App";
+import {allStakeholders} from "../utils/stakeholders";
+import {allOutcomes, allDrivers} from "../utils/drivers";
 import "ag-grid-community/dist/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CSS
 
@@ -20,9 +17,11 @@ import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CS
 //this is using the community edition and react hooks to selectively render the table
 function AdminTables({selectedTable, setSelectedTable}) {
   const [rowData, setRowData] = useState([]); // Set rowData to Array of Objects
+  // Each Column Definition results in one Column.  
+  const [columnDefs, setColumnDefs] = useState([]);
   let rowD;
   let columnInfo;
-
+  
 
   useEffect(() => {
     fetchData(selectedTable);
@@ -30,6 +29,8 @@ function AdminTables({selectedTable, setSelectedTable}) {
   }, [selectedTable]);
 
 
+  //this gets all of the coumn headers for any of the tables that the user can select
+  //the Object.keys gets the keys from the first row of data.  This is used to build the column headers
 const getColumnInfo = (data) => {
   let temp =[];
   let cols = [];
@@ -37,7 +38,6 @@ const getColumnInfo = (data) => {
   for (let i = 1; i < temp.length; i++) {
     cols[i-1] = {field: temp[i], filter: true, headerName: temp[i], width: 125, resizable: true};
   }
-  console.log(cols);
   return cols;
 }
 
@@ -64,22 +64,11 @@ const getColumnInfo = (data) => {
   }
 
   const gridRef = useRef(); // Optional - for accessing Grid's API
-  // Each Column Definition results in one Column.  For now, we are only going to set the 7 key columns that the users might search on
-  const [columnDefs, setColumnDefs] = useState([]);
 
   // DefaultColDef sets props common to all Columns
   const defaultColDef = useMemo(() => ({
     sortable: true,
   }));
-
-
-
-  // Example using Grid's API.  i can use this to do a multi-select on the table
-  //this isnt ready yet.  20 Nov 2022
-
-  // const buttonListener = useCallback((e) => {
-  //   gridRef.current.api.deselectAll();
-  // }, []);
 
   //the return just builds the table
   return (

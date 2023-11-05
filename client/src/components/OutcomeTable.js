@@ -3,20 +3,14 @@ import React, {
   useRef,
   useEffect,
   useMemo,
-  useCallback,
-  useContext,
 } from "react";
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
 import {
-  allDrivers,
   allOutcomes,
-  getDriverByOutcome, 
   getOutcome
 } from "../utils/drivers";
-import { stateContext } from "../App";
 import "ag-grid-community/dist/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CSS
-import { useNavigate, useLocation } from "react-router";
 
 //This component is used to display the limits in a table.
 //it also provides the capability to sort and filter the data.
@@ -27,9 +21,7 @@ function OutcomeTable({
   selOutcome,
   setSelOutcome
 }) {
-  let location = useLocation();
-  let navigate = useNavigate();
-  const [state, setState] = useContext(stateContext);
+
   const [rowData, setRowData] = useState([]); // Set rowData to Array of Objects
   var rowD =[];
 
@@ -113,10 +105,10 @@ function OutcomeTable({
   });
   };
 
-  const cellClickedListener = useCallback(async (event) => {
+  const cellClickedListener = async (event) => {
     let outcomeID = event.data.id;
     await fetchOutcomeInfo(outcomeID);
-  });
+  };
 
 
   //the return just builds the table
@@ -129,9 +121,9 @@ function OutcomeTable({
           rowData={rowData} // Row Data for Rows
           columnDefs={columnDefs} // Column Defs for Columns
           defaultColDef={defaultColDef} // Default Column Properties
-          animateRows={true} // Optional - set to 'true' to have rows animate when sorted
-          rowSelection="multiple" // Options - allows click selection of rows
-          onCellClicked={cellClickedListener} // Optional - registering for Grid Event
+          animateRows={true} // set to 'true' to have rows animate when sorted
+          rowSelection="single" // set to single since the table feeds the form
+          onCellClicked={cellClickedListener} // calls the fetchouctomeinfo function and reseeds the table
         />
       </div>
     </div>

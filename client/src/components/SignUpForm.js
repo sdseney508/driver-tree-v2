@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button } from "react-bootstrap";
-import "./modals.css";
 import { register } from "../utils/auth";
 import { getRoles } from "../utils/sign-up";
 
 
 const SignupForm = ({onModalSubmit}) => {
   const [roleState, setRoleState] = useState([]);
-  const [functionalState, setFunctionalState] = useState([]);
-  const [showSignupModal, setSignupModal] = useState(true);
+  // const [functionalState, setFunctionalState] = useState([]);
+  // const [showSignupModal, setSignupModal] = useState(true);
 
   useEffect(() => {
     getModalData();

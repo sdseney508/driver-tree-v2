@@ -3,9 +3,8 @@ import { Col, Row } from "react-bootstrap";
 import styles from "./legend.module.css";
 
 const Legend = ({ driverTreeObj }) => {
-
+//the below function gets all of the stakeholders and abbreviations from the driverTreeObj, then removes any duplicates and places them in a list under the legend.
   function stake({ driverTreeObj }) {
-    // debugger;
     let stakes = [];
     return driverTreeObj.map((f, index) => {
       if (driverTreeObj[index].stakeholders != null) {
@@ -13,16 +12,11 @@ const Legend = ({ driverTreeObj }) => {
           sholder: driverTreeObj[index].stakeholders,
           abbrev: driverTreeObj[index].stakeholderAbbreviation,
         };
-        console.log(temp.sholder);
+
         const duplicate = stakes.find((s) => s.sholder === temp.sholder);
-        console.log(duplicate);
         if (duplicate) {
-            console.log("i am here");
         } else {
             stakes.push(temp);
-            console.log(stakes);
-            console.log(index);
-            console.log("i am over there");
             return (
               <Row>
                 <Col>

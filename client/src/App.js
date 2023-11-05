@@ -1,5 +1,5 @@
 import React, { useState, createContext } from "react";
-import { useParams, BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 //pages and components
 import Welcome from "./pages/Welcome";

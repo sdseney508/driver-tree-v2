@@ -65,7 +65,10 @@ outcomes.init(
             type: DataTypes.TEXT,
             allowNull: true,
         },
-
+         leadActionOfficer: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
             //TODO:  make this a JSON so we can turn it into a bullet selected list
         relatedEfforts: {
             type: DataTypes.STRING,
@@ -89,11 +92,22 @@ outcomes.init(
             defaultValue: 'Draft',
         },
 
-        // legend: {
-        //     type: DataTypes.TEXT,
-        //     allowNull: true,
-        //     defaultValue: 'Empty Legend',
-        // },
+        tierLevel: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 0,
+        },
+
+        subTierLevel: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 0,
+        },
+        cluster: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 0,
+        },
     },
     {
         sequelize,

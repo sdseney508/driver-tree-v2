@@ -93,7 +93,8 @@
 }
 
 .card_footer {
-  background-color: #ffc0c0;
+  color: red;
+  font-weight: bold;
   border: none;
   font-size: 10px;
   padding: 0px;
@@ -139,6 +140,7 @@
 
 .outcome {
   display: flex;
+  flex: row;
   background-color: white;
   color: rgb(0, 0, 0);
   font-weight: normal;

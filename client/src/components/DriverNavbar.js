@@ -9,12 +9,10 @@ import { useNavigate, useLocation } from "react-router";
 const DriverNavbar = () => {
   let location = useLocation();
   let navigate = useNavigate();
-
   // console.log("location state is: ", locstate);
   const [state, setState] = useContext(stateContext);
   let {outcomeID, driverID} = useParams();
   let pName = location.pathname.slice(0, 6);
-  let selOutcome = location.state ? location.state.selOutcome : null;
   const allOutcomes = () => {
     if(!outcomeID) {
       //TODO:  make this a fetch call for the user's default outcome
@@ -24,17 +22,11 @@ const DriverNavbar = () => {
   };
 
   const gotoDriverTree = () => {
-    if(!state.selOutcome) {
-      //TODO:  make this a fetch call for the user's default outcome
-      outcomeID = 1;
-    } else {
-      outcomeID = state.selOutcome.id;
-    }
-    // console.log('selOutcome'+selOutcome)
-    // console.log("location: " + location);
-    // console.log("location.state: " + location.state)
-    // console.log("selOutcome", selOutcome);
-    navigate("/driverTree/"+outcomeID);
+console.log("outcomeID is: ", outcomeID);
+if (!outcomeID) {
+  outcomeID = 1;
+}
+    navigate("/driverTree/"+ outcomeID);
   };
 
   const adminAccountManage = () => {

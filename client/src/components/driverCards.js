@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useRef, useEffect, useState } from "react";
 // import Select from "react-select";
 import { Col, Card, Row, Button } from "react-bootstrap";
+import Xarrow, { useXarrow, Xwrapper } from "react-xarrows"; //for the arrows
 import styles from "../pages/DriverTreePage.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircle, faSquare } from "@fortawesome/free-solid-svg-icons";
-import { useNavigate, useLocation } from "react-router";
+import { faCircle } from "@fortawesome/free-solid-svg-icons";
+import Legend from "../components/legend";
+import { useNavigate } from "react-router";
 import {
   createDriver,
   deleteDriver,
@@ -13,14 +15,14 @@ import {
   updateDriver,
 } from "../utils/drivers";
 
-const DriverCards = ({ tier, driverTreeObj, selOutcome, setSelOutcome }) => {
-  //This module has three functions:
+const DriverCards = ({ driverTreeObj, selOutcome, setSelOutcome, arrows, showArrowMod, setArrowMod, arrowID, setArrowID }) => {
+  //This module has four functions:
   //1.  It creates the divs that go into the driver tree columns
   //2.  It creates the individual cards in the correct divs
   //3.  It houses the drag and drop functionality for the cards.  this requires the use of the onDragOver, onDragStart, draggable, and onDrop properties in the divs and cards
+  //4.  Draws the correct clusters around the selected drivers based on the cluster field in the drivers table
   //The arrow function is contained in the arrows.js module.  It creates the arrows that connect the cards
 
-  let location = useLocation();
   let navigate = useNavigate();
 
   //very simple drag and drop functionality.  The card is assigned an id in the database, and that id is passed to the drop function
@@ -29,19 +31,11 @@ const DriverCards = ({ tier, driverTreeObj, selOutcome, setSelOutcome }) => {
     e.preventDefault();
   }
 
-  function createCluster(e) {
-    //this function creates the cluster divs that go into the driver tree columns
-    e.preventDefault();
-
-    let body = { outcomeID: selOutcome.id, tierLevel: e.target.dataset.tier };
-    updateDriver(e.target.dataset.cardid, body);
-  }
-
   function drag(e) {
     e.dataTransfer.setData("text", e.target.dataset.cardid);
   }
 
-  function drop(e) {
+  async function drop(e) {
     //on drop, sets the drivers new Tier and subTier as required.  The driver is then updated in the database so it will be placed in its new place on the next render
     e.preventDefault();
     var data = e.dataTransfer.getData("text");
@@ -50,8 +44,8 @@ const DriverCards = ({ tier, driverTreeObj, selOutcome, setSelOutcome }) => {
       tierLevel: e.target.dataset.tier,
       subTier: e.target.dataset.subtier,
     };
-    updateDriver(data, body);
-    window.location.reload(false);
+    await updateDriver(data, body);
+    window.location.reload();
   }
 
   const delDriver = (e) => {
@@ -67,20 +61,27 @@ const DriverCards = ({ tier, driverTreeObj, selOutcome, setSelOutcome }) => {
     navigate("/drpage/" + selOutcome.id + "/" + e.target.id);
   };
 
-  const newDriver = (e) => {
+  const newDriver = async (e) => {
     e.preventDefault();
     let body = { outcomeID: selOutcome.id, tierLevel: e.target.dataset.tier };
-    createDriver(body);
+    await createDriver(body);
     getOutcome(selOutcome.id).then((data) => {
       setSelOutcome(data.data);
     });
-    window.location.reload(false);
+    window.location.reload();
+  };
+
+  //navigate to the outcome page
+  const goToOutcome = async (e) => {
+    navigate("/allOutcomes/" + selOutcome.id);
   };
 
   const deleteCluster = (e) => {
     e.preventDefault();
     let sures = window.confirm("Are you sure you want to delete this cluster?");
-    if (!sures) {return}
+    if (!sures) {
+      return;
+    }
     let body = { cluster: 0 };
     updateCluster(e.target.dataset.cluster, body);
     window.location.reload(false);
@@ -150,9 +151,8 @@ const DriverCards = ({ tier, driverTreeObj, selOutcome, setSelOutcome }) => {
               className={styles.my_cluster}
               data-tier={tier}
               data-subtier={index + 1}
-              data-clusterid={`tier${tier}cluster`+ index+1}
               data-cluster={clusterNumber}
-              id={`tier${tier}subTier` + (index + 1)} //need to fix this
+              id={`tier${tier}cluster` + clusterNumber} //this is used for the arrow start and end points
               onDragOver={allowDrop}
               onDrop={drop}
               onClick={deleteCluster}
@@ -285,23 +285,149 @@ const DriverCards = ({ tier, driverTreeObj, selOutcome, setSelOutcome }) => {
     }
   }
 
+  async function ArrowModal(e, arrowID) {
+    e.preventDefault();
+    await setArrowID(arrowID);
+    setArrowMod(true);
+  }
+
+  const myArrow = (array) => {
+    return array.map((f, index) => {
+      return (<div onClick={(e) => ArrowModal(e, array[index].id)}>
+        <Xarrow
+          start={array[index].start}
+          color={array[index].color}
+          end={array[index].end}
+          path={array[index].path}
+          startAnchor={array[index].startAnchor}
+          endAnchor={array[index].endAnchor}
+          strokeWidth={array[index].strokeWidth}
+          headSize={array[index].headSize}
+          gridBreak={array[index].gridBreak}
+          showTail={array[index].showTail}
+          showHead={array[index].showHead}
+          dashness={array[index].dashness}
+          arrowBodyProps={array[index].arrowBodyProps}
+          passProps={array[index].arrowBodyProps}
+          id={array[index].id}
+        />
+      </div>)
+  });
+  };
+
   return (
     <>
-      <Col className={styles.driver} key="1">
-        <p>{`Tier ${tier.tier} Drivers`}</p>
+      {" "}
+      <Col className={styles.driver} sm={6} md={6} lg={2} key="0">
+        <p>Tier 0</p>
+        <Row
+          style={{
+            height: "800px",
+            width: "100%",
+          }}
+          className="m-1"
+          id="outcomeColumn"
+          key="outcomeColumn1"
+        >
+          <Card
+            className={styles.my_card}
+            onClick={goToOutcome}
+            id={`outcomeID${selOutcome.id}`}
+          >
+            <Card.Header className={styles.card_header}></Card.Header>
+            <Card.Body className={styles.my_card_body}>
+              <Card.Text className={styles.my_card_text}>
+                {selOutcome.outcomeTitle}
+              </Card.Text>
+            </Card.Body>
+            <Card.Footer className={styles.card_footer}></Card.Footer>
+          </Card>
+          <Row style={{ height: "700px" }}>
+            <Legend driverTreeObj={driverTreeObj} />
+          </Row>
+        </Row>
+      </Col>
+
+      <Col className={styles.driver} sm={6} md={6} lg={2} key="1">
+        <p>{`Tier 1 Drivers`}</p>
         <Row
           style={{
             height: "750px",
             width: "100%",
           }}
-          id={`tier${tier.tier}Cards`}
-          key={`tier${tier.tier}Cards`}
+          id={`tier1Cards`}
+          key={`tier1Cards`}
           className={styles.my_row}
         >
-          {tierCards(tier.tier, { driverTreeObj })}
+          {tierCards(1, { driverTreeObj })}
         </Row>
-        <Row style={{ height: "50px" }}>{tierButtons(tier.tier)}</Row>
+        <Row style={{ height: "50px" }}>{tierButtons(1)}</Row>
       </Col>
+
+      <Col className={styles.driver} sm={6} md={6} lg={2} key="2">
+        <p>{`Tier 2 Drivers`}</p>
+        <Row
+          style={{
+            height: "750px",
+            width: "100%",
+          }}
+          id={`tier2Cards`}
+          key={`tier2Cards`}
+          className={styles.my_row}
+        >
+          {tierCards(2, { driverTreeObj })}
+        </Row>
+        <Row style={{ height: "50px" }}>{tierButtons(2)}</Row>
+      </Col>
+
+      <Col className={styles.driver} sm={6} md={6} lg={2} key="3">
+        <p>{`Tier 3 Drivers`}</p>
+        <Row
+          style={{
+            height: "750px",
+            width: "100%",
+          }}
+          id={`tier3Cards`}
+          key={`tier3Cards`}
+          className={styles.my_row}
+        >
+          {tierCards(3, { driverTreeObj })}
+        </Row>
+        <Row style={{ height: "50px" }}>{tierButtons(3)}</Row>
+      </Col>
+
+      <Col className={styles.driver} sm={6} md={6} lg={2} key="4">
+        <p>{`Tier 4 Drivers`}</p>
+        <Row
+          style={{
+            height: "750px",
+            width: "100%",
+          }}
+          id={`tier4Cards`}
+          key={`tier4Cards`}
+          className={styles.my_row}
+        >
+          {tierCards(4, { driverTreeObj })}
+        </Row>
+        <Row style={{ height: "50px" }}>{tierButtons(4)}</Row>
+      </Col>
+
+      <Col className={styles.driver} sm={6} md={6} lg={2} key="5">
+        <p>{`Tier 5 Drivers`}</p>
+        <Row
+          style={{
+            height: "750px",
+            width: "100%",
+          }}
+          id={`tier5Cards`}
+          key={`tier5Cards`}
+          className={styles.my_row}
+        >
+          {tierCards(5, { driverTreeObj })}
+        </Row>
+        <Row style={{ height: "50px" }}>{tierButtons(5)}</Row>
+      </Col>
+      {myArrow(arrows)}
     </>
   );
 };

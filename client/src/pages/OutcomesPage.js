@@ -3,7 +3,7 @@ import React, { useState, useContext, useEffect } from "react";
 // import Select from "react-select";
 import { stateContext } from "../App";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
-import { useNavigate, useLocation } from "react-router";
+import { useNavigate } from "react-router";
 import { Link, useParams } from "react-router-dom";
 import { getUser, loggedIn, getToken } from "../utils/auth";
 import {
@@ -23,7 +23,7 @@ const OutcomesPage = () => {
   const [selDrivers, setSelDrivers] = useState({});
   //These are the initial states for the select boxes.  They are set to the first value in the array, which is the default value
   let navigate = useNavigate();
-  let location = useLocation();
+
   const { outcomeID } = useParams();
   //using the initial useEffect hook to open up the draft oplimits and prefill the form
   useEffect(() => {
@@ -66,7 +66,6 @@ const OutcomesPage = () => {
       await getOutcome(outcomeID).then((data) => {
         console.log(data.data);
         setSelOutcome(data.data);
-        // location.state.selOutcome = selOutcome;
       });
       await getDriverByOutcome(outcomeID).then((data) => {
         let top = data.data;
@@ -81,19 +80,18 @@ const OutcomesPage = () => {
     //this one gets the initial draftOL for the form
   }, []);
 
-
-  const getDrivers = async() => { 
+  const getDrivers = async () => {
     await getDriverByOutcome(selOutcome.id).then((data) => {
       let top = data.data;
       setSelDrivers(top);
     });
-  }
+  };
 
   //sets the initial selection of the drop down lists for the signatures, i couldnt get the map function to work, so brute force here we go.
   useEffect(() => {
     getDrivers();
     setState({ ...state, selOutcome: selOutcome });
-    navigate("/allOutcomes/"+selOutcome.id);
+    navigate("/allOutcomes/" + selOutcome.id);
   }, [selOutcome]);
 
   //this function gets everyone with an assigened role and sets the state for the drop down lists
@@ -109,7 +107,8 @@ const OutcomesPage = () => {
           return (
             <div>
               <Link to={`/drpage/${selOutcome.id}/${selDrivers[index].id}`}>
-              <p>{selDrivers[index].problemStatement}</p></Link>
+                <p>{selDrivers[index].problemStatement}</p>
+              </Link>
             </div>
           );
         }
@@ -130,17 +129,19 @@ const OutcomesPage = () => {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    let body = { [e.target.name]: e.target.value };
+    let body;
+    if (e.target.name === "outcomeTitle") {
+      body = { [e.target.name]: e.target.value, 'problemStatement': e.target.value};
+      updateOutcome(selOutcome.id, body);
+    } else {
+      body = { [e.target.name]: e.target.value };
+    };
     updateOutcome(selOutcome.id, body);
     setSelOutcome({ ...selOutcome, [e.target.name]: e.target.value });
   };
 
-  const buttonClicked = () => {
-    alert("button clicked");
-  };
-
   const driverPage = () => {
-    navigate("/drivertree/"+selOutcome.id);
+    navigate("/drivertree/" + selOutcome.id);
   };
 
   return (
@@ -163,21 +164,54 @@ const OutcomesPage = () => {
             </Col>
             <Form className={styles.my_form}>
               <Row className={styles.outcome_banner + styles.my_row}>
-                <Col sm={10} md={6} lg={9} className={styles.outcome_name}>
-                  <Form.Group style={{width: '100%'}}>
+                <Col sm={10} md={6} lg={8} className={styles.outcome_name}>
+                  <Form.Group style={{ width: "100%" }}>
                     <Form.Control
                       className={styles.outcome_name}
                       as="input"
-                      value={selOutcome.outcomeTitle || "hi"}
+                      value={selOutcome.outcomeTitle}
                       name="outcomeTitle"
                       onChange={handleInputChange}
                       onBlur={handleFormSubmit}
                     ></Form.Control>
                   </Form.Group>
                 </Col>
-                <Col sm={10} md={6} lg={3} className={styles.commander_name}>
-                  <Row className="p-1">Supported Commander: ADM John Doe</Row>
-                  <Row className="p-1">Lead Action Officer: CAPT Jane Doe</Row>
+                <Col sm={10} md={6} lg={4} className={styles.commander_name}>
+                  <Row className={styles.my_row}>
+                    <Form.Group style={{ width: "100%" }}>
+                      <Row className={styles.my_row}>
+                        <Form.Label className={styles.commander_label}>
+                          Supported Commander:
+                        </Form.Label>
+                        <Form.Control
+                          className={styles.commander_name}
+                          as="input"
+                          value={selOutcome.supportedCommanders}
+                          name="supportedCommanders"
+                          onChange={handleInputChange}
+                          onBlur={handleFormSubmit}
+                        ></Form.Control>
+                      </Row>
+                    {/* </Form.Group>
+    
+                    <Form.Group style={{ width: "100%" }}> */}
+                      <Row className={styles.my_row}>
+                        <Form.Label className={styles.commander_label}>
+                          Action Officer:
+                        </Form.Label>
+                        <Form.Control
+                          className={styles.commander_name}
+                          as="input"
+                          value={selOutcome.leadActionOfficer}
+                          name="leadActionOfficer"
+                          onChange={handleInputChange}
+                          onBlur={handleFormSubmit}
+                        ></Form.Control>
+                      </Row>
+                    </Form.Group>
+                  </Row>
+                  {/* <Row className="p-1">Supported Commander: ADM John Doe</Row>
+                  <Row className="p-1">Lead Action Officer: CAPT Jane Doe</Row> */}
                 </Col>
               </Row>
             </Form>
@@ -185,20 +219,20 @@ const OutcomesPage = () => {
               <Col sm={10} md={6} lg={4}>
                 <p className={styles.my_p}>Gap Characerization</p>
                 <Form className={styles.my_form}>
-                  <Form.Group style={{ width: "100%" }}>
+                  {/* <Form.Group style={{ width: "100%" }}>
                     <Form.Label className={styles.form_label}>
                       Problem Statement
                     </Form.Label>
                     <Form.Control
                       as="textarea"
                       className={styles.my_text_area}
-                      value={selOutcome.problemStatement || ""}
+                      value={selOutcome.goals || ""}
                       //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-                      name="problemStatement"
+                      name="goals"
                       onChange={handleInputChange}
                       onBlur={handleFormSubmit}
                     />
-                  </Form.Group>
+                  </Form.Group> */}
 
                   <Form.Group style={{ width: "100%" }}>
                     <Form.Label className={styles.form_label}>

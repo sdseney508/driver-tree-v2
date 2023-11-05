@@ -1,43 +1,33 @@
-//page for viewing and updating op limits
 import React, { useState, useContext, useEffect } from "react";
-import Xarrow, { useXarrow, Xwrapper } from "react-xarrows"; //for the arrows
+// import Select from "react-select";
 import { stateContext } from "../App";
 import { Container, Row, Col, Button, Card, Modal } from "react-bootstrap";
 import {
   createOutcome,
   getOutcome,
   getDriverByOutcome,
+  getStakeholders,
 } from "../utils/drivers";
-import { getArrows } from "../utils/arrows";
 import { useNavigate, useLocation } from "react-router";
-import { useParams } from "react-router"; //to store state in the URL
+import { useParams } from "react-router";
 import DriverCards from "../components/driverCards";
 import Legend from "../components/legend";
 import { getUser, loggedIn, getToken } from "../utils/auth";
 import styles from "./DriverTreePage.module.css";
 import OutcomeTable from "../components/OutcomeTable";
 import ClusterModal from "../components/ClusterModal";
-import ArrowModal from "../components/ArrowModal";
-import DriverArrows from "../components/DrawArrows";
-import ModArrows from "../components/ModArrows";
 
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form
 
 const DriverTreePage = () => {
   const [state, setState] = useContext(stateContext);
-  const [arrows, setArrows] = useState([]);
-  const [arrowID, setArrowID] = useState();
   const [showClusterModal, setClusterModal] = useState(false);
-  const [showArrowModal, setArrowModal] = useState(false);
-  const [showArrowMod, setArrowMod] = useState(false);
   const [selOutcome, setSelOutcome] = useState({});
   const [selDrivers, setSelDrivers] = useState([]);
   const [selDriver, setSelDriver] = useState({});
   const [driverTreeObj, setDriverTreeObj] = useState([]);
   const [selectedCards, setSelectedCards] = useState([]);
   const [stakeholders, setStakeholders] = useState([]);
-
-  const { outcomeID } = useParams();
 
   //These are the initial states for the select boxes.  They are set to the first value in the array, which is the default value
 
@@ -46,26 +36,27 @@ const DriverTreePage = () => {
 
   //grabs the outcomeID from the URL; allows someone to email someone a direct link to a specific driver tree.
   //TODO:  Make it so that this pops an error if someone doesnt have access to that specific Outcome's Driver Tree
+  let { outcomeID } = useParams();
 
-  // let tierOne = {
-  //   tier: 1,
-  // };
+  let tierOne = {
+    tier: 1,
+  };
 
-  // let tierTwo = {
-  //   tier: 2,
-  // };
+  let tierTwo = {
+    tier: 2,
+  };
 
-  // let tierThree = {
-  //   tier: 3,
-  // };
+  let tierThree = {
+    tier: 3,
+  };
 
-  // let tierFour = {
-  //   tier: 4,
-  // };
+  let tierFour = {
+    tier: 4,
+  };
 
-  // let tierFive = {
-  //   tier: 5,
-  // };
+  let tierFive = {
+    tier: 5,
+  };
 
   //using the initial useEffect hook to open up the driver trees and prefill the table at the bottom of the page
   useEffect(() => {
@@ -73,7 +64,6 @@ const DriverTreePage = () => {
       //this first part just ensures they whoever is on this page is an authenticated user; prevents someone from typing in the url and gaining access
       try {
         //these comes from the utils section of the code
-        //TODO:  not working for the useParams pages, change the below to an isExpired check of the token.
         const token = loggedIn() ? getToken() : null;
         if (!token) {
           navigate("/");
@@ -101,9 +91,12 @@ const DriverTreePage = () => {
         console.error(err);
       }
     };
+    //set location state if sent there by the table
+
+    // location.state.selOutcome.id=selOutcome.id;
+    let dtree = [];
     const getOutcomeData = async () => {
-      //TODO:
-      //in here for error handling only; this needs to be updated and removed
+      //todo:  Clean this up so that the navbar always has the correct outcome selected
       if (!outcomeID) {
         outcomeID = 1;
       }
@@ -111,21 +104,23 @@ const DriverTreePage = () => {
         setSelOutcome(data.data);
       });
     };
-    const getDriversData = async () => {
+    //TODO: update to use useParams and put the outcomeID and driverID in the URL
+    const getDriversData = async (outcomeID) => {
       await getDriverByOutcome(outcomeID).then((data) => {
         setDriverTreeObj(data.data);
       });
     };
 
-    const getArrowsData = async () => {
-      await getArrows(outcomeID).then((data) => {
-        setArrows(data.data);
-      });
-    };
+    // const getStakeholderData = async (outcomeID) => {
+    //   await getStakeholders(outcomeID).then((data) => {
+    //     console.log(data.data);
+    //     setStakeholders(data.data);
+    //   });
+    // };
+
     getUserData();
     getOutcomeData();
     getDriversData();
-    getArrowsData();
     // getStakeholderData();
     setState({ ...state, selOutcome: selOutcome });
     //this one gets the initial draftOL for the form
@@ -139,18 +134,16 @@ const DriverTreePage = () => {
         setSelDrivers(data.data);
         dtree = data.data;
         setDriverTreeObj(dtree);
-      });
-    };
-    const getArrowsData = async () => {
-      await getArrows(outcomeID).then((data) => {
-        setArrows(data.data);
+        //TODO set up an object that will calc how many levels and only display the correct number of columns
+        // function drivertiers() {
+        // for (let i = 0; i < data.data.length; i++) {
+        //   let level = data.data[i].tierLevel - 1; //tier level is 1 based, array is 0 based
+        //   dtree[level].unshift(data.data[i]);
       });
     };
 
     getDriversData();
-    getArrowsData();
     setState({ ...state, selOutcome: selOutcome });
-
     navigate("/drivertree/" + selOutcome.id);
   }, [selOutcome]);
 
@@ -161,12 +154,10 @@ const DriverTreePage = () => {
     });
   };
 
-  //navigate to the outcome page
   const goToOutcome = async (e) => {
     navigate("/allOutcomes/" + selOutcome.id);
   };
 
-  //used to handle the submit of the modals for clusters and arrows
   const onModalSubmit = (e) => {
     e.preventDefault();
     handleClose();
@@ -175,31 +166,6 @@ const DriverTreePage = () => {
   //close the modal
   const handleClose = () => {
     setClusterModal(false);
-    setArrowModal(false);
-  };
-
-  const myArrow = (array) => {
-    return array.map((f, index) => {
-      return (<div>
-        <Xarrow
-          start={array[index].start}
-          color={array[index].color}
-          end={array[index].end}
-          path={array[index].path}
-          startAnchor={array[index].startAnchor}
-          endAnchor={array[index].endAnchor}
-          strokeWidth={array[index].strokeWidth}
-          headSize={array[index].headSize}
-          gridBreak={array[index].gridBreak}
-          showTail={array[index].showTail}
-          showHead={array[index].showHead}
-          dashness={array[index].dashness}
-          arrowBodyProps={array[index].arrowBodyProps}
-          passProps={array[index].arrowBodyProps}
-          id={array[index].id}
-        />
-      </div>)
-  });
   };
 
   return (
@@ -225,18 +191,12 @@ const DriverTreePage = () => {
               >
                 Create Cluster
               </Button>
-
-              <Button
-                className={styles.my_btn}
-                onClick={() => setArrowModal(true)}
-                style={{ width: "150px", height: "30px", margin: "10px" }}
-              >
-                Create Arrow
-              </Button>
             </Row>
 
+            <div></div>
+
             <Row className={styles.outcome}>
-              {/* <Col className={styles.driver} key="0">
+              <Col className={styles.driver} sm={6} md={6} lg={2} key="0">
                 <p>Tier 0</p>
                 <Row
                   style={{
@@ -247,7 +207,7 @@ const DriverTreePage = () => {
                   id="outcomeColumn"
                   key="outcomeColumn1"
                 >
-                  <Card className={styles.my_card} onClick={goToOutcome} id={`outcomeID${selOutcome.id}`}>
+                  <Card className={styles.my_card} onClick={goToOutcome}>
                     <Card.Header className={styles.card_header}></Card.Header>
                     <Card.Body className={styles.my_card_body}>
                       <Card.Text className={styles.my_card_text}>
@@ -260,19 +220,58 @@ const DriverTreePage = () => {
                     <Legend driverTreeObj={driverTreeObj} />
                   </Row>
                 </Row>
-              </Col> */}
+              </Col>
 
               <DriverCards
+                tier={tierOne}
                 driverTreeObj={driverTreeObj}
                 selOutcome={selOutcome}
                 selDriver={selDriver}
                 setSelOutcome={setSelOutcome}
-                arrows={arrows}
-                showArrowMod={showArrowMod}
-                setArrowMod={setArrowMod}
-                arrowID={arrowID}
-                setArrowID={setArrowID}
               />
+              <DriverCards
+                tier={tierTwo}
+                driverTreeObj={driverTreeObj}
+                selOutcome={selOutcome}
+                selDriver={selDriver}
+                setSelOutcome={setSelOutcome}
+              />
+
+              <DriverCards
+                tier={tierThree}
+                driverTreeObj={driverTreeObj}
+                selOutcome={selOutcome}
+                selDriver={selDriver}
+                setSelOutcome={setSelOutcome}
+              />
+
+              <DriverCards
+                tier={tierFour}
+                driverTreeObj={driverTreeObj}
+                selOutcome={selOutcome}
+                selDriver={selDriver}
+                setSelOutcome={setSelOutcome}
+              />
+
+              <DriverCards
+                tier={tierFive}
+                driverTreeObj={driverTreeObj}
+                selOutcome={selOutcome}
+                selDriver={selDriver}
+                setSelOutcome={setSelOutcome}
+              />
+
+              {/* <Col
+                className="justify-content-center driver"
+                sm={10}
+                md={3}
+                id="legend"
+                key="legendColumn"
+              >
+                <Row style={{ height: "700px" }}>
+                  <Legend stakeholders={selOutcome.legend} />
+                </Row>
+              </Col> */}
             </Row>
 
             <Row style={{ height: "250px" }}>
@@ -310,61 +309,6 @@ const DriverTreePage = () => {
             selOutcome={selOutcome}
             setSelOutcome={setSelOutcome}
             driverTreeObj={driverTreeObj}
-          />
-          <Button variant="secondary" onClick={handleClose}>
-            Close
-          </Button>
-        </Modal.Body>
-      </Modal>
-
-      <Modal
-        name="arrowModal"
-        show={showArrowModal}
-        size="lg"
-        aria-labelledby="contained-modal-title-vcenter"
-        centered
-        backdrop="static"
-        keyboard={false}
-        onHide={() => setArrowModal(false)}
-        // className={styles.cluster_modal}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title id="cluster-modal">Create Arrow</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {/*change everything in the signup form components*/}
-          <ArrowModal
-            onModalSubmit={onModalSubmit}
-            selDriver={selDriver}
-            setSelDriver={setSelDriver}
-            selOutcome={selOutcome}
-            setSelOutcome={setSelOutcome}
-          />
-          <Button variant="secondary" onClick={handleClose}>
-            Close
-          </Button>
-        </Modal.Body>
-      </Modal>
-
-      <Modal
-        name="arrowModModal"
-        show={showArrowMod}
-        size="lg"
-        centered
-        backdrop="static"
-        keyboard={false}
-        onHide={() => setArrowMod(false)}
-        // className={styles.cluster_modal}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title id="cluster-modal">Mod Arrow</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {/*change everything in the signup form components*/}
-          <ModArrows
-            onModalSubmit={onModalSubmit}
-            arrowID={arrowID}
-            setArrowMod={setArrowMod}
           />
           <Button variant="secondary" onClick={handleClose}>
             Close

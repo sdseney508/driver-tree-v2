@@ -10,15 +10,7 @@ import {
   updateDriver,
 } from "../utils/drivers";
 import DriverTable from "../components/DriversTable";
-import { useNavigate, useLocation, useParams } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faArrowRight,
-  faArrowLeft,
-  faArrowUp,
-  faArrowDown,
-  faCircle,
-} from "@fortawesome/free-solid-svg-icons";
+import { useNavigate, useParams } from "react-router-dom";
 import styles from "./DriverPage.module.css";
 
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form
@@ -29,7 +21,6 @@ const DriverPage = () => {
   const [selDriver, setSelDriver] = useState({});
   const [selOutcome, setSelOutcome] = useState({});
   const navigate = useNavigate();
-  const location = useLocation();
 
   let { outcomeID, driverID } = useParams();
   // this is getting the user data from the database to properly populate the form.  None of the form data is being updated in the database. until after you hit submit.
@@ -126,18 +117,6 @@ const DriverPage = () => {
                 >
                   Driver Details
                 </h2>
-                <FontAwesomeIcon
-                  icon={faArrowLeft}
-                  className={styles.arrows}
-                  onClick={buttonClicked}
-                  onBlur={handleFormSubmit}
-                />
-                <FontAwesomeIcon
-                  icon={faArrowRight}
-                  className={styles.arrows}
-                />
-                <FontAwesomeIcon icon={faArrowUp} className={styles.arrows} />
-                <FontAwesomeIcon icon={faArrowDown} className={styles.arrows} />
                 <Button
                   className={styles.back_button}
                   onClick={backToDriverTree}
@@ -280,38 +259,48 @@ const DriverPage = () => {
                     <Form.Control
                       as="textarea"
                       value={selDriver.progress || ""}
+                      style={{height: "200px" }}
                       //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                       name="progress"
                       onChange={handleInputChange}
                       onBlur={handleFormSubmit}
                     />
                   </Form.Group>
-                  <Row
-                  className={styles.abbrev_row}>
 
-                  <Form.Group>
-                    <Form.Label>Stakeholder</Form.Label>
-                    <Form.Control
-                      as="textarea"
-                      value={selDriver.stakeholders || ""}
-                      style={{ width: "30%" }}
-                      //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-                      name="stakeholders"
-                      onChange={handleInputChange}
-                      onBlur={handleFormSubmit}
-                      />
-                        <Form.Label>Abbreviation</Form.Label>
-                    <Form.Control
-                      as="textarea"
-                      value={selDriver.stakeholderAbbreviation || ""}
-                      style={{ width: "30%" }}
-                      //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-                      name="stakeholderAbbreviation"
-                      onChange={handleInputChange}
-                      onBlur={handleFormSubmit}
-                      />
-                  </Form.Group>
-                                        </Row>
+                  <Row className={styles.abbrev_row}>
+                    <Form.Group>
+                      <Col>
+                        <Row>
+                          <Col>
+                            {" "}
+                            <Form.Label>Stakeholder</Form.Label>
+                            <Form.Control
+                              as="textarea"
+                              value={selDriver.stakeholders || ""}
+                              style={{ width: "30%", height: "30px" }}
+                              //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                              name="stakeholders"
+                              onChange={handleInputChange}
+                              onBlur={handleFormSubmit}
+                            />
+                          </Col>
+                          <Col>
+                            {" "}
+                            <Form.Label>Abbreviation</Form.Label>
+                            <Form.Control
+                              as="textarea"
+                              value={selDriver.stakeholderAbbreviation || ""}
+                              style={{ width: "30%", height: "30px" }}
+                              //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                              name="stakeholderAbbreviation"
+                              onChange={handleInputChange}
+                              onBlur={handleFormSubmit}
+                            />
+                          </Col>
+                        </Row>
+                      </Col>
+                    </Form.Group>
+                  </Row>
                 </Col>
                 <Col className={styles.my_col}>
                   <Form.Group>

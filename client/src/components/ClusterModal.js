@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Form, Button, Row } from "react-bootstrap";
+import { Button, Row } from "react-bootstrap";
 import ClusterTable from "./ClusterTable";
 import styles from "./ClusterModal.module.css";
-import { getCluster, updateDriver, getDriverByOutcome } from "../utils/drivers";
-
-// import styles from "./DriverTreePage.module.css";
+import { updateDriver } from "../utils/drivers";
 
 const ClusterModal = ({
   onModalSubmit,
@@ -14,25 +12,14 @@ const ClusterModal = ({
   setSelOutcome,
   driverTreeObj,
 }) => {
-  const [roleState, setRoleState] = useState([]);
   const [selectedDrivers, setSelectedDrivers] = useState([]);
-  const [cluster, setCluster] = useState([]);
-  const [create, setCreate] = useState(false);
-  const [deleteC, setDeleteC] = useState(false);
 
   useEffect(() => {}, []);
-
-  // set initial form state
-
-  const [validated] = useState(false);
-
-  //for passcheck, ensure passwords match
-  const [showPassAlert, setShowPassAlert] = useState(false);
 
   function createCluster() {
     let clusternumb = 0;
     for (let i = 0; i < selectedDrivers.length - 1; i++) {
-      if (selectedDrivers[i].tierLevel != selectedDrivers[i + 1].tierLevel) {
+      if (selectedDrivers[i].tierLevel !== selectedDrivers[i + 1].tierLevel) {
         alert("Drivers must be in the same tier");
         return;
       }
@@ -45,7 +32,7 @@ const ClusterModal = ({
       }
     }
     clusternumb++;
-    let body = { tierLevel: selectedDrivers[0].tierLevel, cluster: 0 };
+    
     for (let i = 0; i < selectedDrivers.length; i++) {
       const driver = selectedDrivers[i];
       updateDriver(driver.id, { cluster: clusternumb });
