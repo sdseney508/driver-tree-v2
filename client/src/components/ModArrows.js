@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Button, Row, Form } from "react-bootstrap";
 import styles from "./ClusterModal.module.css";
 import { deleteArrow, updateArrow } from "../utils/arrows";
+import { getOutcome } from "../utils/drivers";
 
-const ModArrows = ({ onModalSubmit, arrowID, setArrowMod }) => {
+const ModArrows = ({ onModalSubmit, arrowID, setArrowMod, selOutcome, setSelOutcome }) => {
   const [selectedElements, setSelectedElements] = useState([]);
   const [arrowProps, setArrowProps] = useState([]);
 
@@ -11,13 +12,16 @@ const ModArrows = ({ onModalSubmit, arrowID, setArrowMod }) => {
   async function afterSubmission() {
     let body = arrowProps;
     await updateArrow(arrowID, body);
-    window.location.reload();
+    setArrowMod(false);
   }
 
   async function delArrow() {
     console.log(arrowID);
     await deleteArrow(arrowID);
-    window.location.reload();
+    getOutcome(selOutcome.id).then((res) => {
+      setSelOutcome(res.data);
+    });
+    setArrowMod(false);
   }
 
   return (

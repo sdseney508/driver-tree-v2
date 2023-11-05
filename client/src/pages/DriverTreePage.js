@@ -365,6 +365,8 @@ const DriverTreePage = () => {
             onModalSubmit={onModalSubmit}
             arrowID={arrowID}
             setArrowMod={setArrowMod}
+            selOutcome={selOutcome}
+            setSelOutcome={setSelOutcome}
           />
           <Button variant="secondary" onClick={handleClose}>
             Close

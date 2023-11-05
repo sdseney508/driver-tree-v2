@@ -19,7 +19,7 @@ function ArrowTable({ selDriver, setSelDriver, selOutcome, setSelOutcome, select
   };
 
   const handleSelect = (e) => {
-    console.log(e.target.id);
+
     setShow(false);
   };
 
@@ -34,10 +34,8 @@ function ArrowTable({ selDriver, setSelDriver, selOutcome, setSelOutcome, select
         rowD = data.data;
       });
       await getOutcome(selOutcome.id).then((data) => {
-        console.log(data.data);
         rowD.push(data.data);
       });
-      console.log(rowD);
       setRowData(rowD);
 
 

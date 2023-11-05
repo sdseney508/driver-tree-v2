@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button, Row } from "react-bootstrap";
 import ArrowTable from "./ArrowTable";
 import styles from "./ClusterModal.module.css";
-import { updateDriver } from "../utils/drivers";
-import { createArrow, deleteArrow, updateArrow } from "../utils/arrows";
+
+import { createArrow } from "../utils/arrows";
+import { getOutcome } from "../utils/drivers";
 
 const ArrowModal = ({
   onModalSubmit,
@@ -16,8 +17,10 @@ const ArrowModal = ({
   const [selectedElements, setSelectedElements] = useState([]);
 
   async function createAnArrow() {
+    debugger;
     let body = {};
     body.outcomeID = selOutcome.id;
+    body.outcomeId = selOutcome.id;
     body.passProps = "onClick={setArrowMod(true)}";
 
     if (
@@ -25,9 +28,13 @@ const ArrowModal = ({
       !selectedElements[1].outcomeTitle
     ) {
       //both are drivers
+      if (selectedElements[0].tierLevel > selectedElements[1].tierLevel) {
+        body.start = `card${selectedElements[0].id}`;
+        body.end = `card${selectedElements[1].id}`;
+      } else {
       body.start = `card${selectedElements[1].id}`;
       body.end = `card${selectedElements[0].id}`;
-
+      }
       console.log(body);
       //now check for cluster on the end card
       if (selectedElements[0].cluster !== 0) {
@@ -74,10 +81,10 @@ const ArrowModal = ({
       body.endAnchor = "right";
     }
      await createArrow(body);
-    console.log(body);
-
-    window.location.reload();
-  }
+      getOutcome(selOutcome.id).then((res) => {
+        setSelOutcome(res.data);
+      });
+  };
 
   return (
     <>

@@ -54,7 +54,6 @@ const DriverCards = ({ driverTreeObj, selOutcome, setSelOutcome, arrows, showArr
     getOutcome(selOutcome.id).then((data) => {
       setSelOutcome(data.data);
     });
-    window.location.reload(false);
   };
 
   const goToDriver = async (e) => {
@@ -68,7 +67,6 @@ const DriverCards = ({ driverTreeObj, selOutcome, setSelOutcome, arrows, showArr
     getOutcome(selOutcome.id).then((data) => {
       setSelOutcome(data.data);
     });
-    window.location.reload();
   };
 
   //navigate to the outcome page
