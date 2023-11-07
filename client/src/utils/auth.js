@@ -77,9 +77,9 @@ const register = (
   password,
   userStatus,
   userRole,
-  functionalArea
+  userCommand
 ) => {
-  // debugger;
+  console.log(userCommand);
   return axios.post(apiURL + "/users", {
     firstName,
     lastName,
@@ -87,7 +87,7 @@ const register = (
     password,
     userStatus,
     userRole,
-    functionalArea,
+    userCommand
   });
 };
 

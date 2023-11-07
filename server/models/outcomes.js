@@ -29,7 +29,7 @@ outcomes.init(
             type: DataTypes.INTEGER,
             allowNull: true,
             references: {
-              model: "stakeholder",
+              model: "stakeholders",
               key: "id",
             },
           },

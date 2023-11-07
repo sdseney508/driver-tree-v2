@@ -20,7 +20,6 @@ router.get('/', async (req, res) => {
         const roleData = await role.findAll({
             attributes: ['id', 'role']
         });
-        console.log(roleData);
         res.status(200).json(roleData);
     } catch (err) {
         console.log(err);
@@ -32,7 +31,6 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
     try {
         const roleData = await role.findByPk(req.params.id);
-        console.log(roleData);
         res.status(200).json(roleData);
     } catch (err) {
         console.log(err);

@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Form, Button } from "react-bootstrap";
 import { register } from "../utils/auth";
 import { getRoles } from "../utils/sign-up";
-import { allStakeholders} from "../utils/stakeholders";
-
+import { allStakeholders, getStakeholder} from "../utils/stakeholders";
 
 const SignupForm = ({onModalSubmit}) => {
   const [roleState, setRoleState] = useState([]);
@@ -13,6 +12,7 @@ const SignupForm = ({onModalSubmit}) => {
 
   useEffect(() => {
     getModalData();
+    getStakeholders();
   }, []);
 
   // set initial form state
@@ -35,26 +35,26 @@ const SignupForm = ({onModalSubmit}) => {
     let rolesOpts = await getRoles().then((data) => {
       return data.data;
     });
+    setRoleState(rolesOpts);
+  }
+
+  async function getStakeholders() {
     let stakeholderOpts = await allStakeholders().then((data) => {
-      console.log(data);
       return data.data;
     });
-
-
-    setRoleState(rolesOpts);
     setStakeholderState(stakeholderOpts);
   }
 
-  //create the options for the stakeholder dropdown
-  // function stakeholderOptions() {
-  //   return stakeholderState.map((f, index) => {
-  //     return (
-  //       <option key={index} value={f.id}>
-  //         {f.command}
-  //       </option>
-  //     );
-  //   });
-  // }
+  // create the options for the stakeholder dropdown
+  function stakeholderOptions() {
+    return stakeholderState.map((f, index) => {
+      return (
+        <option key={index} value={f.id}>
+          {f.command}
+        </option>
+      );
+    });
+  }
   
   //creates the options for the role dropdown
   function roleOptions() {
@@ -71,6 +71,7 @@ const SignupForm = ({onModalSubmit}) => {
     //this is the function that is called when the form is submitted.  Please note, that since bcrypt is hashing the password, it will increase the password length well beyond the 14 character minimum and uses special characters so it will always pass the sequqlize validation.  If you are using bcrypt, you will need to use the regex below to validate the password.
   const handleFormSubmit = async (event) => {
     event.preventDefault();
+
     if (userFormData.password !== userFormData.passVal) {
       setShowPassAlert(true);
       alert("Passwords do not match");
@@ -91,9 +92,9 @@ const SignupForm = ({onModalSubmit}) => {
     const password = userFormData.password;
     const userStatus = "Requested";
     const userRole = userFormData.userRole;
-    // const userCommand = userFormData.command;
+    const userCommand = userFormData.command;
 
-    //fetch is popping a promise error so switching to axios
+    console.log(firstName, lastName, email, password, userStatus, userRole, userCommand);
     //couldnt pass the state object so had to pass each value individually
     register(
       firstName,
@@ -102,7 +103,7 @@ const SignupForm = ({onModalSubmit}) => {
       password,
       userStatus,
       userRole,
-      // userCommand
+      userCommand
     )
       .then((res) => console.log(res))
       .catch((err) => console.log(err));
@@ -184,7 +185,7 @@ const SignupForm = ({onModalSubmit}) => {
           </Form.Control.Feedback>
         </Form.Group>
 
-        {/* <Form.Group>
+        <Form.Group>
           <Form.Label htmlFor="command">Command</Form.Label>
           <Form.Select
             name="command"
@@ -199,7 +200,7 @@ const SignupForm = ({onModalSubmit}) => {
           <Form.Control.Feedback type="invalid">
             Command is required!
           </Form.Control.Feedback>
-        </Form.Group> */}
+        </Form.Group>
 
 
         <Form.Group>

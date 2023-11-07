@@ -51,10 +51,6 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false,
       defaultValue: "Requested",
-      //     references: {
-      //       model: 'accountstatus',
-      //       key: 'accountstatus_id',
-      //  }
     },
     userRole: {
       type: DataTypes.STRING,
@@ -66,9 +62,9 @@ User.init(
     },
     userCommand: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
       references: {
-        model: "stakeholder",
+        model: "stakeholders",
         key: "id",
       },
     },

@@ -5,7 +5,7 @@ const {
   drivers,
   outcomes,
   role, 
-  stakeholder,
+  stakeholders,
   state,
   status,
   User, 
@@ -25,7 +25,7 @@ const seedDatabase = async () => {
   await sequelize.sync({ force: true });
 
   //needs to be done first due to foreign key constraints
-  const stakehold = await stakeholder.bulkCreate(stakeholderData, {
+  const stakehold = await stakeholders.bulkCreate(stakeholderData, {
     individualHooks: true,
     returning: true,
   });

@@ -7,8 +7,7 @@ const deliverables = require('./deliverables');
 const drivers = require('./drivers');
 const outcomes = require('./outcomes');
 const role = require('./role');
-const stakeholder = require('./stakeholder');
-const stakeholder_outcomes = require('./stakeholder_outcomes');
+const stakeholders = require('./stakeholders');
 const state = require('./state');
 const status = require('./status');
 const User = require('./User');
@@ -29,26 +28,26 @@ outcomes.hasMany(arrows, {
 arrows.belongsTo(outcomes, {
 });
 
-stakeholder.hasMany(drivers, {
+stakeholders.hasMany(drivers, {
     foreignKey: 'stakeholdersID',
 });
 
-drivers.hasOne(stakeholder, {
+drivers.hasOne(stakeholders, {
 });
 
-stakeholder.hasMany(User, {
+stakeholders.hasMany(User, {
     foreignKey: 'userGroup',
 });
 
-User.belongsTo(stakeholder, {
+User.belongsTo(stakeholders, {
 });
 
-stakeholder.hasMany(outcomes, {
+stakeholders.hasMany(outcomes, {
     foreignKey: 'command',
 });
 
-outcomes.belongsTo(stakeholder, {
+outcomes.belongsTo(stakeholders, {
 });
 
 
-module.exports = { accountStatus, arrows, attachments, audit, carousel, deliverables, drivers, outcomes, role, stakeholder, stakeholder_outcomes, state, status, User };
+module.exports = { accountStatus, arrows, attachments, audit, carousel, deliverables, drivers, outcomes, role, stakeholders, state, status, User };
