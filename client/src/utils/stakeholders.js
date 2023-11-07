@@ -2,7 +2,7 @@ import axios from "axios";
 import apiURL from "./apiURL";
 
 const allStakeholders = () => {
-  return axios.get(apiURL + "/stakesholders");
+  return axios.get(apiURL + "/stakesholders/");
 };
 
 const createStakeholder = (body) => {
@@ -10,7 +10,7 @@ const createStakeholder = (body) => {
 };
 
 const deleteStakeholder = (id) => {
-  return axios.delete(apiURL + "/stakeholder/" + id);
+  return axios.delete(apiURL + "/stakeholders/" + id);
 };
 
 const updateStakeholder = (id, body) => {

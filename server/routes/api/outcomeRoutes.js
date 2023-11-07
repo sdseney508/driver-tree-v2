@@ -7,17 +7,8 @@ const {Op} = require("sequelize");
 //create new outcomes; also logs the creation in the admin poriton of the database
 router.post("/new", async (req, res) => {
   try {
-    const outcomesData = await outcomes.create();
-    let id = outcomesData.id;
-    //TODO:  add the admin log to the outcomes table and add the creation marker to the top level admin table
-    // const outcomeupdate = await outcomes.update(
-    //   { admin_log: req.body.log },
-    //   {
-    //     where: {
-    //       id: id, 
-    //     },
-    //   }
-    // );
+    console.log(req.body);
+    const outcomesData = await outcomes.create({command: req.body.command});
     res.status(200).json(outcomesData);
   } catch (err) {
     res.status(400).json(err);
@@ -67,7 +58,25 @@ router.get("/", async (req, res) => {
   }
 });
 
-//get all active outcomess for the ActiveOpLimits page.  This data will be used to populate the table underneath the form view.
+//get all outcomes for a certain command
+router.get("/command/:command", async (req, res) => {
+  try {
+    console.log("i started the get outcomes route");
+    const outcomesData = await outcomes.findAll({
+      where: {
+        command: {
+          [Op.like]: `%${req.params.command}%`,
+        },
+      },
+    });
+    console.log(outcomesData);
+    res.status(200).json(outcomesData);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+//get all active outcomes.  This data will be used to populate the table underneath the form view.
 router.get("/active", async (req, res) => {
   try {
     const outcomesData = await outcomes.findAll({

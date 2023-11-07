@@ -15,15 +15,26 @@ outcomes.init(
         outcomeTitle: {
             type: DataTypes.TEXT,
             allowNull: true,
-            defaultValue: 'CAPT Guerre is too awesome to be contained by a mere title.',
+            defaultValue: 'Draft',
         },
         //Todo:  move this to its own table with a link to the outcome
         problemStatement: {
             type: DataTypes.TEXT,
             allowNull: true,
-            defaultValue: 'No one can keep up with him',
+            defaultValue: 'Draft',
         },
 
+        //command that owns the outcome.  from stakeholders table
+        command: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+              model: "stakeholder",
+              key: "id",
+            },
+          },
+
+        
         baselinePerformance: {
             type: DataTypes.TEXT,
             allowNull: true,
@@ -34,7 +45,7 @@ outcomes.init(
         rootCauses: {
             type: DataTypes.TEXT,
             allowNull: true,
-            defaultValue: 'He outworks everyone'
+            defaultValue: 'Draft'
         },
         assumptions: {
             type: DataTypes.TEXT,

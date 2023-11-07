@@ -5,16 +5,21 @@ const allDrivers = () => {
   return axios.get(apiURL + "/drivers");
 };
 
+//this is for admin use only
 const allOutcomes = () => {
   return axios.get(apiURL + "/outcomes");
+};
+
+const outcomeByCommand = (command) => {
+  return axios.get(apiURL + "/outcomes/command/" + command);
 };
 
 const createDriver = (body) => {
   return axios.post(apiURL + "/drivers/new", body);
 };
 
-const createOutcome = () => {
-  return axios.post(apiURL + "/outcomes/new");
+const createOutcome = (body) => {
+  return axios.post(apiURL + "/outcomes/new", body);
 };
 
 const deleteDriver = (id) => {
@@ -106,6 +111,7 @@ export {
   getOutcome,
   getStakeholders,
   getUsers,
+  outcomeByCommand,
   updateCluster,
   updateDriver,
   updateOutcome

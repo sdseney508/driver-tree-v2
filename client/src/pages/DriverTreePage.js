@@ -1,6 +1,8 @@
 //page for viewing and updating op limits
 import React, { useState, useContext, useEffect } from "react";
 import { stateContext } from "../App";
+import axios from "axios";
+import html2canvas from 'html2canvas';
 import { Container, Row, Col, Button, Modal } from "react-bootstrap";
 import {
   createOutcome,
@@ -30,7 +32,9 @@ const DriverTreePage = () => {
   const [selOutcome, setSelOutcome] = useState({});
   const [selDriver, setSelDriver] = useState({});
   const [driverTreeObj, setDriverTreeObj] = useState([]);
-
+  //these are the state and URL for the pdf
+  const [elementsToInclude, setElementsToInclude] = useState([]);
+  const [pdfURL, setPdfURL] = useState('');
 
   const { outcomeID } = useParams();
 
@@ -55,14 +59,17 @@ const DriverTreePage = () => {
           throw new Error("something went wrong!");
         }
         const user = response.data;
+        console.log(user);
         //used to make sure they have permissions to make changes
         setState({
           ...state,
           firstName: user.firstName,
           lastName: user.lastName,
           Role: user.userRole,
+          command: user.userCommand,
           userID: user.id,
         });
+        console.log(state);
         let userDataLength = Object.keys(user).length;
         //if the user isnt logged in with an unexpired token, send them to the login page
         if (!userDataLength > 0) {
@@ -98,8 +105,8 @@ const DriverTreePage = () => {
     getOutcomeData();
     getDriversData();
     getArrowsData();
-    // getStakeholderData();
     setState({ ...state, selOutcome: selOutcome });
+
     //this one gets the initial draftOL for the form
   }, []);
 
@@ -124,9 +131,34 @@ const DriverTreePage = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome]);
 
+
+  //function to generate a pdf
+  const generatePDF = async () => {
+    debugger;
+    let cnvsIMG = html2canvas(document.getElementById('pdf'));
+    // const elementToCapture = document.getElementById('pdf');
+    console.log(cnvsIMG);
+    //check for info before making the axios call
+    if (!cnvsIMG) {
+      console.error('No element to capture!');
+      return;
+    }
+
+    // const canvasimg = await html2canvas(elementToCapture);
+    axios.post('http://localhost:8080/generate-pdf', cnvsIMG)
+      .then((response) => {
+        setPdfURL(response.data);
+      })
+      .catch((error) => {
+        console.error('Error generating PDF:', error);
+      });
+  };
+
   //creates new outcome and then resets the selOutcome state.  This cause a a useEffect fire and refreshes the page.
-  const newOutcome = () => {
-    createOutcome().then((data) => {
+  const newOutcome = async () => {
+    let body ={command: state.command}
+    createOutcome(body).then((data) => {
+      setState({ ...state, outcomeID: data.data.id });
       setSelOutcome(data.data);
     });
   };
@@ -146,10 +178,16 @@ const DriverTreePage = () => {
 
   return (
     <>
-      <div className={styles.driver_page} id="driver_parent" key="topleveldiv">
+    {/* <div> 
+    <h1>Generate PDF</h1>
+      <button onClick={generatePDF}>Generate PDF</button>
+      <a href={pdfURL} download="output.pdf">Download PDF</a>
+
+    </div> */}
+      <div className={styles.driver_page} id="pdf" key="topleveldiv">
         <Container fluid className="justify-content-center">
           <Col className={styles.my_col}>
-            <Row
+            {state.Role !== 'Stakeholder' ? (<Row
               className="justify-content-center m-1"
               styles={{ height: "75px" }}
             >
@@ -175,10 +213,11 @@ const DriverTreePage = () => {
               >
                 Create Arrow
               </Button>
-            </Row>
+            </Row>):null }
 
             <Row className={styles.outcome}>
               <DriverCards
+                state={state}
                 driverTreeObj={driverTreeObj}
                 selOutcome={selOutcome}
                 setSelOutcome={setSelOutcome}
@@ -191,12 +230,11 @@ const DriverTreePage = () => {
               />
             </Row>
 
-            <Row style={{ height: "250px" }}>
+            <Row style={{height: "250px" }}>
               <OutcomeTable
-                selDriver={selDriver}
-                setSelDriver={setSelDriver}
                 selOutcome={selOutcome}
                 setSelOutcome={setSelOutcome}
+                command={state.command}
               />
             </Row>
           </Col>

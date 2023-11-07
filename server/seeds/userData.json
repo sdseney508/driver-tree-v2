@@ -1,11 +1,21 @@
 [
   {
-    "firstName": "Charlie",
-    "lastName":"Steele",
-    "email": "charlessteele@hotmail.com",
+    "firstName": "Cory",
+    "lastName": "Yager",
+    "email": "cyager@goipsinc.com",
     "password": "P@assword12345",
     "userstatus": "Active",
-    "userRole": "Administrator"
+    "userRole": "User",
+    "userCommand": 1
+  },
+  {
+    "firstName": "Steve",
+    "lastName": "Seney",
+    "email": "sseney@goipsinc.com",
+    "password": "P@assword12345",
+    "userstatus": "Active",
+    "userRole": "User",
+    "userCommand": 2
   },
   {
     "firstName": "Steve",
@@ -13,33 +23,17 @@
     "email": "sdseney508@gmail.com",
     "password": "P@assword12345",
     "userstatus": "Active",
-    "userRole": "User"
+    "userRole": "Administrator",
+    "userCommand": 3
   },
   {
-    "firstName": "Shannon",
-    "lastName": "Seney",
-    "email": "shannonseney508@gmail.com",
+    "firstName": "Brad",
+    "lastName": "Kinslow",
+    "email": "bkinsolw@goipsinc.com",
     "password": "P@assword12345",
     "userstatus": "Active",
-    "userRole": "User"
-  },
-  {
-    "firstName": "Josh",
-    "lastName": "Guerre",
-    "email": "josh.guerre@gmail.com",
-    "password": "P@assword12345",
-    "userstatus": "Active",
-    "userRole": "User"
-  }
-  ,
- 
-  {
-    "firstName": "Demo",
-    "lastName": "User",
-    "email": "demo.account@gmail.com",
-    "password": "P@assword12345",
-    "userstatus": "Active",
-    "userRole": "User"
+    "userRole": "Stakeholder",
+    "userCommand": 2
   }
 
 ]

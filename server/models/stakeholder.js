@@ -13,7 +13,7 @@ stakeholder.init(
       primaryKey: true,
       autoIncrement: true,
     },
-    stakeholderName: {
+    command: {
       type: DataTypes.STRING,
       allowNull: false,
     },

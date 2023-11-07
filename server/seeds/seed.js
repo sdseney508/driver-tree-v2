@@ -25,6 +25,11 @@ const seedDatabase = async () => {
   await sequelize.sync({ force: true });
 
   //needs to be done first due to foreign key constraints
+  const stakehold = await stakeholder.bulkCreate(stakeholderData, {
+    individualHooks: true,
+    returning: true,
+  });
+  
   const outcome = await outcomes.bulkCreate(outcomesData, {
     individualHooks: true,
     returning: true,
@@ -45,10 +50,6 @@ const seedDatabase = async () => {
     returning: true,
   });
 
-  const stakehold = await stakeholder.bulkCreate(stakeholderData, {
-    individualHooks: true,
-    returning: true,
-  });
   
   const stat = await state.bulkCreate(stateData, {
     individualHooks: true,

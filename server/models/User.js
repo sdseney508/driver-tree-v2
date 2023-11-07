@@ -64,7 +64,7 @@ User.init(
       //       key: 'role_id',
       //  }
     },
-    userGroup: {
+    userCommand: {
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {

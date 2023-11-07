@@ -21,7 +21,6 @@ const ArrowModal = ({
     let body = {};
     body.outcomeID = selOutcome.id;
     body.outcomeId = selOutcome.id;
-    body.passProps = "onClick={setArrowMod(true)}";
 
     if (
       !selectedElements[0].outcomeTitle &&

@@ -43,12 +43,11 @@ stakeholder.hasMany(User, {
 User.belongsTo(stakeholder, {
 });
 
-stakeholder.belongsToMany(outcomes, {
-    through: 'stakeholder_outcomes',
+stakeholder.hasMany(outcomes, {
+    foreignKey: 'command',
 });
 
-outcomes.belongsToMany(stakeholder, {
-    through: 'stakeholder_outcomes',
+outcomes.belongsTo(stakeholder, {
 });
 
 

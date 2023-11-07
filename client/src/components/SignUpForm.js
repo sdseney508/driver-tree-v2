@@ -2,10 +2,12 @@ import React, { useState, useEffect } from "react";
 import { Form, Button } from "react-bootstrap";
 import { register } from "../utils/auth";
 import { getRoles } from "../utils/sign-up";
+import { allStakeholders} from "../utils/stakeholders";
 
 
 const SignupForm = ({onModalSubmit}) => {
   const [roleState, setRoleState] = useState([]);
+  const [stakeholderState, setStakeholderState] = useState([]); //this is the list of stakeholders for the dropdown
   // const [functionalState, setFunctionalState] = useState([]);
   // const [showSignupModal, setSignupModal] = useState(true);
 
@@ -33,9 +35,27 @@ const SignupForm = ({onModalSubmit}) => {
     let rolesOpts = await getRoles().then((data) => {
       return data.data;
     });
+    let stakeholderOpts = await allStakeholders().then((data) => {
+      console.log(data);
+      return data.data;
+    });
+
+
     setRoleState(rolesOpts);
+    setStakeholderState(stakeholderOpts);
   }
 
+  //create the options for the stakeholder dropdown
+  // function stakeholderOptions() {
+  //   return stakeholderState.map((f, index) => {
+  //     return (
+  //       <option key={index} value={f.id}>
+  //         {f.command}
+  //       </option>
+  //     );
+  //   });
+  // }
+  
   //creates the options for the role dropdown
   function roleOptions() {
     return roleState.map((f, index) => {
@@ -71,7 +91,7 @@ const SignupForm = ({onModalSubmit}) => {
     const password = userFormData.password;
     const userStatus = "Requested";
     const userRole = userFormData.userRole;
-    const functionalArea = userFormData.function;
+    // const userCommand = userFormData.command;
 
     //fetch is popping a promise error so switching to axios
     //couldnt pass the state object so had to pass each value individually
@@ -82,7 +102,7 @@ const SignupForm = ({onModalSubmit}) => {
       password,
       userStatus,
       userRole,
-      functionalArea
+      // userCommand
     )
       .then((res) => console.log(res))
       .catch((err) => console.log(err));
@@ -164,6 +184,24 @@ const SignupForm = ({onModalSubmit}) => {
           </Form.Control.Feedback>
         </Form.Group>
 
+        {/* <Form.Group>
+          <Form.Label htmlFor="command">Command</Form.Label>
+          <Form.Select
+            name="command"
+            aria-label="command"
+            onChange={handleInputChange}
+          >
+            <option disabled selected="selected">
+              --Select a Command--
+            </option>
+            {stakeholderOptions()}
+          </Form.Select>
+          <Form.Control.Feedback type="invalid">
+            Command is required!
+          </Form.Control.Feedback>
+        </Form.Group> */}
+
+
         <Form.Group>
           <Form.Label htmlFor="password">Password</Form.Label>
           <Form.Control
@@ -200,7 +238,8 @@ const SignupForm = ({onModalSubmit}) => {
               userFormData.email &&
               userFormData.userRole &&
               userFormData.password &&
-              userFormData.passVal
+              userFormData.passVal && 
+              userFormData.command
             )
           }
           className="m-3"

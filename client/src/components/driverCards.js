@@ -3,7 +3,6 @@ import React, { useRef, useEffect, useState } from "react";
 import { Col, Card, Row, Button } from "react-bootstrap";
 import Xarrow from "react-xarrows"; //for the arrows
 import { getArrows } from "../utils/arrows";
-import DriverArrows from "./DrawArrows";
 import styles from "../pages/DriverTreePage.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-solid-svg-icons";
@@ -18,14 +17,13 @@ import {
 } from "../utils/drivers";
 
 const DriverCards = ({
+  state,
   driverTreeObj,
   selOutcome,
   setSelOutcome,
   arrows,
   setArrows,
-  showArrowMod,
   setArrowMod,
-  arrowID,
   setArrowID,
 }) => {
   //This module has four functions:
@@ -111,11 +109,12 @@ const DriverCards = ({
   };
 
   function tierButtons(tier) {
+    if (state.Role !== 'Stakeholder') {
     return (
       <Button className={styles.my_btn} onClick={newDriver} data-tier={tier}>
         +
       </Button>
-    );
+    );}
   }
 
   function tierCards(tier, { driverTreeObj }) {
@@ -445,11 +444,7 @@ const DriverCards = ({
         </Row>
         <Row style={{ height: "50px" }}>{tierButtons(5)}</Row>
       </Col>
-      <DriverArrows
-        selOutcome={selOutcome}
-        arrows={arrows}
-        setArrows={setArrows}
-      />
+      {myArrow()}
     </>
   );
 };

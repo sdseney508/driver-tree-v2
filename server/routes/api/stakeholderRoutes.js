@@ -7,6 +7,7 @@ const { signToken } = require("../../utils/auth");
 const { authMiddleware } = require("../../utils/auth");
 const secret = "drivertree";
 const expiration = "2h";
+
 // use /api/stakeholders for all the axios calls
 
 
@@ -14,21 +15,21 @@ const expiration = "2h";
 router.get("/stakeholderByID/:id", async (req, res) => {
   try {
     const stakeholderData = await stakeholder.findByPk(req.params.id);
-    res.status(200).json(userData);
+    res.status(200).json(stakeholderData);
   } catch (err) {
     console.log(err);
     res.status(500).json(err);
   }
 });
 
-//get all stakeholders
+//get all stakeholders; used for account creation form
 router.get("/", async (req, res) => {
   try {
-    const stakeholderData = await stakeholder.findByPk(req.id);
-    if (!userData) {
+    const stakeholderData = await stakeholder.findAll();
+    if (!stakeholderData) {
       return res
         .status(400)
-        .json({ message: "Cannot find a user with this id!" });
+        .json({ message: "Cannot find any stakeholders" });
     }
     res.status(200).send(stakeholderData);
   } catch (err) {

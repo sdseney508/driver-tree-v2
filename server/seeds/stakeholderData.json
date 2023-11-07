@@ -1,12 +1,12 @@
 [
   {
-    "stakeholderName": "PEO (U&W)"
+    "command": "PEO (U&W)"
   },
   {
-    "stakeholderName": "PMA-262"
+    "command": "PMA-213"
   },
   {
-    "stakeholderName": "OPNAV"
+    "command": "PMA-271"
   }
 
 ]

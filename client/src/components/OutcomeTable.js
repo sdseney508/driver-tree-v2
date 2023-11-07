@@ -6,8 +6,8 @@ import React, {
 } from "react";
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
 import {
-  allOutcomes,
-  getOutcome
+  getOutcome,
+  outcomeByCommand
 } from "../utils/drivers";
 import "ag-grid-community/dist/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CSS
@@ -19,14 +19,15 @@ import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CS
 //this is using the community edition and react hooks to selectively render the table
 function OutcomeTable({
   selOutcome,
-  setSelOutcome
+  setSelOutcome,
+  command
 }) {
 
   const [rowData, setRowData] = useState([]); // Set rowData to Array of Objects
   var rowD =[];
 
   async function fetchData() {
-    await allOutcomes().then((data) => {
+    await outcomeByCommand(command).then((data) => {
       rowD = data.data;
     });
 

@@ -41,12 +41,14 @@ const OutcomesPage = () => {
           throw new Error("something went wrong!");
         }
         const user = response.data;
+        console.log(user);
         //used to make sure they have permissions to make changes
         setState({
           ...state,
           firstName: user.firstName,
           lastName: user.lastName,
           Role: user.userRole,
+          command: user.userCommand,
           userID: user.id,
         });
         let userDataLength = Object.keys(user).length;
@@ -78,6 +80,7 @@ const OutcomesPage = () => {
     getUserData();
     getOutcomeData();
     getDrivers();
+    console.log(state);
     //this one gets the initial draftOL for the form
   }, []);
 
@@ -119,7 +122,8 @@ const OutcomesPage = () => {
   };
 
   const newOutcome = async () => {
-    createOutcome().then((data) => {
+    let body ={command: state.command}
+    createOutcome(body).then((data) => {
       setState({ ...state, outcomeID: data.data.id });
       setSelOutcome(data.data);
     });
@@ -375,6 +379,7 @@ const OutcomesPage = () => {
               <OutcomeTable
                 selOutcome={selOutcome}
                 setSelOutcome={setSelOutcome}
+                command={state.command}
               />
             </Row>
           </div>
