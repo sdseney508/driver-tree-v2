@@ -20,7 +20,7 @@
 
 .my_div {
   width: 97%;
-  height: 50px;
+  height: 34px;
   display: flex;
 }
 
@@ -59,10 +59,11 @@
 
 .my_card {
   position: relative;
-  display: inline-flex;
+  z-index: 1000;
+  display: flex;
   background-color: #f8f7f7;
   font-size: 0.75em;
-  height: 50px;
+  height: 35px;
   width: 100%;
 }
 
@@ -103,7 +104,41 @@
   text-align: center;
 }
 
-.card_footer:hover {
+.del_div {
+  color: red;
+  margin-right: 1px; 
+  width: 35px;
+  height: 16px;
+}
+
+.abbreviation_div {
+  background-color: rgba(0, 0, 255, 0.734);
+  color: white;
+  margin-right: 1px;
+  width: 35px;
+  height: 16px;
+}
+
+.card_row {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+.card_col_abbrev {
+  width: 20%;
+}
+
+.card_col_body{
+  width: 75%;
+  margin-left: 1px;
+  justify-content: flex-start;
+  align-items: flex-start;
+  align-content: flex-start;
+}
+
+
+.del_div:hover {
   cursor: pointer;
 }
 

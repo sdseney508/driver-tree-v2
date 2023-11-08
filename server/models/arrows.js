@@ -62,17 +62,23 @@ arrows.init(
     },
 
     startAnchor: {
-      type: DataTypes.STRING,
+      type: DataTypes.JSON,
       allowNull: false,
-      defaultValue: "auto",
+
     },
     
     endAnchor: {
-      type: DataTypes.STRING,
+      type: DataTypes.JSON,
       allowNull: false,
-      defaultValue: "auto",
+ 
     },
     
+    headSize: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: 6
+    },
+
     passProps: {
       type: DataTypes.STRING,
       allowNull: true,

@@ -1,21 +1,47 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Row, Form } from "react-bootstrap";
 import styles from "./ClusterModal.module.css";
-import { deleteArrow, updateArrow } from "../utils/arrows";
+import { deleteArrow, getArrow, updateArrow } from "../utils/arrows";
 import { getOutcome } from "../utils/drivers";
 
-const ModArrows = ({ onModalSubmit, arrowID, setArrowMod, selOutcome, setSelOutcome }) => {
-  const [arrowProps, setArrowProps] = useState([]);
+const ModArrows = ({
+  onModalSubmit,
+  arrowID,
+  setArrowMod,
+  selOutcome,
+  setSelOutcome,
+}) => {
+  const [arrowProps, setArrowProps] = useState({});
+
+
+  useEffect(() => {
+    async function fetchArrow() {
+      await getArrow(arrowID).then((res) => {
+        setArrowProps(res.data);
+      });
+    }
+
+    fetchArrow();
+
+  }, []);
 
   //takes the arrowProps from the modal and sets them to the arrowProps state
   async function afterSubmission() {
+    console.log(arrowProps.startAnchor.position);
+    console.log(arrowProps.endAnchor.position);
+    if (
+      arrowProps.startAnchor.position === "right" &&
+      arrowProps.endAnchor.position === "right"
+    ) {
+      setArrowProps({ ...arrowProps, gridBreak: parseInt(-10) });
+    }
     let body = arrowProps;
+    console.log(body);
     await updateArrow(arrowID, body);
     setArrowMod(false);
   }
 
   async function delArrow() {
-    console.log(arrowID);
     await deleteArrow(arrowID);
     getOutcome(selOutcome.id).then((res) => {
       setSelOutcome(res.data);
@@ -48,6 +74,133 @@ const ModArrows = ({ onModalSubmit, arrowID, setArrowMod, selOutcome, setSelOutc
                 <option value="red">Red</option>
               </Form.Select>
 
+              <Form.Label>Start Anchor Location</Form.Label>
+              <Form.Select
+                aria-label="Default select example"
+                onChange={(e) => {
+                  setArrowProps({
+                    ...arrowProps,
+                    startAnchor: {
+                      position: e.target.value,
+                      offset: arrowProps.startAnchor.offset,
+                    },
+                  });
+                }}
+              >
+                <option key={"s0"} value="0">
+                  Select a start anchor
+                </option>
+                <option key={"s1"} value="left">
+                  Left
+                </option>
+                <option key={"s2"} value="right">
+                  Right
+                </option>
+                <option key={"s3"} value="top">
+                  Top
+                </option>
+              </Form.Select>
+
+              <Form.Label>Start Anchor Offset</Form.Label>
+              <Form.Select
+                aria-label="Default select example"
+                defaultValue="0"
+                onChange={(e) => {
+                  if (
+                    arrowProps.startAnchor.position === "left" ||
+                    arrowProps.startAnchor.position === "right"
+                  ) {
+                    setArrowProps({
+                      ...arrowProps,
+                      startAnchor: {
+                        position: arrowProps.startAnchor.position,
+                        offset: { y: parseInt(e.target.value) },
+                      },
+                    });
+                  } else {
+                    setArrowProps({
+                      ...arrowProps,
+                      startAnchor: {
+                        position: arrowProps.startAnchor.position,
+                        offset: { x: parseInt(e.target.value) },
+                      },
+                    });
+                  }
+                }}
+              >
+                <option value="null">
+                  Select an offset (neg down and left)
+                </option>
+                <option value="-20">-20</option>
+                <option value="-10">-10</option>
+                <option value="0">0</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+              </Form.Select>
+
+              <Form.Label>End Anchor Location</Form.Label>
+              <Form.Select
+                aria-label="Default select example"
+                onChange={(e) => {
+                  setArrowProps({
+                    ...arrowProps,
+                    endAnchor: {
+                      position: e.target.value,
+                      offset: arrowProps.endAnchor.offset,
+                    },
+                  });
+                }}
+              >
+                <option key={"e0"} value="0">
+                  Select and end anchor
+                </option>
+                <option key={"e1"} value="left">
+                  Left
+                </option>
+                <option key={"e2"} value="right">
+                  Right
+                </option>
+                <option key={"e3"} value="bottom">
+                  Bottom
+                </option>
+              </Form.Select>
+
+              <Form.Label>Arrow Offset</Form.Label>
+              <Form.Select
+                aria-label="Default select example"
+                onChange={(e) => {
+                  if (
+                    arrowProps.endAnchor.position === "left" ||
+                    arrowProps.endAnchor.position === "right"
+                  ) {
+                    setArrowProps({
+                      ...arrowProps,
+                      endAnchor: {
+                        position: arrowProps.endAnchor.position,
+                        offset: { y: parseInt(e.target.value) },
+                      },
+                    });
+                  } else {
+                    setArrowProps({
+                      ...arrowProps,
+                      endAnchor: {
+                        position: arrowProps.endAnchor.position,
+                        offset: { x: parseInt(e.target.value) },
+                      },
+                    });
+                  }
+                }}
+              >
+                <option value="null">
+                  Select an offset (neg down and left)
+                </option>
+                <option value="-20">-20</option>
+                <option value="-10">-10</option>
+                <option value="0">0</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+              </Form.Select>
+
               <Form.Check
                 type="checkbox"
                 label="Dashed"
@@ -59,11 +212,11 @@ const ModArrows = ({ onModalSubmit, arrowID, setArrowMod, selOutcome, setSelOutc
           </Form>
         </Row>
 
-        <Button onClick={afterSubmission} variant="primary" className='m-1'>
+        <Button onClick={afterSubmission} variant="primary" className="m-1">
           Make Changes
         </Button>
 
-        <Button onClick={delArrow} variant="primary" className='m-1'>
+        <Button onClick={delArrow} variant="primary" className="m-1">
           Delete Arrow
         </Button>
       </div>

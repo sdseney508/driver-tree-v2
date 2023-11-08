@@ -48,7 +48,6 @@ const DriverCards = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome]);
 
-
   function allowDrop(e) {
     //this property gets set on the individual divs onDragOver property to limit where a card can be dropped
     e.preventDefault();
@@ -80,6 +79,8 @@ const DriverCards = ({
   };
 
   const goToDriver = async (e) => {
+    console.log(e.target.id);
+    console.log(selOutcome.id);
     navigate("/drpage/" + selOutcome.id + "/" + e.target.id);
   };
 
@@ -109,12 +110,13 @@ const DriverCards = ({
   };
 
   function tierButtons(tier) {
-    if (state.Role !== 'Stakeholder') {
-    return (
-      <Button className={styles.my_btn} onClick={newDriver} data-tier={tier}>
-        +
-      </Button>
-    );}
+    if (state.Role !== "Stakeholder") {
+      return (
+        <Button className={styles.my_btn} onClick={newDriver} data-tier={tier}>
+          +
+        </Button>
+      );
+    }
   }
 
   function tierCards(tier, { driverTreeObj }) {
@@ -123,7 +125,7 @@ const DriverCards = ({
     if (!driverTreeObj) {
       return <div></div>;
     } else {
-      for (let i = 0; i < 15; i++) {
+      for (let i = 0; i < 36; i++) {
         //needs a nested loop for those instances when the driverTreeObj is smaller than 15
         // logic as follows:  insert a placeholder row, then check to see if there should be a card or a cluster, if yes, pop that row and insert card
         arr.push("skip");
@@ -201,39 +203,47 @@ const DriverCards = ({
                     draggable="true"
                     onDragStart={drag}
                   >
-                    <Card.Header className={styles.card_header}>
-                      <div className={styles.my_card_abb}>
-                        {clusterArr[ind].stakeholderAbbreviation
-                          ? clusterArr[ind].stakeholderAbbreviation
-                          : "-"}
-                      </div>
-                      <FontAwesomeIcon
-                        position="top"
-                        icon={faCircle}
-                        style={{ color: dColor }}
-                        className={styles.card_status}
-                      />
-                    </Card.Header>
+                    <FontAwesomeIcon
+                      position="top"
+                      icon={faCircle}
+                      style={{ color: dColor }}
+                      className={styles.card_status}
+                    />
+                    {/* </Card.Header> */}
 
                     <Card.Body
                       className={styles.my_card_body}
                       id={clusterArr[ind].id}
                     >
-                      <Card.Text
-                        className={styles.my_card_text}
-                        id={clusterArr[ind].id}
-                        onClick={goToDriver}
-                      >
-                        {clusterArr[ind].problemStatement}
-                      </Card.Text>
+                      <Row className={styles.card_row}>
+                        <Col className={styles.card_col_abbrev}>
+                          <div className={styles.abbreviation_div}>
+                            {clusterArr[ind].stakeholderAbbreviation
+                              ? clusterArr[ind].stakeholderAbbreviation
+                              : "-"}
+                          </div>
+                          <div
+                            onClick={delDriver}
+                            id={clusterArr[ind].id}
+                            className={styles.del_div}
+                          >
+                            Del
+                          </div>
+                        </Col>
+                        <Col
+                          className={styles.card_col_body}
+                          onClick={goToDriver}
+                        >
+                          <Card.Text
+                            className={styles.my_card_text}
+                            id={clusterArr[ind].id}
+                            onClick={goToDriver}
+                          >
+                            {clusterArr[ind].problemStatement}
+                          </Card.Text>
+                        </Col>
+                      </Row>
                     </Card.Body>
-                    <Card.Footer
-                      className={styles.card_footer}
-                      onClick={delDriver}
-                      id={clusterArr[ind].id}
-                    >
-                      Delete
-                    </Card.Footer>
                   </Card>
                 );
               })}
@@ -269,36 +279,41 @@ const DriverCards = ({
                 draggable="true"
                 onDragStart={drag}
               >
-                <Card.Header className={styles.card_header}>
-                  <div className={styles.my_card_abb}>
-                    {arr[index].stakeholderAbbreviation
-                      ? arr[index].stakeholderAbbreviation
-                      : "-"}
-                  </div>
-                  <FontAwesomeIcon
-                    position="top"
-                    icon={faCircle}
-                    style={{ color: dColor }}
-                    className={styles.card_status}
-                  />
-                </Card.Header>
+                <FontAwesomeIcon
+                  position="top"
+                  icon={faCircle}
+                  style={{ color: dColor }}
+                  className={styles.card_status}
+                />
+                {/* </Card.Header> */}
 
                 <Card.Body className={styles.my_card_body} id={arr[index].id}>
-                  <Card.Text
-                    className={styles.my_card_text}
-                    id={arr[index].id}
-                    onClick={goToDriver}
-                  >
-                    {arr[index].problemStatement}
-                  </Card.Text>
+                  <Row className={styles.card_row}>
+                    <Col className={styles.card_col_abbrev}>
+                      <div className={styles.abbreviation_div}>
+                        {arr[index].stakeholderAbbreviation
+                          ? arr[index].stakeholderAbbreviation
+                          : "-"}
+                      </div>
+                      <div
+                        onClick={delDriver}
+                        id={arr[index].id}
+                        className={styles.del_div}
+                      >
+                        Del
+                      </div>
+                    </Col>
+                    <Col className={styles.card_col_body} onClick={goToDriver}>
+                      <Card.Text
+                        className={styles.my_card_text}
+                        id={arr[index].id}
+                        onClick={goToDriver}
+                      >
+                        {arr[index].problemStatement}
+                      </Card.Text>
+                    </Col>
+                  </Row>
                 </Card.Body>
-                <Card.Footer
-                  className={styles.card_footer}
-                  onClick={delDriver}
-                  id={arr[index].id}
-                >
-                  Delete
-                </Card.Footer>
               </Card>
             </div>
           );
@@ -316,19 +331,20 @@ const DriverCards = ({
   const myArrow = () => {
     return arrows.map((f, index) => {
       return (
-        <div onClick={(e) => ArrowModal(e, arrows[index].id)}>
+        <div  styles={{zIndex: "1"}} onClick={(e) => ArrowModal(e, arrows[index].id)}>
           <Xarrow
             start={arrows[index].start}
             color={arrows[index].color}
             end={arrows[index].end}
             path={arrows[index].path}
+            arrowBodyProps={{ onClick: (e) => ArrowModal(e, arrows[index].id) }}
             startAnchor={arrows[index].startAnchor}
             endAnchor={arrows[index].endAnchor}
             strokeWidth={arrows[index].strokeWidth}
-            headSize={arrows[index].headSize}
+            headSize={4}
+            zIndex={1}
             gridBreak={arrows[index].gridBreak}
-            showTail={arrows[index].showTail}
-            showHead={arrows[index].showHead}
+            showHead={true}
             dashness={arrows[index].dashness}
             id={arrows[index].id}
           />
@@ -373,7 +389,7 @@ const DriverCards = ({
         <p>{`Tier 1 Drivers`}</p>
         <Row
           style={{
-            height: "750px",
+            height: "1400px",
             width: "100%",
           }}
           id={`tier1Cards`}
@@ -388,7 +404,7 @@ const DriverCards = ({
         <p>{`Tier 2 Drivers`}</p>
         <Row
           style={{
-            height: "750px",
+            height: "1400px",
             width: "100%",
           }}
           id={`tier2Cards`}
@@ -403,7 +419,7 @@ const DriverCards = ({
         <p>{`Tier 3 Drivers`}</p>
         <Row
           style={{
-            height: "750px",
+            height: "1400px",
             width: "100%",
           }}
           id={`tier3Cards`}
@@ -418,7 +434,7 @@ const DriverCards = ({
         <p>{`Tier 4 Drivers`}</p>
         <Row
           style={{
-            height: "750px",
+            height: "1400px",
             width: "100%",
           }}
           id={`tier4Cards`}
@@ -433,7 +449,7 @@ const DriverCards = ({
         <p>{`Tier 5 Drivers`}</p>
         <Row
           style={{
-            height: "750px",
+            height: "1400px",
             width: "100%",
           }}
           id={`tier5Cards`}

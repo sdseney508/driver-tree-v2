@@ -18,8 +18,6 @@ function DriverArrows({ arrows }) {
         strokeWidth={arrows[index].strokeWidth}
         headSize={arrows[index].headSize}
         gridBreak={arrows[index].gridBreak}
-        showTail={arrows[index].showTail}
-        showHead={arrows[index].showHead}
         dashness={arrows[index].dashness}
         id={arrows[index].id}
         />

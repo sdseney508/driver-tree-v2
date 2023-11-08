@@ -6,6 +6,10 @@ const createArrow = (body) => {
   return axios.post(apiURL + "/arrows/new/", body);
 };
 
+const getArrow = (id) => {
+  return axios.get(apiURL + "/arrows/" + id);
+};
+
 const getArrows = (id) => {
   return axios.get(apiURL + "/arrows/outcomeID/" + id);
 }
@@ -20,6 +24,7 @@ const deleteArrow = (id) => {
 
 export {
   createArrow,
+  getArrow,
   getArrows,
   updateArrow,
   deleteArrow

@@ -35,9 +35,10 @@ const ClusterModal = ({
     
     for (let i = 0; i < selectedDrivers.length; i++) {
       const driver = selectedDrivers[i];
+      console.log(driver);
       updateDriver(driver.id, { cluster: clusternumb });
     }
-    window.location.reload();
+    window.location.reload(false);
   }
 
   return (

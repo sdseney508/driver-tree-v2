@@ -17,7 +17,6 @@ const ArrowModal = ({
   const [selectedElements, setSelectedElements] = useState([]);
 
   async function createAnArrow() {
-    debugger;
     let body = {};
     body.outcomeID = selOutcome.id;
     body.outcomeId = selOutcome.id;
@@ -71,13 +70,13 @@ const ArrowModal = ({
     }
 
     if (selectedElements[0].tierLevel === selectedElements[1].tierLevel) {
-      body.startAnchor = "left";
-      body.endAnchor = "left";
+      body.startAnchor = {position: "left", offset: {y: 0}};
+      body.endAnchor = {position: "left", offset: {y: 0}};
       body.dashness = "true";
       body.gridBreak = "10";
     } else {
-      body.startAnchor = "left";
-      body.endAnchor = "right";
+      body.startAnchor = {position: "left", offset: {y: 0}};
+      body.endAnchor = {position: "right", offset: {y: 0}};
     }
      await createArrow(body);
       getOutcome(selOutcome.id).then((res) => {
