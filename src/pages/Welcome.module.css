@@ -7,7 +7,7 @@
 
 .welcome_page {
    display: flex;
-   height: 100vh;
+   height: 1vh;
    flex-direction: column;
    align-items: center;
    justify-content: center;

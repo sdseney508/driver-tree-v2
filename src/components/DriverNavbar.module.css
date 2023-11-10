@@ -1,0 +1,41 @@
+.navbar_custom {
+  position: sticky;
+  top: 0;
+  background: rgb(68, 68, 68);
+  justify-content: space-between;
+  align-items: center;
+  color: rgb(12, 222, 68);
+  z-index: 2000;
+  width: auto;
+  height: 35px;
+  padding: 0 important!;
+  margin: 0 important!;
+
+  --bs-navbar-active-color: rgb(12, 222, 68);
+  --bs-navbar-color: rgb(12, 222, 68);
+  /* opacity: 0.95; */
+
+  /* box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.25);
+   box-shadow: 12px 0 15px -4px rgba(31, 73, 125, 0.8),
+     -12px 0 8px -4px rgba(31, 73, 125, 0.8);
+   box-shadow: 0 9px 0px 0px white, 0 -9px 0px 0px white,
+     12px 0 15px -4px rgba(31, 73, 125, 0.8),
+     -12px 0 15px -4px rgba(31, 73, 125, 0.8); */
+}
+
+.copyright {
+  color: rgb(12, 222, 68);
+  font-size: 0.8rem;
+  margin: 0;
+  padding: 0;
+}
+
+.dropdown-menu {
+  --bs-dropdown-bg: #23262e;
+  --bs-dropdown-border-color: #23262e;
+  --bs-dropdown-link-hover-color: #fff;
+}
+
+.nav_link {
+  width: auto;
+}
