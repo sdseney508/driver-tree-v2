@@ -26,10 +26,7 @@ const ModArrows = ({
 
   //takes the arrowProps from the modal and sets them to the arrowProps state
   async function afterSubmission() {
-
     let body = arrowProps;
-    console.log(body);
-    // body.gridBreak = parseInt(-20);
     await updateArrow(arrowID, body);
     setSelOutcome(selOutcome);
     setArrowMod(false);

@@ -121,6 +121,7 @@
   font-size: 9px;
   text-align: center;
   border: none;
+  z-index: 500;
 }
 
 .my_card_text:hover {
@@ -136,12 +137,15 @@
   align-content: center;
   margin-top: 3px;
   margin-bottom: 3px;
+  z-index: 50;
 }
 
 .my_div {
-  width: 100%;
+  width: 90%;
   height: 34px;
   display: flex;
+  align-items: center;
+  align-content: center;
 }
 
 .my_row {

@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from "react";
 // import Select from "react-select";
 import { Col, Card, Row, Button, Form } from "react-bootstrap";
 import Xarrow, { useXarrow, Xwrapper } from "react-xarrows"; //for the arrows
-import { getArrows } from "../utils/arrows";
+import { getArrows, deleteArrow } from "../utils/arrows";
 import styles from "../pages/DriverTreePage.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-solid-svg-icons";
@@ -74,8 +74,8 @@ const DriverCards = ({
 
   const delDriver = (e) => {
     e.preventDefault();
-    if (window.confirm("Are you sure you want to delete this driver?")) {
-      console.log(e.target.dataset.delid);
+    if (!window.confirm("Are you sure you want to delete this driver?")) {
+      return;
     }
     deleteDriver(e.target.dataset.delid);
     getOutcome(selOutcome.id).then((data) => {
@@ -103,13 +103,28 @@ const DriverCards = ({
 
   const deleteCluster = (e) => {
     e.preventDefault();
-    let sures = window.confirm("Are you sure you want to delete this cluster?");
+    if(!e.target.dataset.cluster) {
+      e.stopPropagation();
+      return;
+    }
+
+    //check to see if there is an arrow attached to the cluster to cascade the delete
+    let arrowid;
+    for (let i=0; i<arrows.length; i++) {
+      if (arrows[i].start === e.target.id || arrows[i].end === e.target.id) {
+        arrowid = arrows[i].id;
+      }};
+
+
+    console.log(e.target.dataset.cluster);
+    let sures = window.confirm("Are you sure you want to delete this cluster?  This will also delete any arrows assigned to this cluster.");
     if (!sures) {
       return;
     }
     let body = { cluster: 0 };
     updateCluster(e.target.dataset.cluster, body);
-    window.location.reload(false);
+    deleteArrow(arrowid);
+    window.location.reload();
   };
 
   function tierButtons(tier) {
@@ -207,53 +222,57 @@ const DriverCards = ({
                 }
                 return (
                   <Card
-                    className={styles.my_card}
-                    id={"card" + clusterArr[ind].id}
+                  className={styles.my_card}
+                  id={"card" + clusterArr[ind].id}
+                  data-cardid={clusterArr[ind].id}
+                  data-delid={clusterArr[ind].id}
+                  draggable="true"
+                  onDragStart={drag}
+                >
+                  <FontAwesomeIcon
+                    position="top"
+                    icon={faCircle}
+                    style={{ color: dColor }}
                     data-cardid={clusterArr[ind].id}
-                    data-delid={clusterArr[ind].id}
-                    draggable="true"
-                    onDragStart={drag}
-                  >
-                    <FontAwesomeIcon
-                      position="top"
-                      icon={faCircle}
-                      style={{ color: dColor }}
-                      className={styles.card_status}
-                    />
-                    <Card.Body
-                      className={styles.my_card_body}
-                      id={clusterArr[ind].id}
-                    >
-                      <Row className={styles.card_row}>
-                        <Col className={styles.card_col_abbrev}>
-                          <div
-                            className={styles.abbreviation_div}
-                            onClick={goToDriver}
-                            data-cardid={arr[index].id}
-                          >
-                            {clusterArr[ind].stakeholderAbbreviation
-                              ? clusterArr[ind].stakeholderAbbreviation
-                              : "-"}
-                          </div>
-                          <div
-                            onClick={delDriver}
-                            data-delid={clusterArr[ind].id}
-                            className={styles.del_div}
-                          >
-                            Del
-                          </div>
-                        </Col>
-                        <Col className={styles.card_col_body}>
-                          <Card.Text
+                    className={styles.card_status}
+                  />
+                  <Card.Body className={styles.my_card_body}>
+                    <Row className={styles.card_row}>
+                      <Col className={styles.card_col_abbrev}>
+                        <div
+                          className={styles.abbreviation_div}
+                          onClick={goToDriver}
+                          data-cardid={clusterArr[ind].id}
+                        >
+                          {clusterArr[ind].stakeholderAbbreviation
+                            ? clusterArr[ind].stakeholderAbbreviation
+                            : "-"}
+                        </div>
+                        <div
+                          onClick={delDriver}
+                          data-delid={clusterArr[ind].id}
+                          className={styles.del_div}
+                        >
+                          Del
+                        </div>
+                      </Col>
+                      <Col className={styles.card_col_body} id={clusterArr[ind].id}>
+                        <Form>
+                          <Form.Control
+                            as="textarea"
+                            data-cardid={clusterArr[ind].id}
                             className={styles.my_card_text}
-                            id={clusterArr[ind].id}
-                          >
-                            {clusterArr[ind].problemStatement}
-                          </Card.Text>
-                        </Col>
-                      </Row>
-                    </Card.Body>
-                  </Card>
+                            defaultValue={clusterArr[ind].problemStatement}
+                            //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                            name="problemStatement"
+                            // onChange={handleInputChange}
+                            onBlur={handleFormSubmit}
+                          />
+                        </Form>
+                      </Col>
+                    </Row>
+                  </Card.Body>
+                </Card>
                 );
               })}
             </div>
