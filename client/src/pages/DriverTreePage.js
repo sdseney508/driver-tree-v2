@@ -2,15 +2,17 @@
 import React, { useState, useContext, useEffect } from "react";
 import { stateContext } from "../App";
 import axios from "axios";
-import html2canvas from 'html2canvas';
+import html2canvas from "html2canvas";
 import { Container, Row, Col, Button, Modal } from "react-bootstrap";
 import {
   createOutcome,
   getOutcome,
+  outcomeByCommand,
   getDriverByOutcome,
 } from "../utils/drivers";
 import { getArrows } from "../utils/arrows";
-import { useNavigate } from "react-router";
+import Xarrow, { Xwrapper } from "react-xarrows";
+import { useNavigate, useLocation } from "react-router";
 import { useParams } from "react-router"; //to store state in the URL
 import DriverCards from "../components/driverCards";
 import { getUser, loggedIn, getToken } from "../utils/auth";
@@ -33,15 +35,13 @@ const DriverTreePage = () => {
   const [selDriver, setSelDriver] = useState({});
   const [driverTreeObj, setDriverTreeObj] = useState([]);
   //these are the state and URL for the pdf
-  const [elementsToInclude, setElementsToInclude] = useState([]);
-  const [pdfURL, setPdfURL] = useState('');
 
   const { outcomeID } = useParams();
-
+  let command;
   //These are the initial states for the select boxes.  They are set to the first value in the array, which is the default value
 
   let navigate = useNavigate();
-
+  let location = useLocation();
   //using the initial useEffect hook to open up the driver trees and prefill the table at the bottom of the page
   useEffect(() => {
     const getUserData = async () => {
@@ -59,54 +59,46 @@ const DriverTreePage = () => {
           throw new Error("something went wrong!");
         }
         const user = response.data;
-   
-        //used to make sure they have permissions to make changes
-        setState({
-          ...state,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          Role: user.userRole,
-          command: user.userCommand,
-          userID: user.id,
-        });
-      
+        let tcommand = user.userCommand;
+        console.log(tcommand);
         let userDataLength = Object.keys(user).length;
+        //used to make sure they have permissions to make changes
         //if the user isnt logged in with an unexpired token, send them to the login page
         if (!userDataLength > 0) {
           navigate("/");
+        } else {
+          setState({
+            ...state,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            Role: user.userRole,
+            command: user.userCommand,
+            userID: user.id,
+          });
+
+          await outcomeByCommand(tcommand).then((data) => {
+            setSelOutcome(data.data[0]);
+          });
+
+          await getDriverByOutcome(outcomeID).then((data) => {
+            setDriverTreeObj(data.data);
+          });
+
+          await getArrows(outcomeID).then((data) => {
+            setArrows(data.data);
+          });
         }
       } catch (err) {
         console.error(err);
+        navigate("/");
       }
-    };
-    const getOutcomeData = async () => {
-      //TODO:
-      //in here for error handling only; this needs to be updated and removed
-      if (!outcomeID) {
-        // eslint-disable-next-line no-const-assign, react-hooks/exhaustive-deps
-        outcomeID = 1;
-      }
-      await getOutcome(outcomeID).then((data) => {
-        setSelOutcome(data.data);
-      });
-    };
-    const getDriversData = async () => {
-      await getDriverByOutcome(outcomeID).then((data) => {
-        setDriverTreeObj(data.data);
-      });
     };
 
-    const getArrowsData = async () => {
-      await getArrows(outcomeID).then((data) => {
-        setArrows(data.data);
-      });
-    };
     getUserData();
-    getOutcomeData();
-    getDriversData();
-    getArrowsData();
+    // getOutcomeData(tcommand);
+    // getDriversData();
+    // getArrowsData();
     setState({ ...state, selOutcome: selOutcome });
-
     //this one gets the initial draftOL for the form
   }, []);
 
@@ -128,35 +120,34 @@ const DriverTreePage = () => {
     setState({ ...state, selOutcome: selOutcome });
 
     navigate("/drivertree/" + selOutcome.id);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome]);
 
-
   //function to generate a pdf
-  const generatePDF = async () => {
-    debugger;
-    let cnvsIMG = html2canvas(document.getElementById('pdf'));
-    // const elementToCapture = document.getElementById('pdf');
-    console.log(cnvsIMG);
-    //check for info before making the axios call
-    if (!cnvsIMG) {
-      console.error('No element to capture!');
-      return;
-    }
+  // const generatePDF = async () => {
+  //   debugger;
+  //   let cnvsIMG = html2canvas(document.getElementById('pdf'));
+  //   // const elementToCapture = document.getElementById('pdf');
+  //   console.log(cnvsIMG);
+  //   //check for info before making the axios call
+  //   if (!cnvsIMG) {
+  //     console.error('No element to capture!');
+  //     return;
+  //   }
 
-    // const canvasimg = await html2canvas(elementToCapture);
-    axios.post('http://localhost:8080/generate-pdf', cnvsIMG)
-      .then((response) => {
-        setPdfURL(response.data);
-      })
-      .catch((error) => {
-        console.error('Error generating PDF:', error);
-      });
-  };
+  //   // const canvasimg = await html2canvas(elementToCapture);
+  //   axios.post('http://localhost:8080/generate-pdf', cnvsIMG)
+  //     .then((response) => {
+  //       setPdfURL(response.data);
+  //     })
+  //     .catch((error) => {
+  //       console.error('Error generating PDF:', error);
+  //     });
+  // };
 
   //creates new outcome and then resets the selOutcome state.  This cause a a useEffect fire and refreshes the page.
   const newOutcome = async () => {
-    let body ={command: state.command}
+    let body = { command: state.command };
     createOutcome(body).then((data) => {
       setState({ ...state, outcomeID: data.data.id });
       setSelOutcome(data.data);
@@ -178,7 +169,7 @@ const DriverTreePage = () => {
 
   return (
     <>
-    {/* <div> 
+      {/* <div> 
     <h1>Generate PDF</h1>
       <button onClick={generatePDF}>Generate PDF</button>
       <a href={pdfURL} download="output.pdf">Download PDF</a>
@@ -187,50 +178,52 @@ const DriverTreePage = () => {
       <div className={styles.driver_page} id="pdf" key="topleveldiv">
         <Container fluid className="justify-content-center">
           <Col className={styles.my_col}>
-            {state.Role !== 'Stakeholder' ? (<Row
-              className="justify-content-center m-1"
-              styles={{ height: "75px" }}
-            >
-              <Button
-                className={styles.my_btn}
-                style={{ width: "150px", height: "30px", margin: "10px" }}
-                onClick={newOutcome}
+            {state.Role !== "Stakeholder" ? (
+              <Row
+                className="justify-content-center m-1"
+                styles={{ height: "75px" }}
               >
-                New Outcome
-              </Button>
-              <Button
-                className={styles.my_btn}
-                onClick={() => setClusterModal(true)}
-                style={{ width: "150px", height: "30px", margin: "10px" }}
-              >
-                Create Cluster
-              </Button>
+                <Button
+                  className={styles.my_btn}
+                  style={{ width: "150px", height: "30px", margin: "10px" }}
+                  onClick={newOutcome}
+                >
+                  New Outcome
+                </Button>
+                <Button
+                  className={styles.my_btn}
+                  onClick={() => setClusterModal(true)}
+                  style={{ width: "150px", height: "30px", margin: "10px" }}
+                >
+                  Create Cluster
+                </Button>
 
-              <Button
-                className={styles.my_btn}
-                onClick={() => setArrowModal(true)}
-                style={{ width: "150px", height: "30px", margin: "10px" }}
-              >
-                Create Arrow
-              </Button>
-            </Row>):null }
-
-            <Row className={styles.outcome}>
-              <DriverCards
-                state={state}
-                driverTreeObj={driverTreeObj}
-                selOutcome={selOutcome}
-                setSelOutcome={setSelOutcome}
-                arrows={arrows}
-                setArrows={setArrows} 
-                showArrowMod={showArrowMod}
-                setArrowMod={setArrowMod}
-                arrowID={arrowID}
-                setArrowID={setArrowID}
-              />
-            </Row>
-
-            <Row style={{height: "250px" }}>
+                <Button
+                  className={styles.my_btn}
+                  onClick={() => setArrowModal(true)}
+                  style={{ width: "150px", height: "30px", margin: "10px" }}
+                >
+                  Create Arrow
+                </Button>
+              </Row>
+            ) : null}
+            <Xwrapper>
+              <Row className={styles.outcome}>
+                <DriverCards
+                  state={state}
+                  driverTreeObj={driverTreeObj}
+                  selOutcome={selOutcome}
+                  setSelOutcome={setSelOutcome}
+                  arrows={arrows}
+                  setArrows={setArrows}
+                  showArrowMod={showArrowMod}
+                  setArrowMod={setArrowMod}
+                  arrowID={arrowID}
+                  setArrowID={setArrowID}
+                />
+              </Row>
+            </Xwrapper>
+            <Row style={{ height: "250px" }}>
               <OutcomeTable
                 selOutcome={selOutcome}
                 setSelOutcome={setSelOutcome}

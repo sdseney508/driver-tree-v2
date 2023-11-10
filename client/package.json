@@ -14,10 +14,10 @@
     "@testing-library/user-event": "^13.5.0",
     "ag-grid-community": "^27.3.0",
     "ag-grid-react": "^27.3.0",
-    "axios": "^0.27.2",
+    "axios": "^1.6.1",
     "bootstrap-icons": "^1.11.1",
     "html2canvas": "^1.4.1",
-    "jwt-decode": "^3.1.2",
+    "jwt-decode": "^4.0.0",
     "multiselect-react-dropdown": "^2.0.25",
     "react": "^18.2.0",
     "react-archer": "^4.3.0",
@@ -31,6 +31,7 @@
     "react-typewriter-effect": "^1.1.0",
     "react-xarrows": "^2.0.2",
     "reactjs-popup": "^2.0.5",
+    "svgo": "^3.0.3",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

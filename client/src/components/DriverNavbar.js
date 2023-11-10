@@ -1,32 +1,75 @@
-import React, { useContext } from "react";
-import { Link, useParams } from "react-router-dom";
+import React, { useContext, useEffect } from "react";
 import { stateContext } from "../App";
+import { Link, useParams } from "react-router-dom";
 import { Navbar, Nav, Container } from "react-bootstrap";
 import styles from "./DriverNavbar.module.css";
 import { useNavigate, useLocation } from "react-router";
-// import Typewriter from "../components/Typewriter";
+import { getUser, loggedIn, getToken } from "../utils/auth";
+import { outcomeByCommand} from "../utils/drivers"
 
 const DriverNavbar = () => {
   let location = useLocation();
   let navigate = useNavigate();
-  // console.log("location state is: ", locstate);
-  const [state, setState] = useContext(stateContext);
   let {outcomeID, driverID} = useParams();
-  let pName = location.pathname.slice(0, 6);
-  const allOutcomes = () => {
-    if(!outcomeID) {
-      //TODO:  make this a fetch call for the user's default outcome
-      outcomeID = 1;
-    }
-    navigate("/allOutcomes/"+outcomeID);
+  let pName = location.pathname.slice(0, 5);
+  let [state, setState] = useContext(stateContext);
+
+  useEffect(() => {
+    const getUserData = async () => {
+      try {
+        const token = loggedIn() ? getToken() : null;
+        if (!token) {
+          navigate("/");
+        }
+        const response = await getUser(token);
+        if (!response.data) {
+          navigate("/");
+          throw new Error("something went wrong!");
+        }
+        const user = response.data;
+        setState({
+          ...state,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          id: user.id,
+          userRole: user.userRole,
+          command: user.userCommand,
+        });
+        let userDataLength = Object.keys(user).length;
+        //if the user isnt logged in with an unexpired token, send them to the login page
+        if (!userDataLength > 0) {
+          navigate("/");
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    getUserData();
+  }, []);
+
+
+  const allOutcomes = async () => {
+    let toutcomeID;
+    await outcomeByCommand(state.command).then((data) => {
+        toutcomeID=data.data[0].id;
+    });
+
+    navigate("/allOutcomes/"+toutcomeID);
   };
 
-  const gotoDriverTree = () => {
-console.log("outcomeID is: ", outcomeID);
-if (!outcomeID) {
-  outcomeID = 1;
-}
-    navigate("/driverTree/"+ outcomeID);
+  const goHome = () => {
+    let stuff = location;
+    console.log(stuff);
+    navigate("/user");
+  };
+
+  const gotoDriverTree = async () => {
+    let toutcomeID;
+    await outcomeByCommand(state.command).then((data) => {
+        toutcomeID=data.data[0].id;
+    });
+    navigate("/driverTree/" + toutcomeID);
   };
 
   const adminAccountManage = () => {
@@ -39,7 +82,7 @@ if (!outcomeID) {
 
   const databaseManagement = () => {
     // 👇️ navigate to database management.  this is where the administrator can add, remove, and update teams, functional areas, and systems.
-    navigate("/admindatabasemanage", { state });
+    navigate("/admindatabasemanage");
   };
 
   //TODO:  bonus feature to be done later, pre-filter drivers by user
@@ -51,13 +94,13 @@ if (!outcomeID) {
     <>
       {/* nested terniary.  First one checks if you are on the welcome screen, second one checks if you are on any of the admin pages.  This could also be modified to check if you are an admin and send you there */}
       {location.pathname !== "/" ? (
-        pName !== "/admin" ? (
+        pName !== "/admi" ? (
           <Navbar className={styles.navbar_custom} variant="dark">
             <Container>
               <Navbar.Toggle />
 
               <Nav>
-                <Nav.Link as={Link} to="/user" className={styles.nav_link}>
+                <Nav.Link onClick={goHome} className={styles.nav_link}>
                   Home Page
                 </Nav.Link>
                 <Nav.Link onClick={allOutcomes} className={styles.nav_link}>
@@ -74,7 +117,7 @@ if (!outcomeID) {
                   Account Mngmt
                 </Nav.Link>
               </Nav>  
-              {/* <Typewriter /> */}
+              <h5 className={styles.copyright}> &copy; Integrated Program Solutions, Inc</h5>
             </Container>
           </Navbar>
         ) : (
@@ -112,6 +155,7 @@ if (!outcomeID) {
                 </Nav>
               </Navbar.Collapse>
             </Container>
+            <p className={styles.copyright}>&#169 Integrated Program Solutions, Inc</p>
           </Navbar>
         )
       ) : (

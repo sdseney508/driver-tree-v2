@@ -52,6 +52,7 @@ const AccountManagement = () => {
           navigate("/");
         }
       } catch (err) {
+        navigate("/");
         console.error(err);
       }
       let rolesOpts = await getRoles().then((data) => {

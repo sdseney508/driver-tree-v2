@@ -12,9 +12,8 @@ const PORT = process.env.PORT || 8080;
 var corsOptions = {
   //for online use
   origin: "https://drivertreev3-3350125317e2.herokuapp.com",
-// https://drivertreev3-3350125317e2.herokuapp.com
-//https://driver-tree-830b009d7ab7.herokuapp.com/
-  //for local use try again
+
+  //for local use
   // origin: "http://localhost:3000"
 // 
 };

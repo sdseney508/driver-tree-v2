@@ -1,5 +1,6 @@
 .driver_page {
   display: flex;
+  width: 2000px;
   background-color: white;
   font-weight: bold;
   align-items: flex-start;
@@ -119,6 +120,10 @@
   height: 16px;
 }
 
+.abbreviation_div:hover {
+  cursor: pointer;
+}
+
 .card_row {
   display: flex;
   flex-direction: row;
@@ -126,7 +131,7 @@
 }
 
 .card_col_abbrev {
-  width: 20%;
+  max-width: 20%;
 }
 
 .card_col_body{
@@ -135,6 +140,10 @@
   justify-content: flex-start;
   align-items: flex-start;
   align-content: flex-start;
+}
+
+.card_col_body {
+  cursor: pointer;
 }
 
 
@@ -148,15 +157,18 @@
   font-weight: normal;
 }
 
+textarea { resize: none; }
+
 .my_card_text {
   background-color: #f8f7f7;
   color: rgb(0, 0, 0);
   font-weight: normal;
+  text-wrap: normal;
   padding: 0px;
   margin: 0px;
   font-size: 9px;
-  overflow: hidden;
   text-align: center;
+  border: none;
 }
 
 .my_card_text:hover {

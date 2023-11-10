@@ -20,6 +20,13 @@
      -12px 0 15px -4px rgba(31, 73, 125, 0.8); */
 }
 
+.copyright {
+  color: rgb(12, 222, 68);
+  font-size: 0.8rem;
+  margin: 0;
+  padding: 0;
+}
+
 .dropdown-menu {
   --bs-dropdown-bg: #23262e;
   --bs-dropdown-border-color: #23262e;

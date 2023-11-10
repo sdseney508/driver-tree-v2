@@ -1,5 +1,5 @@
 import axios from "axios";
-import decode from "jwt-decode";
+import {jwtDecode} from "jwt-decode";
 import apiURL from "./apiURL";
 
 const authHeader = () => {
@@ -14,13 +14,12 @@ const authHeader = () => {
 };
 
 const getRoles = () => {
-  // debugger;
   return axios.get(apiURL + "/roles");
 };
 
 // get user data
 const getProfile = () => {
-  return decode(getToken());
+  return jwtDecode(getToken());
 };
 
 const getToken = () => {
@@ -42,7 +41,7 @@ const loggedIn = () => {
 // check if token is expired
 const isTokenExpired = (token) => {
   try {
-    const decoded = decode(token);
+    const decoded = jwtDecode(token);
     if (decoded.exp < Date.now() / 1000) {
       return true;
     } else return false;
@@ -92,7 +91,7 @@ const register = (
 };
 
 const updateUser = (body, id) => {
-  return axios.put(apiURL + "/users/" + id, {body});
+  return axios.put(apiURL + "/users/" + id, body);
 };
 
 export {

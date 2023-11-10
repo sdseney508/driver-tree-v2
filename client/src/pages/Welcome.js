@@ -16,7 +16,6 @@ import ForgotPass from "../components/ForgotPass";
 import styles from "./Welcome.module.css";
 import { login, loginUser } from "../utils/auth";
 import { useNavigate } from "react-router";
-import Typewriter from "../components/Typewriter";
 import PageHeader from "../components/PageHeader";
 import PageFooter from "../components/PageFooter";
 
@@ -102,11 +101,13 @@ const Welcome = () => {
         return;
       } else {
         login(response.data.token);
-        setState({
+        setState({...state,
           firstName: userData.firstName,
           Role: userData.userRole,
           userID: userData.id,
+          command: userData.userCommand,
         });
+        console.log(state);
         navigate("/user", { state });
       }
     } catch (err) {

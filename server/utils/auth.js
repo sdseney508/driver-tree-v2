@@ -37,10 +37,10 @@ module.exports = {
     id,
     firstName,
     lastName,
-    functional,
+    userCommand,
     userRole,
   }) {
-    const payload = { email, id, firstName, lastName, userRole };
+    const payload = { email, id, firstName, lastName, userRole, userCommand };
     return jwt.sign({ data: payload }, secret, { expiresIn: expiration });
   },
 };

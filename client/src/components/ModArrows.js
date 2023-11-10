@@ -20,7 +20,7 @@ const ModArrows = ({
         setArrowProps(res.data);
       });
     }
-
+    console.log(arrowID);
     fetchArrow();
 
   }, []);
@@ -29,13 +29,16 @@ const ModArrows = ({
   async function afterSubmission() {
     console.log(arrowProps.startAnchor.position);
     console.log(arrowProps.endAnchor.position);
-    if (
-      arrowProps.startAnchor.position === "right" &&
-      arrowProps.endAnchor.position === "right"
-    ) {
-      setArrowProps({ ...arrowProps, gridBreak: parseInt(-10) });
-    }
+    // if (
+    //   arrowProps.startAnchor.position === "right" &&
+    //   arrowProps.endAnchor.position === "right"
+    // ) {
+    //   setArrowProps({ ...arrowProps, gridBreak: parseInt(-10) });
+    // }
+
+
     let body = arrowProps;
+    // body.gridBreak = parseInt(-20);
     console.log(body);
     await updateArrow(arrowID, body);
     setArrowMod(false);
@@ -99,6 +102,9 @@ const ModArrows = ({
                 <option key={"s3"} value="top">
                   Top
                 </option>
+                <option key={"s4"} value="bottom">
+                  Bottom
+                </option>
               </Form.Select>
 
               <Form.Label>Start Anchor Offset</Form.Label>
@@ -129,13 +135,15 @@ const ModArrows = ({
                 }}
               >
                 <option value="null">
-                  Select an offset (neg down and left)
+                  Select an offset (neg is up and left)
                 </option>
+                <option value="-30">-30</option>
                 <option value="-20">-20</option>
                 <option value="-10">-10</option>
                 <option value="0">0</option>
                 <option value="10">10</option>
                 <option value="20">20</option>
+                <option value="-30">30</option>
               </Form.Select>
 
               <Form.Label>End Anchor Location</Form.Label>
@@ -162,6 +170,9 @@ const ModArrows = ({
                 </option>
                 <option key={"e3"} value="bottom">
                   Bottom
+                </option>
+                <option key={"e4"} value="top">
+                  Top
                 </option>
               </Form.Select>
 
@@ -192,13 +203,39 @@ const ModArrows = ({
                 }}
               >
                 <option value="null">
-                  Select an offset (neg down and left)
+                  Select an offset (neg is up and left)
                 </option>
+                <option value="-30">-30</option>
                 <option value="-20">-20</option>
                 <option value="-10">-10</option>
                 <option value="0">0</option>
                 <option value="10">10</option>
                 <option value="20">20</option>
+                <option value="30">30</option>
+              </Form.Select>
+
+              <Form.Label>Turn Distance</Form.Label>
+              <Form.Select
+                aria-label="Default select example"
+                onChange={(e) => {
+ 
+                    setArrowProps({
+                      ...arrowProps,
+                      gridBreak: parseInt(e.target.value)
+                    });
+                  }
+                }
+              >
+                <option value="null">
+                  Select turn distance
+                </option>
+                <option key={"t-30"} value="-30">-30</option>
+                <option key={"t-20"} value="-20">-20</option>
+                <option key={"t-10"} value="-10">-10</option>
+                <option key={"t-0"} value="0">0</option>
+                <option key={"t+10"} value="10">10</option>
+                <option key={"t+20"} value="20">20</option>
+                <option key={"t+30"} value="30">30</option>
               </Form.Select>
 
               <Form.Check

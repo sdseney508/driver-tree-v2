@@ -24,7 +24,6 @@ function App() {
   const [state, setState] = useState({
     selectedPMA: "PMA-262",
     selectedPEO: "PEO(U&W)",
-    selOutcome: null
   });
 
   return (

@@ -58,21 +58,22 @@ const OutcomesPage = () => {
         }
       } catch (err) {
         console.error(err);
+        navigate("/");
       }
     };
 
     const getOutcomeData = async () => {
       if (!outcomeID) {
         // eslint-disable-next-line react-hooks/exhaustive-deps, no-const-assign
-        outcomeID = 1;
+        alert("No Outcomes Found, Please Select an Outcome");
+        navigate("/user");
+
       }
       await getOutcome(outcomeID).then((data) => {
-        console.log(data.data);
         setSelOutcome(data.data);
       });
       await getDriverByOutcome(outcomeID).then((data) => {
         let top = data.data;
-
         setSelDrivers(top);
       });
     };
@@ -80,7 +81,6 @@ const OutcomesPage = () => {
     getUserData();
     getOutcomeData();
     getDrivers();
-    console.log(state);
     //this one gets the initial draftOL for the form
   }, []);
 
@@ -168,6 +168,7 @@ const OutcomesPage = () => {
 
               {/* </Col> */}
             </Col>
+
             <Form className={styles.my_form}>
               <Row className={styles.outcome_banner + styles.my_row}>
                 <Col sm={10} md={6} lg={8} className={styles.outcome_name}>

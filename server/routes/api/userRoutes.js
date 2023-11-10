@@ -81,7 +81,7 @@ router.get("/emails", async (req, res) => {
   }
 });
 
-// gwt all users with a specific roll.
+// get all users with a specific roll.
 router.get("/role/:urole", async (req, res) => {
   try {
     console.log(req.params.urole);
@@ -114,24 +114,17 @@ router.post("/", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     //using email since it is a unique field in the user table
-    console.log("I'm in login");
-    console.log(req.body);
     const userData = await User.findOne({ where: { email: req.body.email } });
     if (!userData) {
       return res
         .status(400)
         .json({ message: "Incorrect email or password, please try again" });
     }
-    console.log(req.body.password);
     const validPassword = await userData.checkPassword(req.body.password);
-    console.log(validPassword);
     if (validPassword !== true) {
       res.status(400).json({ message: "Bad Password" });
       return;
     }
-
-    console.log(userData);
-
     const token = signToken(userData);
     res.json({ token, user: userData, message: "You are now logged in!" });
   } catch (err) {

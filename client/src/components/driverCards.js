@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 // import Select from "react-select";
-import { Col, Card, Row, Button } from "react-bootstrap";
+import { Col, Card, Row, Button, Form } from "react-bootstrap";
 import Xarrow from "react-xarrows"; //for the arrows
 import { getArrows } from "../utils/arrows";
 import styles from "../pages/DriverTreePage.module.css";
@@ -72,16 +72,17 @@ const DriverCards = ({
 
   const delDriver = (e) => {
     e.preventDefault();
-    deleteDriver(e.target.id);
+    if(window.confirm("Are you sure you want to delete this driver?")) {
+      console.log(e.target.dataset.delid);
+    };
+    deleteDriver(e.target.dataset.delid);
     getOutcome(selOutcome.id).then((data) => {
       setSelOutcome(data.data);
     });
   };
-
   const goToDriver = async (e) => {
-    console.log(e.target.id);
-    console.log(selOutcome.id);
-    navigate("/drpage/" + selOutcome.id + "/" + e.target.id);
+    e.preventDefault();
+    navigate("/drpage/" + selOutcome.id + "/" + e.target.dataset.cardid);
   };
 
   const newDriver = async (e) => {
@@ -118,6 +119,13 @@ const DriverCards = ({
       );
     }
   }
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    let body = { [e.target.name]: e.target.value };
+    console.log("body: ", body);
+    updateDriver(e.target.dataset.cardid, body);
+  };
 
   function tierCards(tier, { driverTreeObj }) {
     const arr = [];
@@ -177,8 +185,6 @@ const DriverCards = ({
               data-subtier={index + 1}
               data-cluster={clusterNumber}
               id={`tier${tier}cluster` + clusterNumber} //this is used for the arrow start and end points
-              onDragOver={allowDrop}
-              onDrop={drop}
               onClick={deleteCluster}
             >
               {clusterArr.map((f, ind) => {
@@ -200,6 +206,7 @@ const DriverCards = ({
                     className={styles.my_card}
                     id={"card" + clusterArr[ind].id}
                     data-cardid={clusterArr[ind].id}
+                    data-delid={clusterArr[ind].id}
                     draggable="true"
                     onDragStart={drag}
                   >
@@ -209,35 +216,32 @@ const DriverCards = ({
                       style={{ color: dColor }}
                       className={styles.card_status}
                     />
-                    {/* </Card.Header> */}
-
                     <Card.Body
                       className={styles.my_card_body}
                       id={clusterArr[ind].id}
                     >
                       <Row className={styles.card_row}>
-                        <Col className={styles.card_col_abbrev}>
-                          <div className={styles.abbreviation_div}>
+                        <Col className={styles.card_col_abbrev}          >
+                          <div className={styles.abbreviation_div} onClick={goToDriver} data-cardid={arr[index].id}>
                             {clusterArr[ind].stakeholderAbbreviation
                               ? clusterArr[ind].stakeholderAbbreviation
                               : "-"}
                           </div>
                           <div
-                            onClick={delDriver}
-                            id={clusterArr[ind].id}
-                            className={styles.del_div}
+                          onClick={delDriver}
+                          data-delid={clusterArr[ind].id}
+                          className={styles.del_div}
                           >
                             Del
                           </div>
                         </Col>
                         <Col
                           className={styles.card_col_body}
-                          onClick={goToDriver}
                         >
+
                           <Card.Text
                             className={styles.my_card_text}
                             id={clusterArr[ind].id}
-                            onClick={goToDriver}
                           >
                             {clusterArr[ind].problemStatement}
                           </Card.Text>
@@ -276,6 +280,7 @@ const DriverCards = ({
                 className={styles.my_card}
                 id={"card" + arr[index].id}
                 data-cardid={arr[index].id}
+                data-delid={arr[index].id}
                 draggable="true"
                 onDragStart={drag}
               >
@@ -283,34 +288,40 @@ const DriverCards = ({
                   position="top"
                   icon={faCircle}
                   style={{ color: dColor }}
+                  data-cardid={arr[index].id}
                   className={styles.card_status}
                 />
-                {/* </Card.Header> */}
-
-                <Card.Body className={styles.my_card_body} id={arr[index].id}>
+                <Card.Body className={styles.my_card_body}>
                   <Row className={styles.card_row}>
-                    <Col className={styles.card_col_abbrev}>
-                      <div className={styles.abbreviation_div}>
+                    <Col className={styles.card_col_abbrev} >
+                      <div className={styles.abbreviation_div} onClick={goToDriver} data-cardid={arr[index].id}>
                         {arr[index].stakeholderAbbreviation
                           ? arr[index].stakeholderAbbreviation
                           : "-"}
                       </div>
                       <div
-                        onClick={delDriver}
-                        id={arr[index].id}
+                      onClick={delDriver}
+                        data-delid={arr[index].id}
                         className={styles.del_div}
                       >
                         Del
                       </div>
                     </Col>
-                    <Col className={styles.card_col_body} onClick={goToDriver}>
-                      <Card.Text
-                        className={styles.my_card_text}
-                        id={arr[index].id}
-                        onClick={goToDriver}
-                      >
-                        {arr[index].problemStatement}
-                      </Card.Text>
+                    <Col className={styles.card_col_body} id={arr[index].id}
+                    >
+                      <Form>  
+                      
+                      <Form.Control
+                      as="textarea"
+                      data-cardid={arr[index].id}
+                      className={styles.my_card_text}
+                      defaultValue={arr[index].problemStatement}
+                      //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                      name="problemStatement"
+                      // onChange={handleInputChange}
+                      onBlur={handleFormSubmit}
+                    />                
+                      </Form>
                     </Col>
                   </Row>
                 </Card.Body>
