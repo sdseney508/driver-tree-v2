@@ -16,7 +16,7 @@ import styles from "./DriverPage.module.css";
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form
 
 const DriverPage = () => {
-  const [state, setState] = useContext({stateContext});
+  const [state, setState] = useContext(stateContext);
   const [selDrivers, setSelDrivers] = useState([]);
   const [selDriver, setSelDriver] = useState({});
   const [selOutcome, setSelOutcome] = useState({});

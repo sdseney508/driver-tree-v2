@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 // import Select from "react-select";
 import { Col, Card, Row, Button, Form } from "react-bootstrap";
-import Xarrow from "react-xarrows"; //for the arrows
+import Xarrow, {useXarrow, Xwrapper } from "react-xarrows"; //for the arrows
 import { getArrows } from "../utils/arrows";
 import styles from "../pages/DriverTreePage.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -15,16 +15,19 @@ import {
   updateCluster,
   updateDriver,
 } from "../utils/drivers";
+import DriverArrows from "./DrawArrows";
 
 const DriverCards = ({
+  arrowID,
+  arrows,
   state,
   driverTreeObj,
   selOutcome,
   setSelOutcome,
-  arrows,
   setArrows,
-  setArrowMod,
   setArrowID,
+  setArrowMod,
+  showArrowMod
 }) => {
   //This module has four functions:
   //1.  It creates the divs that go into the driver tree columns
@@ -35,16 +38,9 @@ const DriverCards = ({
 
   let navigate = useNavigate();
 
-  //very simple drag and drop functionality.  The card is assigned an id in the database, and that id is passed to the drop function
-
-  //adding in a useEffect feature to better handle arrow rendering on the page
+  //adding in a useEffect feature to rerender on change to selOutcome
   useEffect(() => {
-    const fetchData = async () => {
-      await getArrows(selOutcome.id).then((data) => {
-        setArrows(data.data);
-      });
-    };
-    fetchData();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome]);
 
@@ -151,6 +147,7 @@ const DriverCards = ({
       return arr.map((f, index) => {
         if (arr[index] === "skip") {
           return (
+            <Xwrapper>
             <div
               className={styles.my_div}
               data-tier={tier}
@@ -159,6 +156,7 @@ const DriverCards = ({
               onDragOver={allowDrop}
               onDrop={drop}
             ></div>
+            </Xwrapper>
           );
         } else if (
           arr[index].cluster > 0 &&
@@ -339,34 +337,12 @@ const DriverCards = ({
     setArrowMod(true);
   }
 
-  const myArrow = () => {
-    return arrows.map((f, index) => {
-      return (
-        <div  styles={{zIndex: "1"}} onClick={(e) => ArrowModal(e, arrows[index].id)}>
-          <Xarrow
-            start={arrows[index].start}
-            color={arrows[index].color}
-            end={arrows[index].end}
-            path={arrows[index].path}
-            arrowBodyProps={{ onClick: (e) => ArrowModal(e, arrows[index].id) }}
-            startAnchor={arrows[index].startAnchor}
-            endAnchor={arrows[index].endAnchor}
-            strokeWidth={arrows[index].strokeWidth}
-            headSize={4}
-            zIndex={1}
-            gridBreak={arrows[index].gridBreak}
-            showHead={true}
-            dashness={arrows[index].dashness}
-            id={arrows[index].id}
-          />
-        </div>
-      );
-    });
-  };
-
   return (
     <>
-      {" "}
+      <div id="outcomeColumn" className={styles.top_div} onLoad={useXarrow}>
+
+      
+        <Xwrapper>
       <Col className={styles.driver} sm={6} md={6} lg={2} key="0">
         <p>Tier 0</p>
         <Row
@@ -383,13 +359,11 @@ const DriverCards = ({
             onClick={goToOutcome}
             id={`outcomeID${selOutcome.id}`}
           >
-            <Card.Header className={styles.card_header}></Card.Header>
             <Card.Body className={styles.my_card_body}>
               <Card.Text className={styles.my_card_text}>
                 {selOutcome.outcomeTitle}
               </Card.Text>
             </Card.Body>
-            <Card.Footer className={styles.card_footer}></Card.Footer>
           </Card>
           <Row style={{ height: "700px" }}>
             <Legend driverTreeObj={driverTreeObj} />
@@ -471,7 +445,12 @@ const DriverCards = ({
         </Row>
         <Row style={{ height: "50px" }}>{tierButtons(5)}</Row>
       </Col>
-      {myArrow()}
+      {arrows ? <DriverArrows
+        arrows={arrows}
+        ArrowModal={ArrowModal}
+        /> : <div></div>}
+      </Xwrapper>
+      </div>
     </>
   );
 };

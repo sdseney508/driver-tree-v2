@@ -39,9 +39,9 @@ const ModArrows = ({
 
     let body = arrowProps;
     // body.gridBreak = parseInt(-20);
-    console.log(body);
     await updateArrow(arrowID, body);
     setArrowMod(false);
+    setSelOutcome(selOutcome)
   }
 
   async function delArrow() {

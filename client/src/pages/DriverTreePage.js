@@ -11,7 +11,7 @@ import {
   getDriverByOutcome,
 } from "../utils/drivers";
 import { getArrows } from "../utils/arrows";
-import Xarrow, { Xwrapper } from "react-xarrows";
+import Xarrow, { Xwrapper, useXarrow } from "react-xarrows";
 import { useNavigate, useLocation } from "react-router";
 import { useParams } from "react-router"; //to store state in the URL
 import DriverCards from "../components/driverCards";
@@ -37,7 +37,8 @@ const DriverTreePage = () => {
   //these are the state and URL for the pdf
 
   const { outcomeID } = useParams();
-  let command;
+  let tcommand;
+  let tout;
   //These are the initial states for the select boxes.  They are set to the first value in the array, which is the default value
 
   let navigate = useNavigate();
@@ -59,8 +60,7 @@ const DriverTreePage = () => {
           throw new Error("something went wrong!");
         }
         const user = response.data;
-        let tcommand = user.userCommand;
-        console.log(tcommand);
+        tcommand = user.userCommand;
         let userDataLength = Object.keys(user).length;
         //used to make sure they have permissions to make changes
         //if the user isnt logged in with an unexpired token, send them to the login page
@@ -76,15 +76,23 @@ const DriverTreePage = () => {
             userID: user.id,
           });
 
-          await outcomeByCommand(tcommand).then((data) => {
-            setSelOutcome(data.data[0]);
-          });
-
-          await getDriverByOutcome(outcomeID).then((data) => {
+          //checks to see if there was an outcomeID passed or if you entered from the user page
+          if (!outcomeID) {
+            await outcomeByCommand(tcommand).then((data) => {
+              setSelOutcome(data.data[0]);
+              tout = data.data[0].id;
+            });
+          } else {
+            tout = outcomeID;
+            await getOutcome(outcomeID).then((data) => {
+              setSelOutcome(data.data);
+            });
+          }
+          await getDriverByOutcome(tout).then((data) => {
             setDriverTreeObj(data.data);
           });
 
-          await getArrows(outcomeID).then((data) => {
+          await getArrows(tout).then((data) => {
             setArrows(data.data);
           });
         }
@@ -108,18 +116,15 @@ const DriverTreePage = () => {
       await getDriverByOutcome(selOutcome.id).then((data) => {
         setDriverTreeObj(data.data);
       });
-    };
-    const getArrowsData = async () => {
+
       await getArrows(outcomeID).then((data) => {
         setArrows(data.data);
       });
     };
 
     getDriversData();
-    getArrowsData();
     setState({ ...state, selOutcome: selOutcome });
-
-    navigate("/drivertree/" + selOutcome.id);
+    navigate(`/driverTree/${selOutcome.id}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome]);
 
@@ -207,21 +212,21 @@ const DriverTreePage = () => {
                 </Button>
               </Row>
             ) : null}
-            <Xwrapper>
-              <Row className={styles.outcome}>
-                <DriverCards
-                  state={state}
-                  driverTreeObj={driverTreeObj}
-                  selOutcome={selOutcome}
-                  setSelOutcome={setSelOutcome}
-                  arrows={arrows}
-                  setArrows={setArrows}
-                  showArrowMod={showArrowMod}
-                  setArrowMod={setArrowMod}
-                  arrowID={arrowID}
-                  setArrowID={setArrowID}
-                />
-              </Row>
+            <Xwrapper>   
+            <Row onLoad={useXarrow} className={styles.outcome}>
+              <DriverCards
+                arrowID={arrowID}
+                arrows={arrows}
+                driverTreeObj={driverTreeObj}
+                state={state}
+                setArrowID={setArrowID}
+                setArrows={setArrows}
+                setArrowMod={setArrowMod}
+                selOutcome={selOutcome}
+                setSelOutcome={setSelOutcome}
+                showArrowMod={showArrowMod}
+              />
+            </Row>
             </Xwrapper>
             <Row style={{ height: "250px" }}>
               <OutcomeTable
