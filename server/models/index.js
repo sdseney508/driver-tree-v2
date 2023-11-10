@@ -28,6 +28,14 @@ outcomes.hasMany(arrows, {
 arrows.belongsTo(outcomes, {
 });
 
+drivers.hasMany(arrows, {
+    foreignKey: 'driverID',
+    onDelete: 'CASCADE',
+});
+
+arrows.belongsTo(drivers, {
+});
+
 stakeholders.hasMany(drivers, {
     foreignKey: 'stakeholdersID',
 });

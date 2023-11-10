@@ -1,8 +1,12 @@
 
 .abbreviation_div {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-top-left-radius: 5px;
   background-color: rgba(0, 0, 255, 0.734);
   color: white;
-  margin-right: 1px;
+  /* margin-right: 1px; */
   width: 35px;
   height: 16px;
 }
@@ -50,6 +54,9 @@
 }
 
 .del_div {
+  position: absolute;
+  bottom: 0;
+  left: 0;
   color: red;
   margin-right: 1px; 
   width: 35px;
@@ -66,12 +73,11 @@
   background-color: white;
   color: rgb(0, 0, 0);
   font-weight: normal;
-  justify-content: flex-start;
   align-items: center;
+  justify-content: center;
 }
 
 .driver_page {
-  display: flex;
   width: 2000px;
   background-color: white;
   font-weight: bold;
@@ -79,7 +85,6 @@
   justify-content: center;
 }
 .my_btn {
-  /* padding: 2px; */
   width: 40px;
   height: 40px;
   box-shadow: 0 4px 8px 0 rgba(82, 81, 81, 0.9),
@@ -87,19 +92,18 @@
 }
 
 .my_card {
-  position: relative;
   z-index: 1000;
   display: flex;
   background-color: #f8f7f7;
   font-size: 0.75em;
   height: 35px;
-  width: 95%;
+  width: 270px;
 }
 
 .my_card_abb {
-  position: relative;
+  position: absolute;
   top: 0;
-  left: 1;
+  left: 0;
   font: size 0.75em;
 }
 
@@ -124,32 +128,28 @@
 }
 
 .my_cluster {
-  width: 100%;
+  width: 90%;
   display: flex;
   flex-direction: column;
   border: 1px solid #0f0e0e;
-  align-items: flex-start;
-  align-content: flex-start;
-  margin-top: 5px;
-  margin-bottom: 5px;
+  align-items: center;
+  align-content: center;
+  margin-top: 3px;
+  margin-bottom: 3px;
 }
 
 .my_div {
-  width: 97%;
+  width: 100%;
   height: 34px;
   display: flex;
 }
 
-
-
 .my_row {
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
   width: 100%;
   justify-content: flex-start;
   align-items: flex-start;
-  align-content: flex-start;
 }
 
 textarea { resize: none; }
@@ -157,7 +157,7 @@ textarea { resize: none; }
   width: 25%;
 }
 
-.outcome {
+/* .outcome {
   display: flex;
   flex: row;
   background-color: white;
@@ -165,16 +165,14 @@ textarea { resize: none; }
   font-weight: normal;
   justify-content: flex-start;
   align-items: flex-start;
-}
+} */
 
 .top_div {
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
   width: 100%;
   justify-content: flex-start;
   align-items: flex-start;
-  align-content: flex-start;
 }
 
 @media (max-width: 768px) {

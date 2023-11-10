@@ -84,6 +84,16 @@ arrows.init(
       allowNull: true,
     },
 
+    driverID: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: "drivers",
+        key: "id",
+      },
+    },
+
+    
+
     outcomeID: {
       type: DataTypes.INTEGER,
       references: {

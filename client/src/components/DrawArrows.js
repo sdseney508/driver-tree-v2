@@ -1,7 +1,13 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Xarrow from "react-xarrows";
 
-function DriverArrows({ arrows, ArrowModal }) {
+function DriverArrows({ arrows, ArrowModal, selOutcome }) {
+
+    //rerenders the arrows on selOutcome change
+  useEffect(() => {
+    console.log("DriverArrows.js: arrows = ");
+  },
+  [selOutcome]);
 
   //this function maps each arrow in the arrows array to a Xarrow component
   const arrowFunc = () => {

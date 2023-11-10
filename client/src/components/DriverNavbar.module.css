@@ -1,12 +1,15 @@
 .navbar_custom {
   position: sticky;
   top: 0;
-  background: linear-gradient(to top, #23262e 0%, #010102 100%);
+  background: rgb(68, 68, 68);
   justify-content: space-between;
   align-items: center;
   color: rgb(12, 222, 68);
-  z-index: 1000;
-  width: 100%;
+  z-index: 2000;
+  width: auto;
+  height: 35px;
+  padding: 0 important!;
+  margin: 0 important!;
 
   --bs-navbar-active-color: rgb(12, 222, 68);
   --bs-navbar-color: rgb(12, 222, 68);

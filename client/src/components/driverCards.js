@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 // import Select from "react-select";
 import { Col, Card, Row, Button, Form } from "react-bootstrap";
-import Xarrow, {useXarrow, Xwrapper } from "react-xarrows"; //for the arrows
+import Xarrow, { useXarrow, Xwrapper } from "react-xarrows"; //for the arrows
 import { getArrows } from "../utils/arrows";
 import styles from "../pages/DriverTreePage.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -19,15 +19,13 @@ import DriverArrows from "./DrawArrows";
 
 const DriverCards = ({
   arrowID,
-  arrows,
   state,
   driverTreeObj,
   selOutcome,
   setSelOutcome,
-  setArrows,
   setArrowID,
   setArrowMod,
-  showArrowMod
+  showArrowMod,
 }) => {
   //This module has four functions:
   //1.  It creates the divs that go into the driver tree columns
@@ -36,12 +34,19 @@ const DriverCards = ({
   //4.  Draws the correct clusters around the selected drivers based on the cluster field in the drivers table
   //The arrow function is contained in the arrows.js module.  It creates the arrows that connect the cards
 
+  //initially set the arrows empty then pull them from the database.  This is done so that the arrows can be updated when the user changes the outcome
+  const [arrows, setArrows] = useState([]);
   let navigate = useNavigate();
 
   //adding in a useEffect feature to rerender on change to selOutcome
   useEffect(() => {
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const getData = async() => {
+      await getArrows(selOutcome.id).then((data) => {
+        setArrows(data.data);
+      });
+    }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  getData();
   }, [selOutcome]);
 
   function allowDrop(e) {
@@ -64,13 +69,14 @@ const DriverCards = ({
     };
     await updateDriver(data, body);
     window.location.reload();
+    setSelOutcome(selOutcome);
   }
 
   const delDriver = (e) => {
     e.preventDefault();
-    if(window.confirm("Are you sure you want to delete this driver?")) {
+    if (window.confirm("Are you sure you want to delete this driver?")) {
       console.log(e.target.dataset.delid);
-    };
+    }
     deleteDriver(e.target.dataset.delid);
     getOutcome(selOutcome.id).then((data) => {
       setSelOutcome(data.data);
@@ -148,14 +154,14 @@ const DriverCards = ({
         if (arr[index] === "skip") {
           return (
             <Xwrapper>
-            <div
-              className={styles.my_div}
-              data-tier={tier}
-              data-subtier={index + 1}
-              id={"tier1subTier" + (index + 1)}
-              onDragOver={allowDrop}
-              onDrop={drop}
-            ></div>
+              <div
+                className={styles.my_div}
+                data-tier={tier}
+                data-subtier={index + 1}
+                id={"tier1subTier" + (index + 1)}
+                onDragOver={allowDrop}
+                onDrop={drop}
+              ></div>
             </Xwrapper>
           );
         } else if (
@@ -219,24 +225,25 @@ const DriverCards = ({
                       id={clusterArr[ind].id}
                     >
                       <Row className={styles.card_row}>
-                        <Col className={styles.card_col_abbrev}          >
-                          <div className={styles.abbreviation_div} onClick={goToDriver} data-cardid={arr[index].id}>
+                        <Col className={styles.card_col_abbrev}>
+                          <div
+                            className={styles.abbreviation_div}
+                            onClick={goToDriver}
+                            data-cardid={arr[index].id}
+                          >
                             {clusterArr[ind].stakeholderAbbreviation
                               ? clusterArr[ind].stakeholderAbbreviation
                               : "-"}
                           </div>
                           <div
-                          onClick={delDriver}
-                          data-delid={clusterArr[ind].id}
-                          className={styles.del_div}
+                            onClick={delDriver}
+                            data-delid={clusterArr[ind].id}
+                            className={styles.del_div}
                           >
                             Del
                           </div>
                         </Col>
-                        <Col
-                          className={styles.card_col_body}
-                        >
-
+                        <Col className={styles.card_col_body}>
                           <Card.Text
                             className={styles.my_card_text}
                             id={clusterArr[ind].id}
@@ -291,34 +298,36 @@ const DriverCards = ({
                 />
                 <Card.Body className={styles.my_card_body}>
                   <Row className={styles.card_row}>
-                    <Col className={styles.card_col_abbrev} >
-                      <div className={styles.abbreviation_div} onClick={goToDriver} data-cardid={arr[index].id}>
+                    <Col className={styles.card_col_abbrev}>
+                      <div
+                        className={styles.abbreviation_div}
+                        onClick={goToDriver}
+                        data-cardid={arr[index].id}
+                      >
                         {arr[index].stakeholderAbbreviation
                           ? arr[index].stakeholderAbbreviation
                           : "-"}
                       </div>
                       <div
-                      onClick={delDriver}
+                        onClick={delDriver}
                         data-delid={arr[index].id}
                         className={styles.del_div}
                       >
                         Del
                       </div>
                     </Col>
-                    <Col className={styles.card_col_body} id={arr[index].id}
-                    >
-                      <Form>  
-                      
-                      <Form.Control
-                      as="textarea"
-                      data-cardid={arr[index].id}
-                      className={styles.my_card_text}
-                      defaultValue={arr[index].problemStatement}
-                      //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-                      name="problemStatement"
-                      // onChange={handleInputChange}
-                      onBlur={handleFormSubmit}
-                    />                
+                    <Col className={styles.card_col_body} id={arr[index].id}>
+                      <Form>
+                        <Form.Control
+                          as="textarea"
+                          data-cardid={arr[index].id}
+                          className={styles.my_card_text}
+                          defaultValue={arr[index].problemStatement}
+                          //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                          name="problemStatement"
+                          // onChange={handleInputChange}
+                          onBlur={handleFormSubmit}
+                        />
                       </Form>
                     </Col>
                   </Row>
@@ -339,117 +348,116 @@ const DriverCards = ({
 
   return (
     <>
-      <div id="outcomeColumn" className={styles.top_div} onLoad={useXarrow}>
-
-      
+      <div id="outcomeColumn" className={styles.top_div}>
         <Xwrapper>
-      <Col className={styles.driver} sm={6} md={6} lg={2} key="0">
-        <p>Tier 0</p>
-        <Row
-          style={{
-            height: "800px",
-            width: "100%",
-          }}
-          className="m-1"
-          id="outcomeColumn"
-          key="outcomeColumn1"
-        >
-          <Card
-            className={styles.my_card}
-            onClick={goToOutcome}
-            id={`outcomeID${selOutcome.id}`}
-          >
-            <Card.Body className={styles.my_card_body}>
-              <Card.Text className={styles.my_card_text}>
-                {selOutcome.outcomeTitle}
-              </Card.Text>
-            </Card.Body>
-          </Card>
-          <Row style={{ height: "700px" }}>
-            <Legend driverTreeObj={driverTreeObj} />
-          </Row>
-        </Row>
-      </Col>
-      <Col className={styles.driver} sm={6} md={6} lg={2} key="1">
-        <p>{`Tier 1 Drivers`}</p>
-        <Row
-          style={{
-            height: "1400px",
-            width: "100%",
-          }}
-          id={`tier1Cards`}
-          key={`tier1Cards`}
-          className={styles.my_row}
-        >
-          {tierCards(1, { driverTreeObj })}
-        </Row>
-        <Row style={{ height: "50px" }}>{tierButtons(1)}</Row>
-      </Col>
-      <Col className={styles.driver} sm={6} md={6} lg={2} key="2">
-        <p>{`Tier 2 Drivers`}</p>
-        <Row
-          style={{
-            height: "1400px",
-            width: "100%",
-          }}
-          id={`tier2Cards`}
-          key={`tier2Cards`}
-          className={styles.my_row}
-        >
-          {tierCards(2, { driverTreeObj })}
-        </Row>
-        <Row style={{ height: "50px" }}>{tierButtons(2)}</Row>
-      </Col>
-      <Col className={styles.driver} sm={6} md={6} lg={2} key="3">
-        <p>{`Tier 3 Drivers`}</p>
-        <Row
-          style={{
-            height: "1400px",
-            width: "100%",
-          }}
-          id={`tier3Cards`}
-          key={`tier3Cards`}
-          className={styles.my_row}
-        >
-          {tierCards(3, { driverTreeObj })}
-        </Row>
-        <Row style={{ height: "50px" }}>{tierButtons(3)}</Row>
-      </Col>
-      <Col className={styles.driver} sm={6} md={6} lg={2} key="4">
-        <p>{`Tier 4 Drivers`}</p>
-        <Row
-          style={{
-            height: "1400px",
-            width: "100%",
-          }}
-          id={`tier4Cards`}
-          key={`tier4Cards`}
-          className={styles.my_row}
-        >
-          {tierCards(4, { driverTreeObj })}
-        </Row>
-        <Row style={{ height: "50px" }}>{tierButtons(4)}</Row>
-      </Col>
-      <Col className={styles.driver} sm={6} md={6} lg={2} key="5">
-        <p>{`Tier 5 Drivers`}</p>
-        <Row
-          style={{
-            height: "1400px",
-            width: "100%",
-          }}
-          id={`tier5Cards`}
-          key={`tier5Cards`}
-          className={styles.my_row}
-        >
-          {tierCards(5, { driverTreeObj })}
-        </Row>
-        <Row style={{ height: "50px" }}>{tierButtons(5)}</Row>
-      </Col>
-      {arrows ? <DriverArrows
-        arrows={arrows}
-        ArrowModal={ArrowModal}
-        /> : <div></div>}
-      </Xwrapper>
+          <Col className={styles.driver} sm={6} md={6} lg={2} key="0">
+            <p>Tier 0</p>
+            <Row
+              style={{
+                height: "800px",
+                width: "100%",
+              }}
+              className="m-1"
+              id="outcomeColumn"
+              key="outcomeColumn1"
+            >
+              <Card
+                className={styles.my_card}
+                onClick={goToOutcome}
+                id={`outcomeID${selOutcome.id}`}
+              >
+                <Card.Body className={styles.my_card_body}>
+                  <Card.Text className={styles.my_card_text}>
+                    {selOutcome.outcomeTitle}
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+              <Row style={{ height: "700px" }}>
+                <Legend driverTreeObj={driverTreeObj} />
+              </Row>
+            </Row>
+          </Col>
+          <Col className={styles.driver} sm={6} md={6} lg={2} key="1">
+            <p>{`Tier 1 Drivers`}</p>
+            <Row
+              style={{
+                height: "1400px",
+                width: "100%",
+              }}
+              id={`tier1Cards`}
+              key={`tier1Cards`}
+              className={styles.my_row}
+            >
+              {tierCards(1, { driverTreeObj })}
+            </Row>
+            <Row style={{ height: "50px" }}>{tierButtons(1)}</Row>
+          </Col>
+          <Col className={styles.driver} sm={6} md={6} lg={2} key="2">
+            <p>{`Tier 2 Drivers`}</p>
+            <Row
+              style={{
+                height: "1400px",
+                width: "100%",
+              }}
+              id={`tier2Cards`}
+              key={`tier2Cards`}
+              className={styles.my_row}
+            >
+              {tierCards(2, { driverTreeObj })}
+            </Row>
+            <Row style={{ height: "50px" }}>{tierButtons(2)}</Row>
+          </Col>
+          <Col className={styles.driver} sm={6} md={6} lg={2} key="3">
+            <p>{`Tier 3 Drivers`}</p>
+            <Row
+              style={{
+                height: "1400px",
+                width: "100%",
+              }}
+              id={`tier3Cards`}
+              key={`tier3Cards`}
+              className={styles.my_row}
+            >
+              {tierCards(3, { driverTreeObj })}
+            </Row>
+            <Row style={{ height: "50px" }}>{tierButtons(3)}</Row>
+          </Col>
+          <Col className={styles.driver} sm={6} md={6} lg={2} key="4">
+            <p>{`Tier 4 Drivers`}</p>
+            <Row
+              style={{
+                height: "1400px",
+                width: "100%",
+              }}
+              id={`tier4Cards`}
+              key={`tier4Cards`}
+              className={styles.my_row}
+            >
+              {tierCards(4, { driverTreeObj })}
+            </Row>
+            <Row style={{ height: "50px" }}>{tierButtons(4)}</Row>
+          </Col>
+          <Col className={styles.driver} sm={6} md={6} lg={2} key="5">
+            <p>{`Tier 5 Drivers`}</p>
+            <Row
+              style={{
+                height: "1400px",
+                width: "100%",
+              }}
+              id={`tier5Cards`}
+              key={`tier5Cards`}
+              className={styles.my_row}
+            >
+              {tierCards(5, { driverTreeObj })}
+            </Row>
+            <Row style={{ height: "50px" }}>{tierButtons(5)}</Row>
+          </Col>
+          {arrows ? (
+            <DriverArrows arrows={arrows} ArrowModal={ArrowModal} />
+          ) : (
+            null
+          )}
+        </Xwrapper>
       </div>
     </>
   );

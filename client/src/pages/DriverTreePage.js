@@ -11,8 +11,8 @@ import {
   getDriverByOutcome,
 } from "../utils/drivers";
 import { getArrows } from "../utils/arrows";
-import Xarrow, { Xwrapper, useXarrow } from "react-xarrows";
-import { useNavigate, useLocation } from "react-router";
+import { Xwrapper, useXarrow } from "react-xarrows";
+import { useNavigate } from "react-router";
 import { useParams } from "react-router"; //to store state in the URL
 import DriverCards from "../components/driverCards";
 import { getUser, loggedIn, getToken } from "../utils/auth";
@@ -42,7 +42,6 @@ const DriverTreePage = () => {
   //These are the initial states for the select boxes.  They are set to the first value in the array, which is the default value
 
   let navigate = useNavigate();
-  let location = useLocation();
   //using the initial useEffect hook to open up the driver trees and prefill the table at the bottom of the page
   useEffect(() => {
     const getUserData = async () => {
@@ -91,10 +90,6 @@ const DriverTreePage = () => {
           await getDriverByOutcome(tout).then((data) => {
             setDriverTreeObj(data.data);
           });
-
-          await getArrows(tout).then((data) => {
-            setArrows(data.data);
-          });
         }
       } catch (err) {
         console.error(err);
@@ -103,9 +98,6 @@ const DriverTreePage = () => {
     };
 
     getUserData();
-    // getOutcomeData(tcommand);
-    // getDriversData();
-    // getArrowsData();
     setState({ ...state, selOutcome: selOutcome });
     //this one gets the initial draftOL for the form
   }, []);
@@ -116,15 +108,12 @@ const DriverTreePage = () => {
       await getDriverByOutcome(selOutcome.id).then((data) => {
         setDriverTreeObj(data.data);
       });
-
-      await getArrows(outcomeID).then((data) => {
-        setArrows(data.data);
-      });
     };
 
     getDriversData();
     setState({ ...state, selOutcome: selOutcome });
     navigate(`/driverTree/${selOutcome.id}`);
+    // window.location.reload(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome]);
 
@@ -212,22 +201,20 @@ const DriverTreePage = () => {
                 </Button>
               </Row>
             ) : null}
-            <Xwrapper>   
+            {/* <Xwrapper>    */}
             <Row onLoad={useXarrow} className={styles.outcome}>
               <DriverCards
                 arrowID={arrowID}
-                arrows={arrows}
                 driverTreeObj={driverTreeObj}
                 state={state}
                 setArrowID={setArrowID}
-                setArrows={setArrows}
                 setArrowMod={setArrowMod}
                 selOutcome={selOutcome}
                 setSelOutcome={setSelOutcome}
                 showArrowMod={showArrowMod}
               />
             </Row>
-            </Xwrapper>
+            {/* </Xwrapper> */}
             <Row style={{ height: "250px" }}>
               <OutcomeTable
                 selOutcome={selOutcome}

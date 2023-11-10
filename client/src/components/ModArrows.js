@@ -13,7 +13,6 @@ const ModArrows = ({
 }) => {
   const [arrowProps, setArrowProps] = useState({});
 
-
   useEffect(() => {
     async function fetchArrow() {
       await getArrow(arrowID).then((res) => {
@@ -23,25 +22,17 @@ const ModArrows = ({
     console.log(arrowID);
     fetchArrow();
 
-  }, []);
+  }, [arrowID]);
 
   //takes the arrowProps from the modal and sets them to the arrowProps state
   async function afterSubmission() {
-    console.log(arrowProps.startAnchor.position);
-    console.log(arrowProps.endAnchor.position);
-    // if (
-    //   arrowProps.startAnchor.position === "right" &&
-    //   arrowProps.endAnchor.position === "right"
-    // ) {
-    //   setArrowProps({ ...arrowProps, gridBreak: parseInt(-10) });
-    // }
-
 
     let body = arrowProps;
+    console.log(body);
     // body.gridBreak = parseInt(-20);
     await updateArrow(arrowID, body);
+    setSelOutcome(selOutcome);
     setArrowMod(false);
-    setSelOutcome(selOutcome)
   }
 
   async function delArrow() {
