@@ -128,7 +128,7 @@ const DriverPage = () => {
                 <br />
               </div>
               <Form.Group>
-                <Row>
+                <Row className={styles.tier_row}>
                   Driver Tier
                   <Form.Control
                     as="select"
@@ -160,7 +160,7 @@ const DriverPage = () => {
               </Form.Group>
 
               {/* Driver Tier: {selDriver.tierLevel} */}
-              <Row className={styles.quad_format + styles.my_row}>
+              <Row className={styles.quad_format}>
                 <Col className={styles.my_col}>
                   <Form.Group style={{ width: "100%" }}>
                     <Form.Label>Problem Statement</Form.Label>
@@ -254,14 +254,14 @@ const DriverPage = () => {
                   </Form.Group>
                 </Col>
               </Row>
-              <Row className={styles.quad_format + styles.my_row}>
+              <Row className={styles.quad_format}>
                 <Col className={styles.my_col}>
                   <Form.Group>
                     <Form.Label>Progress</Form.Label>
                     <Form.Control
                       as="textarea"
                       value={selDriver.progress || ""}
-                      style={{height: "200px" }}
+                      style={{height: "150px" }}
                       //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                       name="progress"
                       onChange={handleInputChange}
@@ -330,6 +330,7 @@ const DriverPage = () => {
                 </Col>
               </Row>
             </Form>
+            <p className={styles.copyright}>&#169; Integrated Program Solutions, Inc</p>
           </div>
 
           <Row style={{ height: "250px" }}>

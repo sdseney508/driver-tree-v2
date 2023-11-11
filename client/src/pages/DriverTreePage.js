@@ -34,6 +34,7 @@ const DriverTreePage = () => {
   const [selOutcome, setSelOutcome] = useState({});
   const [selDriver, setSelDriver] = useState({});
   const [driverTreeObj, setDriverTreeObj] = useState([]);
+  const [pdfURL, setPdfURL] = useState("");
   //these are the state and URL for the pdf
 
   const { outcomeID } = useParams();
@@ -82,6 +83,7 @@ const DriverTreePage = () => {
               tout = data.data[0].id;
             });
           } else {
+            console.log("i'm in the else route");
             tout = outcomeID;
             await getOutcome(outcomeID).then((data) => {
               setSelOutcome(data.data);
@@ -108,36 +110,38 @@ const DriverTreePage = () => {
       await getDriverByOutcome(selOutcome.id).then((data) => {
         setDriverTreeObj(data.data);
       });
+      await getArrows(selOutcome.id).then((data) => {
+        setArrows(data.data);
+      });
     };
 
     getDriversData();
     setState({ ...state, selOutcome: selOutcome });
-    navigate(`/driverTree/${selOutcome.id}`);
-    // window.location.reload(false);
+    navigate("/drivertree/" + selOutcome.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome]);
 
-  //function to generate a pdf
-  // const generatePDF = async () => {
-  //   debugger;
-  //   let cnvsIMG = html2canvas(document.getElementById('pdf'));
-  //   // const elementToCapture = document.getElementById('pdf');
-  //   console.log(cnvsIMG);
-  //   //check for info before making the axios call
-  //   if (!cnvsIMG) {
-  //     console.error('No element to capture!');
-  //     return;
-  //   }
+  // function to generate a pdf
+  const generatePDF = async () => {
+    let canvsIMG = await html2canvas(document.getElementById("pdf"));
+    // const elementToCapture = document.getElementById('pdf');
+    console.log(canvsIMG);
+    //check for info before making the axios call
+    if (!canvsIMG) {
+      console.error("No element to capture!");
+      return;
+    }
 
-  //   // const canvasimg = await html2canvas(elementToCapture);
-  //   axios.post('http://localhost:8080/generate-pdf', cnvsIMG)
-  //     .then((response) => {
-  //       setPdfURL(response.data);
-  //     })
-  //     .catch((error) => {
-  //       console.error('Error generating PDF:', error);
-  //     });
-  // };
+    // const canvasimg = await html2canvas(elementToCapture);
+    axios
+      .post("http://localhost:8080/generate-pdf", canvsIMG)
+      .then((response) => {
+        setPdfURL(response.data);
+      })
+      .catch((error) => {
+        console.error("Error generating PDF:", error);
+      });
+  };
 
   //creates new outcome and then resets the selOutcome state.  This cause a a useEffect fire and refreshes the page.
   const newOutcome = async () => {
@@ -163,12 +167,13 @@ const DriverTreePage = () => {
 
   return (
     <>
-      {/* <div> 
-    <h1>Generate PDF</h1>
-      <button onClick={generatePDF}>Generate PDF</button>
-      <a href={pdfURL} download="output.pdf">Download PDF</a>
-
-    </div> */}
+      <div>
+        <h1>Generate PDF</h1>
+        <button onClick={generatePDF}>Generate PDF</button>
+        <a href={pdfURL} download="output.pdf">
+          Download PDF
+        </a>
+      </div>
       <div className={styles.driver_page} id="pdf" key="topleveldiv">
         <Container fluid className="justify-content-center">
           <Col className={styles.my_col}>
@@ -202,13 +207,16 @@ const DriverTreePage = () => {
               </Row>
             ) : null}
             {/* <Xwrapper>    */}
+            
             <Row onLoad={useXarrow} className={styles.outcome}>
               <DriverCards
                 arrowID={arrowID}
+                arrows={arrows}
                 driverTreeObj={driverTreeObj}
                 state={state}
                 setArrowID={setArrowID}
                 setArrowMod={setArrowMod}
+                setArrows={setArrows}
                 selOutcome={selOutcome}
                 setSelOutcome={setSelOutcome}
                 showArrowMod={showArrowMod}

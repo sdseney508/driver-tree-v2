@@ -1,18 +1,18 @@
 import React, { useEffect } from "react";
+import { getArrows, deleteArrow } from "../utils/arrows";
 import Xarrow from "react-xarrows";
 
-function DriverArrows({ arrows, ArrowModal, selOutcome }) {
+function DriverArrows({ arrows, setArrows, ArrowModal, selOutcome }) {
 
     //rerenders the arrows on selOutcome change
   useEffect(() => {
-    console.log("DriverArrows.js: arrows = ");
   },
   [selOutcome]);
 
   //this function maps each arrow in the arrows array to a Xarrow component
   const arrowFunc = () => {
     return arrows.map((f, index) => {
-      return (<div onClick={(e) => ArrowModal(e, arrows[index].id)}>
+      return (<div key={`arrow${arrows[index].id}`} onClick={(e) => ArrowModal(e, arrows[index].id)}>
         <Xarrow
             arrowBodyProps={{ onClick: (e) => ArrowModal(e, arrows[index].id) }}
             color={arrows[index].color}

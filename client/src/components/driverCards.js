@@ -19,12 +19,14 @@ import DriverArrows from "./DrawArrows";
 
 const DriverCards = ({
   arrowID,
+  arrows,
   state,
   driverTreeObj,
   selOutcome,
   setSelOutcome,
   setArrowID,
   setArrowMod,
+  setArrows,
   showArrowMod,
 }) => {
   //This module has four functions:
@@ -35,18 +37,11 @@ const DriverCards = ({
   //The arrow function is contained in the arrows.js module.  It creates the arrows that connect the cards
 
   //initially set the arrows empty then pull them from the database.  This is done so that the arrows can be updated when the user changes the outcome
-  const [arrows, setArrows] = useState([]);
+  // const [arrows, setArrows] = useState([]);
   let navigate = useNavigate();
 
   //adding in a useEffect feature to rerender on change to selOutcome
   useEffect(() => {
-    const getData = async() => {
-      await getArrows(selOutcome.id).then((data) => {
-        setArrows(data.data);
-      });
-    }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  getData();
   }, [selOutcome]);
 
   function allowDrop(e) {
@@ -151,7 +146,8 @@ const DriverCards = ({
       return <div></div>;
     } else {
       for (let i = 0; i < 36; i++) {
-        //needs a nested loop for those instances when the driverTreeObj is smaller than 15
+        //needs a nested loop for those instances when the driverTreeObj is smaller than 36
+        //TODO look at replacing this with a 6 by 60 grid and use React Draggable.
         // logic as follows:  insert a placeholder row, then check to see if there should be a card or a cluster, if yes, pop that row and insert card
         arr.push("skip");
         for (let j = 0; j < driverTreeObj.length; j++) {
@@ -168,7 +164,6 @@ const DriverCards = ({
       return arr.map((f, index) => {
         if (arr[index] === "skip") {
           return (
-            <Xwrapper>
               <div
                 className={styles.my_div}
                 data-tier={tier}
@@ -176,8 +171,9 @@ const DriverCards = ({
                 id={"tier1subTier" + (index + 1)}
                 onDragOver={allowDrop}
                 onDrop={drop}
+                key={`${tier}div${index+1}`}
               ></div>
-            </Xwrapper>
+      
           );
         } else if (
           arr[index].cluster > 0 &&
@@ -202,6 +198,7 @@ const DriverCards = ({
               className={styles.my_cluster}
               data-tier={tier}
               data-subtier={index + 1}
+              key={`${tier}cluster${clusterNumber}`}
               data-cluster={clusterNumber}
               id={`tier${tier}cluster` + clusterNumber} //this is used for the arrow start and end points
               onClick={deleteCluster}
@@ -228,6 +225,7 @@ const DriverCards = ({
                   data-delid={clusterArr[ind].id}
                   draggable="true"
                   onDragStart={drag}
+                  key={`${tier}clustercard${clusterArr[ind].id}`}
                 >
                   <FontAwesomeIcon
                     position="top"
@@ -299,6 +297,7 @@ const DriverCards = ({
               id={"tier1subTier" + (index + 1)}
               onDragOver={allowDrop}
               onDrop={drop}
+              key={`${tier}div${index+1}`}
             >
               <Card
                 className={styles.my_card}
@@ -307,6 +306,7 @@ const DriverCards = ({
                 data-delid={arr[index].id}
                 draggable="true"
                 onDragStart={drag}
+                key={`${tier}card${arr[index].id}`}
               >
                 <FontAwesomeIcon
                   position="top"
@@ -384,6 +384,7 @@ const DriverCards = ({
                 className={styles.my_card}
                 onClick={goToOutcome}
                 id={`outcomeID${selOutcome.id}`}
+                key={`outcomeCard${selOutcome.id}`}
               >
                 <Card.Body className={styles.my_card_body}>
                   <Card.Text className={styles.my_card_text}>
@@ -397,7 +398,7 @@ const DriverCards = ({
             </Row>
           </Col>
           <Col className={styles.driver} sm={6} md={6} lg={2} key="1">
-            <p>{`Tier 1 Drivers`}</p>
+            <Row>Tier 1 Drivers  {tierButtons(1)}</Row>
             <Row
               style={{
                 height: "1400px",
@@ -412,7 +413,7 @@ const DriverCards = ({
             <Row style={{ height: "50px" }}>{tierButtons(1)}</Row>
           </Col>
           <Col className={styles.driver} sm={6} md={6} lg={2} key="2">
-            <p>{`Tier 2 Drivers`}</p>
+            <Row>Tier 2 Drivers {tierButtons(2)}</Row>
             <Row
               style={{
                 height: "1400px",
@@ -427,7 +428,7 @@ const DriverCards = ({
             <Row style={{ height: "50px" }}>{tierButtons(2)}</Row>
           </Col>
           <Col className={styles.driver} sm={6} md={6} lg={2} key="3">
-            <p>{`Tier 3 Drivers`}</p>
+            <Row>Tier 3 Drivers{tierButtons(3)}</Row>
             <Row
               style={{
                 height: "1400px",
@@ -442,7 +443,7 @@ const DriverCards = ({
             <Row style={{ height: "50px" }}>{tierButtons(3)}</Row>
           </Col>
           <Col className={styles.driver} sm={6} md={6} lg={2} key="4">
-            <p>{`Tier 4 Drivers`}</p>
+            <Row>Tier 4 Drivers {tierButtons(4)}</Row>
             <Row
               style={{
                 height: "1400px",
@@ -457,7 +458,7 @@ const DriverCards = ({
             <Row style={{ height: "50px" }}>{tierButtons(4)}</Row>
           </Col>
           <Col className={styles.driver} sm={6} md={6} lg={2} key="5">
-            <p>{`Tier 5 Drivers`}</p>
+            <Row>Tier 5 Drivers {tierButtons(5)}</Row>
             <Row
               style={{
                 height: "1400px",
@@ -472,7 +473,7 @@ const DriverCards = ({
             <Row style={{ height: "50px" }}>{tierButtons(5)}</Row>
           </Col>
           {arrows ? (
-            <DriverArrows arrows={arrows} ArrowModal={ArrowModal} />
+            <DriverArrows arrows={arrows} setArrows={setArrows} ArrowModal={ArrowModal} selOutcome={selOutcome}/>
           ) : (
             null
           )}

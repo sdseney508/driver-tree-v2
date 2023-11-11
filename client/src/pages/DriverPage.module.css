@@ -42,6 +42,10 @@
    font-size: 10px;
 }
 
+.copyright {
+   align-items: flex-end;
+}
+
 .driver {
    display: flex;
    flex-direction: column;
@@ -50,7 +54,6 @@
    font-weight: normal;
    justify-content: center;
    align-items: center;
-   /* text-align: center; */
 }
 
 .driver_page {
@@ -71,8 +74,8 @@
    width: 100%;
    justify-content: left;
    align-items: top;
+   height: 100%;
    border: 1px solid black;
-   height: 40vh;
 }
 
 
@@ -112,10 +115,19 @@
    flex-direction: row;
    /* flex-wrap: wrap; */
    width: 100%;
-   height: 40vh;
+   height: 45vh;
    justify-content:  left;
    align-items: top;
    border: 1px solid black;
+}
+
+.my_row {
+   display: flex;
+   flex-direction: column;
+   width: 100%;
+   justify-content: center;
+   align-items: center;
+
 }
 
 .welcome-btn {

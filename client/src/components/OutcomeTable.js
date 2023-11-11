@@ -98,8 +98,6 @@ function OutcomeTable({
   //table to get the full record for the selected row.
   // It then passes the data to the parent component to be displayed in the form.
 
-  // const handleCallBack = () => useCallback(state);
-
   async function fetchOutcomeInfo(outcomeID) {
     await getOutcome(outcomeID).then((data) => {
       setSelOutcome(data.data);
