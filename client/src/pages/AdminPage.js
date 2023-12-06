@@ -30,9 +30,8 @@ const AdminPage = () => {
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
-          id: user.id,
+          userId: user.id,
           userRole: user.userRole,
-          functionalArea: user.functional,
         });       
         let userDataLength = Object.keys(user).length;
         //if the user isnt logged in with an unexpired token, send them to the login page
@@ -57,12 +56,12 @@ const AdminPage = () => {
   };
 
   const outcomesManagement = () => {
-    // 👇️ navigate to oplimit management page.  this is where the administrator can add, remove, and update op limits.
+    // 👇️ navigate to outcomes management page.  this is where the administrator can add, remove, and update op limits.
     alert("This feature is disabled for demo.");
   };
 
   const driverManagement = () => {
-    // 👇️ navigate to oplimit management page.  this is where the administrator can add, remove, and update op limits.
+    // 👇️ navigate to driver management page.  this is where the administrator can add, remove, and update op limits.
     alert("This feature is disabled for demo.");
   };
 

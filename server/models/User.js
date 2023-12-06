@@ -6,6 +6,7 @@ class User extends Model {
   checkPassword(loginPw) {
     return bcrypt.compareSync(loginPw, this.password);
   }
+  
 }
 
 User.init(
@@ -27,7 +28,6 @@ User.init(
     email: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
       validate: {
         isEmail: true,
       },
@@ -60,15 +60,16 @@ User.init(
       //       key: 'role_id',
       //  }
     },
-    userCommand: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: "stakeholders",
-        key: "id",
+    // userCommand: {
+      //   type: DataTypes.INTEGER,
+      //   allowNull: false,
+      //   references: {
+        //     model: "stakeholders",
+        //     key: "id",
+        //   },
+        // },
+
       },
-    },
-  },
   {
     hooks: {
       beforeCreate: async (newUserData) => {
@@ -84,7 +85,11 @@ User.init(
         return updatedUserData;
       },
     },
-
+    indexes: [{
+      unique: true,
+      fields: ["email"]}
+    ],
+    
     sequelize,
     timestamps: true,
     freezeTableName: true,

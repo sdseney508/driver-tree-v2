@@ -18,6 +18,7 @@ import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CS
 //and displayed in the form.
 //this is using the community edition and react hooks to selectively render the table
 function OutcomeTable({
+  state, setState,
   selOutcome,
   setSelOutcome,
   command
@@ -30,31 +31,15 @@ function OutcomeTable({
     await outcomeByCommand(command).then((data) => {
       rowD = data.data;
     });
-
     setRowData(rowD);
-    return rowD;
   }
 
-  // async function fetchOneOutcome(outcomeId) {
-  //   await getOutcome(outcomeId).then((data) => {
-  //     let top = data.data;
-  //     console.log("outcome", top);
-  //     setSelOutcome(top);
-  //   });
-  // };
   const gridRef = useRef(); // Optional - for accessing Grid's AP
 
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  //this runs on the initial to fetch the data for the table
-  useEffect(() => {
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome]);
-
 
   // Each Column Definition results in one Column.  For now, we are only going to set the 7 key columns that the users might search on
   const [columnDefs, setColumnDefs] = useState([
@@ -98,15 +83,16 @@ function OutcomeTable({
   //table to get the full record for the selected row.
   // It then passes the data to the parent component to be displayed in the form.
 
-  async function fetchOutcomeInfo(outcomeID) {
-    await getOutcome(outcomeID).then((data) => {
+  async function fetchOutcomeInfo(outcomeId) {
+    await getOutcome(outcomeId).then((data) => {
       setSelOutcome(data.data);
+      // setState({ ...state, outcomeId: selOutcome.id });
   });
   };
 
   const cellClickedListener = async (event) => {
-    let outcomeID = event.data.id;
-    await fetchOutcomeInfo(outcomeID);
+    let outcomeId = event.data.id;
+    await fetchOutcomeInfo(outcomeId);
   };
 
 
@@ -114,7 +100,7 @@ function OutcomeTable({
   return (
     <div>
       {/* On div wrapping Grid a) specify theme CSS Class Class and b) sets Grid size */}
-      <div className="ag-theme-alpine" style={{ width: "100%", height: "100%" }}>
+      <div className="ag-theme-alpine" style={{ height: "200px" }}>
         <AgGridReact
           ref={gridRef} // Ref for accessing Grid's API
           rowData={rowData} // Row Data for Rows

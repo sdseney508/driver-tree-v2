@@ -5,7 +5,6 @@ import { deleteArrow, getArrow, updateArrow } from "../utils/arrows";
 import { getOutcome } from "../utils/drivers";
 
 const ModArrows = ({
-  onModalSubmit,
   arrowID,
   setArrowMod,
   selOutcome,
@@ -19,17 +18,19 @@ const ModArrows = ({
         setArrowProps(res.data);
       });
     }
-    console.log(arrowID);
-    fetchArrow();
 
+    fetchArrow();
   }, [arrowID]);
 
   //takes the arrowProps from the modal and sets them to the arrowProps state
   async function afterSubmission() {
     let body = arrowProps;
     await updateArrow(arrowID, body);
-    setSelOutcome(selOutcome);
+    getOutcome(selOutcome.id).then((res) => {
+      setSelOutcome(res.data);
+    });
     setArrowMod(false);
+    // window.location.reload();
   }
 
   async function delArrow() {
@@ -98,7 +99,6 @@ const ModArrows = ({
               <Form.Label>Start Anchor Offset</Form.Label>
               <Form.Select
                 aria-label="Default select example"
-                defaultValue="0"
                 onChange={(e) => {
                   if (
                     arrowProps.startAnchor.position === "left" ||
@@ -125,13 +125,13 @@ const ModArrows = ({
                 <option value="null">
                   Select an offset (neg is up and left)
                 </option>
-                <option value="-30">-30</option>
-                <option value="-20">-20</option>
-                <option value="-10">-10</option>
-                <option value="0">0</option>
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="-30">30</option>
+                <option key={'sOff-30'}  value="-30">-30</option>
+                <option key={'sOff-20'}  value="-20">-20</option>
+                <option key={'sOff-10'}  value="-10">-10</option>
+                <option key={'sOff-0'}  value="0">0</option>
+                <option key={'sOff+10'}  value="10">10</option>
+                <option key={'sOff+20'}  value="20">20</option>
+                <option key={'sOff+30'}  value="-30">30</option>
               </Form.Select>
 
               <Form.Label>End Anchor Location</Form.Label>
@@ -148,7 +148,7 @@ const ModArrows = ({
                 }}
               >
                 <option key={"e0"} value="0">
-                  Select and end anchor
+                  Select an End Anchor
                 </option>
                 <option key={"e1"} value="left">
                   Left
@@ -164,7 +164,7 @@ const ModArrows = ({
                 </option>
               </Form.Select>
 
-              <Form.Label>Arrow Offset</Form.Label>
+              <Form.Label>Arrow End Point Offset</Form.Label>
               <Form.Select
                 aria-label="Default select example"
                 onChange={(e) => {
@@ -193,37 +193,63 @@ const ModArrows = ({
                 <option value="null">
                   Select an offset (neg is up and left)
                 </option>
-                <option value="-30">-30</option>
-                <option value="-20">-20</option>
-                <option value="-10">-10</option>
-                <option value="0">0</option>
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="30">30</option>
+                <option key={'eOff-30'} value="-30">-30</option>
+                <option key={'eOff-20'} value="-20">-20</option>
+                <option key={'eOff-10'} value="-10">-10</option>
+                <option key={'eOff-0'} value="0">0</option>
+                <option key={'eOff+10'} value="10">10</option>
+                <option key={'eOff+20'} value="20">20</option>
+                <option key={'eOff+30'} value="30">30</option>
               </Form.Select>
 
               <Form.Label>Turn Distance</Form.Label>
               <Form.Select
                 aria-label="Default select example"
                 onChange={(e) => {
- 
+                  if (arrowProps.dashness === true) {
+                    let gbreak =  e.target.value.slice(0, -1);
                     setArrowProps({
                       ...arrowProps,
-                      gridBreak: parseInt(e.target.value)
+                      dashness: arrowProps.dashness,
+                      gridBreak: gbreak,
+                    });
+                  } else {
+                    setArrowProps({
+                      ...arrowProps,
+                      gridBreak: e.target.value,
                     });
                   }
-                }
+                }}
               >
-                <option value="null">
-                  Select turn distance
+                <option value="null">Select turn distance</option>
+                {/* the values are inverted here as this is opposite the Anchor Offset */}
+                <option key={"t-10"} value="10%">
+                  10%
                 </option>
-                <option key={"t-30"} value="-30">-30</option>
-                <option key={"t-20"} value="-20">-20</option>
-                <option key={"t-10"} value="-10">-10</option>
-                <option key={"t-0"} value="0">0</option>
-                <option key={"t+10"} value="10">10</option>
-                <option key={"t+20"} value="20">20</option>
-                <option key={"t+30"} value="30">30</option>
+                <option key={"t-20"} value="20%">
+                  20%
+                </option>
+                <option key={"t-30"} value="30%">
+                  30%
+                </option>
+                <option key={"t-40"} value="40%">
+                  40%
+                </option>
+                <option key={"t-50"} value="50%">
+                  50%
+                </option>
+                <option key={"t-60"} value="60%">
+                  60%
+                </option>
+                <option key={"t-70"} value="70%">
+                  70%
+                </option>
+                <option key={"t-80"} value="80%">
+                  80%
+                </option>
+                <option key={"t-90"} value="90%">
+                  90%
+                </option>
               </Form.Select>
 
               <Form.Check

@@ -12,10 +12,8 @@ audit.init(
             autoIncrement: true,
         },
         log_entry: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING,
             allowNull: false,
-            defaultValue: 1,
-            unique: true,
         }
     },
     {

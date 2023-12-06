@@ -40,9 +40,9 @@ function App() {
               <Route path="/admindrivermanage" element={<AdminDriversPage />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/accountmanage" element={<AccountManagementPage />} />
-              <Route path="/allOutcomes/:outcomeID" element={<OutcomesPage />} />
-              <Route path="/drivertree/:outcomeID" element={<DriverTreePage />} />
-              <Route path="/drpage/:outcomeID/:driverID" element={<DrPage />} />
+              <Route path="/allOutcomes/:outcomeId" element={<OutcomesPage />} />
+              <Route path="/drivertree/:outcomeId" element={<DriverTreePage />} />
+              <Route path="/drpage/:outcomeId/:driverId" element={<DrPage />} />
               <Route path="/user" element={<UserPage />} />
               <Route
                 path="*"

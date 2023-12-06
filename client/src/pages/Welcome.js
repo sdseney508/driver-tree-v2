@@ -64,7 +64,7 @@ const Welcome = () => {
         setState({
           firstName: userData.firstName,
           Role: userData.userRole,
-          userID: userData.id,
+          userId: userData.id,
         });
         navigate("/admin", { state });
       }
@@ -104,7 +104,7 @@ const Welcome = () => {
         setState({...state,
           firstName: userData.firstName,
           Role: userData.userRole,
-          userID: userData.id,
+          userId: userData.id,
           command: userData.userCommand,
         });
         console.log(state);

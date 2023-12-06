@@ -40,11 +40,7 @@ drivers.init(
             allowNull: true,
         },
 
-        cluster: {
-            type: DataTypes.INTEGER,
-            allowNull: true,
-            defaultValue: 0,
-        },
+
 
         //todo:  make this into a JSON for an indentured list of progress
         progress: {
@@ -83,10 +79,18 @@ drivers.init(
             allowNull: false,
             defaultValue: 'Green',
         },
+
+        driverTrainStatus: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            defaultValue: 'Green',
+        },
+
+        //used to show whether the driver is active or not.  this prevents someone from deleting a driver that is in use.  When selecting delete on the drivertree page, it will set this to inactive and it will no longer render on the page.  If this was done in error, the admin can go and change the state back to active and it will reappear on the page.
         state: {
             type: DataTypes.STRING,
             allowNull: false,
-            defaultValue: 'Draft',
+            defaultValue: 'Active',
         },
         stakeholders: {
             type: DataTypes.STRING,
@@ -95,15 +99,6 @@ drivers.init(
         stakeholderAbbreviation: {
             type: DataTypes.STRING,
             allowNull: true,
-        },
-
-        outcomeID: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            references: {
-                model: 'outcomes',
-                key: 'id',
-            },
         },
     },
     {

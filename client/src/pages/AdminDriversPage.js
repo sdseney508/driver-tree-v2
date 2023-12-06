@@ -36,7 +36,7 @@ const AdminDriversPage = () => {
         setState({
           firstName: user.firstName,
           Role: user.userRole,
-          userID: user.id,
+          userId: user.id,
         });
         let userDataLength = Object.keys(user).length;
         //if the user isnt logged in with an unexpired token, send them to the login page
@@ -50,6 +50,7 @@ const AdminDriversPage = () => {
 
     getUserData();
     //this one gets the initial draftOL for the form
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

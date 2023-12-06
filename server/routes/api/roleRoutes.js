@@ -1,5 +1,7 @@
 const router = require('express').Router();
 const { role } = require('../../models');
+const sequelize = require("../../config/connection");
+const { Op } = require("sequelize");
 
 // use /api/roles
 //create a role

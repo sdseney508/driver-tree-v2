@@ -1,33 +1,62 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 // import Select from "react-select";
-import { Col, Card, Row, Button, Form } from "react-bootstrap";
-import Xarrow, { useXarrow, Xwrapper } from "react-xarrows"; //for the arrows
-import { getArrows, deleteArrow } from "../utils/arrows";
+import { Col, Card, Row, Button, Form, Modal } from "react-bootstrap";
+import { Xwrapper, Xarrow } from "react-xarrows"; //for the arrows
+import { deleteArrow } from "../utils/arrows";
 import styles from "../pages/DriverTreePage.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircle } from "@fortawesome/free-solid-svg-icons";
+import { faArrowUp } from "@fortawesome/free-solid-svg-icons";
+import { faFlagUsa } from "@fortawesome/free-solid-svg-icons";
 import Legend from "../components/legend";
 import { useNavigate } from "react-router";
+import Draggable from "react-draggable";
 import {
+  bulkDriverStatusUpdate,
   createDriver,
   deleteDriver,
+  getDriverById,
   getOutcome,
-  updateCluster,
   updateDriver,
+  updateOutcome,
 } from "../utils/drivers";
+import { getArrows } from "../utils/arrows";
+import { addViewCard, getViewCards, removeViewCard } from "../utils/viewCards";
+import {
+  addViewArrow,
+  getViewArrows,
+  removeViewArrow,
+} from "../utils/viewArrows";
+// import { cascadeUpdate } from "../utils/cascadeUpdate";
+import { updateArrow } from "../utils/arrows";
+import { deleteCluster, updateCluster } from "../utils/cluster";
 import DriverArrows from "./DrawArrows";
+import { CreateAnArrow } from "./ArrowFunction";
+import { faCopyright } from "@fortawesome/free-solid-svg-icons";
 
 const DriverCards = ({
-  arrowID,
   arrows,
-  state,
+  setArrows,
+  arrowID,
+  createArrow,
   driverTreeObj,
+  setDriverTreeObj,
+  opacity,
+  setOpacity,
+  PDFState,
+  recordLockState,
+  setCreateArrow,
   selOutcome,
   setSelOutcome,
   setArrowID,
   setArrowMod,
-  setArrows,
-  showArrowMod,
+  state,
+  tableState,
+  viewId,
+  setViewId,
+  viewObj,
+  setViewObj,
+  viewArrows,
+  setViewArrows,
 }) => {
   //This module has four functions:
   //1.  It creates the divs that go into the driver tree columns
@@ -35,36 +64,512 @@ const DriverCards = ({
   //3.  It houses the drag and drop functionality for the cards.  this requires the use of the onDragOver, onDragStart, draggable, and onDrop properties in the divs and cards
   //4.  Draws the correct clusters around the selected drivers based on the cluster field in the drivers table
   //The arrow function is contained in the arrows.js module.  It creates the arrows that connect the cards
-
-  //initially set the arrows empty then pull them from the database.  This is done so that the arrows can be updated when the user changes the outcome
   // const [arrows, setArrows] = useState([]);
   let navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
 
   //adding in a useEffect feature to rerender on change to selOutcome
   useEffect(() => {
-  }, [selOutcome]);
+    const getDriversData = async (selOutcome) => {
+      await getArrows(selOutcome.id).then((data) => {
+        setArrows(data.data);
+      });
+      await getViewCards(viewId).then((data) => {
+        setViewObj(data.data);
+      });
+      await getViewArrows(viewId).then((data) => {
+        setViewArrows(data.data);
+      });
+    };
+    getDriversData(selOutcome);
+  }, [driverTreeObj, opacity]);
+  //this is used to create the divs that go into the driver tree columns
+  let temp;
+  const [selectedElements, setSelectedElements] = useState([]);
+  const [show, setShow] = useState(false);
+  //array for updating arrows after drag and drop
+
+  // const handleClose = () => {
+  //   setShow(false);
+  // };
 
   function allowDrop(e) {
     //this property gets set on the individual divs onDragOver property to limit where a card can be dropped
     e.preventDefault();
   }
 
+  async function ArrowModal(e, arrowId) {
+    e.preventDefault();
+    await setArrowID(arrowId);
+    setArrowMod(true);
+  }
+
+  const cascadeUpdate = async (arrows, cardId, tier, newStatus) => {
+    //this function cascades the updates to future driver cards in the driver card chain.  the first thing it does is check if the card is inside a cluster.  next it finds all the arrows that have the current card or it's clusteras a start point.  then it finds all the cards that have those arrows as startpoints and puts them into an updateArray.  Next we update those cards, then look for all arrows with those cards as start points and repeat until we hit the Outcome Card.
+    //find all the arrows that have the current card as a start point
+    //first check to see if the card is in a cluster
+    //for loop based on tier of the driver card
+    let updateArr = [cardId];
+    let arrayCounter = 1; //this gets updated as we go through the updateArr for the subsequent tiers so we only go through new updateArr additions and dont end up in a continuous loop
+    let loopEnd;
+    let startP;
+    let body = { status: newStatus };
+    //initialize the update array with the current card.  the update array will be used to update all the cards in the chain and will be changed on every iteration of the tier for loop
+
+    for (let i = tier; 1 < i; i--) {
+      //either look at just the card cause you're in the first loop, or you need to search through the remainder of the updateArr beginning at where the last loop left off
+      if (i === tier) {
+        //this is the first loop, so we need to look at the card
+        for (let k = 0; k < arrows.length; k++) {
+          //if it is in a cluster, we need to find all the arrows that have the cluster as a start point
+          //the below string literal is based on how cluster info is passed to the arrows model.  refer to either the arrows model start or end with a cluster already made for an example or look at driverCards.js tierCards function for naming format.
+          //first check driverTreeObj to see if the card is in a cluster
+          let clustCheck = driverTreeObj.findIndex((item) => item.id == cardId);
+          if (driverTreeObj[clustCheck].clusterId) {
+            startP = `tier${i}cluster${driverTreeObj[clustCheck].clusterId}`;
+          }
+          //the card is in a cluster, so we need to find all the arrows that have the cluster as a start point
+          if (
+            arrows[k].start === startP ||
+            arrows[k].start === `card${updateArr[0]}`
+          ) {
+            let endPoint = arrows[k].end;
+            if (endPoint.includes("cluster")) {
+              //we need to find all the cards in the cluster and update them
+              let clusterId = endPoint.slice(12);
+              //this will produce an array of driver cards that we will update using the updateDriver function
+              //TODO:  Figure out why the database call is not returning the correct data
+              for (let cl = 0; cl < driverTreeObj.length; cl++) {
+                if (driverTreeObj[cl].clusterId == clusterId) {
+                  updateArr.push(driverTreeObj[cl].id);
+                }
+              }
+            } else {
+              //the endpoint is not a cluster, so we need to update the card
+              let cId;
+              if (endPoint.includes("card")) {
+                cId = endPoint.slice(4);
+              } else {
+                cId = endPoint.slice(9);
+              }
+              //push to the update Array so we can go on to the next tier evaluation
+              updateArr.push(cId);
+            }
+          }
+
+          loopEnd = updateArr.length;
+        }
+      } else {
+        //this is not the first loop, so we need to look at the updateArr
+        for (let j = arrayCounter; j < loopEnd; j++) {
+          arrayCounter++;
+          //we need to find all the arrows that have the card as a start point
+          for (let k = 0; k < arrows.length; k++) {
+            //if it is in a cluster, we need to find all the arrows that have the cluster as a start point
+            //the below string literal is based on how cluster info is passed to the arrows model.  refer to either the arrows model start or end with a cluster already made for an example or look at driverCards.js tierCards function for naming format.
+            //first check driverTreeObj to see if the card is in a cluster
+            let clustCheck = driverTreeObj.findIndex(
+              (item) => item.id == updateArr[j]
+            );
+            if (driverTreeObj[clustCheck].clusterId) {
+              startP = `tier${i}cluster${driverTreeObj[clustCheck].clusterId}`;
+            }
+            //the card is in a cluster, so we need to find all the arrows that have the cluster as a start point
+            if (
+              arrows[k].start === startP ||
+              arrows[k].start === `card${updateArr[j]}`
+            ) {
+              //the card is in a cluster, so we need to find all the arrows that have the cluster as a start point
+              //the arrow has a start point that is valid, so we need to look at the endpoint of the arrow, beginning with finding out if the endpoint is a cluster.  if it is a cluster, we do a database call and update all cards in the cluster.  if it is not a cluster, we update the card.
+              let endPoint = arrows[k].end;
+              if (endPoint.includes("cluster")) {
+                //we need to find all the cards in the cluster and update them
+                let clusterId = endPoint.slice(12);
+                //this will produce an array of driver cards that we will update using the updateDriver function
+                for (let cl = 0; cl < driverTreeObj.length; cl++) {
+                  if (driverTreeObj[cl].clusterId == clusterId) {
+                    updateArr.push(driverTreeObj[cl].id);
+                  }
+                }
+              } else {
+                //the endpoint is not a cluster, so we need to update the card
+                let cId;
+                if (endPoint.includes("card")) {
+                  cId = endPoint.slice(4);
+                  //the else is in case the card is the outcome
+                } else {
+                  cId = endPoint.slice(9);
+                }
+                //push to the update Array so we can go on to the next tier evaluation
+                updateArr.push(cId);
+              }
+            }
+          }
+        }
+        loopEnd = updateArr.length;
+      }
+    }
+    let ids = [];
+    //now update every driver in the updateArr
+    for (let i = 0; i < updateArr.length; i++) {
+      ids.push(updateArr[i]);
+    }
+    body = { status: newStatus, ids: ids };
+    bulkDriverStatusUpdate(body);
+
+    //now update the outcome
+    let outcomeBody = { status: newStatus };
+    updateOutcome(driverTreeObj[0].outcomeId, outcomeBody);
+
+    // await getOutcome(selOutcome.id).then((data) => {
+    //   setSelOutcome(data.data);
+    // });
+    // //now update the driver tree object
+    await getDriverById(selOutcome.id).then((data) => {
+      setDriverTreeObj(data.data);
+    });
+  };
+
+  //used in the Tier cards to create the driver cards for both the regular and the cluser
+  const dCards = (cardData, tier, viewCheck) => {
+    return (
+      <Card
+        className={styles.my_card}
+        id={"card" + cardData.id}
+        data-cardid={cardData.id}
+        data-tier={tier}
+        data-cluster={cardData.cluster}
+        draggable="true"
+        onDragStart={drag}
+        style={viewCheck != -1 ? { opacity: 1 } : { opacity: opacity }}
+      >
+        {createArrow && !PDFState && !recordLockState ? (
+          <FontAwesomeIcon
+            className={styles.card_arrow}
+            icon={faArrowUp}
+            data-cardid={cardData.id}
+            data-type="driver"
+            onClick={(e) => MakeAnArrow(e, cardData.id, "driver")}
+          />
+        ) : null}
+        <Card.Body className={styles.card_body}>
+          <Row className={styles.card_row}>
+            <Col className={styles.card_col_abbrev}>
+              <div
+                className={styles.abbreviation_div}
+                onClick={goToDriver}
+                data-cardid={cardData.id}
+              >
+                {cardData.stakeholderAbbreviation
+                  ? cardData.stakeholderAbbreviation
+                  : "-"}
+              </div>
+              {!PDFState && !recordLockState ? (
+                <div
+                  onClick={delDriver}
+                  data-cardid={cardData.id}
+                  className={styles.del_div}
+                >
+                  Del
+                </div>
+              ) : null}
+            </Col>
+            <Col className={styles.card_col_body} id={cardData.id}>
+              {!recordLockState ? (
+                <Form>
+                  <Form.Control
+                    as="textarea"
+                    data-cardid={cardData.id}
+                    className={styles.my_card_text}
+                    defaultValue={cardData.problemStatement}
+                    //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                    name="problemStatement"
+                    onBlur={handleFormSubmit}
+                  />
+                </Form>
+              ) : (
+                <Form>
+                  <Form.Control
+                    as="textarea"
+                    data-cardid={cardData.id}
+                    className={styles.my_card_text}
+                    defaultValue={cardData.problemStatement}
+                    //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                    name="problemStatement"
+                    disabled
+                  />
+                </Form>
+              )}
+            </Col>
+
+            {!recordLockState ? (
+              <Form>
+                <Form.Control
+                  as="select"
+                  id="status"
+                  data-cardid={cardData.id}
+                  data-tier={tier}
+                  value={cardData.status}
+                  className={
+                    cardData.status === "Green"
+                      ? styles.green_status
+                      : cardData.status === "Yellow"
+                      ? styles.yellow_status
+                      : styles.red_status
+                  }
+                  //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                  name="status"
+                  onChange={handleFormSubmit}
+                >
+                  <option
+                    key={1}
+                    style={{
+                      width: "30px",
+                      height: "30px",
+                      backgroundColor: "green",
+                    }}
+                    // className={styles.green_status}
+                  >
+                    Green
+                  </option>
+                  <option
+                    key={2}
+                    style={{
+                      width: "30px",
+                      height: "30px",
+                      backgroundColor: "yellow",
+                    }}
+                    // className={styles.yellow_status}
+                  >
+                    Yellow
+                  </option>
+                  <option
+                    key={3}
+                    style={{
+                      width: "30px",
+                      height: "30px",
+                      backgroundColor: "red",
+                    }}
+                    // className={styles.red_status}
+                  >
+                    Red
+                  </option>
+                </Form.Control>
+              </Form>
+            ) : (
+              <Form>
+                <Form.Control
+                  as="select"
+                  id="status"
+                  data-cardid={cardData.id}
+                  value={cardData.status}
+                  className={
+                    cardData.status === "Green"
+                      ? styles.green_status
+                      : cardData.status === "Yellow"
+                      ? styles.yellow_status
+                      : styles.red_status
+                  }
+                  //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                  name="status"
+                  disabled
+                >
+                  <option
+                    key={1}
+                    style={{
+                      width: "30px",
+                      height: "30px",
+                      backgroundColor: "green",
+                    }}
+                    // className={styles.green_status}
+                  >
+                    Green
+                  </option>
+                  <option
+                    key={2}
+                    style={{
+                      width: "30px",
+                      height: "30px",
+                      backgroundColor: "yellow",
+                    }}
+                    // className={styles.yellow_status}
+                  >
+                    Yellow
+                  </option>
+                  <option
+                    key={3}
+                    style={{
+                      width: "30px",
+                      height: "30px",
+                      backgroundColor: "red",
+                    }}
+                    // className={styles.red_status}
+                  >
+                    Red
+                  </option>
+                </Form.Control>
+              </Form>
+            )}
+
+            {tableState === "view" ? (
+              <div
+                onClick={(e) => modifyView(e, cardData.id)}
+                data-cardid={cardData.id}
+                className={styles.view_div}
+              >
+                V
+              </div>
+            ) : null}
+          </Row>
+        </Card.Body>
+      </Card>
+    );
+  };
+
+  const delCluster = (e) => {
+    e.preventDefault();
+    if (!e.target.dataset.cluster) {
+      e.stopPropagation();
+      return;
+    }
+
+    //check to see if there is an arrow attached to the cluster to cascade the delete
+
+    let sures = window.confirm(
+      "Are you sure you want to delete this cluster?  This will also delete any arrows attached to this cluster."
+    );
+    if (!sures) {
+      return;
+    }
+    let arrowid;
+    for (let i = 0; i < arrows.length; i++) {
+      if (arrows[i].start === e.target.id || arrows[i].end === e.target.id) {
+        arrowid = arrows[i].id;
+        deleteArrow(arrowid);
+      }
+    }
+    deleteCluster(e.target.dataset.cluster);
+    getOutcome(selOutcome.id).then((data) => {
+      setSelOutcome(data.data);
+    });
+  };
+
   function drag(e) {
     e.dataTransfer.setData("text", e.target.dataset.cardid);
+    e.dataTransfer.setData("type", e.target.id);
+    e.dataTransfer.setData("dragStart", e.target.dataset.tier);
   }
 
   async function drop(e) {
     //on drop, sets the drivers new Tier and subTier as required.  The driver is then updated in the database so it will be placed in its new place on the next render
     e.preventDefault();
-    var data = e.dataTransfer.getData("text");
+    let aBody = {};
+    let dragStart = e.dataTransfer.getData("dragStart");
+    let dragEnd = e.target.dataset.tier;
+    let cardname = e.dataTransfer.getData("type");
+    let data = e.dataTransfer.getData("text");
     e.target.appendChild(document.getElementById(data));
     let body = {
       tierLevel: e.target.dataset.tier,
       subTier: e.target.dataset.subtier,
     };
+
     await updateDriver(data, body);
+    getDriverById(selOutcome.id).then((data) => {
+      setDriverTreeObj(data.data);
+    });
+    //look through the arrows state to find any arrows with the affected cardId as a start or endpoint then update.
+    if (dragStart === dragEnd) {
+      // window.location.reload();
+      // return;
+      //refresh the component
+      setArrowID(arrows[0].id);
+      await getOutcome(selOutcome.id).then((data) => {
+        setSelOutcome(data.data);
+      });
+      //return, no change in tier so no need to change arrow logic
+    } else {
+      //The user moved the card up / down a tier, so the arrows need to be updated to reflect the new tier
+      //cycle through arrow array and update the arrows as needed
+      for (let i = 0; i < arrows.length; i++) {
+        //see if the card was the start or end of the arrow
+        if (arrows[i].start === cardname) {
+          //compare the tiers of the start and end points, the starting card moved up a tier so compare the dropped tier with the end tier then adjust the arrow accordingly
+          if (dragEnd === document.getElementById(arrows[i].end).dataset.tier) {
+            //make the arrow dashed and use the left attach points since the start and end are on the same tier
+            aBody.start = arrows[i].start;
+            aBody.end = arrows[i].end;
+            aBody.dashness = true;
+            aBody.startAnchor = { position: "left", offset: { y: 0 } };
+            aBody.endAnchor = { position: "left", offset: { y: 0 } };
+            aBody.gridBreak = "30";
+          } else if (
+            dragEnd > document.getElementById(arrows[i].end).dataset.tier
+          ) {
+            //make the arrow normal and use the left attach points
+            aBody.start = arrows[i].start;
+            aBody.end = arrows[i].end;
+            aBody.dashness = false;
+            aBody.startAnchor = { position: "left", offset: { y: 0 } };
+            aBody.endAnchor = { position: "right", offset: { y: 0 } };
+            aBody.gridBreak = "50%"; //reset this in case the arrow was previously dashed
+          } else {
+            //make the arrow normal and use the right attach points but swap the start and end cards
+            aBody.start = arrows[i].end;
+            aBody.end = arrows[i].start;
+            aBody.dashness = false;
+            aBody.startAnchor = { position: "left", offset: { y: 0 } };
+            aBody.endAnchor = { position: "right", offset: { y: 0 } };
+            aBody.gridBreak = "50%"; //reset this in case the arrow was previously dashed
+          }
+        } else if (arrows[i].end === cardname) {
+          //the end card was moved so compare the dropped tier with the start tier then adjust the arrow accordingly
+          if (
+            dragEnd === document.getElementById(arrows[i].start).dataset.tier
+          ) {
+            //make the arrow dashed and use the left attach points
+            aBody.start = arrows[i].start;
+            aBody.end = arrows[i].end;
+            aBody.dashness = true;
+            aBody.startAnchor = { position: "left", offset: { y: 0 } };
+            aBody.endAnchor = { position: "left", offset: { y: 0 } };
+            aBody.gridBreak = "30";
+          } else if (
+            dragEnd > document.getElementById(arrows[i].start).dataset.tier
+          ) {
+            //make the arrow normal and use the left attach points
+            aBody.start = arrows[i].end;
+            aBody.end = arrows[i].start;
+            aBody.dashness = false;
+            aBody.startAnchor = { position: "left", offset: { y: 0 } };
+            aBody.endAnchor = { position: "right", offset: { y: 0 } };
+            aBody.gridBreak = "50%"; //reset this in case the arrow was previously dashed
+          } else {
+            //make the arrow normal and use the left attach points
+            aBody.start = arrows[i].start;
+            aBody.end = arrows[i].end;
+            aBody.dashness = false;
+            aBody.startAnchor = { position: "left", offset: { y: 0 } };
+            aBody.endAnchor = { position: "right", offset: { y: 0 } };
+            aBody.gridBreak = "50%"; //reset this in case the arrow was previously dashed
+          }
+
+          //now update the arrow then go onto the next arrow.
+        }
+        if (aBody.start) {
+          await updateArrow(arrows[i].id, aBody);
+          setArrowID(arrows[i].id);
+          getArrows(selOutcome.id).then((data) => {
+            setArrows(data.data);
+          });
+          aBody = {};
+        }
+      }
+    }
+    getDriverById(selOutcome.id).then((data) => {
+      setDriverTreeObj(data.data);
+    });
     window.location.reload();
-    setSelOutcome(selOutcome);
   }
 
   const delDriver = (e) => {
@@ -72,54 +577,215 @@ const DriverCards = ({
     if (!window.confirm("Are you sure you want to delete this driver?")) {
       return;
     }
-    deleteDriver(e.target.dataset.delid);
+    deleteDriver(e.target.dataset.cardid);
     getOutcome(selOutcome.id).then((data) => {
       setSelOutcome(data.data);
     });
   };
+
   const goToDriver = async (e) => {
     e.preventDefault();
     navigate("/drpage/" + selOutcome.id + "/" + e.target.dataset.cardid);
   };
 
-  const newDriver = async (e) => {
+  const handleSelOutcomeChange = (e) => {
     e.preventDefault();
-    let body = { outcomeID: selOutcome.id, tierLevel: e.target.dataset.tier };
-    await createDriver(body);
+    let body = { [e.target.name]: e.target.value };
+    updateOutcome(e.target.dataset.cardid, body);
+    getOutcome(selOutcome.id).then((data) => {
+      setSelOutcome(data.data);
+    });
+    window.location.reload();
+  };
+
+  const handleClusterChange = (e) => {
+    let body = { [e.target.name]: e.target.value };
+    console.log(body);
+    updateCluster(e.target.dataset.clusterid, body);
     getOutcome(selOutcome.id).then((data) => {
       setSelOutcome(data.data);
     });
   };
 
-  //navigate to the outcome page
   const goToOutcome = async (e) => {
     navigate("/allOutcomes/" + selOutcome.id);
   };
 
-  const deleteCluster = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if(!e.target.dataset.cluster) {
-      e.stopPropagation();
+    let body = { [e.target.name]: e.target.value };
+    if (e.target.name === "status") {
+      //if the user changes the status, then ask if they want to update all the future cards in the driver chain's statust, if yes, then execute cascadeUpdate
+      // let sures = window.confirm(
+      //   "Do you want to update all future cards in this driver chain to this status?  This will also change the status of any cards in a future cluster if this card is a driver of the entire cluster."
+      // );
+      // if (sures) {
+      cascadeUpdate(
+        arrows,
+        e.target.dataset.cardid,
+        e.target.dataset.tier,
+        e.target.value
+      );
+      // }
+    } else {
+      await updateDriver(e.target.dataset.cardid, body);
+    }
+    getOutcome(selOutcome.id).then((data) => {
+      setSelOutcome(data.data);
+    });
+    getDriverById(selOutcome.id).then((data) => {
+      setDriverTreeObj(data.data);
+    });
+  };
+
+  //waits for setSelectedElements to be updated, then calls the CreateAnArrow function to create the arrow
+  useEffect(() => {
+    //first section determines if either the starting or ending arrow is a cluster.  uses the Modal to ask the user if they want to connect to the cluster or the driver then changes the appropriate selectedElement.cluster to 0 using the handle select function
+    //needed for initial render
+    if (selectedElements.length === 0) {
+      return;
+    } else if (selectedElements.length === 1) {
+      if (!selectedElements[0].outcomeTitle && selectedElements[0].clusterId) {
+        setShow(true);
+        return;
+      }
+    } else if (selectedElements.length === 2) {
+      //pop the second element in the array in case the user accidentally clicked twice, otherwise, proceed as normal.
+      if (
+        selectedElements[0].id === selectedElements[1].id &&
+        !selectedElements[0].outcomeTitle &&
+        !selectedElements[1].outcomeTitle
+      ) {
+        selectedElements.pop();
+        return;
+      } else if (selectedElements[1].clusterId) {
+        setShow(true);
+      } else {
+        CreateAnArrow({
+          setCreateArrow,
+          selectedElements,
+          selOutcome,
+          setSelOutcome,
+        });
+        setSelectedElements([]);
+      }
+    }
+  }, [selectedElements]);
+
+  //uses the length of the selected elements array to determine if the user is connecting to a driver or a cluster for the first or second element when making an arrow
+  const handleSelect = async (e) => {
+    if (e.target.id === "driver" && selectedElements.length === 1) {
+      selectedElements[0].clusterId = null;
+    } else if (e.target.id === "driver" && selectedElements.length === 2) {
+      selectedElements[1].clusterId = null;
+    }
+    if (selectedElements.length === 2) {
+      CreateAnArrow({
+        setCreateArrow,
+        selectedElements,
+        selOutcome,
+        setSelOutcome,
+      });
+      setSelectedElements([]);
+    }
+    setShow(false);
+  };
+
+  //uses the CreateArrow function to make an arrow between two cards
+  const MakeAnArrow = async (e, cardId, type) => {
+    e.preventDefault();
+    // console.log(type, cardId);
+    if (type === "driver") {
+      await getDriverById(cardId).then((data) => {
+        temp = data.data;
+      });
+    } else {
+      await getOutcome(cardId).then((data) => {
+        console.log(data.data);
+        temp = data.data;
+      });
+    }
+    setSelectedElements([...selectedElements, temp]);
+  };
+
+  //used to add or remove a card from a view.  also updates / sets the opacity of any arrows that are attached to the card
+  const modifyView = async (e) => {
+    //check to see if the card is already in the view
+    //if it is, remove it from the view, otherwise add it to the view
+    //check to see if there are already views, if not, return an error.
+    if (!viewObj) {
+      alert("You must create a view before you can add cards to it.");
       return;
     }
 
-    //check to see if there is an arrow attached to the cluster to cascade the delete
-    let arrowid;
-    for (let i=0; i<arrows.length; i++) {
-      if (arrows[i].start === e.target.id || arrows[i].end === e.target.id) {
-        arrowid = arrows[i].id;
-      }};
+    if (
+      viewObj.findIndex((item) => item.driverId == e.target.dataset.cardid) !==
+      -1
+    ) {
+      //the card is already in the view, so  remove it and check the viewArrows object to see if any arrow that starts from it needs to be removed.  All error handling logic is server side
+      let arrowCheck = arrows.filter(
+        (item) => item.start === `card${e.target.dataset.cardid}`
+      );
 
+      if (arrowCheck.length > 0) {
+        console.log("in the if statement to remove an arrow");
+        //there are arrows attached to the card, so delete them
+        for (let i = 0; i < arrowCheck.length; i++) {
+          let body = { viewId: viewId, arrowId: arrowCheck[i].id };
 
-    console.log(e.target.dataset.cluster);
-    let sures = window.confirm("Are you sure you want to delete this cluster?  This will also delete any arrows assigned to this cluster.");
-    if (!sures) {
-      return;
+          await removeViewArrow(body);
+        }
+      }
+      let driverId = parseInt(e.target.dataset.cardid);
+      let body = { viewId: viewId, driverId: driverId };
+      await removeViewCard(body);
+    } else {
+      debugger;
+      //the card is not in the view, so add it and any arrows that start from it, first check the viewArrows object (for database integrity) then here we look at the arrows object  because we want to add the arrows to the viewArrows object.  All error handling logic is server side
+      let arrowCheck = arrows.filter(
+        (item) => item.start === `card${e.target.dataset.cardid}`
+      );
+      if (arrowCheck.length > 0) {
+        console.log("in the add statement");
+        let arrowArray = arrows.filter(
+          (item) => item.start === `card${e.target.dataset.cardid}`
+        );
+        if (arrowArray.length > 0) {
+          //there is an arrow attached to the card, so add them to the view
+          let aBody = {};
+          for (let i = 0; i < arrowArray.length; i++) {
+            aBody = { viewId: viewId, arrowId: arrowArray[i].id };
+            addViewArrow(aBody);
+          }
+        }
+      }
+      let body = { viewId: viewId, driverId: e.target.dataset.cardid };
+      addViewCard(body);
     }
-    let body = { cluster: 0 };
-    updateCluster(e.target.dataset.cluster, body);
-    deleteArrow(arrowid);
-    window.location.reload();
+    // get the updated viewObj
+    await getViewCards(viewId).then((data) => {
+      setViewObj(data.data);
+    });
+    await getViewArrows(viewId).then((data) => {
+      setViewArrows(data.data);
+    });
+    let val;
+    if (opacity < 25) {
+      val = opacity + 0.01;
+    } else if (opacity >= 25) {
+      val = opacity - 0.01;
+    }
+    setOpacity(val);
+  };
+
+  //used to create a new driver for the Outcome
+  const newDriver = async (e) => {
+    e.preventDefault();
+    let body = { outcomeId: selOutcome.id, tierLevel: e.target.dataset.tier };
+    await createDriver(body);
+    getOutcome(selOutcome.id).then((data) => {
+      setSelOutcome(data.data);
+    });
   };
 
   function tierButtons(tier) {
@@ -132,20 +798,25 @@ const DriverCards = ({
     }
   }
 
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-    let body = { [e.target.name]: e.target.value };
-    console.log("body: ", body);
-    updateDriver(e.target.dataset.cardid, body);
-  };
-
-  function tierCards(tier, { driverTreeObj }) {
-    const arr = [];
-    let clusterNumber;
+  function tierCards(tier, { driverTreeObj, viewObj }) {
+    let viewCheck;
+    const arr = []; //just an empty arr that will be filled with driverTreeObj
+    let clusterNumber = 0; //this is just used to see how far to expand a cluster
+    let clusterName; //doing it this way to so i dont need the logic when dealing with the first element of the array.
     if (!driverTreeObj) {
       return <div></div>;
     } else {
-      for (let i = 0; i < 36; i++) {
+      //find max number of droppable divs needed for any given tier, then size the columns accordingly.  This will let the columns grow with each tier
+      let max = 25;
+      for (let i = 0; i < driverTreeObj.length; i++) {
+        //now get the number of elements in each tier
+        if (driverTreeObj[i].tierLevel === tier) {
+          if (driverTreeObj[i].subTier >= max) {
+            max = driverTreeObj[i].subTier + 1;
+          }
+        }
+      }
+      for (let i = 0; i < max; i++) {
         //needs a nested loop for those instances when the driverTreeObj is smaller than 36
         //TODO look at replacing this with a 6 by 60 grid and use React Draggable.
         // logic as follows:  insert a placeholder row, then check to see if there should be a card or a cluster, if yes, pop that row and insert card
@@ -162,29 +833,33 @@ const DriverCards = ({
       }
 
       return arr.map((f, index) => {
+        //first check if it is an empty div, then check if it is a cluster, then check if it is a driver.  If it is a driver, then check to see if it is part of a cluster.
         if (arr[index] === "skip") {
+          //empty div, create a spot to drop a driverCard
           return (
-              <div
-                className={styles.my_div}
-                data-tier={tier}
-                data-subtier={index + 1}
-                id={"tier1subTier" + (index + 1)}
-                onDragOver={allowDrop}
-                onDrop={drop}
-                key={`${tier}div${index+1}`}
-              ></div>
-      
+            <div
+              className={styles.my_div}
+              data-tier={tier} //this is used by the update arrows logic to compare the ending and starting div of a drag and if an arrow needs to be updated.
+              data-subtier={index + 1}
+              id={"tier1subTier" + (index + 1)}
+              onDragOver={allowDrop}
+              onDrop={drop}
+              key={`${tier}div${index + 1}`}
+            ></div>
           );
         } else if (
-          arr[index].cluster > 0 &&
-          arr[index].cluster !== clusterNumber
+          //check to see if the driver is part of a cluster and ensure that it is still in the current cluster or if a new cluster needs to be started.
+          arr[index].clusterId !== null &&
+          arr[index].clusterId !== clusterNumber
         ) {
           //check to see how large the cluster is, then create a div for each card in the cluster
           //create a new array for each driver in the cluster then map the array to create the cards
-          clusterNumber = arr[index].cluster;
+          clusterNumber = arr[index].clusterId; //update to the current clusterNumber so we can fill the cluster with the correct cards.
+          clusterName = arr[index].cluster.clusterName; //update to the current
+          //
           let clusterArr = [];
           for (let j = index; j < arr.length; j++) {
-            if (arr[j].cluster === clusterNumber) {
+            if (arr[j].clusterId === clusterNumber) {
               clusterArr.push(arr[j]);
               index++;
             } else {
@@ -199,96 +874,48 @@ const DriverCards = ({
               data-tier={tier}
               data-subtier={index + 1}
               key={`${tier}cluster${clusterNumber}`}
-              data-cluster={clusterNumber}
+              data-cluster={clusterNumber} //this is the clusterId for cluster updates
               id={`tier${tier}cluster` + clusterNumber} //this is used for the arrow start and end points
-              onClick={deleteCluster}
+              onClick={delCluster}
             >
+              {/* text input for clusterName */}
+              <Form>
+                <Form.Control
+                  size="sm"
+                  type="text"
+                  data-clusterid={clusterNumber}
+                  className={styles.my_cluster_name}
+                  defaultValue={clusterName}
+                  placeholder="Cluster Name"
+                  //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                  name="clusterName"
+                  onBlur={handleClusterChange}
+                />
+              </Form>
+
               {clusterArr.map((f, ind) => {
-                let dColor;
-                switch (clusterArr[ind].status) {
-                  case "Green":
-                    dColor = "#00ff00";
-                    break;
-                  case "Yellow":
-                    dColor = "#ffff00";
-                    break;
-                  case "Red":
-                    dColor = "#ff0000";
-                    break;
-                  default:
+                if (viewObj) {
+                  viewCheck = viewObj.findIndex(
+                    (item) => item.driverId == clusterArr[ind].id
+                  );
+                } else {
+                  viewCheck = -1;
                 }
-                return (
-                  <Card
-                  className={styles.my_card}
-                  id={"card" + clusterArr[ind].id}
-                  data-cardid={clusterArr[ind].id}
-                  data-delid={clusterArr[ind].id}
-                  draggable="true"
-                  onDragStart={drag}
-                  key={`${tier}clustercard${clusterArr[ind].id}`}
-                >
-                  <FontAwesomeIcon
-                    position="top"
-                    icon={faCircle}
-                    style={{ color: dColor }}
-                    data-cardid={clusterArr[ind].id}
-                    className={styles.card_status}
-                  />
-                  <Card.Body className={styles.my_card_body}>
-                    <Row className={styles.card_row}>
-                      <Col className={styles.card_col_abbrev}>
-                        <div
-                          className={styles.abbreviation_div}
-                          onClick={goToDriver}
-                          data-cardid={clusterArr[ind].id}
-                        >
-                          {clusterArr[ind].stakeholderAbbreviation
-                            ? clusterArr[ind].stakeholderAbbreviation
-                            : "-"}
-                        </div>
-                        <div
-                          onClick={delDriver}
-                          data-delid={clusterArr[ind].id}
-                          className={styles.del_div}
-                        >
-                          Del
-                        </div>
-                      </Col>
-                      <Col className={styles.card_col_body} id={clusterArr[ind].id}>
-                        <Form>
-                          <Form.Control
-                            as="textarea"
-                            data-cardid={clusterArr[ind].id}
-                            className={styles.my_card_text}
-                            defaultValue={clusterArr[ind].problemStatement}
-                            //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-                            name="problemStatement"
-                            // onChange={handleInputChange}
-                            onBlur={handleFormSubmit}
-                          />
-                        </Form>
-                      </Col>
-                    </Row>
-                  </Card.Body>
-                </Card>
-                );
+
+                return dCards(clusterArr[ind], tier, viewCheck);
               })}
             </div>
           );
-        } else if (arr[index].cluster !== clusterNumber) {
-          let dColor;
-          switch (arr[index].status) {
-            case "Green":
-              dColor = "#00ff00";
-              break;
-            case "Yellow":
-              dColor = "#ffff00";
-              break;
-            case "Red":
-              dColor = "#ff0000";
-              break;
-            default:
+        } else if (arr[index].clusterId !== clusterNumber) {
+          if (viewObj) {
+            viewCheck = viewObj.findIndex(
+              (item) => item.driverId == arr[index].id
+            );
+          } else {
+            viewCheck = -1;
           }
+
+          //the driver is not part of a cluster, so just create the card
           return (
             <div
               className={styles.my_div}
@@ -297,61 +924,9 @@ const DriverCards = ({
               id={"tier1subTier" + (index + 1)}
               onDragOver={allowDrop}
               onDrop={drop}
-              key={`${tier}div${index+1}`}
+              key={`${tier}div${index + 1}`}
             >
-              <Card
-                className={styles.my_card}
-                id={"card" + arr[index].id}
-                data-cardid={arr[index].id}
-                data-delid={arr[index].id}
-                draggable="true"
-                onDragStart={drag}
-                key={`${tier}card${arr[index].id}`}
-              >
-                <FontAwesomeIcon
-                  position="top"
-                  icon={faCircle}
-                  style={{ color: dColor }}
-                  data-cardid={arr[index].id}
-                  className={styles.card_status}
-                />
-                <Card.Body className={styles.my_card_body}>
-                  <Row className={styles.card_row}>
-                    <Col className={styles.card_col_abbrev}>
-                      <div
-                        className={styles.abbreviation_div}
-                        onClick={goToDriver}
-                        data-cardid={arr[index].id}
-                      >
-                        {arr[index].stakeholderAbbreviation
-                          ? arr[index].stakeholderAbbreviation
-                          : "-"}
-                      </div>
-                      <div
-                        onClick={delDriver}
-                        data-delid={arr[index].id}
-                        className={styles.del_div}
-                      >
-                        Del
-                      </div>
-                    </Col>
-                    <Col className={styles.card_col_body} id={arr[index].id}>
-                      <Form>
-                        <Form.Control
-                          as="textarea"
-                          data-cardid={arr[index].id}
-                          className={styles.my_card_text}
-                          defaultValue={arr[index].problemStatement}
-                          //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-                          name="problemStatement"
-                          // onChange={handleInputChange}
-                          onBlur={handleFormSubmit}
-                        />
-                      </Form>
-                    </Col>
-                  </Row>
-                </Card.Body>
-              </Card>
+              {dCards(arr[index], tier, viewCheck)}
             </div>
           );
         }
@@ -359,126 +934,188 @@ const DriverCards = ({
     }
   }
 
-  async function ArrowModal(e, arrowID) {
-    e.preventDefault();
-    await setArrowID(arrowID);
-    setArrowMod(true);
-  }
-
   return (
     <>
-      <div id="outcomeColumn" className={styles.top_div}>
+      <div id="topdiv" className={styles.top_div}>
         <Xwrapper>
-          <Col className={styles.driver} sm={6} md={6} lg={2} key="0">
+          <Col
+            className={styles.driver}
+            sm={6}
+            md={6}
+            lg={2}
+            key="0"
+            style={{ justifyItems: "center", alignContent: "center" }}
+          >
             <p>Tier 0</p>
-            <Row
-              style={{
-                height: "800px",
-                width: "100%",
-              }}
-              className="m-1"
-              id="outcomeColumn"
-              key="outcomeColumn1"
-            >
+            <div id="outcomeColumn" key="outcomeColumn1" className="my_div">
               <Card
                 className={styles.my_card}
-                onClick={goToOutcome}
-                id={`outcomeID${selOutcome.id}`}
+                id={`outcomeId${selOutcome.id}`}
                 key={`outcomeCard${selOutcome.id}`}
               >
+                <Form>
+                  <Form.Control
+                    as="select"
+                    id="status"
+                    data-cardid={selOutcome.id}
+                    value={selOutcome.status}
+                    className={
+                      selOutcome.status === "Green"
+                        ? styles.green_status
+                        : selOutcome.status === "Yellow"
+                        ? styles.yellow_status
+                        : styles.red_status
+                    }
+                    //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                    name="status"
+                    onChange={handleSelOutcomeChange}
+                  >
+                    <option
+                      key={1}
+                      style={{
+                        width: "30px",
+                        height: "30px",
+                        backgroundColor: "green",
+                      }}
+                    >
+                      Green
+                    </option>
+                    <option
+                      key={2}
+                      style={{
+                        width: "30px",
+                        height: "30px",
+                        backgroundColor: "yellow",
+                      }}
+                    >
+                      Yellow
+                    </option>
+                    <option
+                      key={3}
+                      style={{
+                        width: "30px",
+                        height: "30px",
+                        backgroundColor: "red",
+                      }}
+                    >
+                      Red
+                    </option>
+                  </Form.Control>
+                </Form>
+                {createArrow && !PDFState ? (
+                  <FontAwesomeIcon
+                    className={styles.card_arrow}
+                    icon={faArrowUp}
+                    data-cardid={selOutcome.id}
+                    data-type="outcome"
+                    onClick={(e) => MakeAnArrow(e, selOutcome.id, "outcome")}
+                  />
+                ) : null}
                 <Card.Body className={styles.my_card_body}>
-                  <Card.Text className={styles.my_card_text}>
-                    {selOutcome.outcomeTitle}
-                  </Card.Text>
+                  <Row className={styles.card_row}>
+                    <Col className={styles.card_col_abbrev}>
+                      <FontAwesomeIcon
+                        className={styles.card_flag}
+                        icon={faFlagUsa}
+                        data-cardid={selOutcome.id}
+                        onClick={goToOutcome}
+                      />
+                    </Col>
+                    <Col className={styles.card_col_body}>
+                      <Form>
+                        <Form.Control
+                          as="textarea"
+                          data-cardid={selOutcome.id}
+                          className={styles.my_card_text}
+                          defaultValue={selOutcome.outcomeTitle}
+                          //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                          name="outcomeTitle"
+                          onBlur={handleSelOutcomeChange}
+                        />
+                      </Form>
+                    </Col>
+                  </Row>
                 </Card.Body>
               </Card>
-              <Row style={{ height: "700px" }}>
-                <Legend driverTreeObj={driverTreeObj} />
+              <Row style={{ minHeight: "500px" }}>
+                {/* <Legend driverTreeObj={driverTreeObj} /> */}
               </Row>
-            </Row>
+            </div>
           </Col>
           <Col className={styles.driver} sm={6} md={6} lg={2} key="1">
-            <Row>Tier 1 Drivers  {tierButtons(1)}</Row>
-            <Row
-              style={{
-                height: "1400px",
-                width: "100%",
-              }}
-              id={`tier1Cards`}
-              key={`tier1Cards`}
-              className={styles.my_row}
-            >
-              {tierCards(1, { driverTreeObj })}
+            <Row>Tier 1 Drivers {tierButtons(1)}</Row>
+            <Row id={`tier1Cards`} key={`tier1Cards`} className={styles.my_row}>
+              {tierCards(1, { driverTreeObj, viewObj })}
             </Row>
-            <Row style={{ height: "50px" }}>{tierButtons(1)}</Row>
           </Col>
           <Col className={styles.driver} sm={6} md={6} lg={2} key="2">
             <Row>Tier 2 Drivers {tierButtons(2)}</Row>
-            <Row
-              style={{
-                height: "1400px",
-                width: "100%",
-              }}
-              id={`tier2Cards`}
-              key={`tier2Cards`}
-              className={styles.my_row}
-            >
-              {tierCards(2, { driverTreeObj })}
+            <Row id={`tier2Cards`} key={`tier2Cards`} className={styles.my_row}>
+              {tierCards(2, { driverTreeObj, viewObj })}
             </Row>
-            <Row style={{ height: "50px" }}>{tierButtons(2)}</Row>
           </Col>
           <Col className={styles.driver} sm={6} md={6} lg={2} key="3">
             <Row>Tier 3 Drivers{tierButtons(3)}</Row>
-            <Row
-              style={{
-                height: "1400px",
-                width: "100%",
-              }}
-              id={`tier3Cards`}
-              key={`tier3Cards`}
-              className={styles.my_row}
-            >
-              {tierCards(3, { driverTreeObj })}
+            <Row id={`tier3Cards`} key={`tier3Cards`} className={styles.my_row}>
+              {tierCards(3, { driverTreeObj, viewObj })}
             </Row>
-            <Row style={{ height: "50px" }}>{tierButtons(3)}</Row>
           </Col>
           <Col className={styles.driver} sm={6} md={6} lg={2} key="4">
             <Row>Tier 4 Drivers {tierButtons(4)}</Row>
-            <Row
-              style={{
-                height: "1400px",
-                width: "100%",
-              }}
-              id={`tier4Cards`}
-              key={`tier4Cards`}
-              className={styles.my_row}
-            >
-              {tierCards(4, { driverTreeObj })}
+            <Row id={`tier4Cards`} key={`tier4Cards`} className={styles.my_row}>
+              {tierCards(4, { driverTreeObj, viewObj })}
             </Row>
-            <Row style={{ height: "50px" }}>{tierButtons(4)}</Row>
           </Col>
           <Col className={styles.driver} sm={6} md={6} lg={2} key="5">
             <Row>Tier 5 Drivers {tierButtons(5)}</Row>
-            <Row
-              style={{
-                height: "1400px",
-                width: "100%",
-              }}
-              id={`tier5Cards`}
-              key={`tier5Cards`}
-              className={styles.my_row}
-            >
-              {tierCards(5, { driverTreeObj })}
+            <Row id={`tier5Cards`} key={`tier5Cards`} className={styles.my_row}>
+              {tierCards(5, { driverTreeObj, viewObj })}
             </Row>
-            <Row style={{ height: "50px" }}>{tierButtons(5)}</Row>
+            <p>
+              <FontAwesomeIcon icon={faCopyright} />
+              Integrated Program Solutions
+            </p>
           </Col>
-          {arrows ? (
-            <DriverArrows arrows={arrows} setArrows={setArrows} ArrowModal={ArrowModal} selOutcome={selOutcome}/>
-          ) : (
-            null
-          )}
+
+          <DriverArrows
+            arrows={arrows}
+            setArrows={setArrows}
+            ArrowModal={ArrowModal}
+            driverTreeObj={driverTreeObj}
+            selOutcome={selOutcome}
+            viewId={viewId}
+            opacity={opacity}
+            viewArrows={viewArrows}
+            setViewArrows={setViewArrows}
+          />
         </Xwrapper>
       </div>
+
+      <Modal show={show} size="sm">
+        {/* onHide={handleClose} */}
+        <Modal.Header closeButton>
+          <Modal.Title></Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ textAlign: "center" }}>Connect to:</Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            id="driver"
+            onClick={handleSelect}
+            style={{ position: "absolute", left: "25px" }}
+          >
+            Driver
+          </Button>
+          <Button
+            variant="primary"
+            id="cluster"
+            onClick={handleSelect}
+            tyle={{ position: "absolute", right: "25px" }}
+          >
+            Cluster
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 };

@@ -50,7 +50,7 @@ const SignupForm = ({onModalSubmit}) => {
     return stakeholderState.map((f, index) => {
       return (
         <option key={index} value={f.id}>
-          {f.command}
+          {f.comm}
         </option>
       );
     });

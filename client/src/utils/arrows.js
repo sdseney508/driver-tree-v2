@@ -10,6 +10,12 @@ const getArrow = (id) => {
   return axios.get(apiURL + "/arrows/" + id);
 };
 
+//this is used with the onDrop function on the DriverPage to modify the arrow properties after you drag a card to a new tier
+const findArrows = (body) => {
+  console.log(body);
+  return axios.get(apiURL + "/arrows/find/" + body.id + "/" + body.outcomeId);
+};
+
 const getArrows = (id) => {
   return axios.get(apiURL + "/arrows/outcomeID/" + id);
 }
@@ -24,6 +30,7 @@ const deleteArrow = (id) => {
 
 export {
   createArrow,
+  findArrows,
   getArrow,
   getArrows,
   updateArrow,

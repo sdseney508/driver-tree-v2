@@ -1,6 +1,7 @@
 import axios from "axios";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import apiURL from "./apiURL";
+import {getUserViewsForOutcome} from "./views";
 
 const authHeader = () => {
   let id_token = localStorage.getItem("id_token");
@@ -29,6 +30,105 @@ const getToken = () => {
 
 const getUser = (token) => {
   return axios.get(apiURL + "/users/me", { headers: authHeader() });
+};
+
+const getAppData = async (
+  navigate,
+  state,
+  setState,
+  outcomeId,
+  outcomeByCommand,
+  setSelOutcome,
+  getOutcome,
+  getDriverByOutcome,
+  setDriverTreeObj,
+  viewId,
+  setViewId
+) => {
+  //this first part just ensures they whoever is on this page is an authenticated user; prevents someone from typing in the url and gaining access
+  try {
+    //these comes from the utils section of the code
+    const token = loggedIn() ? getToken() : null;
+    if (!token) {
+      navigate("/");
+    }
+    const response = await getUser(token);
+    if (!response.data) {
+      navigate("/");
+      throw new Error("something went wrong!");
+    }
+    const user = response.data;
+
+    let userDataLength = Object.keys(user).length;
+    //used to make sure they have permissions to make changes
+    //if the user isnt logged in with an unexpired token, send them to the login page
+    if (!userDataLength > 0) {
+      navigate("/");
+    } else {
+      setState({
+        ...state,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        Role: user.userRole,
+        command: user.stakeholderId,
+        userId: user.id,
+      });
+      //checks to see if there was an outcomeId passed or if you entered from the user page
+      let tout;
+      if (!outcomeId) {
+        await outcomeByCommand(user.stakeholderId).then((data) => {
+          setSelOutcome(data.data[0]);
+        });
+      } else {
+        await getOutcome(outcomeId).then((data) => {
+          setSelOutcome(data.data);
+        });
+      }
+      await getDriverByOutcome(outcomeId).then((data) => {
+        setDriverTreeObj(data.data);
+      });
+      await getUserViewsForOutcome({ userId: user.id, outcomeId: outcomeId }).then((data) => {
+        if (data.data.length > 0) {
+          setViewId(data.data[0].id);
+        }
+      });
+      return state;
+    }
+  } catch (err) {
+    console.error(err);
+    navigate("/");
+  }
+};
+
+const getUserData = async (navigate, state, setState) => {
+  try {
+    const token = loggedIn() ? getToken() : null;
+    if (!token) {
+      navigate("/");
+    }
+    const response = await getUser(token);
+    if (!response.data) {
+      navigate("/");
+      throw new Error("something went wrong!");
+    }
+    const user = response.data;
+    setState({
+      ...state,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      userId: user.id,
+      userRole: user.userRole,
+      command: user.stakeholderId,
+    });
+    let userDataLength = Object.keys(user).length;
+    //if the user isnt logged in with an unexpired token, send them to the login page
+    if (!userDataLength > 0) {
+      navigate("/");
+    }
+  } catch (err) {
+    console.error(err);
+  }
 };
 
 // check if user's logged in
@@ -78,7 +178,6 @@ const register = (
   userRole,
   userCommand
 ) => {
-  console.log(userCommand);
   return axios.post(apiURL + "/users", {
     firstName,
     lastName,
@@ -86,7 +185,7 @@ const register = (
     password,
     userStatus,
     userRole,
-    userCommand
+    userCommand,
   });
 };
 
@@ -95,10 +194,12 @@ const updateUser = (body, id) => {
 };
 
 export {
+  getAppData,
   getRoles,
   getProfile,
   getToken,
   getUser,
+  getUserData,
   isTokenExpired,
   loggedIn,
   login,

@@ -1,44 +1,30 @@
-import React, { useState, useEffect } from "react";
+import React, { useState} from "react";
 import { Button, Row } from "react-bootstrap";
 import ClusterTable from "./ClusterTable";
 import styles from "./ClusterModal.module.css";
-import { updateDriver } from "../utils/drivers";
+import { createCluster} from "../utils/cluster";
 
 const ClusterModal = ({
-  onModalSubmit,
   selDriver,
   setSelDriver,
   selOutcome,
   setSelOutcome,
-  driverTreeObj,
 }) => {
   const [selectedDrivers, setSelectedDrivers] = useState([]);
 
-  useEffect(() => {}, []);
-
-  function createCluster() {
-    let clusternumb = 0;
+  //creates a cluster from the selected drivers. 
+  //New logic:  create a new cluster in the cluster model, this will then append the clusterId to the driver model.  This will allow for the cluster to be updated and deleted without having to update the driver model.
+  const makeCluster = async() => {
     for (let i = 0; i < selectedDrivers.length - 1; i++) {
       if (selectedDrivers[i].tierLevel !== selectedDrivers[i + 1].tierLevel) {
         alert("Drivers must be in the same tier");
         return;
       }
     }
-    for (let i = 0; i < driverTreeObj.length; i++) {
-      if (driverTreeObj[i].tierLevel === selectedDrivers[0].tierLevel) {
-        if (driverTreeObj[i].cluster > clusternumb) {
-          clusternumb = driverTreeObj[i].cluster;
-        }
-      }
-    }
-    clusternumb++;
-    
-    for (let i = 0; i < selectedDrivers.length; i++) {
-      const driver = selectedDrivers[i];
-      console.log(driver);
-      updateDriver(driver.id, { cluster: clusternumb });
-    }
-    window.location.reload(false);
+    let body = {outcomeId: selOutcome.id, selDriversArr: selectedDrivers};
+    await createCluster(body).then((res) => {
+    });
+    setSelOutcome(selOutcome);
   }
 
   return (
@@ -62,7 +48,7 @@ const ClusterModal = ({
 
           <Button
             variant="primary"
-            onClick={createCluster}
+            onClick={makeCluster}
             disabled={selectedDrivers.length < 2}
           >
             Create

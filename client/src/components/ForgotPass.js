@@ -9,7 +9,7 @@ const ForgotPass = ({onModalSubmit}) => {
   useEffect(() => {
     getEmailAdds();
     setFormData({ ...formData, subject: "Driver Tree Database Password Reset" });
-  }, [formData]);
+  }, []);
 
   async function getEmailAdds() {
     let data = await getCoords().then((data) => {

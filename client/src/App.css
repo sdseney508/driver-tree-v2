@@ -1,5 +1,5 @@
 .App {
-  display: flex;
+  /* display: flex; */
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -8,11 +8,10 @@
   }
 }
 
-body {
-  background: linear-gradient(to bottom, #4d5463 0%, #010102 100%);
-  width: auto;
-  height: 100vh;
-}
+/* body { */
+  /* width: 100vw;
+  height: 80vh;
+} */
 
 @keyframes App-logo-spin {
   from {

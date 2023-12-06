@@ -6,7 +6,7 @@ import React, {
 } from "react";
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
 import {
-  getDriver,
+  getDriverById,
   getDriverByOutcome,
 } from "../utils/drivers";
 import "ag-grid-community/dist/styles/ag-grid.css"; // Core grid CSS, always needed
@@ -106,8 +106,8 @@ function DriverTable({ selDriver, setSelDriver, selOutcome, setSelOutcome }) {
   //to get the full record for the selected row.
   // It then passes the data to the parent component to be displayed in the form.
 
-  async function fetchDriverInfo(driverID) {
-    await getDriver(driverID).then((data) => {
+  async function fetchDriverInfo(driverId) {
+    await getDriverById(driverId).then((data) => {
       let top = data.data;
       console.log(top);
       setSelDriver(top);
@@ -115,9 +115,8 @@ function DriverTable({ selDriver, setSelDriver, selOutcome, setSelOutcome }) {
   }
 
   const cellClickedListener = async (event) => {
-    // debugger;
-    let driverID = event.data.id;
-    await fetchDriverInfo(driverID);
+    let driverId = event.data.id;
+    await fetchDriverInfo(driverId);
   };
 
   //the return just builds the table

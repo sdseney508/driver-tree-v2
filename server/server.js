@@ -11,10 +11,10 @@ const PDFDocument = require('pdfkit');
 const PORT = process.env.PORT || 8080;
 var corsOptions = {
   //for online use
-  origin: "https://drivertreev3-3350125317e2.herokuapp.com",
+  // origin: "https://drivertreev3-3350125317e2.herokuapp.com",
 
   //for local use
-  // origin: "http://localhost:3000"
+  origin: "http://localhost:3000"
 // 
 };
 app.use(cors(corsOptions));
@@ -23,33 +23,6 @@ app.use(cors(corsOptions));
 app.use(express.json());
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
-
-app.post('/generate-pdf', (req, res) => {
-  //whats going in the pdf
-  console.log(req.body);
-  const elementsForPDF = req.body.canvasIMG;
-
-  //create the pdf on the server
-  const doc = new PDFDocument();
-  doc.pipe(fs.createWriteStream('output.pdf'));
-
-  //append the content to the PDF
-  // canvasIMG.forEach(element => {
-    //first attempt, if we make each Driver Card and the Driver Tree
-    //into SVG or Canvas images, then this probably works
-    //and we'll just keep using the doc.AddPage() method
-    doc.addPage().text(canvasIMG, 100, 100);
-  // });
-
-  //close out the PDF
-  doc.end();
-
-  //need to compare this with the example on the documentation of
-  //res.sendFile('output.pdf', { root: __dirname })
-  res.sendFile(path.resolve(__dirname, 'output.pdf'));
-
-});
-// simple route
 
 //the below two are for deployed builds
 if (process.env.NODE_ENV === 'production') {

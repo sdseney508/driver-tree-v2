@@ -23,17 +23,6 @@ outcomes.init(
             allowNull: true,
             defaultValue: 'Draft',
         },
-
-        //command that owns the outcome.  from stakeholders table
-        command: {
-            type: DataTypes.INTEGER,
-            allowNull: true,
-            references: {
-              model: "stakeholders",
-              key: "id",
-            },
-          },
-
         
         baselinePerformance: {
             type: DataTypes.TEXT,
@@ -103,18 +92,7 @@ outcomes.init(
             defaultValue: 'Draft',
         },
 
-        tierLevel: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            defaultValue: 0,
-        },
-
         subTierLevel: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            defaultValue: 0,
-        },
-        cluster: {
             type: DataTypes.INTEGER,
             allowNull: false,
             defaultValue: 0,

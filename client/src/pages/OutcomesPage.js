@@ -5,11 +5,12 @@ import { stateContext } from "../App";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { useNavigate } from "react-router";
 import { Link, useParams } from "react-router-dom";
-import { getUser, loggedIn, getToken } from "../utils/auth";
+import { getAppData } from "../utils/auth";
 import {
   createOutcome,
   getDriverByOutcome,
   getOutcome,
+  outcomeByCommand,
   updateOutcome,
 } from "../utils/drivers";
 import styles from "./OutcomesPage.module.css";
@@ -20,99 +21,59 @@ import OutcomeTable from "../components/OutcomeTable";
 const OutcomesPage = () => {
   const [state, setState] = useContext(stateContext);
   const [selOutcome, setSelOutcome] = useState({});
+  const [driverTreeObj, setDriverTreeObj] = useState([]);
   const [selDrivers, setSelDrivers] = useState({});
+  const [viewId, setViewId] = useState(null);
   //These are the initial states for the select boxes.  They are set to the first value in the array, which is the default value
   let navigate = useNavigate();
 
-  const { outcomeID } = useParams();
+  const { outcomeId } = useParams();
   //using the initial useEffect hook to open up the draft oplimits and prefill the form
   useEffect(() => {
-    const getUserData = async () => {
-      //this first part just ensures they whoever is on this page is an authenticated user; prevents someone from typing in the url and gaining access
-      try {
-        //these comes from the utils section of the code
-        const token = loggedIn() ? getToken() : null;
-        if (!token) {
-          navigate("/");
-        }
-        const response = await getUser(token);
-        if (!response.data) {
-          navigate("/");
-          throw new Error("something went wrong!");
-        }
-        const user = response.data;
-        console.log(user);
-        //used to make sure they have permissions to make changes
-        setState({
-          ...state,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          Role: user.userRole,
-          command: user.userCommand,
-          userID: user.id,
-        });
-        let userDataLength = Object.keys(user).length;
-        //if the user isnt logged in with an unexpired token, send them to the login page
-        if (!userDataLength > 0) {
-          navigate("/");
-        }
-      } catch (err) {
-        console.error(err);
-        navigate("/");
-      }
-    };
-
-    const getOutcomeData = async () => {
-      if (!outcomeID) {
-        // eslint-disable-next-line react-hooks/exhaustive-deps, no-const-assign
-        alert("No Outcomes Found, Please Select an Outcome");
-        navigate("/user");
-
-      }
-      await getOutcome(outcomeID).then((data) => {
-        setSelOutcome(data.data);
-      });
-      await getDriverByOutcome(outcomeID).then((data) => {
-        let top = data.data;
-        setSelDrivers(top);
-      });
-    };
-
-    getUserData();
-    getOutcomeData();
-    getDrivers();
-    //this one gets the initial draftOL for the form
+    getAppData(
+      navigate,
+      state,
+      setState,
+      outcomeId,
+      outcomeByCommand,
+      setSelOutcome,
+      getOutcome,
+      getDriverByOutcome,
+      setDriverTreeObj, viewId, setViewId
+    );
+    // setState({ ...state, selOutcome: selOutcome });
   }, []);
 
-  const getDrivers = async () => {
-    await getDriverByOutcome(selOutcome.id).then((data) => {
-      let top = data.data;
-      setSelDrivers(top);
-    });
-  };
-
+  
   //sets the initial selection of the drop down lists for the signatures, i couldnt get the map function to work, so brute force here we go.
   useEffect(() => {
+    const getDrivers = async () => {
+      await getDriverByOutcome(selOutcome.id).then((data) => {
+        let top = data.data;
+        setDriverTreeObj(top);
+      });
+    };
+
     getDrivers();
     setState({ ...state, selOutcome: selOutcome });
     navigate("/allOutcomes/" + selOutcome.id);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome]);
 
   //this function gets everyone with an assigened role and sets the state for the drop down lists
 
   const barriers = () => {
-    if (!selDrivers[0]) {
+    if (!driverTreeObj[0]) {
       return <div></div>;
     } else {
-      return selDrivers.map((f, index) => {
+      return driverTreeObj.map((f, index) => {
         if (f.tierLevel !== 1) {
           return <div></div>;
         } else {
           return (
             <div>
-              <Link to={`/drpage/${selOutcome.id}/${selDrivers[index].id}`}>
-                <p>{selDrivers[index].problemStatement}</p>
+              <Link to={`/drpage/${selOutcome.id}/${driverTreeObj[index].id}`}>
+                <p>{driverTreeObj[index].problemStatement}</p>
               </Link>
             </div>
           );
@@ -122,28 +83,38 @@ const OutcomesPage = () => {
   };
 
   const newOutcome = async () => {
-    let body ={command: state.command}
+    let body = { command: state.command };
     createOutcome(body).then((data) => {
-      setState({ ...state, outcomeID: data.data.id });
+      setState({ ...state, outcomeId: data.data.id });
       setSelOutcome(data.data);
     });
   };
 
   const handleInputChange = (e) => {
+    e.preventDefault();
     setSelOutcome({ ...selOutcome, [e.target.name]: e.target.value });
+    let body = { [e.target.name]: e.target.value };
+    updateOutcome(selOutcome.id, body);
+    // getOutcome(selOutcome.id).then((data) => {
+    //   setSelOutcome(data.data);
+    // });
   };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     let body;
     if (e.target.name === "outcomeTitle") {
-      body = { [e.target.name]: e.target.value, 'problemStatement': e.target.value};
-      updateOutcome(selOutcome.id, body);
+      body = {
+        [e.target.name]: e.target.value,
+        problemStatement: e.target.value,
+      };
     } else {
       body = { [e.target.name]: e.target.value };
-    };
+    }
     updateOutcome(selOutcome.id, body);
-    setSelOutcome({ ...selOutcome, [e.target.name]: e.target.value });
+    await getOutcome(selOutcome.id).then((data) => {
+      setSelOutcome(data.data);
+    });
   };
 
   const driverPage = () => {
@@ -199,7 +170,7 @@ const OutcomesPage = () => {
                           onBlur={handleFormSubmit}
                         ></Form.Control>
                       </Row>
-                    {/* </Form.Group>
+                      {/* </Form.Group>
     
                     <Form.Group style={{ width: "100%" }}> */}
                       <Row className={styles.my_row}>
@@ -226,20 +197,20 @@ const OutcomesPage = () => {
               <Col sm={10} md={6} lg={4}>
                 <p className={styles.my_p}>Gap Characerization</p>
                 <Form className={styles.my_form}>
-                  {/* <Form.Group style={{ width: "100%" }}>
+                  <Form.Group style={{ width: "100%" }}>
                     <Form.Label className={styles.form_label}>
                       Problem Statement
                     </Form.Label>
                     <Form.Control
                       as="textarea"
                       className={styles.my_text_area}
-                      value={selOutcome.goals || ""}
+                      value={selOutcome.problemStatement || ""}
                       //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-                      name="goals"
+                      name="problemStatement"
                       onChange={handleInputChange}
                       onBlur={handleFormSubmit}
                     />
-                  </Form.Group> */}
+                  </Form.Group>
 
                   <Form.Group style={{ width: "100%" }}>
                     <Form.Label className={styles.form_label}>
@@ -376,13 +347,16 @@ const OutcomesPage = () => {
               </Col>
             </Row>
 
-            <Row style={{ height: "250px" }}>
+            {selOutcome && state.command ?<Row style={{ height: "250px" }}>
               <OutcomeTable
+                state={state}
+                setState={setState}
                 selOutcome={selOutcome}
                 setSelOutcome={setSelOutcome}
                 command={state.command}
+                userId={state.userId}
               />
-            </Row>
+            </Row>: null}
           </div>
         </Container>
       </div>

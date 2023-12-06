@@ -7,18 +7,15 @@ import { createArrow } from "../utils/arrows";
 import { getOutcome } from "../utils/drivers";
 
 const ArrowModal = ({
-  onModalSubmit,
   selDriver,
   setSelDriver,
   selOutcome,
   setSelOutcome,
-  setArrowMod,
 }) => {
   const [selectedElements, setSelectedElements] = useState([]);
 
   async function createAnArrow() {
     let body = {};
-    body.outcomeID = selOutcome.id;
     body.outcomeId = selOutcome.id;
 
     if (
@@ -48,7 +45,7 @@ const ArrowModal = ({
     } else {
       //one is the outcome, find which one and make it the arrow end
       if (selectedElements[0].outcomeTitle) {
-        body.end = `outcomeID${selectedElements[0].id}`;
+        body.end = `outcomeId${selectedElements[0].id}`;
         //now check to see if the other arrow comes out of a cluster or driver
         if (selectedElements[1].cluster === 0) {
           body.start = `card${selectedElements[1].id}`;
@@ -58,7 +55,7 @@ const ArrowModal = ({
             selectedElements[1].cluster;
         }
       } else {
-        body.end = `outcomeID${selectedElements[1].id}`;
+        body.end = `outcomeId${selectedElements[1].id}`;
         if (selectedElements[0].cluster === 0) {
           body.start = `card${selectedElements[0].id}`;
         } else {
@@ -73,7 +70,7 @@ const ArrowModal = ({
       body.startAnchor = {position: "left", offset: {y: 0}};
       body.endAnchor = {position: "left", offset: {y: 0}};
       body.dashness = "true";
-      body.gridBreak = "10";
+      body.gridBreak = "-10";
     } else {
       body.startAnchor = {position: "left", offset: {y: 0}};
       body.endAnchor = {position: "right", offset: {y: 0}};

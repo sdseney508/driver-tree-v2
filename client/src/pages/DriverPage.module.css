@@ -20,30 +20,20 @@
 
 .background_text {
    width: 100%;
-   height: 225px;
+   height: 400px;
 }
 
-.card {
-   background-color: #ded8d8;
-   color: rgb(0, 0, 0);
-   font-size: 10px;
-   margin: 10px;
-   height: 100px;
-}
-
-.card-outcome {
-   background-color: #e6e6e6;
-   color: rgb(0, 0, 0);
-   font-weight: normal;
-}
-
-.card_title {
-   color: rgb(10, 24, 229);
-   font-size: 10px;
+.btn_col {
+   display: flex;
+   width: 500px;
+   justify-content: flex-start;
+   align-items: flex-start;
+   height: 100%;
 }
 
 .copyright {
-   align-items: flex-end;
+   display: flex;
+   justify-content: flex-end;
 }
 
 .driver {
@@ -57,17 +47,25 @@
 }
 
 .driver_page {
+   display: flex;
    background-color: white;
    font-weight: bold;
+   font-size: 1rem;
    align-items: center;
    justify-content: center;
+   justify-items: center;
 }
+
 .my_btn {
-   /* padding: 2px; */
-   width: 40px;
-   height: 40px;
-   box-shadow: 0 4px 8px 0 rgba(82, 81, 81, 0.9), 0 4px 8px 0 rgba(83, 83, 83, 0.9);
+   align-items: center;
+   justify-content: center;
+   align-content: center;
+   margin:5px;
+   width: 200px;
+   box-shadow: 0 4px 8px 0 rgba(82, 81, 81, 0.9),
+     0 4px 8px 0 rgba(83, 83, 83, 0.9);
 } 
+
 .my_col {
    display: flex;
    flex-direction: column;
@@ -78,9 +76,15 @@
    border: 1px solid black;
 }
 
-
 .my_form {
    background-color: white;
+   margin: 5px;
+}
+
+.my_modal {
+   display: flex;
+   justify-content: center;
+   align-content: center;
 }
 
 .my_row {
@@ -89,52 +93,30 @@
    width: 100%;
    justify-content: center;
    align-items: center;
+   margin: 0px important;
 
 }
-
-.my_text_area {
-   display: list-item;
-   outline: none;
- }
  
- .my_text_area div {
-   display: list-item;
- }
-
- .outcome {
-   display: flex;
-   background-color: white;
-   color: rgb(0, 0, 0);
-   font-weight: normal;
-   justify-content: center;
-   align-items: center;
-}
-
  .quad_format {
    display: flex;
    flex-direction: row;
    /* flex-wrap: wrap; */
    width: 100%;
-   height: 45vh;
+   height: 40vh;
    justify-content:  left;
    align-items: top;
    border: 1px solid black;
 }
 
-.my_row {
+.tier_row {
    display: flex;
-   flex-direction: column;
-   width: 100%;
-   justify-content: center;
-   align-items: center;
-
+   flex-direction: row;
+   margin: 0px;
 }
 
 .welcome-btn {
    width: 25%;
-
 }  
-
 
 .status_label {
 width: 100px;

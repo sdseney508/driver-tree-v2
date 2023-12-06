@@ -1,6 +1,8 @@
 const router = require("express").Router();
 const { User } = require("../../models");
 const { signToken } = require("../../utils/auth");
+const sequelize = require("../../config/connection");
+const { Op } = require("sequelize");
 
 //import middleware
 // put authMiddleware anywhere we need to send a token for verification of user. this will maintain their login for up to 2 hours.
@@ -84,7 +86,6 @@ router.get("/emails", async (req, res) => {
 // get all users with a specific roll.
 router.get("/role/:urole", async (req, res) => {
   try {
-    console.log(req.params.urole);
     const userData = await User.findAll({ where: 
       { userRole: req.params.urole, } 
     });
@@ -103,6 +104,11 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ message: "Something went wrong!" });
     }
     const token = signToken(userData);
+    const userUpdate = await User.update( {password: req.body.password}, {
+      where: {
+        id: userData.id,
+      },
+    });
     res.status(200).json({ token, userData });
   } catch (err) {
     console.log(err);
@@ -122,7 +128,7 @@ router.post("/login", async (req, res) => {
     }
     const validPassword = await userData.checkPassword(req.body.password);
     if (validPassword !== true) {
-      res.status(400).json({ message: "Bad Password" });
+      res.status(401).json({ message: "Bad Password" });
       return;
     }
     const token = signToken(userData);

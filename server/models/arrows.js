@@ -3,6 +3,7 @@ const sequelize = require("../config/connection");
 
 class arrows extends Model {}
 
+//TODO:  add a startTier field to make the cascade update execute faster
 arrows.init(
   {
     id: {
@@ -84,23 +85,13 @@ arrows.init(
       allowNull: true,
     },
 
-    driverID: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: "drivers",
-        key: "id",
-      },
-    },
-
-    
-
-    outcomeID: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: "outcomes",
-        key: "id",
-      },
-    },
+    // outcomeID: {
+    //   type: DataTypes.INTEGER,
+    //   references: {
+    //     model: "outcomes",
+    //     key: "id",
+    //   },
+    // },
   },
   {
     sequelize,

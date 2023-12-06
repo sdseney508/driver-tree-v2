@@ -11,7 +11,8 @@ stakeholders.init(
       primaryKey: true,
       autoIncrement: true,
     },
-    command: {
+    
+    comm: {
       type: DataTypes.STRING,
       allowNull: false,
     },

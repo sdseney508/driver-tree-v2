@@ -1,6 +1,8 @@
 const router = require("express").Router();
 const { stakeholders } = require("../../models");
 const { signToken } = require("../../utils/auth");
+const sequelize = require("../../config/connection");
+const { Op } = require("sequelize");
 
 //import middleware
 // put authMiddleware anywhere we need to send a token for verification of user. this will maintain their login for up to 2 hours.

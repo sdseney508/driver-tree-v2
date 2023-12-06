@@ -1,51 +1,21 @@
 import React, { useContext, useEffect } from "react";
 import { stateContext } from "../App";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Navbar, Nav, Container } from "react-bootstrap";
 import styles from "./DriverNavbar.module.css";
 import { useNavigate, useLocation } from "react-router";
-import { getUser, loggedIn, getToken } from "../utils/auth";
+import { getUserData } from "../utils/auth";
 import { outcomeByCommand} from "../utils/drivers"
 
 const DriverNavbar = () => {
   let location = useLocation();
   let navigate = useNavigate();
-  let {outcomeID, driverID} = useParams();
   let pName = location.pathname.slice(0, 5);
   let [state, setState] = useContext(stateContext);
 
   useEffect(() => {
-    const getUserData = async () => {
-      try {
-        const token = loggedIn() ? getToken() : null;
-        if (!token) {
-          navigate("/");
-        }
-        const response = await getUser(token);
-        if (!response.data) {
-          navigate("/");
-          throw new Error("something went wrong!");
-        }
-        const user = response.data;
-        setState({
-          ...state,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          id: user.id,
-          userRole: user.userRole,
-          command: user.userCommand,
-        });
-        let userDataLength = Object.keys(user).length;
-        //if the user isnt logged in with an unexpired token, send them to the login page
-        if (!userDataLength > 0) {
-          navigate("/");
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    getUserData();
+    getUserData(state, setState, navigate);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 
@@ -59,8 +29,6 @@ const DriverNavbar = () => {
   };
 
   const goHome = () => {
-    let stuff = location;
-    console.log(stuff);
     navigate("/user");
   };
 
@@ -155,7 +123,7 @@ const DriverNavbar = () => {
                 </Nav>
               </Navbar.Collapse>
             </Container>
-            <p className={styles.copyright}>&#169 Integrated Program Solutions, Inc</p>
+            <p className={styles.copyright}>&#169; Integrated Program Solutions, Inc</p>
           </Navbar>
         )
       ) : (

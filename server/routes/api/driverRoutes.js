@@ -1,7 +1,7 @@
 const router = require("express").Router();
-const { drivers } = require("../../models");
+const { drivers, clusters } = require("../../models");
 const sequelize = require("../../config/connection");
-const {Op} = require("sequelize");
+const { Op } = require("sequelize");
 
 // use /api/drivers
 //create a new drivers; 
@@ -12,12 +12,11 @@ router.post("/new", async (req, res) => {
     let subTier = await drivers.max("subTier", {
       where: {
         tierLevel: req.body.tierLevel,
-        outcomeID: req.body.outcomeID,
+        outcomeId: req.body.outcomeId,
       },
     });
     let body = req.body;
     body.subTier = subTier + 1;
-    console.log(body);
     const driversData = await drivers.create(req.body);
     res.status(200).json(driversData);
   } catch (err) {
@@ -40,7 +39,6 @@ router.post("/", async (req, res) => {
 //after you select it from the table.
 router.get("/getOne/:id", async (req, res) => {
   try {
-    console.log(req.params.id);
     const driversData = await drivers.findOne({
       where: {
         id: req.params.id,
@@ -57,8 +55,9 @@ router.get("/getOne/:id", async (req, res) => {
 //get all drivers for the drivers table.  This data will be used to populate the table underneath the form view.
 router.get("/", async (req, res) => {
   try {
-    const driversData = await drivers.findAll();
-    console.log(driversData);
+    const driversData = await drivers.findAll({
+      include: [{model: clusters}],
+    });
     res.status(200).json(driversData);
   } catch (err) {
     res.status(500).json(err);
@@ -68,9 +67,28 @@ router.get("/", async (req, res) => {
 //get all active driverss for the drivers table. This data will be used to populate the table underneath the form view.
 router.get("/byoutcome/:id", async (req, res) => {
   try {
+    //the id is the outcome id, not the driver id, this does not return a driver, it returns the drivers for an outcome joined with the cluster information
+    const driversData = await drivers.findAll({
+      include: [{
+          model: clusters
+        },
+      ],
+      where: {
+        outcomeId: req.params.id,
+      },
+    });
+    res.status(200).json(driversData);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+//this gets all the drivers with the same cluster for use in the cascadeUpdate function
+router.get("/byCluster/:id", async (req, res) => {
+  try {
     const driversData = await drivers.findAll({
       where: {
-        outcomeID: req.params.id,
+        clusterId: req.params.id,
       },
     });
     res.status(200).json(driversData);
@@ -85,7 +103,7 @@ router.get("/stakeholders/:id", async (req, res) => {
     const driversData = await drivers.findAll({
       attributes: ["stakeholders", "stakeholderAbbreviation"],
       where: {
-        outcomeID: req.params.id,
+        outcomeId: req.params.id,
       },
     });
     console.log(driversData);
@@ -100,7 +118,7 @@ router.get("/byOutcomeByTier/:id", async (req, res) => {
   try {
     const driversData = await drivers.findAll({
       where: {
-        outcomeID: req.params.id,
+        outcomeId: req.params.id,
         tierLevel: req.body.tierLevel,
       },
     });
@@ -167,21 +185,23 @@ router.put("/update/:id", async (req, res) => {
   }
 });
 
-//gets the highest cluster number for a tier of drivers.  looks for the highest number in the cluster column and increments it by 1 and returns the new value
-router.get("/cluster/", async (req, res) => {
+//bulk update of driver status
+router.put("/bulkUpdate", async (req, res) => {
   try {
-    //first check for the highest subTier number under a tier and
-    //outcome and increment it by 1
-    let clust = await drivers.findAll({
-      attributes: [[sequelize.fn("max", sequelize.col("cluster"))]],
+    const driversData = await drivers.update(req.body, {
       where: {
-        tierLevel: req.body.tierLevel,
-        outcomeID: req.body.outcomeID,
+        id: {
+          [Op.or]: req.body.ids,
+        },
       },
     });
-    res.status(200).json(clust);
+    if (!driversData) {
+      res.status(404).json({ message: "No drivers found with this id!" });
+      return;
+    }
+    res.status(200).json(driversData);
   } catch (err) {
-    res.status(401).json(err);
+    res.status(400).json(err);
   }
 });
 

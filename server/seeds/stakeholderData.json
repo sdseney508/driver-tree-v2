@@ -1,12 +1,6 @@
 [
-  {
-    "command": "PEO (U&W)"
-  },
-  {
-    "command": "PMA-213"
-  },
-  {
-    "command": "PMA-271"
-  }
+  {"comm":"PMA-271"},
+  {"comm":"PMA-213"},
+  {"comm":"PEO (U&W)"}
 
 ]

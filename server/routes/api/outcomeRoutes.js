@@ -1,14 +1,14 @@
 const router = require("express").Router();
-const { outcomes } = require("../../models");
+const { outcomes, stakeholders } = require("../../models");
 const sequelize = require("../../config/connection");
-const {Op} = require("sequelize");
+const { Op } = require("sequelize");
 
 // use /api/outcomes
 //create new outcomes; also logs the creation in the admin poriton of the database
 router.post("/new", async (req, res) => {
   try {
-    console.log(req.body);
-    const outcomesData = await outcomes.create({command: req.body.command});
+    //TODO:  figure out the bug where it requires stakeholderId instead of stakeholderID to work on the join
+    const outcomesData = await outcomes.create({stakeholderId: req.body.command, stakeholderId: req.body.command});
     res.status(200).json(outcomesData);
   } catch (err) {
     res.status(400).json(err);
@@ -31,14 +31,11 @@ router.post("/", async (req, res) => {
 //after you select it from the table.
 router.get("/getOne/:id", async (req, res) => {
   try {
-    console.log("i started the get");
-    console.log(req.params.id);
     const outcomesData = await outcomes.findOne({
       where: {
         id: req.params.id,
       },
     });
-    console.log(outcomesData);
     res.status(200).json(outcomesData);
   } catch (err) {
     res.status(500).json(err);
@@ -49,9 +46,9 @@ router.get("/getOne/:id", async (req, res) => {
 //get all outcomess for the outcomes table.  This data will be used to populate the table underneath the form view.
 router.get("/", async (req, res) => {
   try {
-    console.log("i started the get outcomes route");
-    const outcomesData = await outcomes.findAll();
-    console.log(outcomesData);
+    const outcomesData = await outcomes.findAll({
+      include: [{model: stakeholders}]
+    });
     res.status(200).json(outcomesData);
   } catch (err) {
     res.status(500).json(err);
@@ -61,15 +58,12 @@ router.get("/", async (req, res) => {
 //get all outcomes for a certain command
 router.get("/command/:command", async (req, res) => {
   try {
-    console.log("i started the get outcomes route");
     const outcomesData = await outcomes.findAll({
       where: {
-        command: {
-          [Op.like]: `%${req.params.command}%`,
+        stakeholderId: req.params.command
         },
       },
-    });
-    console.log(outcomesData);
+    );
     res.status(200).json(outcomesData);
   } catch (err) {
     res.status(500).json(err);

@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const { accountStatus } = require('../../models');
+const { Op } = require("sequelize");
 
 // use /api/accountStatus
 //create a status.  This should almost never be used

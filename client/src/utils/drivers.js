@@ -10,6 +10,11 @@ const allOutcomes = () => {
   return axios.get(apiURL + "/outcomes");
 };
 
+//used for the cascading status update
+const bulkDriverStatusUpdate = (body) => {
+  return axios.put(apiURL + "/drivers/bulkUpdate", body);
+};
+
 const outcomeByCommand = (command) => {
   return axios.get(apiURL + "/outcomes/command/" + command);
 };
@@ -32,7 +37,7 @@ const getCluster = (id, body) => {
   return axios.get(apiURL + "/drivers/byOutcomeByTier/" + id, body);
 }
 
-const getDriver = (id) => { 
+const getDriverById = (id) => { 
   return axios.get(apiURL + "/drivers/getOne/" + id);
 };
 
@@ -41,7 +46,7 @@ const getDrivers = () => {
 };
 
 const getDriverByOutcome = (id) => {  
-  //the id is the outcome id, not the driver id
+  //the id is the outcome id, not the driver id, this does not return a driver, it returns the drivers for an outcome joined with the cluster information
   return axios.get(apiURL + "/drivers/byoutcome/" + id);
 };
 
@@ -51,7 +56,7 @@ const getOutcome = (id) => {
 
 const appendAdminLog = (id, log) => {
   console.log(log);
-  return axios.put(apiURL + "/oplimits/adminlog/" + id, { log });
+  return axios.put(apiURL + "/oplimits/adminlog/" + id,  log );
 };
 
 
@@ -67,6 +72,11 @@ const getCoords = () => {
 
 const getDraft = () => {
   return axios.get(apiURL + "/drivers/draft");
+};
+
+//this is used in the cascadeUpdate function in utils
+const getDriversByCluster = (clusterId) => {
+  return axios.get(apiURL + "/drivers/byCluster/" + clusterId);
 };
 
 const getEmails = () => {
@@ -97,6 +107,7 @@ export {
   allDrivers,
   allOutcomes,
   appendAdminLog,
+  bulkDriverStatusUpdate,
   createDriver,
   createOutcome,
   deleteDriver,
@@ -104,8 +115,9 @@ export {
   getCluster,
   getCoords,
   getDraft,
-  getDriver,
+  getDriverById,
   getDrivers,
+  getDriversByCluster,
   getDriverByOutcome,
   getEmails,
   getOutcome,

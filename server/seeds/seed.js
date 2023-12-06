@@ -2,6 +2,8 @@ const sequelize = require("../config/connection");
 
 const {
   accountStatus,
+  arrows,
+  clusters,
   drivers,
   outcomes,
   role, 
@@ -12,6 +14,8 @@ const {
 } = require("../models");
 
 const accountStatusData = require("./accountStatusData.json");
+const arrowsData = require("./arrowsData.json");
+const clusterData = require("./clusterData.json");
 const driversData = require("./driversData.json");
 const outcomesData = require("./outcomesData.json");
 const roleData = require("./roleData.json");
@@ -30,6 +34,11 @@ const seedDatabase = async () => {
     returning: true,
   });
   
+const cluster = await clusters.bulkCreate(clusterData, {
+    individualHooks: true,
+    returning: true,
+  });
+
   const outcome = await outcomes.bulkCreate(outcomesData, {
     individualHooks: true,
     returning: true,
@@ -50,7 +59,11 @@ const seedDatabase = async () => {
     returning: true,
   });
 
-  
+  const arrow = await arrows.bulkCreate(arrowsData, {
+    individualHooks: true,
+    returning: true,
+  });
+
   const stat = await state.bulkCreate(stateData, {
     individualHooks: true,
     returning: true,
@@ -66,7 +79,6 @@ const seedDatabase = async () => {
     individualHooks: true,
     returning: true,
   });
-
 
   process.exit(0);
 };

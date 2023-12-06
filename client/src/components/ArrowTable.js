@@ -138,7 +138,7 @@ function ArrowTable({ selDriver, setSelDriver, selOutcome, setSelOutcome, select
         <Modal.Header closeButton>
           <Modal.Title></Modal.Title>
         </Modal.Header>
-        <Modal.Body style={{textAlign: "center"}}>Coonect to:</Modal.Body>
+        <Modal.Body style={{textAlign: "center"}}>Connect to:</Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" id="driver" onClick={handleSelect} style={{position: "absolute", left: '25px'}}>
             Driver
