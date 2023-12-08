@@ -54,21 +54,24 @@ const ModArrows = ({
             <Form.Group controlId="formBasicColor">
               <Form.Label>Color</Form.Label>
               <Form.Select
-                aria-label="Default select example"
-                defaultValue="Black"
+                aria-label="ArrowColor"
+                defaultValue="Select An Arrow Color"
                 onChange={(e) => {
                   setArrowProps({ ...arrowProps, color: e.target.value });
                 }}
               >
-                <option value="black">Black</option>
-                <option value="blue">Blue</option>
-                <option value="green">Green</option>
-                <option value="red">Red</option>
+                                <option key={"c1"} value="0">
+                  Select an arrow color
+                </option>
+                <option key={"c2"} value="black">Black</option>
+                <option key={"c3"} value="blue">Blue</option>
+                <option key={"c4"} value="green">Green</option>
+                <option key={"c5"} value="red">Red</option>
               </Form.Select>
 
               <Form.Label>Start Anchor Location</Form.Label>
               <Form.Select
-                aria-label="Default select example"
+                aria-label="Start Anchor Looation"
                 onChange={(e) => {
                   setArrowProps({
                     ...arrowProps,
@@ -136,7 +139,7 @@ const ModArrows = ({
 
               <Form.Label>End Anchor Location</Form.Label>
               <Form.Select
-                aria-label="Default select example"
+                aria-label="End Anchor Location"
                 onChange={(e) => {
                   setArrowProps({
                     ...arrowProps,
@@ -166,7 +169,7 @@ const ModArrows = ({
 
               <Form.Label>Arrow End Point Offset</Form.Label>
               <Form.Select
-                aria-label="Default select example"
+                aria-label="End Point Offset"
                 onChange={(e) => {
                   if (
                     arrowProps.endAnchor.position === "left" ||
@@ -204,7 +207,7 @@ const ModArrows = ({
 
               <Form.Label>Turn Distance</Form.Label>
               <Form.Select
-                aria-label="Default select example"
+                aria-label="Turn Distance"
                 onChange={(e) => {
                   if (arrowProps.dashness === true) {
                     let gbreak =  e.target.value.slice(0, -1);

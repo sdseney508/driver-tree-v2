@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 // import Select from "react-select";
 import { Col, Card, Row, Button, Form, Modal } from "react-bootstrap";
-import { Xwrapper, Xarrow } from "react-xarrows"; //for the arrows
+import { Xwrapper } from "react-xarrows"; //for the arrows
 import { deleteArrow } from "../utils/arrows";
 import styles from "../pages/DriverTreePage.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -14,6 +14,7 @@ import {
   createDriver,
   deleteDriver,
   getDriverById,
+  getDriverByOutcome,
   getOutcome,
   updateDriver,
   updateOutcome,
@@ -33,8 +34,8 @@ import { CreateAnArrow } from "./ArrowFunction";
 import { faCopyright } from "@fortawesome/free-solid-svg-icons";
 
 const DriverCards = ({
-  arrows,
-  setArrows,
+  // arrows,
+  // setArrows,
   arrowId,
   setArrowID,
   createArrow,
@@ -68,27 +69,14 @@ const DriverCards = ({
 
   const [selectedElements, setSelectedElements] = useState([]);
   const [show, setShow] = useState(false);
-  // const [arrows, setArrows] = useState([]);
-  // adding in a useEffect feature to rerender on change to selOutcome
-  useEffect(() => {
-    const getDriversData = async (selOutcome, viewId) => {
-      await getArrows(selOutcome.id).then((data) => {
-        setArrows(data.data);
-      });
-      await getViewCards(viewId).then((data) => {
-        setViewObj(data.data);
-      });
-      await getViewArrows(viewId).then((data) => {
-        setViewArrows(data.data);
-      });
-      console.log("DriverCards because of viewId " + selOutcome.id);
-    };
-    getDriversData(selOutcome, viewId);
-  }, [viewId]);
-
+  const [arrows, setArrows] = useState([]);
+  // const [driverTreeObj, setDriverTreeObj] = useState([]);
 
   useEffect(() => {
     const getDriversData = async (selOutcome, viewId) => {
+      // await getDriverByOutcome(selOutcome.id).then((data) => {
+      //   setDriverTreeObj(data.data);
+      // });
       await getArrows(selOutcome.id).then((data) => {
         setArrows(data.data);
       });
@@ -101,23 +89,23 @@ const DriverCards = ({
       console.log("DriverCards because of driverTreeObj " + selOutcome.id);
     };
     getDriversData(selOutcome, viewId);
-  }, [driverTreeObj]);
+  }, [selOutcome, driverTreeObj, opacity]);
 
-  useEffect(() => {
-    const getDriversData = async (selOutcome, viewId) => {
-      await getArrows(selOutcome.id).then((data) => {
-        setArrows(data.data);
-      });
-      await getViewCards(viewId).then((data) => {
-        setViewObj(data.data);
-      });
-      await getViewArrows(viewId).then((data) => {
-        setViewArrows(data.data);
-      });
-      console.log("DriverCards because of selOutcome " + selOutcome.id);
-    };
-    getDriversData(selOutcome, viewId);
-  }, [selOutcome]);
+  // useEffect(() => {
+  //   const getDriversData = async (selOutcome, viewId) => {
+  //     await getArrows(selOutcome.id).then((data) => {
+  //       setArrows(data.data);
+  //     });
+  //     await getViewCards(viewId).then((data) => {
+  //       setViewObj(data.data);
+  //     });
+  //     await getViewArrows(viewId).then((data) => {
+  //       setViewArrows(data.data);
+  //     });
+  //     console.log("DriverCards because of selOutcome " + selOutcome.id);
+  //   };
+  //   getDriversData(selOutcome, viewId);
+  // }, [selOutcome]);
 
   function allowDrop(e) {
     //this property gets set on the individual divs onDragOver property to limit where a card can be dropped
@@ -247,13 +235,14 @@ const DriverCards = ({
     let outcomeBody = { status: newStatus };
     updateOutcome(driverTreeObj[0].outcomeId, outcomeBody);
 
-    // await getOutcome(selOutcome.id).then((data) => {
-    //   setSelOutcome(data.data);
-    // });
+    await getOutcome(selOutcome.id).then((data) => {
+      setSelOutcome(data.data);
+    });
     // //now update the driver tree object
     await getDriverById(selOutcome.id).then((data) => {
       setDriverTreeObj(data.data);
     });
+    window.location.reload();
   };
 
   //used in the Tier cards to create the driver cards for both the regular and the cluser
@@ -639,26 +628,28 @@ const DriverCards = ({
     let body = { [e.target.name]: e.target.value };
     if (e.target.name === "status") {
       //if the user changes the status, then ask if they want to update all the future cards in the driver chain's statust, if yes, then execute cascadeUpdate
-      // let sures = window.confirm(
-      //   "Do you want to update all future cards in this driver chain to this status?  This will also change the status of any cards in a future cluster if this card is a driver of the entire cluster."
-      // );
-      // if (sures) {
-      cascadeUpdate(
-        arrows,
-        e.target.dataset.cardid,
-        e.target.dataset.tier,
-        e.target.value
+      let sures = window.confirm(
+        "Do you want to update all future cards in this driver chain to this status?  This will also change the status of any cards in a future cluster if this card is a driver of the entire cluster."
       );
-      // }
-    } else {
+      if (sures) {
+        cascadeUpdate(
+          arrows,
+          e.target.dataset.cardid,
+          e.target.dataset.tier,
+          e.target.value
+        );
+      } else {await updateDriver(e.target.dataset.cardid, body);}
+    } else { 
+      console.log("they said no");
       await updateDriver(e.target.dataset.cardid, body);
     }
-    getOutcome(selOutcome.id).then((data) => {
-      setSelOutcome(data.data);
-    });
-    getDriverById(selOutcome.id).then((data) => {
+    // await getOutcome(selOutcome.id).then((data) => {
+    //   setSelOutcome(data.data);
+    // });
+    await getDriverById(selOutcome.id).then((data) => {
       setDriverTreeObj(data.data);
     });
+    window.location.reload();
   };
 
   //waits for setSelectedElements to be updated, then calls the CreateAnArrow function to create the arrow
@@ -1061,7 +1052,9 @@ const DriverCards = ({
                 </Card.Body>
               </Card>
               <Row style={{ minHeight: "500px" }}>
-                {/* <Legend driverTreeObj={driverTreeObj} /> */}
+                <br />
+                <br />
+                <Legend driverTreeObj={driverTreeObj} />
               </Row>
             </div>
           </Col>
@@ -1100,15 +1093,19 @@ const DriverCards = ({
             </p>
           </Col>
 
-          <DriverArrows
-            ArrowModal={ArrowModal}
-            driverTreeObj={driverTreeObj}
-            selOutcome={selOutcome}
-            viewId={viewId}
-            opacity={opacity}
-            viewArrows={viewArrows}
-            setViewArrows={setViewArrows}
-          />
+          {driverTreeObj ? (
+            <DriverArrows
+              arrows={arrows}
+              setArrows={setArrows}
+              ArrowModal={ArrowModal}
+              driverTreeObj={driverTreeObj}
+              selOutcome={selOutcome}
+              viewId={viewId}
+              opacity={opacity}
+              viewArrows={viewArrows}
+              setViewArrows={setViewArrows}
+            />
+          ) : null}
         </Xwrapper>
       </div>
 

@@ -17,7 +17,7 @@ function DriverArrows({
   const [arrows, setArrows] = useState([]);
 
   useEffect(() => {
-  
+    console.log(" draw arrows useEffectdriverTreeObj");
     //get the arrows from the database
     async function fetchData() {
       await getArrows(selOutcome.id).then((data)=> {
@@ -30,7 +30,6 @@ function DriverArrows({
 
     //this function maps each arrow in the arrows array to a Xarrow component
   const arrowFunc = () => {
-    // console.log("DriverArrows arrowFunc");
     return arrows.map((f, index) => {
       //see if the arrow is in the view, 
       let opVal = 1;

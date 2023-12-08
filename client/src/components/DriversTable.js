@@ -109,7 +109,6 @@ function DriverTable({ selDriver, setSelDriver, selOutcome, setSelOutcome }) {
   async function fetchDriverInfo(driverId) {
     await getDriverById(driverId).then((data) => {
       let top = data.data;
-      console.log(top);
       setSelDriver(top);
     });
   }
