@@ -11,10 +11,10 @@ const PDFDocument = require('pdfkit');
 const PORT = process.env.PORT || 8080;
 var corsOptions = {
   //for online use
-  // origin: "https://drivertreev3-3350125317e2.herokuapp.com",
+  origin: "https://drivertreev3-3350125317e2.herokuapp.com",
 
   //for local use
-  origin: "http://localhost:3000"
+  // origin: "http://localhost:3000"
 // 
 };
 app.use(cors(corsOptions));
