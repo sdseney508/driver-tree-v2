@@ -85,13 +85,6 @@ arrows.init(
       allowNull: true,
     },
 
-    // outcomeID: {
-    //   type: DataTypes.INTEGER,
-    //   references: {
-    //     model: "outcomes",
-    //     key: "id",
-    //   },
-    // },
   },
   {
     sequelize,

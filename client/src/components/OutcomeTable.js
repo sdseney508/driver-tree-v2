@@ -86,7 +86,7 @@ function OutcomeTable({
   async function fetchOutcomeInfo(outcomeId) {
     await getOutcome(outcomeId).then((data) => {
       setSelOutcome(data.data);
-      // setState({ ...state, outcomeId: selOutcome.id });
+      setState({ ...state, outcomeId: selOutcome.id });
   });
   };
 

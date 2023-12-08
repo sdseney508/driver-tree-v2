@@ -1,12 +1,45 @@
-import React, {
-  useState,
-  useRef,
-  useEffect,
-  useMemo,
-} from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
-import {allStakeholders} from "../utils/stakeholders";
-import {allOutcomes, allDrivers} from "../utils/drivers";
+import {
+  allStakeholders,
+  createStakeholder,
+  updateStakeholder,
+  deleteStakeholder,
+} from "../utils/stakeholders";
+import {
+  allDrivers,
+  allOutcomes,
+  appendAdminLog,
+  bulkDriverStatusUpdate,
+  createDriver,
+  createOutcome,
+  deleteDriver,
+  findUser,
+  getCluster,
+  getCoords,
+  getDraft,
+  getDriverById,
+  getDrivers,
+  getOutcome,
+  getStakeholders,
+  updateDriver,
+  updateOutcome,
+} from "../utils/drivers";
+import {
+  createStatus,
+  getAllStatus,
+  modifyStatus,
+  deleteStatus,
+} from "../utils/accountStatus";
+import {
+  createArrow,
+  findArrows,
+  getArrow,
+  getAllArrows,
+  getArrows,
+  updateArrow,
+  deleteArrow,
+} from "../utils/arrows";
 import "ag-grid-community/dist/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CSS
 
@@ -15,49 +48,86 @@ import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CS
 //when a user selects a row, the row data is passed to the parent component
 //and displayed in the form.
 //this is using the community edition and react hooks to selectively render the table
-function AdminTables({selectedTable, setSelectedTable}) {
+function AdminTables({ selectedTable, setSelectedTable }) {
   const [rowData, setRowData] = useState([]); // Set rowData to Array of Objects
-  // Each Column Definition results in one Column.  
+  // Each Column Definition results in one Column.
   const [columnDefs, setColumnDefs] = useState([]);
   let rowD;
   let columnInfo;
-  
+  const [id, setId] = useState("");
 
   useEffect(() => {
     fetchData(selectedTable);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedTable]);
-
+  }, [selectedTable, id]);
 
   //this gets all of the coumn headers for any of the tables that the user can select
   //the Object.keys gets the keys from the first row of data.  This is used to build the column headers
-const getColumnInfo = (data) => {
-  let temp =[];
-  let cols = [];
-  temp = Object.keys(data);
-  for (let i = 1; i < temp.length; i++) {
-    cols[i-1] = {field: temp[i], filter: true, headerName: temp[i], width: 125, resizable: true};
+  const getColumnInfo = (data) => {
+    let temp = [];
+    let cols = [];
+    temp = Object.keys(data);
+    for (let i = 1; i < temp.length; i++) {
+      cols[i - 1] = {
+        field: temp[i],
+        filter: true,
+        headerName: temp[i],
+        width: 125,
+        resizable: true,
+      };
+    }
+    return cols;
+  };
+
+  function deepFlattenToObject(obj, prefix = '') {
+    return Object.keys(obj).reduce((acc, k) => {
+      const pre = prefix.length ? prefix + '_' : '';
+      if (typeof obj[k] === 'object' && obj[k] !== null) {
+        Object.assign(acc, deepFlattenToObject(obj[k], pre + k));
+      } else {
+        acc[pre + k] = obj[k];
+      }
+      return acc;
+    }, {});
   }
-  return cols;
-}
 
   async function fetchData(tableType) {
+    console.log(tableType);
+    switch (tableType) {
+      case "stakeholder":
+        await allStakeholders().then((data) => {
+          columnInfo = getColumnInfo(data.data[0]);
+          rowD = data.data;
+        });
+        break;
+      case "outcomes":
+        await allOutcomes().then((data) => {
+          columnInfo = getColumnInfo(data.data[0]);
+          rowD = data.data;
+        });
+        break;
+      case "drivers":
+        await allDrivers().then((data) => {
+          columnInfo = getColumnInfo(data.data[0]);
+          rowD = data.data;
+        });
+        break;
+      case "accountStatus":
+        await getAllStatus().then((data) => {
+          columnInfo = getColumnInfo(data.data[0]);
+          rowD = data.data;
+        });
+        break;
+      case "arrows":
+        await getAllArrows().then((data) => {
+          let arr = data.data[0];
+          console.log(deepFlattenToObject(arr));
+          columnInfo = getColumnInfo(arr);
+          rowD = data.data;
+        });
+        break;
 
-    if (tableType === "stakeholder") {
-      await allStakeholders().then((data) => {
-        columnInfo = getColumnInfo(data.data[0]);
-        rowD = data.data;
-      });
-    } else if (tableType === "outcomes") {
-      await allOutcomes().then((data) => {
-        columnInfo = getColumnInfo(data.data[0]);
-        rowD = data.data;
-      });
-    } else if (tableType === "drivers"){
-      await allDrivers().then((data) => {
-        columnInfo = getColumnInfo(data.data[0]);
-        rowD = data.data;
-      });
+      default:
     }
     setRowData(rowD);
     setColumnDefs(columnInfo);
@@ -66,13 +136,46 @@ const getColumnInfo = (data) => {
   const gridRef = useRef(); // Optional - for accessing Grid's API
 
   // DefaultColDef sets props common to all Columns
-  const defaultColDef = useMemo(() => ({
-    sortable: true,
-  }));
+  const defaultColDef = useMemo(
+    () => ({
+      sortable: true,
+      editable: true,
+      valueSetter: async (params, colDef) => {
+        const body = { [params.column.colDef.field]: params.newValue };
+        const id = params.data.id;
+        switch (selectedTable) {
+          case "stakeholder":
+            await updateStakeholder(id, body);
+            console.log(id, body);
+            break;
+          case "outcomes":
+            await updateOutcome(id, body);
+            break;
+          case "drivers":
+            await updateDriver(id, body);
+            break;
+          case "accountStatus":
+            await modifyStatus(id, body);
+            break;
+          case "arrows":
+            await updateArrow(id, body);
+            break;
+
+          default:
+        }
+      },
+    }),
+    [selectedTable]
+  );
+
+  const cellClickedListener = async (e) => {
+    console.log(e.column.colDef.field);
+    setId(e.data.id);
+  };
 
   //the return just builds the table
   return (
-    <div >
+    <div>
       {/* On div wrapping Grid a) specify theme CSS Class Class and b) sets Grid size */}
 
       <div className="ag-theme-alpine" style={{ width: "100%", height: 300 }}>
@@ -82,8 +185,9 @@ const getColumnInfo = (data) => {
           columnDefs={columnDefs} // Column Defs for Columns
           defaultColDef={defaultColDef} // Default Column Properties
           animateRows={true} // Optional - set to 'true' to have rows animate when sorted
+          sideBar={true}
           rowSelection="multiple" // Options - allows click selection of rows
-          // onCellClicked={cellClickedListener} // Optional - registering for Grid Event
+          onCellClicked={cellClickedListener} // Optional - registering for Grid Event
         />
       </div>
     </div>

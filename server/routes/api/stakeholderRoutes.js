@@ -46,16 +46,17 @@ router.post("/", async (req, res) => {
 });
 
 //update stakeholder info
-router.put("/:id", async (req, res) => {
+router.put("/update/:id", async (req, res) => {
   try {
-    const stakeholderData = await stakeholders.findByPk(req.params.id);
+    console.log(req.body);
+    const stakeholderData = await stakeholders.update(req.body, {
+      where: {
+        id: req.params.id,
+      },
+    });
     if (!stakeholderData) {
       res.status(404).json({ message: "No stakeholder found with this id!" });
       return;
-    } else {
-      await stakeholder.findByPk(req.params.id).then((results) => {
-        results.update(req.body);
-      });
     }
     res.status(200).json(stakeholderData);
   } catch (err) {

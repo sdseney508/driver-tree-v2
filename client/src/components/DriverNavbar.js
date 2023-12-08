@@ -89,7 +89,7 @@ const DriverNavbar = () => {
             </Container>
           </Navbar>
         ) : (
-          <Navbar className="navbar-custom" variant="dark">
+          <Navbar className={styles.navbar_custom} variant="dark">
             <Container fluid>
               <Navbar.Toggle />
               <Navbar.Collapse id="navbar" className="navbar-custom">
@@ -112,14 +112,14 @@ const DriverNavbar = () => {
                   >
                     Database Mngmt
                   </Nav.Link>
-
+{/* 
                   <Nav.Link
                     as={Link}
                     to="/admincarouselmanage"
                     className="navbar-custom"
                   >
                     Carousel Mngmt
-                  </Nav.Link>
+                  </Nav.Link> */}
                 </Nav>
               </Navbar.Collapse>
             </Container>

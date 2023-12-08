@@ -19,7 +19,8 @@ const getStakeholder = (id) => {
 
 
 const updateStakeholder = (id, body) => {
-  return axios.put(apiURL + "/stakeholders/" + id, body);
+  console.log(body);
+  return axios.put(apiURL + "/stakeholders/update/" + id, body);
 };
 
 export {

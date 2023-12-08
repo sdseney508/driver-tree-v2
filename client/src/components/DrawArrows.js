@@ -1,11 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Xarrow from "react-xarrows";
 import { getArrows } from "../utils/arrows";
-import {getViewArrows} from "../utils/viewArrows";
 
 function DriverArrows({
-  arrows, 
-  setArrows,
+  // arrows, 
+  // setArrows,
   driverTreeObj,
   ArrowModal,
   selOutcome,
@@ -15,30 +14,23 @@ function DriverArrows({
   setViewArrows
 }) {
   //rerenders the arrows on selOutcome change
-  useEffect(() => {
-    console.log("DriverArrows useEffect selOutcome");
-    //get the arrows from the database
-    async function fetchData() {
-      await getArrows(selOutcome).then((data) => {
-        setArrows(data.data);
-      });
-    }
-    fetchData();
-  }, [selOutcome]);
+  const [arrows, setArrows] = useState([]);
 
   useEffect(() => {
-    console.log("DriverArrows useEffect driverTreeObj");
+  
     //get the arrows from the database
     async function fetchData() {
-      await getViewArrows(viewId).then((data) => {
-        setViewArrows(data.data);
+      await getArrows(selOutcome.id).then((data)=> {
+        setArrows(data.data);
       });
     }
     fetchData();
   }, [driverTreeObj]);
 
+
     //this function maps each arrow in the arrows array to a Xarrow component
   const arrowFunc = () => {
+    // console.log("DriverArrows arrowFunc");
     return arrows.map((f, index) => {
       //see if the arrow is in the view, 
       let opVal = 1;
@@ -52,8 +44,9 @@ function DriverArrows({
           <Xarrow
             arrowBodyProps={{ style: {opacity: opVal}, onClick: (e) => ArrowModal(e, arrows[index].id), id: "arrow" + arrows[index].id }}
             arrowHeadProps={{ style: {opacity: opVal}, onClick: (e) => ArrowModal(e, arrows[index].id), id: "arrowhead" + arrows[index].id }}
+            key={arrows[index].id}
             divContainerStyle={{position: "relative"}}
-            SVGcanvasStyle={{position: "relative"}}
+            SVGcanvasStyle={{position: "absolute"}}
             color={arrows[index].color}
             dashness={arrows[index].dashness}
             end={arrows[index].end}

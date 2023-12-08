@@ -10,8 +10,8 @@ import {
   outcomeByCommand,
   getDriverByOutcome,
 } from "../utils/drivers";
-import { getViewCards } from "../utils/viewCards";
-import { getViewArrows } from "../utils/viewArrows";
+// import { getViewCards } from "../utils/viewCards";
+// import { getViewArrows } from "../utils/viewArrows";
 import { createView, deleteView } from "../utils/views";
 import { getArrows } from "../utils/arrows";
 import { useNavigate } from "react-router";
@@ -31,8 +31,7 @@ import { Xwrapper } from "react-xarrows";
 
 const DriverTreePage = () => {
   const [state, setState] = useContext(stateContext);
-  const [arrows, setArrows] = useState([]);
-  const [arrowID, setArrowID] = useState();
+  const [arrowID, setArrowID] = useState("");
   const [clusters, setClusters] = useState([]);
   const [createArrow, setCreateArrow] = useState(false);
   const [opacity, setOpacity] = useState(100);
@@ -63,7 +62,7 @@ const DriverTreePage = () => {
 
   //these are the state and URL for the pdf
   const { outcomeId } = useParams();
-
+  const [arrows, setArrows] = useState([]);
   //custom styles for the divs down below
 
   //These are the initial states for the select boxes.  They are set to the first value in the array, which is the default value
@@ -98,14 +97,22 @@ const DriverTreePage = () => {
       await getDriverByOutcome(selOutcome.id).then((data) => {
         setDriverTreeObj(data.data);
       });
+      await getArrows(selOutcome.id).then((data) => {
+        setArrows(data.data);
+      });
+      // await getViewCards(viewId).then((data) => {
+      //   setViewObj(data.data);
+      // });
+      // await getViewArrows(viewId).then((data) => {
+      //   setViewArrows(data.data);
+      // });
     };
     getDriversData(selOutcome);
-    setState({ ...state, selOutcome: selOutcome });
-    navigate("/drivertree/" + selOutcome.id);
+    // setState({ ...state, selOutcome: selOutcome });
+    // navigate("/drivertree/" + selOutcome.id);
     // window.location.reload();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    console.log("DriverTreePage useEffect");
-  }, [selOutcome, viewId]);
+  }, [selOutcome]);
 
   const createNewView = async (e) => {
     e.preventDefault();
@@ -205,9 +212,7 @@ const DriverTreePage = () => {
   };
 
   //use canvg to turn all SVGs into PNGs
-  const convertSvgToPng = 
-  
-    async () => {
+  const convertSvgToPng = async () => {
     applyXmlns();
     let svg = document.querySelectorAll("svg");
 
@@ -221,7 +226,7 @@ const DriverTreePage = () => {
       let svgWidth = svgBounds.width;
       let svgHeight = svgBounds.height;
     }
-      // let svgString = svgArray[i].outerHTML;
+    // let svgString = svgArray[i].outerHTML;
     //   htmlToImage.toPng(svgArray[i]).then(function (dataUrl) {
     //     var img = new Image();
     //     img.src = dataUrl;
@@ -276,10 +281,6 @@ const DriverTreePage = () => {
   };
 
   const pdfExportComponent = useRef(null);
-
-  const handleExportWithComponent = (event) => {
-    setPDFState(true);
-  };
 
   const updateOpacity = (e) => {
     setOpacity(e.target.value / 100);
@@ -349,9 +350,10 @@ const DriverTreePage = () => {
               className={styles.pdf_export}
             >
               <DriverCards
-                arrowID={arrowID}
                 arrows={arrows}
                 setArrows={setArrows}
+                arrowID={arrowID}
+                setArrowID={setArrowID}
                 cluster={clusters}
                 setClusters={setClusters}
                 createArrow={createArrow}
@@ -362,10 +364,7 @@ const DriverTreePage = () => {
                 PDFState={PDFState}
                 recordLockState={recordLockState}
                 state={state}
-                selDriver={selDriver}
                 setCreateArrow={setCreateArrow}
-                setSelDriver={setSelDriver}
-                setArrowID={setArrowID}
                 setArrowMod={setArrowMod}
                 selOutcome={selOutcome}
                 setSelOutcome={setSelOutcome}

@@ -62,7 +62,8 @@ router.get("/:id", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const arrowData = await arrows.findAll({
-      include: [{ model: outcomes }],
+      raw:true,
+      include: [{ model: outcomes, attributes: ["outcomeTitle"]}],
     });
     res.status(200).json(arrowData);
   } catch (err) {

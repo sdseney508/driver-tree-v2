@@ -155,7 +155,6 @@ const AdminAccountManagement = () => {
       ...userFormData,
       [event.target.name]: event.target.value,
     });
-    console.log(userFormData);
   };
 
   const handleFormSubmit = async (event) => {
@@ -166,7 +165,8 @@ const AdminAccountManagement = () => {
       setShowPassAlert(true);
       window("Passwords do not match");
       return;
-    } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#$^+=!*()@%&]).{14,}$/.test(userFormData.password)) {
+    } else if (userFormData.password && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#$^+=!*()@%&]).{14,}$/.test(userFormData.password)) {
+      console.log(userFormData.password);
       alert('The password must contain at least 14 characters including at least 1 uppercase, 1 lowercase, 1 special character and 1 number.');
       return;
     } else if (!userFormData.firstName || !userFormData.lastName) {
@@ -200,10 +200,11 @@ const AdminAccountManagement = () => {
     } else {
       body = { firstName, lastName, email, userStatus, userRole };
     }
-
-    // await updateUser(body, id)
-    //   .then()
-    //   .catch((err) => console.log(err));
+    await updateUser(body, id)
+      .then()
+      .catch((err) => console.log(err));
+    form.reset();
+    window.location.reload();
   };
 
   return (

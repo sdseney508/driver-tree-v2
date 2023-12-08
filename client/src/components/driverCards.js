@@ -9,7 +9,6 @@ import { faArrowUp } from "@fortawesome/free-solid-svg-icons";
 import { faFlagUsa } from "@fortawesome/free-solid-svg-icons";
 import Legend from "../components/legend";
 import { useNavigate } from "react-router";
-import Draggable from "react-draggable";
 import {
   bulkDriverStatusUpdate,
   createDriver,
@@ -36,7 +35,8 @@ import { faCopyright } from "@fortawesome/free-solid-svg-icons";
 const DriverCards = ({
   arrows,
   setArrows,
-  arrowID,
+  arrowId,
+  setArrowID,
   createArrow,
   driverTreeObj,
   setDriverTreeObj,
@@ -47,7 +47,6 @@ const DriverCards = ({
   setCreateArrow,
   selOutcome,
   setSelOutcome,
-  setArrowID,
   setArrowMod,
   state,
   tableState,
@@ -66,11 +65,13 @@ const DriverCards = ({
   //The arrow function is contained in the arrows.js module.  It creates the arrows that connect the cards
   // const [arrows, setArrows] = useState([]);
   let navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(true);
 
-  //adding in a useEffect feature to rerender on change to selOutcome
+  const [selectedElements, setSelectedElements] = useState([]);
+  const [show, setShow] = useState(false);
+  // const [arrows, setArrows] = useState([]);
+  // adding in a useEffect feature to rerender on change to selOutcome
   useEffect(() => {
-    const getDriversData = async (selOutcome) => {
+    const getDriversData = async (selOutcome, viewId) => {
       await getArrows(selOutcome.id).then((data) => {
         setArrows(data.data);
       });
@@ -80,18 +81,43 @@ const DriverCards = ({
       await getViewArrows(viewId).then((data) => {
         setViewArrows(data.data);
       });
+      console.log("DriverCards because of viewId " + selOutcome.id);
     };
-    getDriversData(selOutcome);
-  }, [driverTreeObj, opacity]);
-  //this is used to create the divs that go into the driver tree columns
-  let temp;
-  const [selectedElements, setSelectedElements] = useState([]);
-  const [show, setShow] = useState(false);
-  //array for updating arrows after drag and drop
+    getDriversData(selOutcome, viewId);
+  }, [viewId]);
 
-  // const handleClose = () => {
-  //   setShow(false);
-  // };
+
+  useEffect(() => {
+    const getDriversData = async (selOutcome, viewId) => {
+      await getArrows(selOutcome.id).then((data) => {
+        setArrows(data.data);
+      });
+      await getViewCards(viewId).then((data) => {
+        setViewObj(data.data);
+      });
+      await getViewArrows(viewId).then((data) => {
+        setViewArrows(data.data);
+      });
+      console.log("DriverCards because of driverTreeObj " + selOutcome.id);
+    };
+    getDriversData(selOutcome, viewId);
+  }, [driverTreeObj]);
+
+  useEffect(() => {
+    const getDriversData = async (selOutcome, viewId) => {
+      await getArrows(selOutcome.id).then((data) => {
+        setArrows(data.data);
+      });
+      await getViewCards(viewId).then((data) => {
+        setViewObj(data.data);
+      });
+      await getViewArrows(viewId).then((data) => {
+        setViewArrows(data.data);
+      });
+      console.log("DriverCards because of selOutcome " + selOutcome.id);
+    };
+    getDriversData(selOutcome, viewId);
+  }, [selOutcome]);
 
   function allowDrop(e) {
     //this property gets set on the individual divs onDragOver property to limit where a card can be dropped
@@ -475,15 +501,12 @@ const DriverCards = ({
     };
 
     await updateDriver(data, body);
-    getDriverById(selOutcome.id).then((data) => {
-      setDriverTreeObj(data.data);
-    });
+
     //look through the arrows state to find any arrows with the affected cardId as a start or endpoint then update.
     if (dragStart === dragEnd) {
       // window.location.reload();
       // return;
-      //refresh the component
-      setArrowID(arrows[0].id);
+      //refresh the componen
       await getOutcome(selOutcome.id).then((data) => {
         setSelOutcome(data.data);
       });
@@ -566,7 +589,7 @@ const DriverCards = ({
         }
       }
     }
-    getDriverById(selOutcome.id).then((data) => {
+    await getDriverById(selOutcome.id).then((data) => {
       setDriverTreeObj(data.data);
     });
     window.location.reload();
@@ -694,6 +717,7 @@ const DriverCards = ({
   //uses the CreateArrow function to make an arrow between two cards
   const MakeAnArrow = async (e, cardId, type) => {
     e.preventDefault();
+    let temp;
     // console.log(type, cardId);
     if (type === "driver") {
       await getDriverById(cardId).then((data) => {
@@ -740,7 +764,6 @@ const DriverCards = ({
       let body = { viewId: viewId, driverId: driverId };
       await removeViewCard(body);
     } else {
-      debugger;
       //the card is not in the view, so add it and any arrows that start from it, first check the viewArrows object (for database integrity) then here we look at the arrows object  because we want to add the arrows to the viewArrows object.  All error handling logic is server side
       let arrowCheck = arrows.filter(
         (item) => item.start === `card${e.target.dataset.cardid}`
@@ -1078,8 +1101,6 @@ const DriverCards = ({
           </Col>
 
           <DriverArrows
-            arrows={arrows}
-            setArrows={setArrows}
             ArrowModal={ArrowModal}
             driverTreeObj={driverTreeObj}
             selOutcome={selOutcome}

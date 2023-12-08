@@ -1,7 +1,7 @@
 //page for viewing and updating op limits
 import React, { useState, useContext, useEffect } from "react";
 import { stateContext } from "../App";
-import { Container, Row, Col, Button, Form } from "react-bootstrap";
+import { Container, Row, Col, Button} from "react-bootstrap";
 import AdminTables from "../components/AdminTables";
 import "./DriverTreePage.module.css";
 import "./button.css";
@@ -26,10 +26,10 @@ const AdminCarouselManage = () => {
               <h3 className="text-center" >Database Insertions and Deletions Disabled For Demo</h3>
               <Button
                 className="welcome-btn p-1 rounded-lg m-3"
-                id="outcomes"
+                id="accountStatus"
                 onClick={handleClick}
               >
-                Outcomes Table
+                Account Status Table
               </Button>
 
               <Button
@@ -47,6 +47,57 @@ const AdminCarouselManage = () => {
               >
                 Stakeholders Table
               </Button>
+              <Button
+                className="welcome-btn p-1 rounded-lg m-3"
+                id="arrows"
+                onClick={handleClick}
+              >
+                Arrows Table
+              </Button>
+              <Button
+                className="welcome-btn p-1 rounded-lg m-3"
+                id="outcomes"
+                onClick={handleClick}
+              >
+                Outcomes Table
+              </Button>
+              <Button
+                className="welcome-btn p-1 rounded-lg m-3"
+                id="role"
+                onClick={handleClick}
+              >
+                Role Table
+              </Button>
+              <Button
+                className="welcome-btn p-1 rounded-lg m-3"
+                id="status"
+                onClick={handleClick}
+              >
+                Driver / Outcome Status Table
+              </Button>
+              <Button
+                className="welcome-btn p-1 rounded-lg m-3"
+                id="viewArrows"
+                onClick={handleClick}
+              >
+                View Arrows
+              </Button>
+              <Button
+                className="welcome-btn p-1 rounded-lg m-3"
+                id="viewCards"
+                onClick={handleClick}
+              >
+                View Cards
+              </Button>
+              <Button
+                className="welcome-btn p-1 rounded-lg m-3"
+                id="views"
+                onClick={handleClick}
+              >
+                Views Table
+              </Button>
+
+
             </Col>
           </Row>
 

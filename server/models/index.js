@@ -18,14 +18,12 @@ const views = require("./views");
 
 //TODO:  set up table connections
 outcomes.hasMany(drivers, {
-  // foreignKey: 'outcomeID',
   onDelete: "CASCADE",
 });
 
 drivers.belongsTo(outcomes, {});
 
 outcomes.hasMany(arrows, {
-  // foreignKey: 'outcomeID',
   onDelete: "CASCADE",
 });
 
@@ -40,12 +38,10 @@ outcomes.belongsTo(stakeholders, {});
 clusters.belongsTo(outcomes, {});
 
 outcomes.hasMany(clusters, {
-  // foreignKey: 'outcomeID',
   onDelete: "CASCADE",
 });
 
 clusters.hasMany(drivers, {
-  // foreignKey: 'clusterID',
   //no need for cascade delete, the delete route in clusterRoutes updates the correct drivers.
 });
 
@@ -56,7 +52,6 @@ stakeholders.hasMany(drivers, {});
 drivers.hasOne(stakeholders, {});
 
 stakeholders.hasMany(User, {
-  // foreignKey: 'userCommand',
 });
 
 User.belongsTo(stakeholders, {});
@@ -64,7 +59,6 @@ User.belongsTo(stakeholders, {});
 views.belongsTo(outcomes, {});
 
 outcomes.hasMany(views, {
-  // foreignKey: 'outcomeID',
   onDelete: "CASCADE",
 });
 

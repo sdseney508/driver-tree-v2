@@ -20,6 +20,11 @@ const getArrows = (id) => {
   return axios.get(apiURL + "/arrows/outcomeID/" + id);
 }
 
+//this is used on the admin page to fill in the table
+const getAllArrows = () => {
+  return axios.get(apiURL + "/arrows/");
+}
+
 const updateArrow = (id, body) => {
   return axios.put(apiURL + "/arrows/update/" + id, body);
 };
@@ -33,6 +38,7 @@ export {
   findArrows,
   getArrow,
   getArrows,
+  getAllArrows,
   updateArrow,
   deleteArrow
 };

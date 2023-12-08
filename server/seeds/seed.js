@@ -6,11 +6,11 @@ const {
   clusters,
   drivers,
   outcomes,
-  role, 
+  role,
   stakeholders,
   state,
   status,
-  User, 
+  User,
 } = require("../models");
 
 const accountStatusData = require("./accountStatusData.json");
@@ -21,39 +21,41 @@ const outcomesData = require("./outcomesData.json");
 const roleData = require("./roleData.json");
 const stakeholderData = require("./stakeholderData.json");
 const stateData = require("./stateData.json");
-const statusData = require('./statusData.json');
+const statusData = require("./statusData.json");
 const userData = require("./userData.json");
-
 
 const seedDatabase = async () => {
   await sequelize.sync({ force: true });
 
   //needs to be done first due to foreign key constraints
+  
   const stakehold = await stakeholders.bulkCreate(stakeholderData, {
     individualHooks: true,
     returning: true,
   });
   
-const cluster = await clusters.bulkCreate(clusterData, {
-    individualHooks: true,
-    returning: true,
-  });
-
   const outcome = await outcomes.bulkCreate(outcomesData, {
     individualHooks: true,
     returning: true,
   });
-  const account = await accountStatus.bulkCreate(accountStatusData, { 
-    individualHooks: true,
-    returning: true,
-  });
 
-  const driver = await drivers.bulkCreate(driversData, {
+  const cluster = await clusters.bulkCreate(clusterData, {
     individualHooks: true,
     returning: true,
   });
 
   
+  
+  const account = await accountStatus.bulkCreate(accountStatusData, {
+    individualHooks: true,
+    returning: true,
+  });
+  
+  const driver = await drivers.bulkCreate(driversData, {
+    individualHooks: true,
+    returning: true,
+  });
+
   const rol = await role.bulkCreate(roleData, {
     individualHooks: true,
     returning: true,

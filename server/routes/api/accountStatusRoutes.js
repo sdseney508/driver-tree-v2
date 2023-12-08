@@ -6,7 +6,7 @@ const { Op } = require("sequelize");
 //create a status.  This should almost never be used
 router.post('/', async (req, res) => {
   try {
-    const accountStatusData = await accountStatus.create(req.body);
+    const accountStatusData = await accountStatus.create();
     res.status(200).json(accountStatusData);
   } catch (err) {
     console.log(err);
