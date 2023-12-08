@@ -1,5 +1,5 @@
 {
-  "name": "react-mysql-op-limit-database",
+  "name": "react-mysql-drivertree-database",
   "version": "1.0.0",
   "description": "Node.js Rest APIs with Express, Sequelize, MySQL, and a React front end.",
   "main": "server.js",
@@ -27,9 +27,9 @@
   "author": "Steve 'Homeschool' Seney",
   "license": "Restricted",
   "bugs": {
-    "url": "https://github.com/sdseney508/op-limit-react/issues"
+    "url": ""
   },
-  "homepage": "https://github.com/sdseney508/op-limit-react#readme",
+  "homepage": "",
   "dependencies": {
     "@babel/core": "^7.23.3",
     "@progress/kendo-drawing": "^1.19.0",
