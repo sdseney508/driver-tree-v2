@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 // import Select from "react-select";
 import { Col, Card, Row, Button, Form, Modal } from "react-bootstrap";
-import { Xwrapper } from "react-xarrows"; //for the arrows
+import { Xwrapper, useXarrow } from "react-xarrows"; //for the arrows
 import { deleteArrow } from "../utils/arrows";
 import styles from "../pages/DriverTreePage.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -89,7 +89,7 @@ const DriverCards = ({
       console.log("DriverCards because of driverTreeObj " + selOutcome.id);
     };
     getDriversData(selOutcome, viewId);
-  }, [selOutcome, driverTreeObj, opacity]);
+  }, [selOutcome, opacity, viewId]);
 
   // useEffect(() => {
   //   const getDriversData = async (selOutcome, viewId) => {
@@ -1031,6 +1031,7 @@ const DriverCards = ({
                       <FontAwesomeIcon
                         className={styles.card_flag}
                         icon={faFlagUsa}
+                        id="usflag"
                         data-cardid={selOutcome.id}
                         onClick={goToOutcome}
                       />
@@ -1054,7 +1055,7 @@ const DriverCards = ({
               <Row style={{ minHeight: "500px" }}>
                 <br />
                 <br />
-                <Legend driverTreeObj={driverTreeObj} />
+                <Legend selOutcome={selOutcome} />
               </Row>
             </div>
           </Col>

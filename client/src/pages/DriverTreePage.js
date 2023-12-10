@@ -1,8 +1,9 @@
 //page for viewing and updating op limits
 import React, { useState, useContext, useEffect, useRef } from "react";
 import { stateContext } from "../App";
-import download from "downloadjs";
+import jsPDF from "jspdf";
 import * as htmlToImage from "html-to-image";
+import html2canvas from "html2canvas";
 import { Container, Row, Col, Button, Modal } from "react-bootstrap";
 import {
   createOutcome,
@@ -206,65 +207,89 @@ const DriverTreePage = () => {
     //start at 1 the flag already has one
     for (let i = 2; i < svgArray.length; i++) {
       svgArray[i].setAttributeNS(xmlns, "xmlns", svgns);
-      svgArray[i].setAttributeNS(xmlns, "xmlns:xlink", xlinkns);
+      // svgArray[i].setAttributeNS(xmlns, "xmlns:xlink", xlinkns);
     }
   };
 
   //use canvg to turn all SVGs into PNGs
   const convertSvgToPng = async () => {
-    applyXmlns();
+    // var content = document.getElementById("pdf-export");
+    // applyXmlns();
     let svg = document.querySelectorAll("svg");
-
     let svgArray = Array.from(svg);
     //start at 1 the flag already has one
     console.log(svgArray.length);
-    for (let i = 0; i < svgArray.length; i++) {
+    for (let i = 1; i < svgArray.length; i++) {
       console.log(svgArray[i].parentNode);
-      console.log(svgArray[i]);
+      console.log(svgArray[i].outerHTML);
       let svgBounds = svgArray[i].getBoundingClientRect();
       let svgWidth = svgBounds.width;
       let svgHeight = svgBounds.height;
+      let svgString = svgArray[i].outerHTML;
+      let svgsliced = 
+      htmlToImage.toPng(svgArray[i]).then(function (dataUrl) {
+        var img = new Image();
+        img.src = dataUrl;
+        img.width = svgWidth;
+        img.height = svgHeight;
+        //now replace the svg with the png
+        svgArray[i].parentNode.replaceChild(img, svgArray[i]);
+        img.setAttribute("style", "position: relative; top: 0; left: 0");
+        let carddiv = document.getElementById("tier1subTier1");
+        carddiv.appendChild(img);
+      });
     }
-    // let svgString = svgArray[i].outerHTML;
-    //   htmlToImage.toPng(svgArray[i]).then(function (dataUrl) {
-    //     var img = new Image();
-    //     img.src = dataUrl;
-    //     img.width = svgWidth;
-    //     img.height = svgHeight;
-    //     //now replace the svg with the png
-    //     svgArray[i].parentNode.replaceChild(img, svgArray[i]);
-    //     // img.setAttribute("style", "position: relative; top: 0; left: 0");
-    //     // let carddiv = document.getElementById("tier1subTier1");
-    //     // carddiv.appendChild(img);
-    //     // download(dataUrl, "download.png");
-    //   });
-    // }
+    
   };
 
   //used to clean the cards up for a PDF generation
   useEffect(() => {
     //needed to prevent a random pdf from generating on every page load
     if (PDFState && document.readyState === "complete") {
+      applyXmlns();
+      convertSvgToPng();
       //first get all the svg elements, then convert them into pngs, then save them to a folder, then replace the svg with the png.
+      let pdf = new jsPDF(
+        'l'
+      );
 
-      //get all the SVGs, then cycle through them and attach an id attribute to them
-      convertSvgToPng().then(() => {
-        exportElement(
-          document.getElementById("pdf-export"),
-          {},
-          `${selOutcome.outcomeTitle}`
-        );
-      });
-      // window.location.reload();
+      let pdfExport = document.getElementById("pdf-export");
+      exportElement(pdfExport, {}, selOutcome.outcomeTitle);
+      // let svgelement = document.getElementById("SVG72");
+      // console.log(svgelement.parentElement);
+      // console.log(svgelement.parentNode);
+      // svgelement.path.fill = "red";
+      // html2canvas(pdfExport).then((canvas) => {
+      //   //convert to an image data URL
+      //   let imgData = canvas.toDataURL("image/png");
+      //   const imgProps = pdf.getImageProperties(imgData);
+      //   const pdfWidth = pdf.internal.pageSize.getWidth();
+      //   const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      //   pdf.addImage(imgData, "PNG", 10, 10, pdfWidth, pdfHeight);
+      //   pdf.save(`${selOutcome.outcomeTitle}.pdf`);
+      //   let svgstring = document.getElementById("SVG66").outerHTML;
+      //   let svgstring1 = document.getElementById("SVG66").innerHTML;
+      //   console.log(svgstring);
+      //   console.log(svgstring1);
+
+      // });
     } else if (PDFState && document.readyState !== "complete") {
-      convertSvgToPng().then(() => {
-        exportElement(
-          document.getElementById("pdf-export"),
-          {},
-          `${selOutcome.outcomeTitle}`
-        );
-      });
-      // window.location.reload();
+      applyXmlns();
+      // let svgstring = document.getElementById("SVG66").outerHTML;
+      // let svgstring1 = document.getElementById("SVG66").innerHTML;
+      // console.log(svgstring);
+      // console.log(svgstring1);
+      // let pdf = new jsPDF();
+      let pdfExport = document.getElementsById("pdf-export");
+      exportElement(pdfExport, {}, selOutcome.outcomeTitle);
+      // html2canvas(pdfExport, { allowTaint: true }).then(function (canvas) {
+      //   //convert to an image data URL
+      //   var imgData = canvas.toDataURL("image/png");
+
+      //   //add to pdf
+      //   pdf.addImage(imgData, "PNG", 100, 100);
+      //   pdf.save(`${selOutcome.outcomeTitle}.pdf`);
+      // });
     }
     setPDFState(false);
 
@@ -342,12 +367,12 @@ const DriverTreePage = () => {
               </Col>
             )}
           </div>
-          <Xwrapper>
-            <Row
-              id="pdf-export"
-              style={PDFState ? pdfStyle : showTable.driverStyle}
-              className={styles.pdf_export}
-            >
+          <Row
+            id="pdf-export"
+            style={PDFState ? pdfStyle : showTable.driverStyle}
+            className={styles.pdf_export}
+          >
+            <Xwrapper>
               <DriverCards
                 arrows={arrows}
                 setArrows={setArrows}
@@ -376,8 +401,8 @@ const DriverTreePage = () => {
                 viewArrows={viewArrows}
                 setViewArrows={setViewArrows}
               />
-            </Row>
-          </Xwrapper>
+            </Xwrapper>
+          </Row>
 
           <div style={showTable.tableStyle}>
             {state.command && tableState === "outcome" ? (

@@ -9,28 +9,17 @@ import {
 import {
   allDrivers,
   allOutcomes,
-  appendAdminLog,
-  bulkDriverStatusUpdate,
-  createDriver,
-  createOutcome,
-  deleteDriver,
-  findUser,
-  getCluster,
-  getCoords,
-  getDraft,
-  getDriverById,
-  getDrivers,
-  getOutcome,
-  getStakeholders,
   updateDriver,
   updateOutcome,
 } from "../utils/drivers";
 import {
-  createStatus,
-  getAllStatus,
-  modifyStatus,
-  deleteStatus,
+  createAccountStatus,
+  getAllAccountStatus,
+  modifyAccountStatus,
+  deleteAccountStatus,
 } from "../utils/accountStatus";
+import { getAllRoles, modifyRole, createRole } from "../utils/roles";
+import { getAllStatuses, modifyStatus, createStatus } from "../utils/status";
 import {
   createArrow,
   findArrows,
@@ -64,6 +53,7 @@ function AdminTables({ selectedTable, setSelectedTable }) {
   //this gets all of the coumn headers for any of the tables that the user can select
   //the Object.keys gets the keys from the first row of data.  This is used to build the column headers
   const getColumnInfo = (data) => {
+    console.log(data);
     let temp = [];
     let cols = [];
     temp = Object.keys(data);
@@ -113,7 +103,8 @@ function AdminTables({ selectedTable, setSelectedTable }) {
         });
         break;
       case "accountStatus":
-        await getAllStatus().then((data) => {
+        await getAllAccountStatus().then((data) => {
+          console.log(data);
           columnInfo = getColumnInfo(data.data[0]);
           rowD = data.data;
         });
@@ -123,6 +114,18 @@ function AdminTables({ selectedTable, setSelectedTable }) {
           let arr = data.data[0];
           console.log(deepFlattenToObject(arr));
           columnInfo = getColumnInfo(arr);
+          rowD = data.data;
+        });
+        break;
+      case "role":
+        await getAllRoles().then((data) => {
+          columnInfo = getColumnInfo(data.data[0]);
+          rowD = data.data;
+        });
+        break;
+      case "status":
+        await getAllStatuses().then((data) => {
+          columnInfo = getColumnInfo(data.data[0]);
           rowD = data.data;
         });
         break;
@@ -155,10 +158,16 @@ function AdminTables({ selectedTable, setSelectedTable }) {
             await updateDriver(id, body);
             break;
           case "accountStatus":
-            await modifyStatus(id, body);
+            await modifyAccountStatus(id, body);
             break;
           case "arrows":
             await updateArrow(id, body);
+            break;
+          case "role":
+            await modifyRole(id, body);
+            break;
+          case "status":
+            await modifyStatus(id, body);
             break;
 
           default:

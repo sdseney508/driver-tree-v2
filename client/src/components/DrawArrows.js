@@ -43,9 +43,11 @@ function DriverArrows({
           <Xarrow
             arrowBodyProps={{ style: {opacity: opVal}, onClick: (e) => ArrowModal(e, arrows[index].id), id: "arrow" + arrows[index].id }}
             arrowHeadProps={{ style: {opacity: opVal}, onClick: (e) => ArrowModal(e, arrows[index].id), id: "arrowhead" + arrows[index].id }}
+            animateDrawing={false}
             key={arrows[index].id}
             divContainerStyle={{position: "relative"}}
             SVGcanvasStyle={{position: "absolute"}}
+            SVGcanvasProps={{id: "SVG"+arrows[index].id}}
             color={arrows[index].color}
             dashness={arrows[index].dashness}
             end={arrows[index].end}
@@ -66,7 +68,7 @@ function DriverArrows({
 
   return (
     <>
-     {arrows ? arrowFunc(): null}
+     {arrowFunc()}
     </>
   );
 }

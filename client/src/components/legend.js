@@ -1,37 +1,45 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Col, Row } from "react-bootstrap";
 import styles from "./legend.module.css";
+import { getDriverByOutcome } from "../utils/drivers";
 
-const Legend = ({ driverTreeObj }) => {
+const Legend = ({ selOutcome }) => {
   //the below function gets all of the stakeholders and abbreviations from the driverTreeObj, then removes any duplicates and places them in a list under the legend.
   // debugger;
+  const [driverTreeObj, setDriverTreeObj] = useState([]);
   // console.log(driverTreeObj);
-  function stake(driverTreeObj) {
+
+useEffect(() => {
+      getDriverByOutcome(selOutcome.id).then((data) => {
+        setDriverTreeObj(data.data);
+      });
+    }, [selOutcome]);
+
+
+      const stake =(driverTreeObj) => {
     let stakes = [];
-    if (driverTreeObj.length<1) {
+    if (driverTreeObj.length < 1) {
       return;
     }
     return driverTreeObj.map((f, index) => {
-      if (driverTreeObj[index].stakeholders != null) {
-        let temp = {
-          sholder: driverTreeObj[index].stakeholders,
-          abbrev: driverTreeObj[index].stakeholderAbbreviation,
-        };
+      let temp = {
+        sholder: driverTreeObj[index].stakeholders,
+        abbrev: driverTreeObj[index].stakeholderAbbreviation,
+      };
 
-        const duplicate = stakes.find((s) => s.sholder === temp.sholder);
-        if (duplicate) {
-        } else {
-          stakes.push(temp);
-          return (
-            <Row>
-              <Col>
-                {driverTreeObj[index].stakeholders}
-                {":     "}
-              </Col>
-              <Col>{driverTreeObj[index].stakeholderAbbreviation}</Col>
-            </Row>
-          );
-        }
+      const duplicate = stakes.find((s) => s.sholder === temp.sholder);
+      if (duplicate) {
+      } else {
+        stakes.push(temp);
+        return (
+          <Row>
+            <Col>
+              {driverTreeObj[index].stakeholders}
+              {":     "}
+            </Col>
+            <Col>{driverTreeObj[index].stakeholderAbbreviation}</Col>
+          </Row>
+        );
       }
     });
   }

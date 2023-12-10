@@ -12,7 +12,6 @@ const AdminCarouselManage = () => {
 
   const handleClick = (e) => {
     e.preventDefault();
-    console.log(e.target.id);
     setSelectedTable(e.target.id);
   };
 
@@ -74,20 +73,6 @@ const AdminCarouselManage = () => {
                 onClick={handleClick}
               >
                 Driver / Outcome Status Table
-              </Button>
-              <Button
-                className="welcome-btn p-1 rounded-lg m-3"
-                id="viewArrows"
-                onClick={handleClick}
-              >
-                View Arrows
-              </Button>
-              <Button
-                className="welcome-btn p-1 rounded-lg m-3"
-                id="viewCards"
-                onClick={handleClick}
-              >
-                View Cards
               </Button>
               <Button
                 className="welcome-btn p-1 rounded-lg m-3"

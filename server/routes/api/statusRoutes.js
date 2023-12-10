@@ -1,12 +1,12 @@
 const router = require('express').Router();
-const { accountStatus } = require('../../models');
+const { status } = require('../../models');
 const { Op } = require("sequelize");
 
-// use /api/accountStatus
+// use /api/status
 //create a status.  This should almost never be used
 router.post('/', async (req, res) => {
   try {
-    const accountStatusData = await accountStatus.create();
+    const statusData = await status.create();
     res.status(200).json(accountStatusData);
   } catch (err) {
     console.log(err);
@@ -17,8 +17,8 @@ router.post('/', async (req, res) => {
 //get all statuss; this is used on the admin page to allow the admin to change a user's account status
 router.get('/', async (req, res) => {
     try {
-        const accountStatusData = await accountStatus.findAll();
-        res.status(200).json(accountStatusData);
+        const statusData = await status.findAll();
+        res.status(200).json(statusData);
     } catch (err) {
         console.log(err);
         res.status(500).json(err);
@@ -28,8 +28,8 @@ router.get('/', async (req, res) => {
 //get specific accountStatus for future use
 router.get('/:id', async (req, res) => {
     try {
-        const accountStatusData = await accountStatus.findByPk(req.params.id);
-        res.status(200).json(accountStatusData);
+        const statusData = await status.findByPk(req.params.id);
+        res.status(200).json(statusData);
     } catch (err) {
         console.log(err);
         res.status(500).json(err);
@@ -39,16 +39,16 @@ router.get('/:id', async (req, res) => {
 //update/change a status info      
 router.put('/:id', async (req, res) => {
     try { 
-        const accountStatusData = await accountStatus.update(req.body, {
+        const statusData = await status.update(req.body, {
             where: {
                 id: req.params.id,
             },
         });
-        if (!accountStatusData) {
+        if (!statusData) {
             res.status(404).json({ message: 'No status found with this id!' });
             return;
         }
-        res.status(200).json(accountStatusData);
+        res.status(200).json(statusData);
 
     } catch (err) { 
         console.log(err);
@@ -60,7 +60,7 @@ router.put('/:id', async (req, res) => {
 //delete a status.  This should almost never be used
 router.delete('/:id', async (req, res) => {
     try {
-        const accountStatusData = await accountStatus.destroy({
+        const statusData = await status.destroy({
             where: {
                 id: req.params.id,
             },
