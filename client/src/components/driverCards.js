@@ -84,7 +84,6 @@ const DriverCards = ({
       });
     };
     getDriversData(selOutcome, viewId);
-    console.log(tableState);
   }, [selOutcome, opacity, viewId]);
 
   const addArrowToView = async () => {
@@ -813,6 +812,66 @@ const DriverCards = ({
     }
   }
 
+  const svg = (
+    <svg
+      width="102.328125"
+      height="67"
+      overflow="auto"
+      id="SVG59b"
+      xmlns="http://www.w3.org/2000/svg"
+
+    >
+      <path
+        d="M 86.328125 16 L 54.1640625 16 L 54.1640625 51 22 51"
+        stroke="black"
+        stroke-dasharray="2 2"
+        stroke-width="3"
+        fill="transparent"
+        pointerEvents="visibleStroke"
+        id="arrow59b"
+      ></path>
+      <g
+        fill="black"
+        pointerEvents="auto"
+        transform="translate(24,55) rotate(180) scale(8)"
+        opacity="1"
+        id="arrowhead59b"
+      >
+        <path d="M 0 0 L 1 0.5 L 0 1 L 0.25 0.5 z"></path>
+      </g>
+    </svg>
+  );
+
+  const svg2 = (
+    <svg
+      width="145.5"
+      height="259.5"
+      overflow="auto"
+      id="SVG83"
+      // style={{position: "absolute", left: "300px", top: '150px'}}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M 129.5 243.5 L  16 243.5 L 16 22 16 22"
+        stroke="green"
+        stroke-dasharray="0 0"
+        stroke-width="2"
+        fill="transparent"
+        pointerEvents="visibleStroke"
+        id="arrow83"
+      ></path>
+      <g
+        fill="black"
+        pointerEvents="auto"
+        transform="translate(12,24) rotate(270) scale(8)"
+        opacity="1"
+        id="arrowhead83"
+      >
+        <path d="M 0 0 L 1 0.5 L 0 1 L 0.25 0.5 z"></path>
+      </g>
+    </svg>
+  );
+
   function tierCards(tier, { driverTreeObj, viewObj }) {
     let viewCheck;
     const arr = []; //just an empty arr that will be filled with driverTreeObj
@@ -882,8 +941,6 @@ const DriverCards = ({
               let idCheck = objCheck[i].id;
               for (let j = 0; j < viewObj.length; j++) {
                 if (viewObj[j].driverId === idCheck) {
-                  console.log(idCheck);
-                  console.log(viewObj[j].driverId);
                   clusterViewCheck = 1;
                 }
               }
@@ -891,7 +948,6 @@ const DriverCards = ({
           }
 
           let clusterArr = [];
-          console.log("clusterViewCheck: " + clusterViewCheck);
           for (let j = index; j < arr.length; j++) {
             if (arr[j].clusterId === clusterNumber) {
               clusterArr.push(arr[j]);
@@ -1104,41 +1160,16 @@ const DriverCards = ({
             <Row>Tier 4 Drivers {tierButtons(4)}</Row>
             <Row id={`tier4Cards`} key={`tier4Cards`} className={styles.my_row}>
               {tierCards(4, { driverTreeObj, viewObj })}
+              {svg}
             </Row>
           </Col>
           <Col className={styles.driver} sm={6} md={6} lg={2} key="5">
             <Row>Tier 5 Drivers {tierButtons(5)}</Row>
             <Row id={`tier5Cards`} key={`tier5Cards`} className={styles.my_row}>
               {tierCards(5, { driverTreeObj, viewObj })}
+              {svg2}
             </Row>
-            <svg
-              width="102.328125"
-              height="67"
-              overflow="auto"
-              id="SVG59b"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M 86.328125 16 L  54.1640625 16 L 54.1640625 51 22 51"
-                stroke="black"
-                stroke-dasharray="0 0"
-                stroke-width="3"
-                fill="transparent"
-                pointer-events="visibleStroke"
-                id="arrow59b"
-                style={{ opacity: 1 }}
-              ></path>
-              <g
-                fill="black"
-                pointer-events="auto"
-                transform="translate(24,55) rotate(180) scale(8)"
-                opacity="1"
-                id="arrowhead59b"
-                style={{ opacity: 1 }}
-              >
-                <path d="M 0 0 L 1 0.5 L 0 1 L 0.25 0.5 z"></path>
-              </g>
-            </svg>
+
             <p>
               <FontAwesomeIcon icon={faCopyright} />
               Integrated Program Solutions
@@ -1212,6 +1243,35 @@ const DriverCards = ({
           </Button>
         </Modal.Footer>
       </Modal>
+
+      {/* <svg
+              width="102.328125"
+              height="67"
+              overflow="auto"
+              id="SVG59b"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M 86.328125 16 L  54.1640625 16 L 54.1640625 51 22 51"
+                stroke="black"
+                stroke-dasharray="0 0"
+                stroke-width="3"
+                fill="transparent"
+                pointer-events="visibleStroke"
+                id="arrow59b"
+                style={{ opacity: 1 }}
+              ></path>
+              <g
+                fill="black"
+                pointer-events="auto"
+                transform="translate(24,55) rotate(180) scale(8)"
+                opacity="1"
+                id="arrowhead59b"
+                style={{ opacity: 1 }}
+              >
+                <path d="M 0 0 L 1 0.5 L 0 1 L 0.25 0.5 z"></path>
+              </g>
+            </svg> */}
     </>
   );
 };

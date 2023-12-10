@@ -3,6 +3,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { stateContext } from "../App";
 import { getUser, loggedIn, getToken } from "../utils/auth";
 import { getAccountStatus, getRoles } from "../utils/sign-up";
+import { getAllAccountStatus } from "../utils/accountStatus";
 import { getUsers } from "../utils/drivers";
 import { Container, Row, Button, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
@@ -87,8 +88,8 @@ const AdminAccountManagement = () => {
       setRoleState(rolesOpts);
 
       //get the initial state data for Account Status
-      let accStatus = await getAccountStatus().then((data) => {
-        return data.data.accountStatusData;
+      let accStatus = await getAllAccountStatus().then((data) => {
+        return data.data;
       });
       setAccountState(accStatus);
     };
@@ -124,7 +125,6 @@ const AdminAccountManagement = () => {
 
 
   function accountStatusOptions() {
-    console.log(selectedAccountStatus);
     return accountState.map((f, index) => {
       return (
         <option key={index} value={f.accountstatus}>
@@ -319,8 +319,6 @@ const AdminAccountManagement = () => {
         <div
           style={{
             height: "30vh",
-            overflowX: "scroll",
-            overflowY: "scroll",
             color: "black",
           }}
         >

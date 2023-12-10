@@ -7,7 +7,6 @@ const Legend = ({ selOutcome }) => {
   //the below function gets all of the stakeholders and abbreviations from the driverTreeObj, then removes any duplicates and places them in a list under the legend.
   // debugger;
   const [driverTreeObj, setDriverTreeObj] = useState([]);
-  // console.log(driverTreeObj);
 
 useEffect(() => {
       getDriverByOutcome(selOutcome.id).then((data) => {
@@ -32,12 +31,12 @@ useEffect(() => {
       } else {
         stakes.push(temp);
         return (
-          <Row>
-            <Col>
+          <Row key={"stakeRow"+index}>
+            <Col key={"Sholder"+index}>
               {driverTreeObj[index].stakeholders}
               {":     "}
             </Col>
-            <Col>{driverTreeObj[index].stakeholderAbbreviation}</Col>
+            <Col key={"SholderAbbrev"+index}>{driverTreeObj[index].stakeholderAbbreviation}</Col>
           </Row>
         );
       }

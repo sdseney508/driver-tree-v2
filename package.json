@@ -1,5 +1,5 @@
 {
-  "name": "react-mysql-drivertree-database",
+  "name": "react-mysql-decision-tree-database",
   "version": "1.0.0",
   "description": "Node.js Rest APIs with Express, Sequelize, MySQL, and a React front end.",
   "main": "server.js",

@@ -210,32 +210,82 @@ const DriverTreePage = () => {
     }
   };
 
+  const svg = (
+    <svg
+      width="102.328125"
+      height="67"
+      overflow="auto"
+      id="SVG59b"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M 86.328125 16 L 54.1640625 16 L 54.1640625 51 22 51"
+        stroke="black"
+        stroke-dasharray="2 2"
+        stroke-width="3"
+        fill="transparent"
+        pointerEvents="visibleStroke"
+        id="arrow59b"
+      ></path>
+      <g
+        fill="black"
+        pointerEvents="auto"
+        transform="translate(24,55) rotate(180) scale(8)"
+        opacity="1"
+        id="arrowhead59b"
+      >
+        <path d="M 0 0 L 1 0.5 L 0 1 L 0.25 0.5 z"></path>
+      </g>
+    </svg>
+  );
+
   //use canvg to turn all SVGs into PNGs
   const convertSvgToPng = async () => {
     // var content = document.getElementById("pdf-export");
     // applyXmlns();
-    let svg = document.querySelectorAll("svg");
-    let svgArray = Array.from(svg);
+    let arrowStuff = document.querySelectorAll("card");
+    console.log(arrowStuff);
+    // for (let i = 0; i < arrows.length; i++) {
+    //   let startP = arrows[i].star;
+    //   let coords = document.getElementById(startP);
+    //   let bounds = coords.getBoundingClientRect();
+    //   console.log(coords);
+    // }
+    let svgs = document.querySelectorAll("svg");
+    let svgArray = Array.from(svgs);
     //start at 1 the flag already has one
     console.log(svgArray.length);
     for (let i = 1; i < svgArray.length; i++) {
       console.log(svgArray[i].parentNode);
       console.log(svgArray[i].outerHTML);
+      console.log(svgArray[i].innerHTML);
+      // svgArray[i].parentNode.appendChild(svg);
       let svgBounds = svgArray[i].getBoundingClientRect();
+      console.log(svgBounds);
+      let cardelem = document.getElementById("card244");
+      let sVg = document.createElement("svg");
+      sVg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      sVg.setAttribute("width", svgBounds.width);
+      sVg.setAttribute("height", svgBounds.height);
+      sVg.setAttribute("overflow", "auto");
+      sVg.setAttribute("id", "SVG72");
+      sVg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+      sVg.innerHTML = svgArray[i].innerHTML;
+      cardelem.parentNode.appendChild(sVg);
       let svgWidth = svgBounds.width;
       let svgHeight = svgBounds.height;
       let svgString = svgArray[i].outerHTML;
-      htmlToImage.toPng(svgArray[i]).then(function (dataUrl) {
-        var img = new Image();
-        img.src = dataUrl;
-        img.width = svgWidth;
-        img.height = svgHeight;
-        //now replace the svg with the png
-        svgArray[i].parentNode.replaceChild(img, svgArray[i]);
-        img.setAttribute("style", "position: relative; top: 0; left: 0");
-        let carddiv = document.getElementById("tier1subTier1");
-        carddiv.appendChild(img);
-      });
+      // htmlToImage.toPng(svgArray[i]).then(function (dataUrl) {
+      //   var img = new Image();
+      //   img.src = dataUrl;
+      //   img.width = svgWidth;
+      //   img.height = svgHeight;
+      //   //now replace the svg with the png
+      //   svgArray[i].parentNode.replaceChild(img, svgArray[i]);
+      //   img.setAttribute("style", "position: relative; top: 0; left: 0");
+      //   let carddiv = document.getElementById("tier1subTier1");
+      //   carddiv.appendChild(img);
+      // });
     }
     
   };
