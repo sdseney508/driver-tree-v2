@@ -29,6 +29,12 @@ import {
   updateArrow,
   deleteArrow,
 } from "../utils/arrows";
+import {
+  updateView,
+  createView,
+  deleteView,
+  getAllViews,
+} from "../utils/views";
 import "ag-grid-community/dist/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CSS
 
@@ -69,10 +75,10 @@ function AdminTables({ selectedTable, setSelectedTable }) {
     return cols;
   };
 
-  function deepFlattenToObject(obj, prefix = '') {
+  function deepFlattenToObject(obj, prefix = "") {
     return Object.keys(obj).reduce((acc, k) => {
-      const pre = prefix.length ? prefix + '_' : '';
-      if (typeof obj[k] === 'object' && obj[k] !== null) {
+      const pre = prefix.length ? prefix + "_" : "";
+      if (typeof obj[k] === "object" && obj[k] !== null) {
         Object.assign(acc, deepFlattenToObject(obj[k], pre + k));
       } else {
         acc[pre + k] = obj[k];
@@ -104,7 +110,6 @@ function AdminTables({ selectedTable, setSelectedTable }) {
         break;
       case "accountStatus":
         await getAllAccountStatus().then((data) => {
-          console.log(data);
           columnInfo = getColumnInfo(data.data[0]);
           rowD = data.data;
         });
@@ -129,7 +134,12 @@ function AdminTables({ selectedTable, setSelectedTable }) {
           rowD = data.data;
         });
         break;
-
+      case "views":
+        await getAllViews().then((data) => {
+          columnInfo = getColumnInfo(data.data[0]);
+          rowD = data.data;
+        });
+        break;
       default:
     }
     setRowData(rowD);
@@ -169,7 +179,8 @@ function AdminTables({ selectedTable, setSelectedTable }) {
           case "status":
             await modifyStatus(id, body);
             break;
-
+          case "views":
+            await updateView(id, body);
           default:
         }
       },

@@ -14,6 +14,7 @@ import {
 // import { getViewCards } from "../utils/viewCards";
 // import { getViewArrows } from "../utils/viewArrows";
 import { createView, deleteView } from "../utils/views";
+import { addViewArrow, getViewArrows } from "../utils/viewArrows";
 import { getArrows } from "../utils/arrows";
 import { useNavigate } from "react-router";
 import { useParams } from "react-router"; //to store state in the URL
@@ -47,7 +48,8 @@ const DriverTreePage = () => {
   const [viewId, setViewId] = useState(""); //used to let the user cycle through their personal views, the view state is the view id in case multiple users create same named views.
   const [viewObj, setViewObj] = useState([]); //used to store the view object for the view cards
   const [viewArrows, setViewArrows] = useState([]); //used to store the view arrows for the view cards
-  const [tableState, setTableState] = useState("outcome"); //used to toggle the table at the bottom of the page
+  const [tableState, setTableState] = useState("outcome"); //used to toggle the table at the bottom of the page. const [connectionShow, setConnectionShow] = useState(false);
+
   let tableStyle = { height: "25vh", width: "100%", overFlowY: "scroll" };
   let driverStyle = {
     height: "60vh",
@@ -114,6 +116,7 @@ const DriverTreePage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome]);
 
+
   const createNewView = async (e) => {
     e.preventDefault();
     let body = {
@@ -132,11 +135,6 @@ const DriverTreePage = () => {
     setViewId("");
   };
 
-  async function ArrowModal(e, arrowId) {
-    e.preventDefault();
-    await setArrowID(arrowId);
-    setArrowMod(true);
-  }
   //use the showTable state to show or hide the table at the bottom of the page by changing the height of the div and passing that variable to the inline style
   const customStyles = (table) => {
     //first check to see if the user is trying to hide the table, then toggle the styles
@@ -168,6 +166,7 @@ const DriverTreePage = () => {
       setTableState("view");
     }
     setShowTable({ tableStyle, driverStyle });
+    console.log(tableState);
   };
 
   const goToDriver = async (e) => {
@@ -226,7 +225,6 @@ const DriverTreePage = () => {
       let svgWidth = svgBounds.width;
       let svgHeight = svgBounds.height;
       let svgString = svgArray[i].outerHTML;
-      let svgsliced = 
       htmlToImage.toPng(svgArray[i]).then(function (dataUrl) {
         var img = new Image();
         img.src = dataUrl;
@@ -246,7 +244,7 @@ const DriverTreePage = () => {
   useEffect(() => {
     //needed to prevent a random pdf from generating on every page load
     if (PDFState && document.readyState === "complete") {
-      applyXmlns();
+      // applyXmlns();
       convertSvgToPng();
       //first get all the svg elements, then convert them into pngs, then save them to a folder, then replace the svg with the png.
       let pdf = new jsPDF(
@@ -523,6 +521,7 @@ const DriverTreePage = () => {
           </Button>
         </Modal.Body>
       </Modal>
+     
     </>
   );
 };

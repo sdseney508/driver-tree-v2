@@ -1,4 +1,5 @@
 const accountStatus = require("./accountStatus");
+const adminAudit = require("./adminAudit");
 const arrows = require("./arrows");
 const attachments = require("./attachments");
 const audit = require("./audit");
@@ -85,8 +86,11 @@ User.hasMany(views, {
   onDelete: "CASCADE",
 });
 
+
+
 module.exports = {
   accountStatus,
+  adminAudit,
   arrows,
   attachments,
   audit,

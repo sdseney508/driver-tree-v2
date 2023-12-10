@@ -34,9 +34,7 @@ import { CreateAnArrow } from "./ArrowFunction";
 import { faCopyright } from "@fortawesome/free-solid-svg-icons";
 
 const DriverCards = ({
-  // arrows,
-  // setArrows,
-  arrowId,
+  arrowID,
   setArrowID,
   createArrow,
   driverTreeObj,
@@ -52,7 +50,6 @@ const DriverCards = ({
   state,
   tableState,
   viewId,
-  setViewId,
   viewObj,
   setViewObj,
   viewArrows,
@@ -64,13 +61,12 @@ const DriverCards = ({
   //3.  It houses the drag and drop functionality for the cards.  this requires the use of the onDragOver, onDragStart, draggable, and onDrop properties in the divs and cards
   //4.  Draws the correct clusters around the selected drivers based on the cluster field in the drivers table
   //The arrow function is contained in the arrows.js module.  It creates the arrows that connect the cards
-  // const [arrows, setArrows] = useState([]);
   let navigate = useNavigate();
 
   const [selectedElements, setSelectedElements] = useState([]);
   const [show, setShow] = useState(false);
   const [arrows, setArrows] = useState([]);
-  // const [driverTreeObj, setDriverTreeObj] = useState([]);
+  const [connectionShow, setConnectionShow] = useState(false);
 
   useEffect(() => {
     const getDriversData = async (selOutcome, viewId) => {
@@ -86,36 +82,45 @@ const DriverCards = ({
       await getViewArrows(viewId).then((data) => {
         setViewArrows(data.data);
       });
-      console.log("DriverCards because of driverTreeObj " + selOutcome.id);
     };
     getDriversData(selOutcome, viewId);
+    console.log(tableState);
   }, [selOutcome, opacity, viewId]);
 
-  // useEffect(() => {
-  //   const getDriversData = async (selOutcome, viewId) => {
-  //     await getArrows(selOutcome.id).then((data) => {
-  //       setArrows(data.data);
-  //     });
-  //     await getViewCards(viewId).then((data) => {
-  //       setViewObj(data.data);
-  //     });
-  //     await getViewArrows(viewId).then((data) => {
-  //       setViewArrows(data.data);
-  //     });
-  //     console.log("DriverCards because of selOutcome " + selOutcome.id);
-  //   };
-  //   getDriversData(selOutcome, viewId);
-  // }, [selOutcome]);
+  const addArrowToView = async () => {
+    setConnectionShow(false);
+    let body = { viewId: viewId, arrowId: arrowID };
+    let arrowCheck = viewArrows.findIndex((v) => v.arrowId == arrowID);
+    if (arrowCheck === -1) {
+      await addViewArrow(body);
+    } else {
+      await removeViewArrow(body);
+    }
+    await getViewArrows(viewId).then((data) => {
+      setViewArrows(data.data);
+    });
+    let val;
+    if (opacity < 25) {
+      val = opacity + 0.01;
+    } else if (opacity >= 25) {
+      val = opacity - 0.01;
+    }
+    setOpacity(val);
+  };
 
   function allowDrop(e) {
     //this property gets set on the individual divs onDragOver property to limit where a card can be dropped
     e.preventDefault();
   }
 
-  async function ArrowModal(e, arrowId) {
+  async function ArrowModal(e, arrowId, tableState) {
     e.preventDefault();
     await setArrowID(arrowId);
-    setArrowMod(true);
+    if (tableState === "view") {
+      setConnectionShow(true);
+    } else {
+      setArrowMod(true);
+    }
   }
 
   const cascadeUpdate = async (arrows, cardId, tier, newStatus) => {
@@ -612,7 +617,6 @@ const DriverCards = ({
 
   const handleClusterChange = (e) => {
     let body = { [e.target.name]: e.target.value };
-    console.log(body);
     updateCluster(e.target.dataset.clusterid, body);
     getOutcome(selOutcome.id).then((data) => {
       setSelOutcome(data.data);
@@ -638,9 +642,10 @@ const DriverCards = ({
           e.target.dataset.tier,
           e.target.value
         );
-      } else {await updateDriver(e.target.dataset.cardid, body);}
-    } else { 
-      console.log("they said no");
+      } else {
+        await updateDriver(e.target.dataset.cardid, body);
+      }
+    } else {
       await updateDriver(e.target.dataset.cardid, body);
     }
     // await getOutcome(selOutcome.id).then((data) => {
@@ -709,14 +714,12 @@ const DriverCards = ({
   const MakeAnArrow = async (e, cardId, type) => {
     e.preventDefault();
     let temp;
-    // console.log(type, cardId);
     if (type === "driver") {
       await getDriverById(cardId).then((data) => {
         temp = data.data;
       });
     } else {
       await getOutcome(cardId).then((data) => {
-        console.log(data.data);
         temp = data.data;
       });
     }
@@ -743,7 +746,6 @@ const DriverCards = ({
       );
 
       if (arrowCheck.length > 0) {
-        console.log("in the if statement to remove an arrow");
         //there are arrows attached to the card, so delete them
         for (let i = 0; i < arrowCheck.length; i++) {
           let body = { viewId: viewId, arrowId: arrowCheck[i].id };
@@ -755,12 +757,11 @@ const DriverCards = ({
       let body = { viewId: viewId, driverId: driverId };
       await removeViewCard(body);
     } else {
-      //the card is not in the view, so add it and any arrows that start from it, first check the viewArrows object (for database integrity) then here we look at the arrows object  because we want to add the arrows to the viewArrows object.  All error handling logic is server side
+      //the card is not in the view, so add it and any arrows that start from it, first check the viewArrows object (for database integrity) then here we look at the arrows object  because we want to add the arrows to the viewArrows object.  Check to see if the card is in a cluster, if it is, add all arrows from the cluster too.  All error handling logic is server side.
       let arrowCheck = arrows.filter(
         (item) => item.start === `card${e.target.dataset.cardid}`
       );
       if (arrowCheck.length > 0) {
-        console.log("in the add statement");
         let arrowArray = arrows.filter(
           (item) => item.start === `card${e.target.dataset.cardid}`
         );
@@ -848,6 +849,7 @@ const DriverCards = ({
 
       return arr.map((f, index) => {
         //first check if it is an empty div, then check if it is a cluster, then check if it is a driver.  If it is a driver, then check to see if it is part of a cluster.
+        let clusterViewCheck = -1; //this initializes the ClusterViewCheck for every row of the cloumn, the cluster opacity will be reset after the If check
         if (arr[index] === "skip") {
           //empty div, create a spot to drop a driverCard
           return (
@@ -870,8 +872,26 @@ const DriverCards = ({
           //create a new array for each driver in the cluster then map the array to create the cards
           clusterNumber = arr[index].clusterId; //update to the current clusterNumber so we can fill the cluster with the correct cards.
           clusterName = arr[index].cluster.clusterName; //update to the current
-          //
+          let objCheck = [];
+
+          objCheck = driverTreeObj.filter(
+            (item) => item.clusterId === clusterNumber
+          );
+          for (let i = 0; i < objCheck.length; i++) {
+            if (viewObj) {
+              let idCheck = objCheck[i].id;
+              for (let j = 0; j < viewObj.length; j++) {
+                if (viewObj[j].driverId === idCheck) {
+                  console.log(idCheck);
+                  console.log(viewObj[j].driverId);
+                  clusterViewCheck = 1;
+                }
+              }
+            }
+          }
+
           let clusterArr = [];
+          console.log("clusterViewCheck: " + clusterViewCheck);
           for (let j = index; j < arr.length; j++) {
             if (arr[j].clusterId === clusterNumber) {
               clusterArr.push(arr[j]);
@@ -886,6 +906,9 @@ const DriverCards = ({
             <div
               className={styles.my_cluster}
               data-tier={tier}
+              style={
+                clusterViewCheck != -1 ? { opacity: 1 } : { opacity: opacity }
+              }
               data-subtier={index + 1}
               key={`${tier}cluster${clusterNumber}`}
               data-cluster={clusterNumber} //this is the clusterId for cluster updates
@@ -1088,12 +1111,39 @@ const DriverCards = ({
             <Row id={`tier5Cards`} key={`tier5Cards`} className={styles.my_row}>
               {tierCards(5, { driverTreeObj, viewObj })}
             </Row>
+            <svg
+              width="102.328125"
+              height="67"
+              overflow="auto"
+              id="SVG59b"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M 86.328125 16 L  54.1640625 16 L 54.1640625 51 22 51"
+                stroke="black"
+                stroke-dasharray="0 0"
+                stroke-width="3"
+                fill="transparent"
+                pointer-events="visibleStroke"
+                id="arrow59b"
+                style={{ opacity: 1 }}
+              ></path>
+              <g
+                fill="black"
+                pointer-events="auto"
+                transform="translate(24,55) rotate(180) scale(8)"
+                opacity="1"
+                id="arrowhead59b"
+                style={{ opacity: 1 }}
+              >
+                <path d="M 0 0 L 1 0.5 L 0 1 L 0.25 0.5 z"></path>
+              </g>
+            </svg>
             <p>
               <FontAwesomeIcon icon={faCopyright} />
               Integrated Program Solutions
             </p>
           </Col>
-
           {driverTreeObj ? (
             <DriverArrows
               arrows={arrows}
@@ -1103,6 +1153,7 @@ const DriverCards = ({
               selOutcome={selOutcome}
               viewId={viewId}
               opacity={opacity}
+              tableState={tableState}
               viewArrows={viewArrows}
               setViewArrows={setViewArrows}
             />
@@ -1132,6 +1183,32 @@ const DriverCards = ({
             tyle={{ position: "absolute", right: "25px" }}
           >
             Cluster
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={connectionShow} size="md">
+        {/* onHide={handleClose} */}
+        <Modal.Header closeButton>
+          <Modal.Title></Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ textAlign: "center" }}>Arrow Options</Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            id="addToView"
+            onClick={addArrowToView}
+            style={{ position: "absolute", left: "25px" }}
+          >
+            Add / Remove Arrow To View?
+          </Button>
+          <Button
+            variant="primary"
+            id="modifyArrow"
+            onClick={() => [setArrowMod(true), setConnectionShow(false)]}
+            tyle={{ position: "absolute", right: "25px" }}
+          >
+            Modify Arrow Properties?
           </Button>
         </Modal.Footer>
       </Modal>

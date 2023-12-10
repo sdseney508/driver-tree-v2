@@ -20,6 +20,16 @@ router.get("/userByOutcome/:userId/:outcomeId", async (req, res) => {
   }
 });
 
+//get all views for the admin page.  This populates the views table for an outcome on the admin page.
+router.get("/allViews", async (req, res) => {
+  try {
+    const viewData = await views.findAll();
+    res.status(200).json(viewData);
+  } catch (err) {
+    res.status(400).json(err);
+  }
+});
+
 //get a specific view.  Not sure where we'll use this yet, but it's here if we need it.
 router.get("/:id", async (req, res) => {
   try {

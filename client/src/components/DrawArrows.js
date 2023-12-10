@@ -11,13 +11,13 @@ function DriverArrows({
   viewId,
   opacity,
   viewArrows,
+  tableState,
   setViewArrows
 }) {
   //rerenders the arrows on selOutcome change
   const [arrows, setArrows] = useState([]);
 
   useEffect(() => {
-    console.log(" draw arrows useEffectdriverTreeObj");
     //get the arrows from the database
     async function fetchData() {
       await getArrows(selOutcome.id).then((data)=> {
@@ -41,8 +41,8 @@ function DriverArrows({
       }
       return (
           <Xarrow
-            arrowBodyProps={{ style: {opacity: opVal}, onClick: (e) => ArrowModal(e, arrows[index].id), id: "arrow" + arrows[index].id }}
-            arrowHeadProps={{ style: {opacity: opVal}, onClick: (e) => ArrowModal(e, arrows[index].id), id: "arrowhead" + arrows[index].id }}
+            arrowBodyProps={{ style: {opacity: opVal}, onClick: (e) => ArrowModal(e, arrows[index].id, tableState), id: "arrow" + arrows[index].id }}
+            arrowHeadProps={{ style: {opacity: opVal}, onClick: (e) => ArrowModal(e, arrows[index].id, tableState), id: "arrowhead" + arrows[index].id }}
             animateDrawing={false}
             key={arrows[index].id}
             divContainerStyle={{position: "relative"}}

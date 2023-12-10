@@ -23,7 +23,7 @@ const addViewArrow = (body) => {
 //removes an arrow from a view; the body is the viewId and the ArrowId, this is done automatically when a driver is removed from a view by checking any arrows that are associated with that driver
 const removeViewArrow = (body) => {
   console.log(body);
-  return axios.delete(apiURL + "/viewArrows/delete", body);
+  return axios.delete(apiURL + "/viewArrows/delete/"+ body.viewId +"/"+ body.arrowId);
 }
 
 export {

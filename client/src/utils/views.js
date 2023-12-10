@@ -15,6 +15,10 @@ const getView = (viewId) => {
   return axios.get(apiURL + "/views/" + viewId);
 };
 
+const getAllViews = () => {
+  return axios.get(apiURL + "/views/allViews");
+};
+
 const getUserViewsForOutcome = (body) => {
   return axios.get(apiURL + "/views/userByOutcome/" + body.userId + "/" + body.outcomeId);
 }
@@ -29,5 +33,6 @@ export {
   deleteView,
   getUserViewsForOutcome,
   getView,
+  getAllViews,
   updateView,
 };
