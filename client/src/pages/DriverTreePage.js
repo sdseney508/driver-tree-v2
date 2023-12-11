@@ -210,34 +210,34 @@ const DriverTreePage = () => {
     }
   };
 
-  const svg = (
-    <svg
-      width="102.328125"
-      height="67"
-      overflow="auto"
-      id="SVG59b"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M 86.328125 16 L 54.1640625 16 L 54.1640625 51 22 51"
-        stroke="black"
-        stroke-dasharray="2 2"
-        stroke-width="3"
-        fill="transparent"
-        pointerEvents="visibleStroke"
-        id="arrow59b"
-      ></path>
-      <g
-        fill="black"
-        pointerEvents="auto"
-        transform="translate(24,55) rotate(180) scale(8)"
-        opacity="1"
-        id="arrowhead59b"
-      >
-        <path d="M 0 0 L 1 0.5 L 0 1 L 0.25 0.5 z"></path>
-      </g>
-    </svg>
-  );
+  // const svg = (
+  //   <svg
+  //     width="102.328125"
+  //     height="67"
+  //     overflow="auto"
+  //     id="SVG59b"
+  //     xmlns="http://www.w3.org/2000/svg"
+  //   >
+  //     <path
+  //       d="M 86.328125 16 L 54.1640625 16 L 54.1640625 51 22 51"
+  //       stroke="black"
+  //       stroke-dasharray="2 2"
+  //       stroke-width="3"
+  //       fill="transparent"
+  //       pointerEvents="visibleStroke"
+  //       id="arrow59b"
+  //     ></path>
+  //     <g
+  //       fill="black"
+  //       pointerEvents="auto"
+  //       transform="translate(24,55) rotate(180) scale(8)"
+  //       opacity="1"
+  //       id="arrowhead59b"
+  //     >
+  //       <path d="M 0 0 L 1 0.5 L 0 1 L 0.25 0.5 z"></path>
+  //     </g>
+  //   </svg>
+  // );
 
   //use canvg to turn all SVGs into PNGs
   const convertSvgToPng = async () => {

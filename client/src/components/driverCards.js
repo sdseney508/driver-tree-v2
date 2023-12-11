@@ -1160,14 +1160,14 @@ const DriverCards = ({
             <Row>Tier 4 Drivers {tierButtons(4)}</Row>
             <Row id={`tier4Cards`} key={`tier4Cards`} className={styles.my_row}>
               {tierCards(4, { driverTreeObj, viewObj })}
-              {svg}
+              {/* {svg} */}
             </Row>
           </Col>
           <Col className={styles.driver} sm={6} md={6} lg={2} key="5">
             <Row>Tier 5 Drivers {tierButtons(5)}</Row>
             <Row id={`tier5Cards`} key={`tier5Cards`} className={styles.my_row}>
               {tierCards(5, { driverTreeObj, viewObj })}
-              {svg2}
+              {/* {svg2} */}
             </Row>
 
             <p>
