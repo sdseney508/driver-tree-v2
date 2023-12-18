@@ -1,6 +1,7 @@
 const router = require('express').Router();
 
 const accountStatusRoutes = require('./accountStatusRoutes');
+const adminAuditRoutes = require('./adminAuditRoutes');
 const arrowRoutes = require('./arrowRoutes');
 const auditRoutes = require('./auditRoutes');
 const carouselRoutes = require('./carouselRoutes');
@@ -16,6 +17,7 @@ const viewCardRoutes = require('./viewCardRoutes');
 const viewRoutes = require('./viewRoutes');
 
 router.use('/accountStatus', accountStatusRoutes);
+router.use('/adminAudit', adminAuditRoutes);
 router.use('/arrows', arrowRoutes);
 router.use('/audit', auditRoutes);
 router.use('/carousel', carouselRoutes);

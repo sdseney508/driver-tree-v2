@@ -1,7 +1,8 @@
+/* eslint-disable eqeqeq */
 import React, { useEffect, useState } from "react";
 // import Select from "react-select";
 import { Col, Card, Row, Button, Form, Modal } from "react-bootstrap";
-import { Xwrapper, useXarrow } from "react-xarrows"; //for the arrows
+import { Xwrapper } from "react-xarrows"; //for the arrows
 import { deleteArrow } from "../utils/arrows";
 import styles from "../pages/DriverTreePage.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -14,7 +15,6 @@ import {
   createDriver,
   deleteDriver,
   getDriverById,
-  getDriverByOutcome,
   getOutcome,
   updateDriver,
   updateOutcome,
@@ -70,9 +70,6 @@ const DriverCards = ({
 
   useEffect(() => {
     const getDriversData = async (selOutcome, viewId) => {
-      // await getDriverByOutcome(selOutcome.id).then((data) => {
-      //   setDriverTreeObj(data.data);
-      // });
       await getArrows(selOutcome.id).then((data) => {
         setArrows(data.data);
       });
@@ -84,6 +81,7 @@ const DriverCards = ({
       });
     };
     getDriversData(selOutcome, viewId);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome, opacity, viewId]);
 
   const addArrowToView = async () => {
@@ -688,6 +686,7 @@ const DriverCards = ({
         setSelectedElements([]);
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedElements]);
 
   //uses the length of the selected elements array to determine if the user is connecting to a driver or a cluster for the first or second element when making an arrow
@@ -736,6 +735,7 @@ const DriverCards = ({
     }
 
     if (
+      // eslint-disable-next-line eqeqeq
       viewObj.findIndex((item) => item.driverId == e.target.dataset.cardid) !==
       -1
     ) {
@@ -796,7 +796,7 @@ const DriverCards = ({
   const newDriver = async (e) => {
     e.preventDefault();
     let body = { outcomeId: selOutcome.id, tierLevel: e.target.dataset.tier };
-    await createDriver(body);
+    await createDriver(body, state.userId);
     getOutcome(selOutcome.id).then((data) => {
       setSelOutcome(data.data);
     });
@@ -812,65 +812,66 @@ const DriverCards = ({
     }
   }
 
-  const svg = (
-    <svg
-      width="102.328125"
-      height="67"
-      overflow="auto"
-      id="SVG59b"
-      xmlns="http://www.w3.org/2000/svg"
+  // const svg = (
+  //   <svg
+  //     width="102.328125px"
+  //     height="67px"
+  //     overflow="auto"
+  //     id="SVG59b"
+  //     xmlns="http://www.w3.org/2000/svg"
+  //     // style={{position: "absolute", left: "300px", top: '150px', zIndex: '10000'}}
 
-    >
-      <path
-        d="M 86.328125 16 L 54.1640625 16 L 54.1640625 51 22 51"
-        stroke="black"
-        stroke-dasharray="2 2"
-        stroke-width="3"
-        fill="transparent"
-        pointerEvents="visibleStroke"
-        id="arrow59b"
-      ></path>
-      <g
-        fill="black"
-        pointerEvents="auto"
-        transform="translate(24,55) rotate(180) scale(8)"
-        opacity="1"
-        id="arrowhead59b"
-      >
-        <path d="M 0 0 L 1 0.5 L 0 1 L 0.25 0.5 z"></path>
-      </g>
-    </svg>
-  );
+  //   >
+  //     <path
+  //       d="M 86.328125 16 L 54.1640625 16 L 54.1640625 51 22 51"
+  //       stroke="black"
+  //       strokeDasharray="2 2"
+  //       strokeWidth="3"
+  //       fill="transparent"
+  //       pointerEvents="visibleStroke"
+  //       id="arrow59b"
+  //     ></path>
+  //     <g
+  //       fill="black"
+  //       pointerEvents="auto"
+  //       transform="translate(24,55) rotate(180) scale(8)"
+  //       opacity="1"
+  //       id="arrowhead59b"
+  //     >
+  //       <path d="M 0 0 L 1 0.5 L 0 1 L 0.25 0.5 z"></path>
+  //     </g>
+  //   </svg>
+  // );
 
-  const svg2 = (
-    <svg
-      width="145.5"
-      height="259.5"
-      overflow="auto"
-      id="SVG83"
-      // style={{position: "absolute", left: "300px", top: '150px'}}
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M 129.5 243.5 L  16 243.5 L 16 22 16 22"
-        stroke="green"
-        stroke-dasharray="0 0"
-        stroke-width="2"
-        fill="transparent"
-        pointerEvents="visibleStroke"
-        id="arrow83"
-      ></path>
-      <g
-        fill="black"
-        pointerEvents="auto"
-        transform="translate(12,24) rotate(270) scale(8)"
-        opacity="1"
-        id="arrowhead83"
-      >
-        <path d="M 0 0 L 1 0.5 L 0 1 L 0.25 0.5 z"></path>
-      </g>
-    </svg>
-  );
+  // const svg2 = (
+  //   <svg
+  //     width="145.5"
+  //     height="259.5"
+  //     overflow="auto"
+  //     id="SVG83"
+  //     // style={{position: "absolute", left: "300px", top: '150px'}}
+  //     xmlns="http://www.w3.org/2000/svg"
+  //   >
+  //     <path
+  //       d="M 129.5 243.5 L  16 243.5 L 16 22 16 22"
+  //       stroke="green"
+  //       stroke-dasharray="0 0"
+  //       stroke-width="2"
+  //       fill="transparent"
+  //       pointerEvents="visibleStroke"
+  //       id="arrow83"
+  //     ></path>
+  //     <g
+  //       fill="black"
+  //       pointerEvents="auto"
+  //       transform="translate(12,24) rotate(270) scale(8)"
+  //       opacity="1"
+  //       id="arrowhead83"
+  //     >
+  //       <path d="M 0 0 L 1 0.5 L 0 1 L 0.25 0.5 z"></path>
+  //     </g>
+  //   </svg>
+  // );
 
   function tierCards(tier, { driverTreeObj, viewObj }) {
     let viewCheck;
@@ -906,6 +907,7 @@ const DriverCards = ({
         }
       }
 
+      // eslint-disable-next-line array-callback-return
       return arr.map((f, index) => {
         //first check if it is an empty div, then check if it is a cluster, then check if it is a driver.  If it is a driver, then check to see if it is part of a cluster.
         let clusterViewCheck = -1; //this initializes the ClusterViewCheck for every row of the cloumn, the cluster opacity will be reset after the If check
@@ -963,6 +965,7 @@ const DriverCards = ({
               className={styles.my_cluster}
               data-tier={tier}
               style={
+                // eslint-disable-next-line eqeqeq
                 clusterViewCheck != -1 ? { opacity: 1 } : { opacity: opacity }
               }
               data-subtier={index + 1}
@@ -1039,10 +1042,12 @@ const DriverCards = ({
             key="0"
             style={{ justifyItems: "center", alignContent: "center" }}
           >
-            <p>Tier 0</p>
-            <div id="outcomeColumn" key="outcomeColumn1" className="my_div">
+            <Row>
+              Tier 0
+              </Row>
+            <Row id="outcomeColumn" key="outcomeColumn1" className={styles.my_row}>
               <Card
-                className={styles.my_card}
+                className={styles.outcome_card}
                 id={`outcomeId${selOutcome.id}`}
                 key={`outcomeCard${selOutcome.id}`}
               >
@@ -1131,12 +1136,12 @@ const DriverCards = ({
                   </Row>
                 </Card.Body>
               </Card>
-              <Row style={{ minHeight: "500px" }}>
+              <Row style={{ minHeight: "500px", width: "90%" }}>
                 <br />
                 <br />
                 <Legend selOutcome={selOutcome} />
               </Row>
-            </div>
+            </Row>
           </Col>
           <Col className={styles.driver} sm={6} md={6} lg={2} key="1">
             <Row>Tier 1 Drivers {tierButtons(1)}</Row>
@@ -1160,14 +1165,17 @@ const DriverCards = ({
             <Row>Tier 4 Drivers {tierButtons(4)}</Row>
             <Row id={`tier4Cards`} key={`tier4Cards`} className={styles.my_row}>
               {tierCards(4, { driverTreeObj, viewObj })}
-              {/* {svg} */}
+              {/* <div style={{position: "absolute", left: "300px", top: '150px', height: "100px", width: '100px', zIndex: "1500"}}>
+                
+                {svg}
+                </div> */}
             </Row>
           </Col>
           <Col className={styles.driver} sm={6} md={6} lg={2} key="5">
             <Row>Tier 5 Drivers {tierButtons(5)}</Row>
             <Row id={`tier5Cards`} key={`tier5Cards`} className={styles.my_row}>
               {tierCards(5, { driverTreeObj, viewObj })}
-              {/* {svg2} */}
+
             </Row>
 
             <p>
@@ -1243,35 +1251,6 @@ const DriverCards = ({
           </Button>
         </Modal.Footer>
       </Modal>
-
-      {/* <svg
-              width="102.328125"
-              height="67"
-              overflow="auto"
-              id="SVG59b"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M 86.328125 16 L  54.1640625 16 L 54.1640625 51 22 51"
-                stroke="black"
-                stroke-dasharray="0 0"
-                stroke-width="3"
-                fill="transparent"
-                pointer-events="visibleStroke"
-                id="arrow59b"
-                style={{ opacity: 1 }}
-              ></path>
-              <g
-                fill="black"
-                pointer-events="auto"
-                transform="translate(24,55) rotate(180) scale(8)"
-                opacity="1"
-                id="arrowhead59b"
-                style={{ opacity: 1 }}
-              >
-                <path d="M 0 0 L 1 0.5 L 0 1 L 0.25 0.5 z"></path>
-              </g>
-            </svg> */}
     </>
   );
 };

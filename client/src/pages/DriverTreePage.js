@@ -1,9 +1,6 @@
 //page for viewing and updating op limits
-import React, { useState, useContext, useEffect, useRef } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { stateContext } from "../App";
-import jsPDF from "jspdf";
-import * as htmlToImage from "html-to-image";
-import html2canvas from "html2canvas";
 import { Container, Row, Col, Button, Modal } from "react-bootstrap";
 import {
   createOutcome,
@@ -11,10 +8,8 @@ import {
   outcomeByCommand,
   getDriverByOutcome,
 } from "../utils/drivers";
-// import { getViewCards } from "../utils/viewCards";
-// import { getViewArrows } from "../utils/viewArrows";
+
 import { createView, deleteView } from "../utils/views";
-import { addViewArrow, getViewArrows } from "../utils/viewArrows";
 import { getArrows } from "../utils/arrows";
 import { useNavigate } from "react-router";
 import { useParams } from "react-router"; //to store state in the URL
@@ -23,7 +18,7 @@ import { getAppData } from "../utils/auth";
 import styles from "./DriverTreePage.module.css";
 import OutcomeTable from "../components/OutcomeTable";
 import ClusterModal from "../components/ClusterModal";
-// import ArrowModal from "../components/ArrowModal";
+
 import ModArrows from "../components/ModArrows";
 import { exportElement } from "../utils/export-element";
 import ViewsTable from "../components/ViewsTable";
@@ -39,7 +34,7 @@ const DriverTreePage = () => {
   const [opacity, setOpacity] = useState(100);
   const [PDFState, setPDFState] = useState(false);
   const [showClusterModal, setClusterModal] = useState(false);
-  const [showArrowModal, setArrowModal] = useState(false);
+  const [, setArrowModal] = useState(false);
   const [showArrowMod, setArrowMod] = useState(false);
   const [selOutcome, setSelOutcome] = useState({});
   const [selDriver, setSelDriver] = useState({});
@@ -92,6 +87,7 @@ const DriverTreePage = () => {
       setRecordLockState(true);
     }
     console.log("DriverTreePage initial useEffect");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   //this useeffect is there to refresh the driver tree elements whenever the selOutcome state is changed.
@@ -103,19 +99,12 @@ const DriverTreePage = () => {
       await getArrows(selOutcome.id).then((data) => {
         setArrows(data.data);
       });
-      // await getViewCards(viewId).then((data) => {
-      //   setViewObj(data.data);
-      // });
-      // await getViewArrows(viewId).then((data) => {
-      //   setViewArrows(data.data);
-      // });
     };
     getDriversData(selOutcome);
     setState({ ...state, selOutcome: selOutcome });
     navigate("/drivertree/" + selOutcome.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome]);
-
 
   const createNewView = async (e) => {
     e.preventDefault();
@@ -196,153 +185,63 @@ const DriverTreePage = () => {
     setArrowMod(false);
   };
 
-  //apply the xmlns tag to all svgs
-  const applyXmlns = () => {
-    let svg = document.querySelectorAll("svg");
-    let svgArray = Array.from(svg);
-    const xmlns = "http://www.w3.org/2000/xmlns/";
-    const xlinkns = "http://www.w3.org/1999/xlink";
-    const svgns = "http://www.w3.org/2000/svg";
-    //start at 1 the flag already has one
-    for (let i = 2; i < svgArray.length; i++) {
-      svgArray[i].setAttributeNS(xmlns, "xmlns", svgns);
-      // svgArray[i].setAttributeNS(xmlns, "xmlns:xlink", xlinkns);
-    }
-  };
-
-  // const svg = (
-  //   <svg
-  //     width="102.328125"
-  //     height="67"
-  //     overflow="auto"
-  //     id="SVG59b"
-  //     xmlns="http://www.w3.org/2000/svg"
-  //   >
-  //     <path
-  //       d="M 86.328125 16 L 54.1640625 16 L 54.1640625 51 22 51"
-  //       stroke="black"
-  //       stroke-dasharray="2 2"
-  //       stroke-width="3"
-  //       fill="transparent"
-  //       pointerEvents="visibleStroke"
-  //       id="arrow59b"
-  //     ></path>
-  //     <g
-  //       fill="black"
-  //       pointerEvents="auto"
-  //       transform="translate(24,55) rotate(180) scale(8)"
-  //       opacity="1"
-  //       id="arrowhead59b"
-  //     >
-  //       <path d="M 0 0 L 1 0.5 L 0 1 L 0.25 0.5 z"></path>
-  //     </g>
-  //   </svg>
-  // );
-
-  //use canvg to turn all SVGs into PNGs
-  const convertSvgToPng = async () => {
-    // var content = document.getElementById("pdf-export");
-    // applyXmlns();
-    let arrowStuff = document.querySelectorAll("card");
-    console.log(arrowStuff);
-    // for (let i = 0; i < arrows.length; i++) {
-    //   let startP = arrows[i].star;
-    //   let coords = document.getElementById(startP);
-    //   let bounds = coords.getBoundingClientRect();
-    //   console.log(coords);
-    // }
+  const svgForPdf = () => {
+    //this function takes in an array of svgs from the arrows, pulls out the <path> and <g> elements, then creates a new svg element and appends the path and g elements to it.  it then returns the SVG element in a div for appending to the DOM.  The <div> element has an absolute position based on the position of the arrow svg element that is passed in as part of the entering arguement.
+    //first we remove the first element in svgs
     let svgs = document.querySelectorAll("svg");
     let svgArray = Array.from(svgs);
-    //start at 1 the flag already has one
-    console.log(svgArray.length);
-    for (let i = 1; i < svgArray.length; i++) {
-      console.log(svgArray[i].parentNode);
-      console.log(svgArray[i].outerHTML);
-      console.log(svgArray[i].innerHTML);
-      // svgArray[i].parentNode.appendChild(svg);
-      let svgBounds = svgArray[i].getBoundingClientRect();
-      console.log(svgBounds);
-      let cardelem = document.getElementById("card244");
-      let sVg = document.createElement("svg");
-      sVg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-      sVg.setAttribute("width", svgBounds.width);
-      sVg.setAttribute("height", svgBounds.height);
-      sVg.setAttribute("overflow", "auto");
-      sVg.setAttribute("id", "SVG72");
-      sVg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
-      sVg.innerHTML = svgArray[i].innerHTML;
-      cardelem.parentNode.appendChild(sVg);
-      let svgWidth = svgBounds.width;
-      let svgHeight = svgBounds.height;
-      let svgString = svgArray[i].outerHTML;
-      // htmlToImage.toPng(svgArray[i]).then(function (dataUrl) {
-      //   var img = new Image();
-      //   img.src = dataUrl;
-      //   img.width = svgWidth;
-      //   img.height = svgHeight;
-      //   //now replace the svg with the png
-      //   svgArray[i].parentNode.replaceChild(img, svgArray[i]);
-      //   img.setAttribute("style", "position: relative; top: 0; left: 0");
-      //   let carddiv = document.getElementById("tier1subTier1");
-      //   carddiv.appendChild(img);
-      // });
-    }
-    
+    // eslint-disable-next-line array-callback-return
+    svgArray.map((f, index) => {
+      if (svgArray[index].id.slice(0, 3) === "SVG") {
+        let innerSVG = svgArray[index].innerHTML;
+        let width = svgArray[index].getBoundingClientRect().width;
+        if (width > 245) {
+          width = 245;
+        }
+        let height = svgArray[index].getBoundingClientRect().height;
+
+        let svgstuff = `<svg
+        width="${width}px"
+        height="${height}px"
+        xmlns="http://www.w3.org/2000/svg"
+        >
+          ${innerSVG}
+    </svg>`;
+        let svgdiv = document.createElement("div");
+
+        let svgtop = svgArray[index].getBoundingClientRect().top;
+        //the additional offset accounts for delta between cards and column widths
+        let svgleft = svgArray[index].getBoundingClientRect().left - 13;
+        svgdiv.setAttribute(
+          "style",
+          `position: absolute; top: ${svgtop}px; left: ${svgleft}px; z-index: 50; width: ${width}px; height: ${height}px;`
+        );
+
+        svgdiv.innerHTML = svgstuff;
+        let pdfExport = document.getElementById("pdf-export");
+        pdfExport.appendChild(svgdiv);
+      }
+    });
   };
+
 
   //used to clean the cards up for a PDF generation
   useEffect(() => {
     //needed to prevent a random pdf from generating on every page load
     if (PDFState && document.readyState === "complete") {
-      // applyXmlns();
-      convertSvgToPng();
-      //first get all the svg elements, then convert them into pngs, then save them to a folder, then replace the svg with the png.
-      let pdf = new jsPDF(
-        'l'
-      );
-
+      svgForPdf();
+      let options = {
+        papersize: "auto",
+        margin: "25px",
+        landscape: true,
+      };
       let pdfExport = document.getElementById("pdf-export");
-      exportElement(pdfExport, {}, selOutcome.outcomeTitle);
-      // let svgelement = document.getElementById("SVG72");
-      // console.log(svgelement.parentElement);
-      // console.log(svgelement.parentNode);
-      // svgelement.path.fill = "red";
-      // html2canvas(pdfExport).then((canvas) => {
-      //   //convert to an image data URL
-      //   let imgData = canvas.toDataURL("image/png");
-      //   const imgProps = pdf.getImageProperties(imgData);
-      //   const pdfWidth = pdf.internal.pageSize.getWidth();
-      //   const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      //   pdf.addImage(imgData, "PNG", 10, 10, pdfWidth, pdfHeight);
-      //   pdf.save(`${selOutcome.outcomeTitle}.pdf`);
-      //   let svgstring = document.getElementById("SVG66").outerHTML;
-      //   let svgstring1 = document.getElementById("SVG66").innerHTML;
-      //   console.log(svgstring);
-      //   console.log(svgstring1);
-
-      // });
-    } else if (PDFState && document.readyState !== "complete") {
-      applyXmlns();
-      // let svgstring = document.getElementById("SVG66").outerHTML;
-      // let svgstring1 = document.getElementById("SVG66").innerHTML;
-      // console.log(svgstring);
-      // console.log(svgstring1);
-      // let pdf = new jsPDF();
-      let pdfExport = document.getElementsById("pdf-export");
-      exportElement(pdfExport, {}, selOutcome.outcomeTitle);
-      // html2canvas(pdfExport, { allowTaint: true }).then(function (canvas) {
-      //   //convert to an image data URL
-      //   var imgData = canvas.toDataURL("image/png");
-
-      //   //add to pdf
-      //   pdf.addImage(imgData, "PNG", 100, 100);
-      //   pdf.save(`${selOutcome.outcomeTitle}.pdf`);
-      // });
+      exportElement(pdfExport, options, selOutcome.outcomeTitle);
+      window.location.reload();
     }
     setPDFState(false);
-
-    //then we push the arrows to the DOM so they can be exported
-  }, [PDFState, selOutcome.outcomeTitle]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [PDFState]);
 
   const handleClick = () => {
     setPDFState(true);
@@ -351,8 +250,6 @@ const DriverTreePage = () => {
   const toggleArrow = () => {
     setCreateArrow(!createArrow);
   };
-
-  const pdfExportComponent = useRef(null);
 
   const updateOpacity = (e) => {
     setOpacity(e.target.value / 100);
@@ -374,7 +271,6 @@ const DriverTreePage = () => {
                 >
                   Generate PDF
                 </button>
-
                 <button className={styles.dtree_btn} onClick={goToDriver}>
                   Driver Details
                 </button>
@@ -571,7 +467,6 @@ const DriverTreePage = () => {
           </Button>
         </Modal.Body>
       </Modal>
-     
     </>
   );
 };

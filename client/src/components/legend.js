@@ -20,6 +20,7 @@ useEffect(() => {
     if (driverTreeObj.length < 1) {
       return;
     }
+    // eslint-disable-next-line array-callback-return
     return driverTreeObj.map((f, index) => {
       let temp = {
         sholder: driverTreeObj[index].stakeholders,
@@ -34,7 +35,7 @@ useEffect(() => {
           <Row key={"stakeRow"+index}>
             <Col key={"Sholder"+index}>
               {driverTreeObj[index].stakeholders}
-              {":     "}
+              {"     "}
             </Col>
             <Col key={"SholderAbbrev"+index}>{driverTreeObj[index].stakeholderAbbreviation}</Col>
           </Row>

@@ -3,8 +3,6 @@ import Xarrow from "react-xarrows";
 import { getArrows } from "../utils/arrows";
 
 function DriverArrows({
-  // arrows, 
-  // setArrows,
   driverTreeObj,
   ArrowModal,
   selOutcome,
@@ -12,7 +10,6 @@ function DriverArrows({
   opacity,
   viewArrows,
   tableState,
-  setViewArrows
 }) {
   //rerenders the arrows on selOutcome change
   const [arrows, setArrows] = useState([]);
@@ -25,6 +22,7 @@ function DriverArrows({
       });
     }
     fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [driverTreeObj]);
 
 
@@ -44,9 +42,10 @@ function DriverArrows({
             arrowBodyProps={{ style: {opacity: opVal}, onClick: (e) => ArrowModal(e, arrows[index].id, tableState), id: "arrow" + arrows[index].id }}
             arrowHeadProps={{ style: {opacity: opVal}, onClick: (e) => ArrowModal(e, arrows[index].id, tableState), id: "arrowhead" + arrows[index].id }}
             animateDrawing={false}
+            animationSpeed={0}
             key={arrows[index].id}
-            divContainerStyle={{position: "relative"}}
-            SVGcanvasStyle={{position: "absolute"}}
+            divContainerStyle={{position: "relative", overflow: "hide"}}
+            SVGcanvasStyle={{position: "relative", animation: "none", overflow: "hide"}}
             SVGcanvasProps={{id: "SVG"+arrows[index].id}}
             color={arrows[index].color}
             dashness={arrows[index].dashness}
@@ -59,7 +58,7 @@ function DriverArrows({
             start={arrows[index].start}
             startAnchor={arrows[index].startAnchor}
             strokeWidth={arrows[index].strokeWidth}
-            zIndex={10}
+            zIndex={100}
           />
 
       );

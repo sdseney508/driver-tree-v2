@@ -12,7 +12,7 @@ adminAudit.init(
             autoIncrement: true,
         },
 
-        user_id: {
+        userId: {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
@@ -25,7 +25,20 @@ adminAudit.init(
             type: DataTypes.STRING,
             allowNull: false,
         },
+        fieldName: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
 
+        tableUid: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+
+        action: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
         oldData: {
             type: DataTypes.STRING,
             allowNull: false,

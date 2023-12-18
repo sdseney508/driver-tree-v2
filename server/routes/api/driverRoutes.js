@@ -1,11 +1,12 @@
 const router = require("express").Router();
-const { drivers, clusters } = require("../../models");
+const { drivers, clusters, adminAudit } = require("../../models");
 const sequelize = require("../../config/connection");
 const { Op } = require("sequelize");
 
 // use /api/drivers
 //create a new drivers; 
-router.post("/new", async (req, res) => {
+router.post("/new/:userId", async (req, res) => {
+  let driversData = [];
   try {
     //first check for the highest subTier number under a tier and
     //outcome and increment it by 1
@@ -17,11 +18,25 @@ router.post("/new", async (req, res) => {
     });
     let body = req.body;
     body.subTier = subTier + 1;
-    const driversData = await drivers.create(req.body);
+    driversData = await drivers.create(req.body);
     res.status(200).json(driversData);
   } catch (err) {
     res.status(400).json(err);
   }
+  // try {
+  //   console.log("in the admin log try");
+  //   console.log(JSON.stringify(driversData));
+  //   let log = await adminAudit.create({
+  //     action: "Create",
+  //     model: "drivers",
+  //     tableUid: driversData.id,
+  //     fieldName: "All",
+  //     newData: JSON.stringify(driversData),
+  //     userId: req.params.userId,
+  //   });
+  // } catch (err) {
+  //   res.status(400).json(err);
+  // }
 });
 
 //this route is only for database seeding and testing

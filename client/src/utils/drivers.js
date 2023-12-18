@@ -19,8 +19,9 @@ const outcomeByCommand = (command) => {
   return axios.get(apiURL + "/outcomes/command/" + command);
 };
 
-const createDriver = (body) => {
-  return axios.post(apiURL + "/drivers/new", body);
+const createDriver = (body, userId) => {
+  
+  return axios.post(apiURL + "/drivers/new/"+userId, body);
 };
 
 const createOutcome = (body) => {
