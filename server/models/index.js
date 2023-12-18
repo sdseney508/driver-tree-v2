@@ -1,3 +1,4 @@
+const { stat } = require("@babel/core/lib/gensync-utils/fs");
 const accountStatus = require("./accountStatus");
 const adminAudit = require("./adminAudit");
 const arrows = require("./arrows");
@@ -12,17 +13,24 @@ const role = require("./role");
 const stakeholders = require("./stakeholders");
 const state = require("./state");
 const status = require("./status");
+const statusDefinition = require("./statusDefinition");
 const User = require("./User");
 const viewArrows = require("./viewArrows");
 const viewCards = require("./viewCards");
 const views = require("./views");
 
-//TODO:  set up table connections
+
 outcomes.hasMany(drivers, {
   onDelete: "CASCADE",
 });
 
 drivers.belongsTo(outcomes, {});
+
+status.hasMany(statusDefinition, {
+  onDelete: "CASCADE",
+  });
+
+statusDefinition.belongsTo(status, {});
 
 outcomes.hasMany(arrows, {
   onDelete: "CASCADE",
@@ -103,6 +111,7 @@ module.exports = {
   stakeholders,
   state,
   status,
+  statusDefinition,
   User,
   viewArrows,
   viewCards,
