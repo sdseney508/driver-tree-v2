@@ -1,52 +1,51 @@
 const router = require('express').Router();
-const { status } = require('../../models');
+const { statusDefinition } = require('../../models');
 const { Op } = require("sequelize");
 
-// use /api/status
-//create a status.  This should almost never be used
+// use /api/statusDefinition
+//create a statusDefinition.  This should almost never be used
 router.post('/', async (req, res) => {
   try {
-    const statusData = await status.create();
-    res.status(200).json(accountStatusData);
+    const statusDefData = await statusDefinition.create();
+    res.status(200).json(accountstatusDefData);
   } catch (err) {
-    console.log(err);
     res.status(400).json(err);
   }
 });
 
-//get all statuss; this is used on the admin page to allow the admin to change a status
+//get all statusDef's; this is used on the admin page to allow the admin to change a statusDefinition
 router.get('/', async (req, res) => {
     try {
-        const statusData = await status.findAll();
-        res.status(200).json(statusData);
+        const statusDefData = await statusDefinition.findAll();
+        res.status(200).json(statusDefData);
     } catch (err) {
         res.status(500).json(err);
     }
 });
 
-//get specific status for future use
+//get specific statusDefinition for future use
 router.get('/:id', async (req, res) => {
     try {
-        const statusData = await status.findByPk(req.params.id);
-        res.status(200).json(statusData);
+        const statusDefData = await statusDefinition.findByPk(req.params.id);
+        res.status(200).json(statusDefData);
     } catch (err) {
         res.status(500).json(err);
     }
 });
 
-//update/change a status info      
+//update/change a statusDefinition info      
 router.put('/:id', async (req, res) => {
     try { 
-        const statusData = await status.update(req.body, {
+        const statusDefData = await statusDefinition.update(req.body, {
             where: {
                 id: req.params.id,
             },
         });
-        if (!statusData) {
+        if (!statusDefData) {
             res.status(404).json({ message: 'No status found with this id!' });
             return;
         }
-        res.status(200).json(statusData);
+        res.status(200).json(statusDefData);
 
     } catch (err) { 
         res.status(400).json(err);
@@ -54,10 +53,10 @@ router.put('/:id', async (req, res) => {
 
 });
 
-//delete a status.  This should almost never be used
+//delete a statusDefinition.  This should almost never be used
 router.delete('/:id', async (req, res) => {
     try {
-        const statusData = await status.destroy({
+        const statusDefData = await statusDefinition.destroy({
             where: {
                 id: req.params.id,
             },

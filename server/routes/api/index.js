@@ -10,6 +10,7 @@ const driverRoutes = require('./driverRoutes');
 const outcomeRoutes = require('./outcomeRoutes');
 const roleRoutes = require('./roleRoutes');
 const statusRoutes = require('./statusRoutes');
+const statusDefinitionRoutes = require('./statusDefinitionRoutes')
 const stakeholderRoutes = require('./stakeholderRoutes');
 const userRoutes = require('./userRoutes');
 const viewArrowRoutes = require('./viewArrowRoutes');
@@ -26,6 +27,7 @@ router.use('/drivers', driverRoutes);
 router.use('/outcomes', outcomeRoutes);
 router.use('/roles', roleRoutes);
 router.use('/status', statusRoutes);
+router.use('/statusDefinition', statusDefinitionRoutes);
 router.use('/stakeholders', stakeholderRoutes);
 router.use('/users', userRoutes);
 router.use('/viewArrows', viewArrowRoutes);

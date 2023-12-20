@@ -26,12 +26,6 @@ outcomes.hasMany(drivers, {
 
 drivers.belongsTo(outcomes, {});
 
-status.hasMany(statusDefinition, {
-  onDelete: "CASCADE",
-  });
-
-statusDefinition.belongsTo(status, {});
-
 outcomes.hasMany(arrows, {
   onDelete: "CASCADE",
 });

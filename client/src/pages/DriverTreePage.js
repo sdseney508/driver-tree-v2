@@ -86,7 +86,6 @@ const DriverTreePage = () => {
     if (state.Role === "Stakeholder") {
       setRecordLockState(true);
     }
-    console.log("DriverTreePage initial useEffect");
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -45,6 +45,7 @@ useEffect(() => {
   }
 
   return (
+    <>
     <div className={styles.legend}>
       <Col className={styles.legend_col}>
         <h4>Legend</h4>
@@ -52,6 +53,7 @@ useEffect(() => {
         {stake(driverTreeObj)}
       </Col>
     </div>
+    </>
   );
 };
 export default Legend;
