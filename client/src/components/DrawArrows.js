@@ -3,6 +3,8 @@ import Xarrow from "react-xarrows";
 import { getArrows } from "../utils/arrows";
 
 function DriverArrows({
+  arrows,
+  setArrows,
   driverTreeObj,
   ArrowModal,
   selOutcome,
@@ -12,7 +14,7 @@ function DriverArrows({
   tableState,
 }) {
   //rerenders the arrows on selOutcome change
-  const [arrows, setArrows] = useState([]);
+  // const [arrows, setArrows] = useState([]);
 
   useEffect(() => {
     //get the arrows from the database
@@ -23,7 +25,8 @@ function DriverArrows({
     }
     fetchData();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [driverTreeObj]);
+  // window.location.reload();
+  }, [selOutcome, driverTreeObj]);
 
 
     //this function maps each arrow in the arrows array to a Xarrow component
@@ -58,7 +61,7 @@ function DriverArrows({
             start={arrows[index].start}
             startAnchor={arrows[index].startAnchor}
             strokeWidth={arrows[index].strokeWidth}
-            zIndex={100}
+            zIndex={10}
           />
 
       );
@@ -67,7 +70,7 @@ function DriverArrows({
 
   return (
     <>
-     {arrowFunc()}
+     {arrows ? arrowFunc(): null}
     </>
   );
 }

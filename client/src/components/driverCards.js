@@ -15,6 +15,7 @@ import {
   createDriver,
   deleteDriver,
   getDriverById,
+  getDriverByOutcome,
   getOutcome,
   updateDriver,
   updateOutcome,
@@ -32,10 +33,9 @@ import { deleteCluster, updateCluster } from "../utils/cluster";
 import DriverArrows from "./DrawArrows";
 import { CreateAnArrow } from "./ArrowFunction";
 import { faCopyright } from "@fortawesome/free-solid-svg-icons";
+import ModArrows from "../components/ModArrows";
 
 const DriverCards = ({
-  arrowID,
-  setArrowID,
   createArrow,
   driverTreeObj,
   setDriverTreeObj,
@@ -46,7 +46,6 @@ const DriverCards = ({
   setCreateArrow,
   selOutcome,
   setSelOutcome,
-  setArrowMod,
   state,
   tableState,
   viewId,
@@ -62,27 +61,38 @@ const DriverCards = ({
   //4.  Draws the correct clusters around the selected drivers based on the cluster field in the drivers table
   //The arrow function is contained in the arrows.js module.  It creates the arrows that connect the cards
   let navigate = useNavigate();
-
+  const [arrowID, setArrowID] = useState('');
   const [selectedElements, setSelectedElements] = useState([]);
   const [show, setShow] = useState(false);
   const [arrows, setArrows] = useState([]);
   const [connectionShow, setConnectionShow] = useState(false);
+  const [showArrowMod, setArrowMod] = useState(false);
+  // const [showClusterModal, setClusterModal] = useState(false);
+  const [, setArrowModal] = useState(false);
+  // const [driverTreeObj, setDriverTreeObj] = useState([]);
 
   useEffect(() => {
     const getDriversData = async (selOutcome, viewId) => {
+      // await getDriverByOutcome(selOutcome.id).then((data) => {
+      //   setDriverTreeObj(data.data);
+      // });
       await getArrows(selOutcome.id).then((data) => {
         setArrows(data.data);
       });
-      await getViewCards(viewId).then((data) => {
-        setViewObj(data.data);
-      });
-      await getViewArrows(viewId).then((data) => {
-        setViewArrows(data.data);
-      });
+      if (viewId) {
+        await getViewCards(viewId).then((data) => {
+          setViewObj(data.data);
+        });
+      }
+      if (viewId) {
+        await getViewArrows(viewId).then((data) => {
+          setViewArrows(data.data);
+        });
+      }
     };
     getDriversData(selOutcome, viewId);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selOutcome, opacity, viewId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [opacity, viewId]);
 
   const addArrowToView = async () => {
     setConnectionShow(false);
@@ -241,10 +251,10 @@ const DriverCards = ({
       setSelOutcome(data.data);
     });
     // //now update the driver tree object
-    await getDriverById(selOutcome.id).then((data) => {
+    await getDriverByOutcome(selOutcome.id).then((data) => {
       setDriverTreeObj(data.data);
     });
-    window.location.reload();
+    // window.location.reload();
   };
 
   //used in the Tier cards to create the driver cards for both the regular and the cluser
@@ -345,7 +355,6 @@ const DriverCards = ({
                       height: "30px",
                       backgroundColor: "green",
                     }}
-                    // className={styles.green_status}
                   >
                     Green
                   </option>
@@ -356,7 +365,6 @@ const DriverCards = ({
                       height: "30px",
                       backgroundColor: "yellow",
                     }}
-                    // className={styles.yellow_status}
                   >
                     Yellow
                   </option>
@@ -367,7 +375,6 @@ const DriverCards = ({
                       height: "30px",
                       backgroundColor: "red",
                     }}
-                    // className={styles.red_status}
                   >
                     Red
                   </option>
@@ -492,16 +499,9 @@ const DriverCards = ({
     };
 
     await updateDriver(data, body);
-
     //look through the arrows state to find any arrows with the affected cardId as a start or endpoint then update.
     if (dragStart === dragEnd) {
-      // window.location.reload();
-      // return;
-      //refresh the componen
-      await getOutcome(selOutcome.id).then((data) => {
-        setSelOutcome(data.data);
-      });
-      //return, no change in tier so no need to change arrow logic
+      //return, no change in tier so no need to change arrow logic and DOM refreshed at bottom
     } else {
       //The user moved the card up / down a tier, so the arrows need to be updated to reflect the new tier
       //cycle through arrow array and update the arrows as needed
@@ -572,17 +572,18 @@ const DriverCards = ({
         }
         if (aBody.start) {
           await updateArrow(arrows[i].id, aBody);
-          setArrowID(arrows[i].id);
-          getArrows(selOutcome.id).then((data) => {
-            setArrows(data.data);
-          });
+
           aBody = {};
         }
       }
     }
-    await getDriverById(selOutcome.id).then((data) => {
+    await getDriverByOutcome(selOutcome.id).then((data) => {
       setDriverTreeObj(data.data);
     });
+    // await getOutcome(selOutcome.id).then((data) => {
+    //   setSelOutcome(data.data);
+    // });
+
     window.location.reload();
   }
 
@@ -602,6 +603,18 @@ const DriverCards = ({
     navigate("/drpage/" + selOutcome.id + "/" + e.target.dataset.cardid);
   };
 
+  //used to handle the submit of the modals for clusters and arrows
+  const onModalSubmit = (e) => {
+    e.preventDefault();
+    handleClose();
+  };
+
+  //close the modal
+  const handleClose = () => {
+    setArrowModal(false);
+    setArrowMod(false);
+  };
+
   const handleSelOutcomeChange = (e) => {
     e.preventDefault();
     let body = { [e.target.name]: e.target.value };
@@ -615,9 +628,6 @@ const DriverCards = ({
   const handleClusterChange = (e) => {
     let body = { [e.target.name]: e.target.value };
     updateCluster(e.target.dataset.clusterid, body);
-    getOutcome(selOutcome.id).then((data) => {
-      setSelOutcome(data.data);
-    });
   };
 
   const goToOutcome = async (e) => {
@@ -645,13 +655,9 @@ const DriverCards = ({
     } else {
       await updateDriver(e.target.dataset.cardid, body);
     }
-    // await getOutcome(selOutcome.id).then((data) => {
-    //   setSelOutcome(data.data);
-    // });
-    await getDriverById(selOutcome.id).then((data) => {
-      setDriverTreeObj(data.data);
+    await getOutcome(selOutcome.id).then((data) => {
+      setSelOutcome(data.data);
     });
-    window.location.reload();
   };
 
   //waits for setSelectedElements to be updated, then calls the CreateAnArrow function to create the arrow
@@ -686,7 +692,7 @@ const DriverCards = ({
         setSelectedElements([]);
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedElements]);
 
   //uses the length of the selected elements array to determine if the user is connecting to a driver or a cluster for the first or second element when making an arrow
@@ -1042,10 +1048,12 @@ const DriverCards = ({
             key="0"
             style={{ justifyItems: "center", alignContent: "center" }}
           >
-            <Row>
-              Tier 0
-              </Row>
-            <Row id="outcomeColumn" key="outcomeColumn1" className={styles.my_row}>
+            <Row>Tier 0</Row>
+            <Row
+              id="outcomeColumn"
+              key="outcomeColumn1"
+              className={styles.my_row}
+            >
               <Card
                 className={styles.outcome_card}
                 id={`outcomeId${selOutcome.id}`}
@@ -1165,17 +1173,12 @@ const DriverCards = ({
             <Row>Tier 4 Drivers {tierButtons(4)}</Row>
             <Row id={`tier4Cards`} key={`tier4Cards`} className={styles.my_row}>
               {tierCards(4, { driverTreeObj, viewObj })}
-              {/* <div style={{position: "absolute", left: "300px", top: '150px', height: "100px", width: '100px', zIndex: "1500"}}>
-                
-                {svg}
-                </div> */}
             </Row>
           </Col>
           <Col className={styles.driver} sm={6} md={6} lg={2} key="5">
             <Row>Tier 5 Drivers {tierButtons(5)}</Row>
             <Row id={`tier5Cards`} key={`tier5Cards`} className={styles.my_row}>
               {tierCards(5, { driverTreeObj, viewObj })}
-
             </Row>
 
             <p>
@@ -1183,7 +1186,8 @@ const DriverCards = ({
               Integrated Program Solutions
             </p>
           </Col>
-          {driverTreeObj ? (
+
+          {driverTreeObj && arrows? (
             <DriverArrows
               arrows={arrows}
               setArrows={setArrows}
@@ -1250,6 +1254,35 @@ const DriverCards = ({
             Modify Arrow Properties?
           </Button>
         </Modal.Footer>
+      </Modal>
+
+      {/* for modifying arrows */}
+      <Modal
+        name="arrowModModal"
+        show={showArrowMod}
+        size="md"
+        centered
+        backdrop="static"
+        keyboard={false}
+        onHide={() => setArrowMod(false)}
+        // className={styles.cluster_modal}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title id="cluster-modal">Mod Arrow</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {/*change everything in the signup form components*/}
+          <ModArrows
+            onModalSubmit={onModalSubmit}
+            arrowID={arrowID}
+            setArrowMod={setArrowMod}
+            selOutcome={selOutcome}
+            setSelOutcome={setSelOutcome}
+          />
+          <Button variant="secondary" onClick={handleClose}>
+            Close
+          </Button>
+        </Modal.Body>
       </Modal>
     </>
   );

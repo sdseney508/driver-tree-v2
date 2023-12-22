@@ -185,6 +185,8 @@ router.put("/clusterUpdate/:id", async (req, res) => {
 //update drivers info
 router.put("/update/:id", async (req, res) => {
   try {
+    console.log("in the update driver route, id: "+req.params.id);
+    console.log(req.body);
     const driversData = await drivers.update(req.body, {
       where: {
         id: req.params.id,

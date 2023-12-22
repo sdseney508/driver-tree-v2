@@ -1,7 +1,7 @@
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import apiURL from "./apiURL";
-import {getUserViewsForOutcome} from "./views";
+// import {  setState } from "react";
 
 const authHeader = () => {
   let id_token = localStorage.getItem("id_token");
@@ -32,19 +32,15 @@ const getUser = (token) => {
   return axios.get(apiURL + "/users/me", { headers: authHeader() });
 };
 
-const getAppData = async (
+const getAppData = async ({
   navigate,
+  outcomeId,
   state,
   setState,
-  outcomeId,
   outcomeByCommand,
   setSelOutcome,
-  getOutcome,
-  getDriverByOutcome,
-  setDriverTreeObj,
-  viewId,
-  setViewId
-) => {
+  getOutcome
+}) => {
   //this first part just ensures they whoever is on this page is an authenticated user; prevents someone from typing in the url and gaining access
   try {
     //these comes from the utils section of the code
@@ -74,7 +70,6 @@ const getAppData = async (
         userId: user.id,
       });
       //checks to see if there was an outcomeId passed or if you entered from the user page
-      let tout;
       if (!outcomeId) {
         await outcomeByCommand(user.stakeholderId).then((data) => {
           setSelOutcome(data.data[0]);
@@ -84,15 +79,6 @@ const getAppData = async (
           setSelOutcome(data.data);
         });
       }
-      await getDriverByOutcome(outcomeId).then((data) => {
-        setDriverTreeObj(data.data);
-      });
-      await getUserViewsForOutcome({ userId: user.id, outcomeId: outcomeId }).then((data) => {
-        if (data.data.length > 0) {
-          setViewId(data.data[0].id);
-        }
-      });
-      return state;
     }
   } catch (err) {
     console.error(err);

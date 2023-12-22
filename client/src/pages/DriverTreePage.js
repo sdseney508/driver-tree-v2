@@ -10,7 +10,7 @@ import {
 } from "../utils/drivers";
 
 import { createView, deleteView } from "../utils/views";
-import { getArrows } from "../utils/arrows";
+// import { getArrows } from "../utils/arrows";
 import { useNavigate } from "react-router";
 import { useParams } from "react-router"; //to store state in the URL
 import DriverCards from "../components/driverCards";
@@ -19,7 +19,6 @@ import styles from "./DriverTreePage.module.css";
 import OutcomeTable from "../components/OutcomeTable";
 import ClusterModal from "../components/ClusterModal";
 
-import ModArrows from "../components/ModArrows";
 import { exportElement } from "../utils/export-element";
 import ViewsTable from "../components/ViewsTable";
 import { Xwrapper } from "react-xarrows";
@@ -28,17 +27,15 @@ import { Xwrapper } from "react-xarrows";
 
 const DriverTreePage = () => {
   const [state, setState] = useContext(stateContext);
-  const [arrowID, setArrowID] = useState("");
   const [clusters, setClusters] = useState([]);
   const [createArrow, setCreateArrow] = useState(false);
   const [opacity, setOpacity] = useState(100);
   const [PDFState, setPDFState] = useState(false);
-  const [showClusterModal, setClusterModal] = useState(false);
-  const [, setArrowModal] = useState(false);
   const [showArrowMod, setArrowMod] = useState(false);
   const [selOutcome, setSelOutcome] = useState({});
-  const [selDriver, setSelDriver] = useState({});
   const [driverTreeObj, setDriverTreeObj] = useState([]);
+  const [showClusterModal, setClusterModal] = useState(false);
+  const [selDriver, setSelDriver] = useState({});
   const [recordLockState, setRecordLockState] = useState(false); //used to lock the record when a user is editing it, reads the user's account permissions and adjusts record locks accordingly, stakeholders have read only access.
   const [viewId, setViewId] = useState(""); //used to let the user cycle through their personal views, the view state is the view id in case multiple users create same named views.
   const [viewObj, setViewObj] = useState([]); //used to store the view object for the view cards
@@ -58,9 +55,7 @@ const DriverTreePage = () => {
     overFlowX: "visible",
   };
 
-  //these are the state and URL for the pdf
   const { outcomeId } = useParams();
-  const [arrows, setArrows] = useState([]);
   //custom styles for the divs down below
 
   //These are the initial states for the select boxes.  They are set to the first value in the array, which is the default value
@@ -69,7 +64,7 @@ const DriverTreePage = () => {
 
   //using the initial useEffect hook to open up the driver trees and prefill the table at the bottom of the page
   useEffect(() => {
-    getAppData(
+    getAppData({
       navigate,
       state,
       setState,
@@ -78,32 +73,28 @@ const DriverTreePage = () => {
       setSelOutcome,
       getOutcome,
       getDriverByOutcome,
-      setDriverTreeObj,
-      viewId,
-      setViewId
-    );
+      setDriverTreeObj
+  });
     setState({ ...state, selOutcome: selOutcome });
     if (state.Role === "Stakeholder") {
       setRecordLockState(true);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  //this useeffect is there to refresh the driver tree elements whenever the selOutcome state is changed.
+  //this useEffect is there to refresh the driver tree elements whenever the selOutcome state is changed.
   useEffect(() => {
-    const getDriversData = async (selOutcome) => {
+    const getDriversData = async (selOutcome, viewId) => {
       await getDriverByOutcome(selOutcome.id).then((data) => {
         setDriverTreeObj(data.data);
       });
-      await getArrows(selOutcome.id).then((data) => {
-        setArrows(data.data);
-      });
     };
+
     getDriversData(selOutcome);
     setState({ ...state, selOutcome: selOutcome });
     navigate("/drivertree/" + selOutcome.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selOutcome]);
+  }, [selOutcome, driverTreeObj]);
 
   const createNewView = async (e) => {
     e.preventDefault();
@@ -154,7 +145,6 @@ const DriverTreePage = () => {
       setTableState("view");
     }
     setShowTable({ tableStyle, driverStyle });
-    console.log(tableState);
   };
 
   const goToDriver = async (e) => {
@@ -169,19 +159,6 @@ const DriverTreePage = () => {
       setState({ ...state, outcomeId: data.data.id });
       setSelOutcome(data.data);
     });
-  };
-
-  //used to handle the submit of the modals for clusters and arrows
-  const onModalSubmit = (e) => {
-    e.preventDefault();
-    handleClose();
-  };
-
-  //close the modal
-  const handleClose = () => {
-    setClusterModal(false);
-    setArrowModal(false);
-    setArrowMod(false);
   };
 
   const svgForPdf = () => {
@@ -222,7 +199,16 @@ const DriverTreePage = () => {
       }
     });
   };
+  const onModalSubmit = (e) => {
+    e.preventDefault();
+    handleClose();
+  };
 
+  //close the modal
+  const handleClose = () => {
+    setClusterModal(false);
+    setArrowMod(false);
+  };
 
   //used to clean the cards up for a PDF generation
   useEffect(() => {
@@ -239,7 +225,7 @@ const DriverTreePage = () => {
       window.location.reload();
     }
     setPDFState(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [PDFState]);
 
   const handleClick = () => {
@@ -317,15 +303,11 @@ const DriverTreePage = () => {
           >
             <Xwrapper>
               <DriverCards
-                arrows={arrows}
-                setArrows={setArrows}
-                arrowID={arrowID}
-                setArrowID={setArrowID}
+                driverTreeObj={driverTreeObj}
+                setDriverTreeObj={setDriverTreeObj}
                 cluster={clusters}
                 setClusters={setClusters}
                 createArrow={createArrow}
-                driverTreeObj={driverTreeObj}
-                setDriverTreeObj={setDriverTreeObj}
                 opacity={opacity}
                 setOpacity={setOpacity}
                 PDFState={PDFState}
@@ -431,35 +413,6 @@ const DriverTreePage = () => {
             selOutcome={selOutcome}
             setSelOutcome={setSelOutcome}
             driverTreeObj={driverTreeObj}
-          />
-          <Button variant="secondary" onClick={handleClose}>
-            Close
-          </Button>
-        </Modal.Body>
-      </Modal>
-
-      {/* for modifying arrows */}
-      <Modal
-        name="arrowModModal"
-        show={showArrowMod}
-        size="md"
-        centered
-        backdrop="static"
-        keyboard={false}
-        onHide={() => setArrowMod(false)}
-        // className={styles.cluster_modal}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title id="cluster-modal">Mod Arrow</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {/*change everything in the signup form components*/}
-          <ModArrows
-            onModalSubmit={onModalSubmit}
-            arrowID={arrowID}
-            setArrowMod={setArrowMod}
-            selOutcome={selOutcome}
-            setSelOutcome={setSelOutcome}
           />
           <Button variant="secondary" onClick={handleClose}>
             Close
