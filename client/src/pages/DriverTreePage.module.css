@@ -246,7 +246,7 @@ width: 150px;
 }
 .pdf_export {
   display: flex;
-  align-items: start;
+  align-items: flex-start;
   justify-content: center;
   height: fit-content;
 

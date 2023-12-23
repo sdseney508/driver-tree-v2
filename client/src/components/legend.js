@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { Col, Row } from "react-bootstrap";
 import styles from "./legend.module.css";
-import { getDriverByOutcome } from "../utils/drivers";
+// import { getDriverByOutcome } from "../utils/drivers";
 
-const Legend = ({ selOutcome }) => {
+const Legend = ({ driverTreeObj }) => {
   //the below function gets all of the stakeholders and abbreviations from the driverTreeObj, then removes any duplicates and places them in a list under the legend.
   // debugger;
-  const [driverTreeObj, setDriverTreeObj] = useState([]);
+  // const [driverTreeObj, setDriverTreeObj] = useState([]);
 
-useEffect(() => {
-      getDriverByOutcome(selOutcome.id).then((data) => {
-        setDriverTreeObj(data.data);
-      });
-    }, [selOutcome]);
+// useEffect(() => {
+//       getDriverByOutcome(selOutcome.id).then((data) => {
+//         setDriverTreeObj(data.data);
+//       });
+//     }, [selOutcome]);
 
 
       const stake =(driverTreeObj) => {

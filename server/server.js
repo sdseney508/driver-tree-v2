@@ -8,10 +8,10 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 var corsOptions = {
   //for online use
-  origin: "https://drivertreev3-3350125317e2.herokuapp.com",
+  // origin: "https://drivertreev3-3350125317e2.herokuapp.com",
 
   //for local use
-  // origin: "http://localhost:3000"
+  origin: "http://localhost:3000"
 // 
 };
 app.use(cors(corsOptions));
@@ -30,7 +30,6 @@ if (process.env.NODE_ENV === 'production') {
 app.use(routes);
 
 // turn on connection to db and server
-//{ force: false } to drop tables and recreate
 sequelize.sync().then(() => {
   app.listen(PORT, () => console.log(`Server is running on port ${PORT}.`));
 });

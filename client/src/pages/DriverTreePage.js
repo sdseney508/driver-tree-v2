@@ -72,8 +72,6 @@ const DriverTreePage = () => {
       outcomeByCommand,
       setSelOutcome,
       getOutcome,
-      getDriverByOutcome,
-      setDriverTreeObj
   });
     setState({ ...state, selOutcome: selOutcome });
     if (state.Role === "Stakeholder") {
@@ -94,7 +92,7 @@ const DriverTreePage = () => {
     setState({ ...state, selOutcome: selOutcome });
     navigate("/drivertree/" + selOutcome.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selOutcome, driverTreeObj]);
+  }, [selOutcome]);
 
   const createNewView = async (e) => {
     e.preventDefault();

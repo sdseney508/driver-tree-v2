@@ -26,7 +26,7 @@ function DriverArrows({
     fetchData();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   // window.location.reload();
-  }, [selOutcome, driverTreeObj]);
+  }, [driverTreeObj]);
 
 
     //this function maps each arrow in the arrows array to a Xarrow component

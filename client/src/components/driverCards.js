@@ -1147,7 +1147,7 @@ const DriverCards = ({
               <Row style={{ minHeight: "500px", width: "90%" }}>
                 <br />
                 <br />
-                <Legend selOutcome={selOutcome} />
+                <Legend driverTreeObj={driverTreeObj} />
               </Row>
             </Row>
           </Col>
