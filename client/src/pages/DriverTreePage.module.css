@@ -241,8 +241,8 @@ width: 150px;
   font-size: 0.75em;
   padding: 0px;
   height: 45px;
-  max-width: 200px;
-  width: 65%;
+  max-width: 190px;
+  width: 96%;
 }
 .pdf_export {
   display: flex;

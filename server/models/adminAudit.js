@@ -40,11 +40,11 @@ adminAudit.init(
             allowNull: false,
         },
         oldData: {
-            type: DataTypes.STRING,
+            type: DataTypes.TEXT,
             allowNull: false,
         },
         newData: {
-            type: DataTypes.STRING,
+            type: DataTypes.TEXT,
             allowNull: false,
         },  
     },

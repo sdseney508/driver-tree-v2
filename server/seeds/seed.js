@@ -10,6 +10,7 @@ const {
   stakeholders,
   state,
   status,
+  statusDefinition,
   User,
 } = require("../models");
 
@@ -72,6 +73,11 @@ const seedDatabase = async () => {
   });
 
   const statuses = await status.bulkCreate(statusData, {
+    individualHooks: true,
+    returning: true,
+  });
+
+  const statDef = await statusDefinition.bulkCreate(statusDefData, {
     individualHooks: true,
     returning: true,
   });

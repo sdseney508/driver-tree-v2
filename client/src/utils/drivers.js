@@ -96,8 +96,8 @@ const updateCluster = (id, body) => {
   return axios.put(apiURL + "/drivers/clusterUpdate/" + id, body);
 };
 
-const updateDriver = (id, body) => {
-  return axios.put(apiURL + "/drivers/update/" + id, body);
+const updateDriver = (id, userId, body) => {
+  return axios.put(apiURL + "/drivers/update/" + id + "/" + userId, body);
 };
 
 const updateOutcome = (id, body) => {

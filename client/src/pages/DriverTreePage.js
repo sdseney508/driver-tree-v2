@@ -1,12 +1,13 @@
 //page for viewing and updating op limits
 import React, { useState, useContext, useEffect } from "react";
 import { stateContext } from "../App";
+import { PDFExport, savePDF } from "@progress/kendo-react-pdf";
 import { Container, Row, Col, Button, Modal } from "react-bootstrap";
 import {
   createOutcome,
+  getDriverByOutcome,
   getOutcome,
   outcomeByCommand,
-  getDriverByOutcome,
 } from "../utils/drivers";
 
 import { createView, deleteView } from "../utils/views";
@@ -18,8 +19,11 @@ import { getAppData } from "../utils/auth";
 import styles from "./DriverTreePage.module.css";
 import OutcomeTable from "../components/OutcomeTable";
 import ClusterModal from "../components/ClusterModal";
-
+import { getArrows } from "../utils/arrows";
+import { getViewArrows } from "../utils/viewArrows";
+import { getViewCards } from "../utils/viewCards";
 import { exportElement } from "../utils/export-element";
+import { getUserViewsForOutcome } from "../utils/views";
 import ViewsTable from "../components/ViewsTable";
 import { Xwrapper } from "react-xarrows";
 
@@ -28,6 +32,7 @@ import { Xwrapper } from "react-xarrows";
 const DriverTreePage = () => {
   const [state, setState] = useContext(stateContext);
   const [clusters, setClusters] = useState([]);
+  const [arrows, setArrows] = useState("");
   const [createArrow, setCreateArrow] = useState(false);
   const [opacity, setOpacity] = useState(100);
   const [PDFState, setPDFState] = useState(false);
@@ -41,6 +46,9 @@ const DriverTreePage = () => {
   const [viewObj, setViewObj] = useState([]); //used to store the view object for the view cards
   const [viewArrows, setViewArrows] = useState([]); //used to store the view arrows for the view cards
   const [tableState, setTableState] = useState("outcome"); //used to toggle the table at the bottom of the page. const [connectionShow, setConnectionShow] = useState(false);
+
+  const container = React.useRef(null);
+  const pdfExportComponent = React.useRef(null);
 
   let tableStyle = { height: "25vh", width: "100%", overFlowY: "scroll" };
   let driverStyle = {
@@ -72,24 +80,62 @@ const DriverTreePage = () => {
       outcomeByCommand,
       setSelOutcome,
       getOutcome,
-  });
-    setState({ ...state, selOutcome: selOutcome });
-    if (state.Role === "Stakeholder") {
-      setRecordLockState(true);
+    });
+
+    let tout;
+    console.log(outcomeId);
+    if (!outcomeId) {
+      outcomeByCommand(state.command).then((data) => {
+        tout = data.data[0];
+        console.log(tout);
+        setSelOutcome(tout);
+      });
+      navigate("/allOutcomes/" + tout.id);
+    } else {
+      navigate("/allOutcomes/" + outcomeId);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    // setState({ ...state, selOutcome: selOutcome });
   }, []);
 
-  //this useEffect is there to refresh the driver tree elements whenever the selOutcome state is changed.
   useEffect(() => {
-    const getDriversData = async (selOutcome, viewId) => {
-      await getDriverByOutcome(selOutcome.id).then((data) => {
+    const getInfo = async () => {
+      let tId;
+      if (!selOutcome.id) {
+        tId = outcomeId;
+        selOutcome.id = outcomeId;
+      } else {
+        tId = selOutcome.id;
+      }
+      await getOutcome(tId).then((data) => {
+        setState({ ...state, selOutcome: data.data });
+      });
+      await getDriverByOutcome(tId).then((data) => {
         setDriverTreeObj(data.data);
+      });
+      await getArrows(tId).then((data) => {
+        setArrows(data.data);
+      });
+      await getUserViewsForOutcome({
+        userId: state.userId,
+        outcomeId: tId,
+      }).then((data) => {
+        if (data.data.length > 0) {
+          setViewId(data.data[0].id);
+        }
+      });
+      await getViewCards(viewId).then((data) => {
+        setViewObj(data.data);
+      });
+      await getViewArrows(viewId).then((data) => {
+        setViewArrows(data.data);
       });
     };
 
-    getDriversData(selOutcome);
-    setState({ ...state, selOutcome: selOutcome });
+    getInfo();
+    if (state.Role === "Stakeholder") {
+      setRecordLockState(true);
+    }
     navigate("/drivertree/" + selOutcome.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome]);
@@ -162,15 +208,42 @@ const DriverTreePage = () => {
   const svgForPdf = () => {
     //this function takes in an array of svgs from the arrows, pulls out the <path> and <g> elements, then creates a new svg element and appends the path and g elements to it.  it then returns the SVG element in a div for appending to the DOM.  The <div> element has an absolute position based on the position of the arrow svg element that is passed in as part of the entering arguement.
     //first we remove the first element in svgs
+    // debugger;
     let svgs = document.querySelectorAll("svg");
+
     let svgArray = Array.from(svgs);
     // eslint-disable-next-line array-callback-return
     svgArray.map((f, index) => {
       if (svgArray[index].id.slice(0, 3) === "SVG") {
+        let id = svgArray[index].id.slice(3);
+
+        // console.log(id);
+        let pCard = arrows.find((f) => f.id === parseInt(id));
+        let parentElem = document.getElementById(pCard.start);
+        //get parent element of parentElem
+        let grandParentElem = parentElem.parentElement;
+        console.log(parentElem);
+        console.log(grandParentElem);
+        console.log(parentElem.getBoundingClientRect().left);
+        console.log(grandParentElem.getBoundingClientRect().left);
+        // console.log(parentElem.getBoundingClientRect());
+        // console.log(svgArray[index]);
+        // console.log(svgArray[index].innerHTML);
         let innerSVG = svgArray[index].innerHTML;
+        // const tempDiv = document.createElement("div");
+        // tempDiv.innerHTML = innerSVG;
+        // const anumateElem = tempDiv.querySelector("animate");
+        // console.log(anumateElem);
+        // if (anumateElem) {
+        //   anumateElem.remove();
+        // }
+        // const modSVG = tempDiv.innerHTML;
+        // svgArray[index].innerHTML = modSVG;
+
+        // console.log(innerSVG);
         let width = svgArray[index].getBoundingClientRect().width;
-        if (width > 245) {
-          width = 245;
+        if (width > 300) {
+          width = 300;
         }
         let height = svgArray[index].getBoundingClientRect().height;
 
@@ -185,10 +258,11 @@ const DriverTreePage = () => {
 
         let svgtop = svgArray[index].getBoundingClientRect().top;
         //the additional offset accounts for delta between cards and column widths
-        let svgleft = svgArray[index].getBoundingClientRect().left - 8;
+        // console.log(parentElem.getBoundingClientRect().right);
+        let svgleft = svgArray[index].getBoundingClientRect().left * 0.997;
         svgdiv.setAttribute(
           "style",
-          `position: absolute; top: ${svgtop}px; left: ${svgleft}px; z-index: 50; width: ${width}px; height: ${height}px;`
+          `position: absolute; top: ${svgtop}px; left: ${svgleft}px; z-index: 10; width: ${width}px; height: ${height}px;`
         );
 
         svgdiv.innerHTML = svgstuff;
@@ -212,14 +286,18 @@ const DriverTreePage = () => {
   useEffect(() => {
     //needed to prevent a random pdf from generating on every page load
     if (PDFState && document.readyState === "complete") {
+      setTableState("");
       svgForPdf();
       let options = {
         papersize: "auto",
         margin: "25px",
         landscape: true,
       };
-      let pdfExport = document.getElementById("pdf-export");
-      exportElement(pdfExport, options, selOutcome.outcomeTitle);
+      if (pdfExportComponent.current) {
+        pdfExportComponent.current.save();
+      }
+      // let pdfExport = document.getElementById("pdf-export");
+      // exportElement(pdfExport, options, selOutcome.outcomeTitle);
       window.location.reload();
     }
     setPDFState(false);
@@ -294,39 +372,49 @@ const DriverTreePage = () => {
               </Col>
             )}
           </div>
-          <Row
+          <PDFExport
+            ref={pdfExportComponent}
+            paperSize="auto"
+            margin={40}
+            
+          >
+            <Row
             id="pdf-export"
             style={PDFState ? pdfStyle : showTable.driverStyle}
             className={styles.pdf_export}
           >
             <Xwrapper>
-              <DriverCards
-                driverTreeObj={driverTreeObj}
-                setDriverTreeObj={setDriverTreeObj}
-                cluster={clusters}
-                setClusters={setClusters}
-                createArrow={createArrow}
-                opacity={opacity}
-                setOpacity={setOpacity}
-                PDFState={PDFState}
-                recordLockState={recordLockState}
-                state={state}
-                setCreateArrow={setCreateArrow}
-                setArrowMod={setArrowMod}
-                selOutcome={selOutcome}
-                setSelOutcome={setSelOutcome}
-                showArrowMod={showArrowMod}
-                tableState={tableState}
-                viewId={viewId}
-                setViewId={setViewId}
-                viewObj={viewObj}
-                setViewObj={setViewObj}
-                viewArrows={viewArrows}
-                setViewArrows={setViewArrows}
-              />
+              {driverTreeObj && arrows && state.selOutcome ? (
+                <DriverCards
+                  arrows={arrows}
+                  setArrows={setArrows}
+                  driverTreeObj={driverTreeObj}
+                  setDriverTreeObj={setDriverTreeObj}
+                  cluster={clusters}
+                  setClusters={setClusters}
+                  createArrow={createArrow}
+                  opacity={opacity}
+                  setOpacity={setOpacity}
+                  PDFState={PDFState}
+                  recordLockState={recordLockState}
+                  state={state}
+                  setCreateArrow={setCreateArrow}
+                  setArrowMod={setArrowMod}
+                  selOutcome={state.selOutcome}
+                  setSelOutcome={setSelOutcome}
+                  showArrowMod={showArrowMod}
+                  tableState={tableState}
+                  viewId={viewId}
+                  setViewId={setViewId}
+                  viewObj={viewObj}
+                  setViewObj={setViewObj}
+                  viewArrows={viewArrows}
+                  setViewArrows={setViewArrows}
+                />
+              ) : null}
             </Xwrapper>
-          </Row>
-
+            </Row>
+          </PDFExport>
           <div style={showTable.tableStyle}>
             {state.command && tableState === "outcome" ? (
               <OutcomeTable

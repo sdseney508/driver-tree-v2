@@ -37,6 +37,7 @@ const DriverNavbar = () => {
     await outcomeByCommand(state.command).then((data) => {
         toutcomeID=data.data[0].id;
     });
+    console.log(toutcomeID);
     navigate("/driverTree/" + toutcomeID);
   };
 

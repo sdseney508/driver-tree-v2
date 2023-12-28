@@ -1,7 +1,9 @@
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import apiURL from "./apiURL";
-// import {  setState } from "react";
+import {outcomeByCommand} from "./drivers"
+
+
 
 const authHeader = () => {
   let id_token = localStorage.getItem("id_token");
@@ -37,7 +39,6 @@ const getAppData = async ({
   outcomeId,
   state,
   setState,
-  outcomeByCommand,
   setSelOutcome,
   getOutcome
 }) => {

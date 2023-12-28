@@ -2,12 +2,13 @@
 import React, { useEffect, useState } from "react";
 // import Select from "react-select";
 import { Col, Card, Row, Button, Form, Modal } from "react-bootstrap";
-import { Xwrapper } from "react-xarrows"; //for the arrows
+import { Xwrapper, useXarrow } from "react-xarrows"; //for the arrows
 import { deleteArrow } from "../utils/arrows";
 import styles from "../pages/DriverTreePage.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowUp } from "@fortawesome/free-solid-svg-icons";
 import { faFlagUsa } from "@fortawesome/free-solid-svg-icons";
+import Xarrow from "react-xarrows";
 import Legend from "../components/legend";
 import { useNavigate } from "react-router";
 import {
@@ -36,6 +37,8 @@ import { faCopyright } from "@fortawesome/free-solid-svg-icons";
 import ModArrows from "../components/ModArrows";
 
 const DriverCards = ({
+  arrows,
+  setArrows,
   createArrow,
   driverTreeObj,
   setDriverTreeObj,
@@ -61,24 +64,23 @@ const DriverCards = ({
   //4.  Draws the correct clusters around the selected drivers based on the cluster field in the drivers table
   //The arrow function is contained in the arrows.js module.  It creates the arrows that connect the cards
   let navigate = useNavigate();
-  const [arrowID, setArrowID] = useState('');
+  const [arrowID, setArrowID] = useState("");
   const [selectedElements, setSelectedElements] = useState([]);
   const [show, setShow] = useState(false);
-  const [arrows, setArrows] = useState([]);
+  // const [arrows, setArrows] = useState([]);
   const [connectionShow, setConnectionShow] = useState(false);
   const [showArrowMod, setArrowMod] = useState(false);
   // const [showClusterModal, setClusterModal] = useState(false);
   const [, setArrowModal] = useState(false);
-  // const [driverTreeObj, setDriverTreeObj] = useState([]);
 
   useEffect(() => {
     const getDriversData = async (selOutcome, viewId) => {
       // await getDriverByOutcome(selOutcome.id).then((data) => {
       //   setDriverTreeObj(data.data);
       // });
-      await getArrows(selOutcome.id).then((data) => {
-        setArrows(data.data);
-      });
+      // await getArrows(selOutcome.id).then((data) => {
+      //   setArrows(data.data);
+      // });
       if (viewId) {
         await getViewCards(viewId).then((data) => {
           setViewObj(data.data);
@@ -247,14 +249,14 @@ const DriverCards = ({
     let outcomeBody = { status: newStatus };
     updateOutcome(driverTreeObj[0].outcomeId, outcomeBody);
 
-    await getOutcome(selOutcome.id).then((data) => {
-      setSelOutcome(data.data);
-    });
+    // await getOutcome(selOutcome.id).then((data) => {
+    //   setSelOutcome(data.data);
+    // });
+
     // //now update the driver tree object
     await getDriverByOutcome(selOutcome.id).then((data) => {
       setDriverTreeObj(data.data);
     });
-    // window.location.reload();
   };
 
   //used in the Tier cards to create the driver cards for both the regular and the cluser
@@ -266,6 +268,7 @@ const DriverCards = ({
         data-cardid={cardData.id}
         data-tier={tier}
         data-cluster={cardData.cluster}
+        key={"card"+cardData.id}
         draggable="true"
         onDragStart={drag}
         style={viewCheck != -1 ? { opacity: 1 } : { opacity: opacity }}
@@ -486,7 +489,6 @@ const DriverCards = ({
 
   async function drop(e) {
     //on drop, sets the drivers new Tier and subTier as required.  The driver is then updated in the database so it will be placed in its new place on the next render
-    e.preventDefault();
     let aBody = {};
     let dragStart = e.dataTransfer.getData("dragStart");
     let dragEnd = e.target.dataset.tier;
@@ -498,10 +500,11 @@ const DriverCards = ({
       subTier: e.target.dataset.subtier,
     };
 
-    await updateDriver(data, body);
+    await updateDriver(data, state.userId, body);
     //look through the arrows state to find any arrows with the affected cardId as a start or endpoint then update.
     if (dragStart === dragEnd) {
       //return, no change in tier so no need to change arrow logic and DOM refreshed at bottom
+      // window.location.reload();
     } else {
       //The user moved the card up / down a tier, so the arrows need to be updated to reflect the new tier
       //cycle through arrow array and update the arrows as needed
@@ -572,18 +575,17 @@ const DriverCards = ({
         }
         if (aBody.start) {
           await updateArrow(arrows[i].id, aBody);
-
+          getArrows(selOutcome.id).then((data) => {
+            setArrows(data.data);
+          });
           aBody = {};
         }
       }
     }
+
     await getDriverByOutcome(selOutcome.id).then((data) => {
       setDriverTreeObj(data.data);
     });
-    // await getOutcome(selOutcome.id).then((data) => {
-    //   setSelOutcome(data.data);
-    // });
-
     window.location.reload();
   }
 
@@ -643,17 +645,17 @@ const DriverCards = ({
         "Do you want to update all future cards in this driver chain to this status?  This will also change the status of any cards in a future cluster if this card is a driver of the entire cluster."
       );
       if (sures) {
-        cascadeUpdate(
+        await cascadeUpdate(
           arrows,
           e.target.dataset.cardid,
           e.target.dataset.tier,
           e.target.value
         );
       } else {
-        await updateDriver(e.target.dataset.cardid, body);
+        await updateDriver(e.target.dataset.cardid, state.userId, body);
       }
     } else {
-      await updateDriver(e.target.dataset.cardid, body);
+      await updateDriver(e.target.dataset.cardid, state.userId, body);
     }
     await getOutcome(selOutcome.id).then((data) => {
       setSelOutcome(data.data);
@@ -1144,7 +1146,7 @@ const DriverCards = ({
                   </Row>
                 </Card.Body>
               </Card>
-              <Row style={{ minHeight: "500px", width: "90%" }}>
+              <Row style={{ minHeight: "500px", width: "87%" }}>
                 <br />
                 <br />
                 <Legend driverTreeObj={driverTreeObj} />
@@ -1187,7 +1189,10 @@ const DriverCards = ({
             </p>
           </Col>
 
-          {driverTreeObj && arrows? (
+ 
+            {/* {arrowFunc()} */}
+
+          {driverTreeObj ? (
             <DriverArrows
               arrows={arrows}
               setArrows={setArrows}

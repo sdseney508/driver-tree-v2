@@ -1,0 +1,93 @@
+[
+    {
+      "statusDefinition": "On Schedule",
+      "statusId": "1",
+      "outcomeId": "1"
+    },
+    {
+      "statusDefinition": ">1 month behind schedule",
+      "statusId": "2",
+      "outcomeId": "1"
+    },
+    {
+      "statusDefinition": ">2 months behind schedule",
+      "statusId": "3",
+      "outcomeId": "1"
+    },
+    {
+      "statusDefinition": "On Schedule",
+      "statusId": "1",
+      "outcomeId": "2"
+    },
+    {
+      "statusDefinition": ">1 month behind schedule",
+      "statusId": "2",
+      "outcomeId": "2"
+    },
+    {
+      "statusDefinition": ">2 months behind schedule",
+      "statusId": "3",
+      "outcomeId": "2"
+    },
+    {
+      "statusDefinition": "On Schedule",
+      "statusId": "1",
+      "outcomeId": "3"
+    },
+    {
+      "statusDefinition": ">1 month behind schedule",
+      "statusId": "2",
+      "outcomeId": "3"
+    },
+    {
+      "statusDefinition": ">2 months behind schedule",
+      "statusId": "3",
+      "outcomeId": "3"
+    },
+    {
+      "statusDefinition": "On Schedule",
+      "statusId": "1",
+      "outcomeId": "4"
+    },
+    {
+      "statusDefinition": ">1 month behind schedule",
+      "statusId": "2",
+      "outcomeId": "4"
+    },
+    {
+      "statusDefinition": ">2 months behind schedule",
+      "statusId": "3",
+      "outcomeId": "4"
+    },
+    {
+      "statusDefinition": "On Schedule",
+      "statusId": "1",
+      "outcomeId": "5"
+    },
+    {
+      "statusDefinition": ">1 month behind schedule",
+      "statusId": "2",
+      "outcomeId": "5"
+    },
+    {
+      "statusDefinition": ">2 months behind schedule",
+      "statusId": "3",
+      "outcomeId": "5"
+    },
+    {
+      "statusDefinition": "On Schedule",
+      "statusId": "1",
+      "outcomeId": "6"
+    },
+    {
+      "statusDefinition": ">1 month behind schedule",
+      "statusId": "2",
+      "outcomeId": "6"
+    },
+    {
+      "statusDefinition": ">2 months behind schedule",
+      "statusId": "3",
+      "outcomeId": "6"
+    }
+
+  ]

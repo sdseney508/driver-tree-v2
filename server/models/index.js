@@ -1,4 +1,3 @@
-const { stat } = require("@babel/core/lib/gensync-utils/fs");
 const accountStatus = require("./accountStatus");
 const adminAudit = require("./adminAudit");
 const arrows = require("./arrows");
@@ -88,7 +87,13 @@ User.hasMany(views, {
   onDelete: "CASCADE",
 });
 
+status.belongsToMany(outcomes, {
+  through: "statusDefinition",
+});
 
+outcomes.belongsToMany(status, {
+  through: "statusDefinition",
+});
 
 module.exports = {
   accountStatus,

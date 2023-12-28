@@ -7,6 +7,7 @@ const { Op } = require("sequelize");
 //create a new drivers; 
 router.post("/new/:userId", async (req, res) => {
   let driversData = [];
+  const transaction = await sequelize.transaction();
   try {
     //first check for the highest subTier number under a tier and
     //outcome and increment it by 1
@@ -18,25 +19,25 @@ router.post("/new/:userId", async (req, res) => {
     });
     let body = req.body;
     body.subTier = subTier + 1;
-    driversData = await drivers.create(req.body);
+    driversData = await drivers.create(req.body, {
+      transaction,
+    });
+    await adminAudit.create({
+      action: "Create",
+      model: "drivers",
+      tableUid: driversData.id,
+      fieldName: "All",
+      newData: JSON.stringify(driversData),
+      oldData: "new Driver",
+      userId: req.params.userId,
+    },
+    {transaction}
+    );
+    await transaction.commit();
     res.status(200).json(driversData);
   } catch (err) {
     res.status(400).json(err);
   }
-  // try {
-  //   console.log("in the admin log try");
-  //   console.log(JSON.stringify(driversData));
-  //   let log = await adminAudit.create({
-  //     action: "Create",
-  //     model: "drivers",
-  //     tableUid: driversData.id,
-  //     fieldName: "All",
-  //     newData: JSON.stringify(driversData),
-  //     userId: req.params.userId,
-  //   });
-  // } catch (err) {
-  //   res.status(400).json(err);
-  // }
 });
 
 //this route is only for database seeding and testing
@@ -183,19 +184,38 @@ router.put("/clusterUpdate/:id", async (req, res) => {
 });
 
 //update drivers info
-router.put("/update/:id", async (req, res) => {
+router.put("/update/:id/:userId", async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
-    console.log("in the update driver route, id: "+req.params.id);
-    console.log(req.body);
-    const driversData = await drivers.update(req.body, {
+    const oldData = await drivers.findOne({
       where: {
         id: req.params.id,
       },
     });
-    if (!driversData) {
+    if (!oldData) {
       res.status(404).json({ message: "No drivers found with this id!" });
       return;
     }
+    const driversData = await drivers.update(req.body, {
+      where: {
+        id: req.params.id,
+      },
+      transaction,
+    });
+
+    await adminAudit.create({
+      action: "Update",
+      model: "drivers",
+      tableUid: req.params.id,
+      fieldName: "All",
+      newData: JSON.stringify(req.body),
+      oldData: JSON.stringify(oldData),
+      userId: req.params.userId,
+    },
+    {transaction}
+    );
+    await transaction.commit();
+
     res.status(200).json(driversData);
   } catch (err) {
     res.status(400).json(err);

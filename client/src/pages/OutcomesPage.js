@@ -22,15 +22,15 @@ const OutcomesPage = () => {
   const [state, setState] = useContext(stateContext);
   const [selOutcome, setSelOutcome] = useState({});
   const [driverTreeObj, setDriverTreeObj] = useState([]);
-  const [selDrivers, setSelDrivers] = useState({});
   const [viewId, setViewId] = useState(null);
   //These are the initial states for the select boxes.  They are set to the first value in the array, which is the default value
   let navigate = useNavigate();
 
   const { outcomeId } = useParams();
+
   //using the initial useEffect hook to open up the draft oplimits and prefill the form
   useEffect(() => {
-    getAppData(
+    getAppData({
       navigate,
       state,
       setState,
@@ -38,13 +38,23 @@ const OutcomesPage = () => {
       outcomeByCommand,
       setSelOutcome,
       getOutcome,
-      getDriverByOutcome,
-      setDriverTreeObj, viewId, setViewId
-    );
+  });
+
+    let tout;
+    console.log(outcomeId);
+    if (!outcomeId) {
+    outcomeByCommand(state.command).then((data) => {
+        tout = data.data[0];
+        console.log(tout);
+        setSelOutcome(tout);
+      });
+      navigate("/allOutcomes/" + tout.id);
+    } else {
+      navigate("/allOutcomes/" + outcomeId);}
+
     // setState({ ...state, selOutcome: selOutcome });
   }, []);
 
-  
   //sets the initial selection of the drop down lists for the signatures, i couldnt get the map function to work, so brute force here we go.
   useEffect(() => {
     const getDrivers = async () => {
@@ -95,9 +105,6 @@ const OutcomesPage = () => {
     setSelOutcome({ ...selOutcome, [e.target.name]: e.target.value });
     let body = { [e.target.name]: e.target.value };
     updateOutcome(selOutcome.id, body);
-    // getOutcome(selOutcome.id).then((data) => {
-    //   setSelOutcome(data.data);
-    // });
   };
 
   const handleFormSubmit = async (e) => {
@@ -118,6 +125,7 @@ const OutcomesPage = () => {
   };
 
   const driverPage = () => {
+    console.log(selOutcome.id);
     navigate("/drivertree/" + selOutcome.id);
   };
 
@@ -347,16 +355,18 @@ const OutcomesPage = () => {
               </Col>
             </Row>
 
-            {selOutcome && state.command ?<Row style={{ height: "250px" }}>
-              <OutcomeTable
-                state={state}
-                setState={setState}
-                selOutcome={selOutcome}
-                setSelOutcome={setSelOutcome}
-                command={state.command}
-                userId={state.userId}
-              />
-            </Row>: null}
+            {selOutcome && state.command ? (
+              <Row style={{ height: "250px" }}>
+                <OutcomeTable
+                  state={state}
+                  setState={setState}
+                  selOutcome={selOutcome}
+                  setSelOutcome={setSelOutcome}
+                  command={state.command}
+                  userId={state.userId}
+                />
+              </Row>
+            ) : null}
           </div>
         </Container>
       </div>
