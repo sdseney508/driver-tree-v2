@@ -1,7 +1,7 @@
 //page for viewing and updating op limits
 import React, { useState, useContext, useEffect } from "react";
 import { stateContext } from "../App";
-import { PDFExport, savePDF } from "@progress/kendo-react-pdf";
+import { PDFExport } from "@progress/kendo-react-pdf";
 import { Container, Row, Col, Button, Modal } from "react-bootstrap";
 import {
   createOutcome,
@@ -22,7 +22,7 @@ import ClusterModal from "../components/ClusterModal";
 import { getArrows } from "../utils/arrows";
 import { getViewArrows } from "../utils/viewArrows";
 import { getViewCards } from "../utils/viewCards";
-import { exportElement } from "../utils/export-element";
+// import { exportElement } from "../utils/export-element";
 import { getUserViewsForOutcome } from "../utils/views";
 import ViewsTable from "../components/ViewsTable";
 import { Xwrapper } from "react-xarrows";
@@ -47,7 +47,6 @@ const DriverTreePage = () => {
   const [viewArrows, setViewArrows] = useState([]); //used to store the view arrows for the view cards
   const [tableState, setTableState] = useState("outcome"); //used to toggle the table at the bottom of the page. const [connectionShow, setConnectionShow] = useState(false);
 
-  const container = React.useRef(null);
   const pdfExportComponent = React.useRef(null);
 
   let tableStyle = { height: "25vh", width: "100%", overFlowY: "scroll" };
@@ -83,19 +82,16 @@ const DriverTreePage = () => {
     });
 
     let tout;
-    console.log(outcomeId);
     if (!outcomeId) {
       outcomeByCommand(state.command).then((data) => {
         tout = data.data[0];
-        console.log(tout);
-        setSelOutcome(tout);
+        setSelOutcome(data.data[0]);
       });
       navigate("/allOutcomes/" + tout.id);
     } else {
       navigate("/allOutcomes/" + outcomeId);
     }
 
-    // setState({ ...state, selOutcome: selOutcome });
   }, []);
 
   useEffect(() => {
@@ -215,32 +211,7 @@ const DriverTreePage = () => {
     // eslint-disable-next-line array-callback-return
     svgArray.map((f, index) => {
       if (svgArray[index].id.slice(0, 3) === "SVG") {
-        let id = svgArray[index].id.slice(3);
-
-        // console.log(id);
-        let pCard = arrows.find((f) => f.id === parseInt(id));
-        let parentElem = document.getElementById(pCard.start);
-        //get parent element of parentElem
-        let grandParentElem = parentElem.parentElement;
-        console.log(parentElem);
-        console.log(grandParentElem);
-        console.log(parentElem.getBoundingClientRect().left);
-        console.log(grandParentElem.getBoundingClientRect().left);
-        // console.log(parentElem.getBoundingClientRect());
-        // console.log(svgArray[index]);
-        // console.log(svgArray[index].innerHTML);
         let innerSVG = svgArray[index].innerHTML;
-        // const tempDiv = document.createElement("div");
-        // tempDiv.innerHTML = innerSVG;
-        // const anumateElem = tempDiv.querySelector("animate");
-        // console.log(anumateElem);
-        // if (anumateElem) {
-        //   anumateElem.remove();
-        // }
-        // const modSVG = tempDiv.innerHTML;
-        // svgArray[index].innerHTML = modSVG;
-
-        // console.log(innerSVG);
         let width = svgArray[index].getBoundingClientRect().width;
         if (width > 300) {
           width = 300;
@@ -288,11 +259,11 @@ const DriverTreePage = () => {
     if (PDFState && document.readyState === "complete") {
       setTableState("");
       svgForPdf();
-      let options = {
-        papersize: "auto",
-        margin: "25px",
-        landscape: true,
-      };
+      // let options = {
+      //   papersize: "auto",
+      //   margin: "25px",
+      //   landscape: true,
+      // };
       if (pdfExportComponent.current) {
         pdfExportComponent.current.save();
       }

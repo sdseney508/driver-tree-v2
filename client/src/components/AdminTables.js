@@ -181,6 +181,7 @@ function AdminTables({ selectedTable, setSelectedTable }) {
             break;
           case "views":
             await updateView(id, body);
+            break;
           default:
         }
       },

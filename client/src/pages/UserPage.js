@@ -2,7 +2,7 @@
 import React, { useContext, useEffect } from "react";
 import { stateContext } from "../App";
 import { useNavigate } from "react-router-dom";
-import { getUser, getUserData, loggedIn, getToken } from "../utils/auth";
+import { getUserData} from "../utils/auth";
 // import { getCarousel } from "../utils/carousel";
 import UserCarousel from "../components/UserCarousel";
 import "./UserPage.css";

@@ -23,6 +23,20 @@ router.get('/', async (req, res) => {
     }
 });
 
+//get all the statusDef's for a specific outcome.  This is used to populate the legend on the drivertreepage
+router.get('/byOutcome/:id', async (req, res) => {
+    try {
+        const statusDefData = await statusDefinition.findAll({
+            where: {
+                outcomeId: req.params.id,
+            },
+        });
+        res.status(200).json(statusDefData);
+    } catch (err) {
+        res.status(500).json(err);
+    }
+});
+
 //get specific statusDefinition for future use
 router.get('/:id', async (req, res) => {
     try {

@@ -1,5 +1,5 @@
 //page for viewing and updating op limits
-import React, { useState, useContext, useEffect, setState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { getUser, loggedIn, getToken } from "../utils/auth";
 import { stateContext } from "../App";
 import { Container, Row, Col, Button, Modal } from "react-bootstrap";

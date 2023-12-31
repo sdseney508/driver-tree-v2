@@ -64,6 +64,7 @@ const DriverPage = () => {
 
     const getAppData = async () => {
       if (!outcomeId) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         outcomeId = 1;
       }
       await getDriverByOutcome(outcomeId).then((data) => {
@@ -75,6 +76,7 @@ const DriverPage = () => {
         setSelOutcome(top);
       });
       if (!driverId) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         driverId = selDrivers[0].id;
       }
       await getDriverById(driverId).then((data) => {
@@ -376,11 +378,6 @@ const generateAllQuads = (selDrivers) => {
       scale: 0.55,
       margin: "1cm",
     });
-  };
-
-  const onModalSubmit = (e) => {
-    e.preventDefault();
-    handleClose();
   };
 
   //close the modal

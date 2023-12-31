@@ -22,7 +22,6 @@ const OutcomesPage = () => {
   const [state, setState] = useContext(stateContext);
   const [selOutcome, setSelOutcome] = useState({});
   const [driverTreeObj, setDriverTreeObj] = useState([]);
-  const [viewId, setViewId] = useState(null);
   //These are the initial states for the select boxes.  They are set to the first value in the array, which is the default value
   let navigate = useNavigate();
 

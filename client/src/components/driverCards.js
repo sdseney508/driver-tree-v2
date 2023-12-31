@@ -2,13 +2,12 @@
 import React, { useEffect, useState } from "react";
 // import Select from "react-select";
 import { Col, Card, Row, Button, Form, Modal } from "react-bootstrap";
-import { Xwrapper, useXarrow } from "react-xarrows"; //for the arrows
+import { Xwrapper } from "react-xarrows"; //for the arrows
 import { deleteArrow } from "../utils/arrows";
 import styles from "../pages/DriverTreePage.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowUp } from "@fortawesome/free-solid-svg-icons";
 import { faFlagUsa } from "@fortawesome/free-solid-svg-icons";
-import Xarrow from "react-xarrows";
 import Legend from "../components/legend";
 import { useNavigate } from "react-router";
 import {
@@ -35,6 +34,8 @@ import DriverArrows from "./DrawArrows";
 import { CreateAnArrow } from "./ArrowFunction";
 import { faCopyright } from "@fortawesome/free-solid-svg-icons";
 import ModArrows from "../components/ModArrows";
+import { getStatusDefinitionByOutcome } from "../utils/statusDefinition";
+
 
 const DriverCards = ({
   arrows,
@@ -75,12 +76,6 @@ const DriverCards = ({
 
   useEffect(() => {
     const getDriversData = async (selOutcome, viewId) => {
-      // await getDriverByOutcome(selOutcome.id).then((data) => {
-      //   setDriverTreeObj(data.data);
-      // });
-      // await getArrows(selOutcome.id).then((data) => {
-      //   setArrows(data.data);
-      // });
       if (viewId) {
         await getViewCards(viewId).then((data) => {
           setViewObj(data.data);
@@ -1146,10 +1141,10 @@ const DriverCards = ({
                   </Row>
                 </Card.Body>
               </Card>
-              <Row style={{ minHeight: "500px", width: "87%" }}>
+              <Row style={{ minHeight: "500px", width: "90%" }}>
                 <br />
                 <br />
-                <Legend driverTreeObj={driverTreeObj} />
+                {driverTreeObj ? <Legend driverTreeObj={driverTreeObj} selOutcome={selOutcome}  />: null}
               </Row>
             </Row>
           </Col>
@@ -1195,15 +1190,11 @@ const DriverCards = ({
           {driverTreeObj ? (
             <DriverArrows
               arrows={arrows}
-              setArrows={setArrows}
               ArrowModal={ArrowModal}
-              driverTreeObj={driverTreeObj}
-              selOutcome={selOutcome}
-              viewId={viewId}
               opacity={opacity}
               tableState={tableState}
               viewArrows={viewArrows}
-              setViewArrows={setViewArrows}
+              viewId={viewId}
             />
           ) : null}
         </Xwrapper>

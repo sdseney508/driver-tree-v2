@@ -19,3 +19,39 @@
 .status_col {
   font-size: .75rem;
 }
+
+.red_status {
+  background-color: rgb(255, 2, 2);
+  position: absolute;
+  color: rgb(255, 2, 2);
+  top: 0;
+  right: 0;
+  width: 15px;
+  height: 15px;
+  padding: 0px;
+  text-align: center;
+}
+
+.yellow_status {
+  background-color: rgb(251, 255, 2);
+  position: absolute;
+  color: rgb(251, 255, 2);
+  top: 0;
+  right: 0;
+  width: 15px;
+  height: 15px;
+  padding: 0px;
+  text-align: center;
+}
+
+.green_status {
+  background-color: rgb(44, 255, 2);
+  position: absolute;
+  color: rgb(44, 255, 2);
+  top: 0;
+  right: 0;
+  width: 15px;
+  height: 15px;
+  padding: 0px;
+  text-align: center;
+}

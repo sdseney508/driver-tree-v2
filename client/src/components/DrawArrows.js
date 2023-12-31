@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Xarrow from "react-xarrows";
-import { getArrows } from "../utils/arrows";
 
 function DriverArrows({
   arrows, 
@@ -10,28 +9,14 @@ function DriverArrows({
   viewArrows,
   tableState,
 }) {
-  //rerenders the arrows on selOutcome change
-  // const [arrows, setArrows] = useState([]);
-  // useEffect(() => {
-  //   //get the arrows from the database
-  //   // async function fetchData() {
-  //   //   await getArrows(selOutcome.id).then((data)=> {
-  //   //     setArrows(data.data);
-  //   //   });
-  //   // }
-  //   // fetchData();
-  //   // console.log("arrows", arrows);
-  // }, [driverTreeObj]);
-
-
+  console.log("arrows", arrows);
     //this function maps each arrow in the arrows array to a Xarrow component
   const arrowFunc = () => {
-    console.log("arrows", arrows);
     return arrows.map((f, index) => {
       //see if the arrow is in the view, 
       let opVal = 1;
       let viewCheck;
-      if (viewArrows) {viewCheck = viewArrows.findIndex((v) => v.arrowId == arrows[index].id);}
+      if (viewArrows) {viewCheck = viewArrows.findIndex((v) => v.arrowId === arrows[index].id);}
       //set initial condition for opacity
       if (viewCheck === -1 && viewId) {
         opVal = opacity;

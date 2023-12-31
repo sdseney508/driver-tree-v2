@@ -21,6 +21,7 @@ const driversData = require("./driversData.json");
 const outcomesData = require("./outcomesData.json");
 const roleData = require("./roleData.json");
 const stakeholderData = require("./stakeholderData.json");
+const statusDefData = require("./statusDefData.json");
 const stateData = require("./stateData.json");
 const statusData = require("./statusData.json");
 const userData = require("./userData.json");
