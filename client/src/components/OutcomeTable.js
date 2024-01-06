@@ -18,7 +18,6 @@ import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CS
 //and displayed in the form.
 //this is using the community edition and react hooks to selectively render the table
 function OutcomeTable({
-  state, setState,
   selOutcome,
   setSelOutcome,
   command
@@ -39,7 +38,7 @@ function OutcomeTable({
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [selOutcome]);
 
   // Each Column Definition results in one Column.  For now, we are only going to set the 7 key columns that the users might search on
   const [columnDefs, setColumnDefs] = useState([

@@ -22,7 +22,7 @@ const OutcomesPage = () => {
   const [state, setState] = useContext(stateContext);
   const [selOutcome, setSelOutcome] = useState({});
   const [driverTreeObj, setDriverTreeObj] = useState([]);
-  //These are the initial states for the select boxes.  They are set to the first value in the array, which is the default value
+  //These are the initial states for the select boxes.  They are set to the first valuein the array, which is the default value
   let navigate = useNavigate();
 
   const { outcomeId } = useParams();
@@ -40,11 +40,9 @@ const OutcomesPage = () => {
   });
 
     let tout;
-    console.log(outcomeId);
     if (!outcomeId) {
     outcomeByCommand(state.command).then((data) => {
         tout = data.data[0];
-        console.log(tout);
         setSelOutcome(tout);
       });
       navigate("/allOutcomes/" + tout.id);
@@ -57,6 +55,9 @@ const OutcomesPage = () => {
   //sets the initial selection of the drop down lists for the signatures, i couldnt get the map function to work, so brute force here we go.
   useEffect(() => {
     const getDrivers = async () => {
+      if(!selOutcome.id){
+        selOutcome.id = outcomeId;
+      }
       await getDriverByOutcome(selOutcome.id).then((data) => {
         let top = data.data;
         setDriverTreeObj(top);
@@ -73,16 +74,16 @@ const OutcomesPage = () => {
 
   const barriers = () => {
     if (!driverTreeObj[0]) {
-      return <div></div>;
+      return <div key={'nullbarrier'}></div>;
     } else {
       return driverTreeObj.map((f, index) => {
         if (f.tierLevel !== 1) {
           return <div></div>;
         } else {
           return (
-            <div>
-              <Link to={`/drpage/${selOutcome.id}/${driverTreeObj[index].id}`}>
-                <p>{driverTreeObj[index].problemStatement}</p>
+            <div key={'barriers'+index}>
+              <Link to={`/drpage/${selOutcome.id}/${driverTreeObj[index].id}`} key={'barrierslink'+index}>
+                <p key={'p'+index}>{driverTreeObj[index].problemStatement}</p>
               </Link>
             </div>
           );
@@ -100,7 +101,7 @@ const OutcomesPage = () => {
   };
 
   const handleInputChange = (e) => {
-    e.preventDefault();
+    // e.preventDefault();
     setSelOutcome({ ...selOutcome, [e.target.name]: e.target.value });
     let body = { [e.target.name]: e.target.value };
     updateOutcome(selOutcome.id, body);
@@ -115,7 +116,7 @@ const OutcomesPage = () => {
         problemStatement: e.target.value,
       };
     } else {
-      body = { [e.target.name]: e.target.value };
+      body = {[e.target.name]: e.target.value };
     }
     updateOutcome(selOutcome.id, body);
     await getOutcome(selOutcome.id).then((data) => {
@@ -124,7 +125,6 @@ const OutcomesPage = () => {
   };
 
   const driverPage = () => {
-    console.log(selOutcome.id);
     navigate("/drivertree/" + selOutcome.id);
   };
 
@@ -134,17 +134,12 @@ const OutcomesPage = () => {
         <Container>
           <div className={styles.my_div}>
             <Col className={styles.my_col}>
-              {/* <Col className={styles.my_col} sm={6} md={3} lg={3}> */}
               <Button className="p-1 m-1" onClick={newOutcome}>
                 Create New Outcome
               </Button>
-              {/* </Col> */}
-              {/* <Col  className={styles.my_col} sm={6} md={3} lg={3}> */}
               <Button className="p-1 m-1" onClick={driverPage}>
                 View Driver Tree
               </Button>
-
-              {/* </Col> */}
             </Col>
 
             <Form className={styles.my_form}>
@@ -154,7 +149,7 @@ const OutcomesPage = () => {
                     <Form.Control
                       className={styles.outcome_name}
                       as="input"
-                      value={selOutcome.outcomeTitle}
+                      defaultValue={selOutcome.outcomeTitle}
                       name="outcomeTitle"
                       onChange={handleInputChange}
                       onBlur={handleFormSubmit}
@@ -171,7 +166,7 @@ const OutcomesPage = () => {
                         <Form.Control
                           className={styles.commander_name}
                           as="input"
-                          value={selOutcome.supportedCommanders}
+                          defaultValue={selOutcome.supportedCommanders || ""}
                           name="supportedCommanders"
                           onChange={handleInputChange}
                           onBlur={handleFormSubmit}
@@ -187,7 +182,7 @@ const OutcomesPage = () => {
                         <Form.Control
                           className={styles.commander_name}
                           as="input"
-                          value={selOutcome.leadActionOfficer}
+                          defaultValue={selOutcome.leadActionOfficer || ""}
                           name="leadActionOfficer"
                           onChange={handleInputChange}
                           onBlur={handleFormSubmit}
@@ -195,8 +190,6 @@ const OutcomesPage = () => {
                       </Row>
                     </Form.Group>
                   </Row>
-                  {/* <Row className="p-1">Supported Commander: ADM John Doe</Row>
-                  <Row className="p-1">Lead Action Officer: CAPT Jane Doe</Row> */}
                 </Col>
               </Row>
             </Form>
@@ -211,7 +204,7 @@ const OutcomesPage = () => {
                     <Form.Control
                       as="textarea"
                       className={styles.my_text_area}
-                      value={selOutcome.problemStatement || ""}
+                      defaultValue={selOutcome.problemStatement || ""}
                       //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                       name="problemStatement"
                       onChange={handleInputChange}
@@ -226,7 +219,7 @@ const OutcomesPage = () => {
                     <Form.Control
                       as="textarea"
                       className={styles.my_text_area}
-                      value={selOutcome.baselinePerformance || ""}
+                      defaultValue={selOutcome.baselinePerformance || ""}
                       //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                       name="baselinePerformance"
                       onChange={handleInputChange}
@@ -241,7 +234,7 @@ const OutcomesPage = () => {
                     <Form.Control
                       as="textarea"
                       className={styles.my_text_area}
-                      value={selOutcome.rootCauses || ""}
+                      defaultValue={selOutcome.rootCauses || ""}
                       //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                       name="rootCauses"
                       onChange={handleInputChange}
@@ -256,7 +249,7 @@ const OutcomesPage = () => {
                     <Form.Control
                       as="textarea"
                       className={styles.my_text_area}
-                      value={selOutcome.assumptions || ""}
+                      defaultValue={selOutcome.assumptions || ""}
                       //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                       name="assumptions"
                       onChange={handleInputChange}
@@ -274,7 +267,7 @@ const OutcomesPage = () => {
                     <Form.Control
                       as="textarea"
                       className={styles.my_text_area}
-                      value={selOutcome.scope || ""}
+                      defaultValue={selOutcome.scope || ""}
                       //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                       name="scope"
                       onChange={handleInputChange}
@@ -289,7 +282,7 @@ const OutcomesPage = () => {
                     <Form.Control
                       as="textarea"
                       className={styles.my_text_area}
-                      value={selOutcome.goals || ""}
+                      defaultValue={selOutcome.goals || ""}
                       //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                       name="goals"
                       onChange={handleInputChange}
@@ -304,7 +297,7 @@ const OutcomesPage = () => {
                     <Form.Control
                       as="textarea"
                       className={styles.my_text_area}
-                      value={selOutcome.measurements || ""}
+                      defaultValue={selOutcome.measurements || ""}
                       //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                       name="measurements"
                       onChange={handleInputChange}
@@ -322,7 +315,7 @@ const OutcomesPage = () => {
                   <Form.Control
                     as="textarea"
                     className={styles.my_text_area}
-                    value={selOutcome.supportingCommanders || ""}
+                    defaultValue={selOutcome.supportingCommanders || ""}
                     //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                     name="supportingCommanders"
                     onChange={handleInputChange}
@@ -337,7 +330,7 @@ const OutcomesPage = () => {
                   <Form.Control
                     as="textarea"
                     className={styles.my_text_area}
-                    value={selOutcome.stakeholders || ""}
+                    defaultValue={selOutcome.stakeholders || ""}
                     //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                     name="stakeholders"
                     onChange={handleInputChange}
@@ -345,12 +338,12 @@ const OutcomesPage = () => {
                   />
                 </Form.Group>
 
-                <Form.Group style={{ width: "100%" }}>
-                  <Form.Label className={styles.form_label}>
+                <div style={{ width: "100%" }}>
+                  <div className={styles.form_label}>
                     Tier 1 Drivers/Barriers
-                  </Form.Label>
+                  </div>
                   {barriers()}
-                </Form.Group>
+                </div>
               </Col>
             </Row>
 

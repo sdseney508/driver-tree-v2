@@ -142,7 +142,7 @@ const DriverPage = () => {
           <Col sm={6} md={6} lg={6}>
             <h2
               className="text-center fw-bolder"
-              style={{ "text-shadow": "1px 1px 1px grey" }}
+              style={{ "textShadow": "1px 1px 1px grey" }}
             >
               Driver Details
             </h2>
@@ -349,8 +349,6 @@ const generateAllQuads = (selDrivers) => {
 
   const handleInputChange = (e) => {
     setSelDriver({ ...selDriver, [e.target.name]: e.target.value });
-    // let body = { [e.target.name]: e.target.value };
-    // updateDriver(selDriver.id, body);
   };
 
   const handleFormSubmit = async (e) => {
@@ -363,10 +361,6 @@ const generateAllQuads = (selDrivers) => {
   const backToDriverTree = () => {
     navigate("/drivertree/" + selOutcome.id);
   };
-
-  // const handleClick = () => {
-  //   exportElement(document.getElementById("pdf-export"), {});
-  // };
 
   const exportPDFWithMethod = () => {
     handleClose();

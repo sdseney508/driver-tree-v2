@@ -25,7 +25,6 @@ const AdminPage = () => {
           throw new Error('something went wrong!');
         }
         const user = response.data
-        console.log(user);
         setState({...state, 
           firstName: user.firstName,
           lastName: user.lastName,

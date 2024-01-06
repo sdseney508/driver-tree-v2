@@ -166,7 +166,6 @@ const AdminAccountManagement = () => {
       window("Passwords do not match");
       return;
     } else if (userFormData.password && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#$^+=!*()@%&]).{14,}$/.test(userFormData.password)) {
-      console.log(userFormData.password);
       alert('The password must contain at least 14 characters including at least 1 uppercase, 1 lowercase, 1 special character and 1 number.');
       return;
     } else if (!userFormData.firstName || !userFormData.lastName) {
@@ -213,7 +212,7 @@ const AdminAccountManagement = () => {
         <div className="admin-account">
           <h2
             className="text-center fw-bolder"
-            style={{ "text-shadow": "1px 1px 1px grey" }}
+            style={{ "textShadow": "1px 1px 1px grey" }}
           >
             Admin Account Management
           </h2>

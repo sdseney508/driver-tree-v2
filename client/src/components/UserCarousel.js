@@ -13,40 +13,6 @@ function UserCarousel() {
     setIndex(selectedIndex);
   };
 
-  // useEffect(() => {
-  //   const getCarouselData = async () => {
-  //     try {
-  //       const response = await getCarousel();
-  //       if (!response.data) {
-  //         throw new Error("something went wrong!");
-  //       }
-  //       const carousel = response.data;
-  //       console.log(carousel);
-  //       setCarousels(carousel);
-  //     } catch (err) {
-  //       console.error(err);
-  //     }
-  //   };
-  //   getCarouselData();
-  //   console.log("carousel data", carousels)
-  // }, []);
-
-
-  function carouselItems() {
-    return carousels.map((f, index) => {
-      return (
-        <Carousel.Item style={{ textAlign: "center" }}>
-          <img src="https://picsum.photos/500/300?img=1" alt="First slide" />
-          <Carousel.Caption>
-            <h3>{f.courselTitle}</h3>
-            <a href={f.carouselLink} style={{ color: "white" }}>
-              {f.carouselText}
-            </a>
-          </Carousel.Caption>
-        </Carousel.Item>
-      );
-    });
-  }
 
   //for now these are hard coded.  For final deployment, they'll reference the OLDB database carousel model.  They execute a get request to the carousel model and then map through the results to display the images, links, and captions.
 

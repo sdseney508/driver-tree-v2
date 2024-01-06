@@ -30,7 +30,6 @@ const ArrowModal = ({
       body.start = `card${selectedElements[1].id}`;
       body.end = `card${selectedElements[0].id}`;
       }
-      console.log(body);
       //now check for cluster on the end card
       if (selectedElements[0].cluster !== 0) {
         body.end =

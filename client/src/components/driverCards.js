@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 // import Select from "react-select";
 import { Col, Card, Row, Button, Form, Modal } from "react-bootstrap";
-import { Xwrapper } from "react-xarrows"; //for the arrows
+import { Xwrapper, useXarrow } from "react-xarrows"; //for the arrows
 import { deleteArrow } from "../utils/arrows";
 import styles from "../pages/DriverTreePage.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -65,6 +65,7 @@ const DriverCards = ({
   //4.  Draws the correct clusters around the selected drivers based on the cluster field in the drivers table
   //The arrow function is contained in the arrows.js module.  It creates the arrows that connect the cards
   let navigate = useNavigate();
+  let updateMyArrow = useXarrow();
   const [arrowID, setArrowID] = useState("");
   const [selectedElements, setSelectedElements] = useState([]);
   const [show, setShow] = useState(false);
@@ -89,7 +90,15 @@ const DriverCards = ({
     };
     getDriversData(selOutcome, viewId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [opacity, viewId]);
+  }, [selOutcome, opacity, viewId]);
+
+  useEffect(() => {
+    getArrows(selOutcome.id).then((data) => {
+      setArrows(data.data);
+    });
+    
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [driverTreeObj]);
 
   const addArrowToView = async () => {
     setConnectionShow(false);
@@ -115,6 +124,7 @@ const DriverCards = ({
   function allowDrop(e) {
     //this property gets set on the individual divs onDragOver property to limit where a card can be dropped
     e.preventDefault();
+    
   }
 
   async function ArrowModal(e, arrowId, tableState) {
@@ -255,7 +265,7 @@ const DriverCards = ({
   };
 
   //used in the Tier cards to create the driver cards for both the regular and the cluser
-  const dCards = (cardData, tier, viewCheck) => {
+  const DCards = (cardData, tier, viewCheck) => {
     return (
       <Card
         className={styles.my_card}
@@ -265,7 +275,7 @@ const DriverCards = ({
         data-cluster={cardData.cluster}
         key={"card"+cardData.id}
         draggable="true"
-        onDragStart={drag}
+        onDragStart={useDrag}
         style={viewCheck != -1 ? { opacity: 1 } : { opacity: opacity }}
       >
         {createArrow && !PDFState && !recordLockState ? (
@@ -476,7 +486,7 @@ const DriverCards = ({
     });
   };
 
-  function drag(e) {
+  const useDrag = (e) => {
     e.dataTransfer.setData("text", e.target.dataset.cardid);
     e.dataTransfer.setData("type", e.target.id);
     e.dataTransfer.setData("dragStart", e.target.dataset.tier);
@@ -577,10 +587,14 @@ const DriverCards = ({
         }
       }
     }
-
+    console.log(driverTreeObj);
     await getDriverByOutcome(selOutcome.id).then((data) => {
+      console.log(data.data);
+      setDriverTreeObj([]);
       setDriverTreeObj(data.data);
     });
+    console.log(driverTreeObj);
+
     window.location.reload();
   }
 
@@ -1001,7 +1015,7 @@ const DriverCards = ({
                   viewCheck = -1;
                 }
 
-                return dCards(clusterArr[ind], tier, viewCheck);
+                return DCards(clusterArr[ind], tier, viewCheck);
               })}
             </div>
           );
@@ -1025,7 +1039,7 @@ const DriverCards = ({
               onDrop={drop}
               key={`${tier}div${index + 1}`}
             >
-              {dCards(arr[index], tier, viewCheck)}
+              {DCards(arr[index], tier, viewCheck)}
             </div>
           );
         }
@@ -1183,9 +1197,6 @@ const DriverCards = ({
               Integrated Program Solutions
             </p>
           </Col>
-
- 
-            {/* {arrowFunc()} */}
 
           {driverTreeObj ? (
             <DriverArrows

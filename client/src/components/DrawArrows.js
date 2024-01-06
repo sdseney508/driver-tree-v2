@@ -9,7 +9,6 @@ function DriverArrows({
   viewArrows,
   tableState,
 }) {
-  console.log("arrows", arrows);
     //this function maps each arrow in the arrows array to a Xarrow component
   const arrowFunc = () => {
     return arrows.map((f, index) => {

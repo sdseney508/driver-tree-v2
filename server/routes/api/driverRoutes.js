@@ -19,8 +19,9 @@ router.post("/new/:userId", async (req, res) => {
     });
     let body = req.body;
     body.subTier = subTier + 1;
-    driversData = await drivers.create(req.body, {
-      transaction,
+    driversData = await drivers.create(req.body, 
+      {
+      transaction
     });
     await adminAudit.create({
       action: "Create",

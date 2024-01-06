@@ -107,7 +107,6 @@ const Welcome = () => {
           userId: userData.id,
           command: userData.userCommand,
         });
-        console.log(state);
         navigate("/user", { state });
       }
     } catch (err) {

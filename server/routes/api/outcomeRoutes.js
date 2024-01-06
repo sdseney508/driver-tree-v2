@@ -1,57 +1,70 @@
 const router = require("express").Router();
-const { outcomes, stakeholders, adminAudit, statusDefinition } = require("../../models");
+const {
+  outcomes,
+  stakeholders,
+  adminAudit,
+  statusDefinition,
+} = require("../../models");
 const sequelize = require("../../config/connection");
 const { Op } = require("sequelize");
 
 // use /api/outcomes
 //create new outcomes; also logs the creation in the admin poriton of the database
 router.post("/new", async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
     //this is a transaction that also creates the admin log entry and the status definition entry
-    const transaction = await sequelize.transaction();
-    const outcomesData = await outcomes.create({stakeholderId: req.body.command, stakeholderId: req.body.command}, {transaction});
-    await adminAudit.create({
-      action: "Create",
-      model: "outcomes",
-      tableUid: outcomesData.id,
-      fieldName: "All",
-      newData: "created a new Outcome",
-      oldData: "new Outcome",
-      userId: req.body.userId,
-    },
-    {transaction}
+    console.log(req.body);
+    const outcomesData = await outcomes.create(
+      { stakeholderId: req.body.stakeholderId },
+      { transaction }
+    );
+    await adminAudit.create(
+      {
+        action: "Create",
+        model: "outcomes",
+        tableUid: outcomesData.id,
+        fieldName: "All",
+        newData: "created a new Outcome",
+        oldData: "new Outcome",
+        userId: req.body.userId,
+      },
+      { transaction }
     );
 
     //create the new status definition for red yellow green, these can be modified in the Legend section of the DriverTreePage
-    await statusDefinition.create({
-      outcomeId: outcomesData.id,
-      statusId: 1,
-      statusDefinition: "On Schedule",
-    },
-    {transaction}
+    await statusDefinition.create(
+      {
+        outcomeId: outcomesData.id,
+        statusId: 1,
+        statusDefinition: "On Schedule",
+      },
+      { transaction }
     );
 
-    await statusDefinition.create({
-      outcomeId: outcomesData.id,
-      statusId: 2,
-      statusDefinition: ">1 month behind",
-    },
-    {transaction}
+    await statusDefinition.create(
+      {
+        outcomeId: outcomesData.id,
+        statusId: 2,
+        statusDefinition: ">1 month behind",
+      },
+      { transaction }
     );
 
-    await statusDefinition.create({
-      outcomeId: outcomesData.id,
-      statusId: 3,
-      statusDefinition: ">2 months behind",
-    },
-    {transaction}
+    await statusDefinition.create(
+      {
+        outcomeId: outcomesData.id,
+        statusId: 3,
+        statusDefinition: ">2 months behind",
+      },
+      { transaction }
     );
+    await transaction.commit();
     res.status(200).json(outcomesData);
   } catch (err) {
     res.status(400).json(err);
   }
 });
-
 
 //this route is only for database seeding and testing
 router.post("/", async (req, res) => {
@@ -79,12 +92,11 @@ router.get("/getOne/:id", async (req, res) => {
   }
 });
 
-
 //get all outcomess for the outcomes table.  This data will be used to populate the table underneath the form view.
 router.get("/", async (req, res) => {
   try {
     const outcomesData = await outcomes.findAll({
-      include: [{model: stakeholders}]
+      include: [{ model: stakeholders }],
     });
     res.status(200).json(outcomesData);
   } catch (err) {
@@ -97,10 +109,9 @@ router.get("/command/:command", async (req, res) => {
   try {
     const outcomesData = await outcomes.findAll({
       where: {
-        stakeholderId: req.params.command
-        },
+        stakeholderId: req.params.command,
       },
-    );
+    });
     res.status(200).json(outcomesData);
   } catch (err) {
     res.status(500).json(err);
@@ -133,7 +144,9 @@ router.get("/draft", async (req, res) => {
 router.get("/retired", async (req, res) => {
   try {
     // console.log("i started the get to sign route");
-    const outcomesData = await outcomes.findAll({ where: { olstat: "Retired" } });
+    const outcomesData = await outcomes.findAll({
+      where: { olstat: "Retired" },
+    });
     res.status(200).json(outcomesData);
   } catch (err) {
     console.log(err);
@@ -141,27 +154,6 @@ router.get("/retired", async (req, res) => {
   }
 });
 
-//TODO:  Still needs to be finished and tested. append the admin log with what was changed
-router.put("/adminlog/:id", async (req, res) => {
-  try {
-    let comment = req.body.log;
-    console.log(typeof(comment));
-    console.log(comment.admin_log);
-    await sequelize.query(
-      "update outcomes set admin_log = concat(admin_log, :adminLog) where id = :id",
-      {
-        replacements: {
-          adminLog: req.body.log.admin_log,
-          id: req.params.id,
-        },
-      }
-    );
-    res.status(200).json({ message: "Admin Log Updated" });
-  } catch (err) {
-    console.log(err);
-    res.status(401).json(err);
-  }
-});
 
 //update outcomes info
 //TODO add in the call to update the admin log as well

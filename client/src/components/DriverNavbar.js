@@ -1,27 +1,59 @@
-import React, { useContext, useEffect } from "react";
-import { stateContext } from "../App";
+import React, { useEffect, useState } from "react";
+
 import { Link } from "react-router-dom";
 import { Navbar, Nav, Container } from "react-bootstrap";
 import styles from "./DriverNavbar.module.css";
 import { useNavigate, useLocation } from "react-router";
-import { getUserData } from "../utils/auth";
+import { loggedIn, getToken, getUser } from "../utils/auth";
 import { outcomeByCommand} from "../utils/drivers"
 
 const DriverNavbar = () => {
   let location = useLocation();
   let navigate = useNavigate();
   let pName = location.pathname.slice(0, 5);
-  let [state, setState] = useContext(stateContext);
+  const [navState, setNavState] = useState({});
 
   useEffect(() => {
-    getUserData(state, setState, navigate);
+    const getUserData = async (navigate, state, setState) => {
+      try {
+        const token = loggedIn() ? getToken() : null;
+        if (!token) {
+          navigate("/");
+        }
+        const response = await getUser(token);
+        if (!response.data) {
+          navigate("/");
+          throw new Error("something went wrong!");
+        }
+        const user = response.data;
+        console.log(user);
+        setNavState({
+          ...state,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          userId: user.id,
+          userRole: user.userRole,
+          command: user.stakeholderId,
+        });
+        let userDataLength = Object.keys(user).length;
+        //if the user isnt logged in with an unexpired token, send them to the login page
+        if (!userDataLength > 0) {
+          navigate("/");
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    getUserData(navigate, navState, setNavState);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 
   const allOutcomes = async () => {
     let toutcomeID;
-    await outcomeByCommand(state.command).then((data) => {
+    await outcomeByCommand(navState.command).then((data) => {
         toutcomeID=data.data[0].id;
     });
 
@@ -34,7 +66,7 @@ const DriverNavbar = () => {
 
   const gotoDriverTree = async () => {
     let toutcomeID;
-    await outcomeByCommand(state.command).then((data) => {
+    await outcomeByCommand(navState.command).then((data) => {
         toutcomeID=data.data[0].id;
     });
     console.log(toutcomeID);

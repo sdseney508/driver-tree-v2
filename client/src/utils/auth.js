@@ -80,6 +80,7 @@ const getAppData = async ({
           setSelOutcome(data.data);
         });
       }
+      return state;
     }
   } catch (err) {
     console.error(err);

@@ -21,7 +21,6 @@ function ViewsTable({ outcomeId, setViewId, userId, viewId }) {
   }, [viewId]);
 
   const fetchData = async () => {
-    getUserData();
     let body = { userId: userId, outcomeId: outcomeId };
     await getUserViewsForOutcome(body).then((data) => {
       if (data.data.length === 0) {

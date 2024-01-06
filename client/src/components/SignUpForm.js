@@ -94,7 +94,6 @@ const SignupForm = ({onModalSubmit}) => {
     const userRole = userFormData.userRole;
     const userCommand = userFormData.command;
 
-    console.log(firstName, lastName, email, password, userStatus, userRole, userCommand);
     //couldnt pass the state object so had to pass each value individually
     register(
       firstName,

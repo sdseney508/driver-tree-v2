@@ -65,7 +65,6 @@ const CreateAnArrow = async ({
 
      
     } else {
-      console.log("one is an outcome")
       //one is the outcome, find which one and make it the arrow end
       if (selectedElements[0].outcomeTitle) {
         body.end = `outcomeId${selectedElements[0].id}`;
@@ -98,7 +97,6 @@ const CreateAnArrow = async ({
       body.startAnchor = {position: "left", offset: {y: 0}};
       body.endAnchor = {position: "right", offset: {y: 0}};
     }
-    console.log("body", body);
      await createArrow(body);
       getOutcome(selOutcome.id).then((res) => {
         setSelOutcome(res.data);

@@ -15,7 +15,7 @@ import { createView, deleteView } from "../utils/views";
 import { useNavigate } from "react-router";
 import { useParams } from "react-router"; //to store state in the URL
 import DriverCards from "../components/driverCards";
-import { getAppData } from "../utils/auth";
+import { getAppData, loggedIn, getToken, getUser } from "../utils/auth";
 import styles from "./DriverTreePage.module.css";
 import OutcomeTable from "../components/OutcomeTable";
 import ClusterModal from "../components/ClusterModal";
@@ -71,54 +71,73 @@ const DriverTreePage = () => {
 
   //using the initial useEffect hook to open up the driver trees and prefill the table at the bottom of the page
   useEffect(() => {
-    getAppData({
-      navigate,
-      state,
-      setState,
-      outcomeId,
-      outcomeByCommand,
-      setSelOutcome,
-      getOutcome,
-    });
-
-    let tout;
-    if (!outcomeId) {
-      outcomeByCommand(state.command).then((data) => {
-        tout = data.data[0];
-        setSelOutcome(data.data[0]);
-      });
-      navigate("/allOutcomes/" + tout.id);
-    } else {
-      navigate("/allOutcomes/" + outcomeId);
+    const getAppData = async () => {
+      //this first part just ensures they whoever is on this page is an authenticated user; prevents someone from typing in the url and gaining access
+      try {
+        //these comes from the utils section of the code
+        const token = loggedIn() ? getToken() : null;
+        if (!token) {
+          navigate("/");
+        }
+        const response = await getUser(token);
+        if (!response.data) {
+          navigate("/");
+          throw new Error("something went wrong!");
+        }
+        const user = response.data;
+    
+        let userDataLength = Object.keys(user).length;
+        //used to make sure they have permissions to make changes
+        //if the user isnt logged in with an unexpired token, send them to the login page
+        if (!userDataLength > 0) {
+          navigate("/");
+        } else {
+          setState({
+            ...state,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            Role: user.userRole,
+            command: user.stakeholderId,
+            userId: user.id,
+          });
+          //checks to see if there was an outcomeId passed or if you entered from the user page
+          if (!outcomeId) {
+            await outcomeByCommand(user.stakeholderId).then((data) => {
+              setSelOutcome(data.data[0]);
+            });
+          } else {
+            await getOutcome(outcomeId).then((data) => {
+              setSelOutcome(data.data);
+            });
+          }
+          return state;
+        }
+      } catch (err) {
+        console.error(err);
+        navigate("/");
+      }
+    };
+    getAppData();
+    if (state.Role === "Stakeholder") {
+      setRecordLockState(true);
     }
-
+    console.log(state);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     const getInfo = async () => {
-      let tId;
       if (!selOutcome.id) {
-        tId = outcomeId;
         selOutcome.id = outcomeId;
-      } else {
-        tId = selOutcome.id;
-      }
-      await getOutcome(tId).then((data) => {
+      } 
+      await getOutcome(selOutcome.id).then((data) => {
         setState({ ...state, selOutcome: data.data });
       });
-      await getDriverByOutcome(tId).then((data) => {
+      await getDriverByOutcome(selOutcome.id).then((data) => {
         setDriverTreeObj(data.data);
       });
-      await getArrows(tId).then((data) => {
+      await getArrows(selOutcome.id).then((data) => {
         setArrows(data.data);
-      });
-      await getUserViewsForOutcome({
-        userId: state.userId,
-        outcomeId: tId,
-      }).then((data) => {
-        if (data.data.length > 0) {
-          setViewId(data.data[0].id);
-        }
       });
       await getViewCards(viewId).then((data) => {
         setViewObj(data.data);
@@ -129,12 +148,13 @@ const DriverTreePage = () => {
     };
 
     getInfo();
+    console.log(viewId);
     if (state.Role === "Stakeholder") {
       setRecordLockState(true);
     }
     navigate("/drivertree/" + selOutcome.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selOutcome]);
+  }, [selOutcome, viewId, tableState]);
 
   const createNewView = async (e) => {
     e.preventDefault();
@@ -194,7 +214,8 @@ const DriverTreePage = () => {
 
   //creates new outcome and then resets the selOutcome state.  This cause a a useEffect fire and refreshes the page.
   const newOutcome = async () => {
-    let body = { command: state.command };
+    console.log(state);
+    let body = { stakeholderId: state.command, userId: state.userId };
     createOutcome(body).then((data) => {
       setState({ ...state, outcomeId: data.data.id });
       setSelOutcome(data.data);
@@ -229,7 +250,7 @@ const DriverTreePage = () => {
 
         let svgtop = svgArray[index].getBoundingClientRect().top;
         //the additional offset accounts for delta between cards and column widths
-        // console.log(parentElem.getBoundingClientRect().right);
+
         let svgleft = svgArray[index].getBoundingClientRect().left * 0.997;
         svgdiv.setAttribute(
           "style",
@@ -387,7 +408,7 @@ const DriverTreePage = () => {
             </Row>
           </PDFExport>
           <div style={showTable.tableStyle}>
-            {state.command && tableState === "outcome" ? (
+            {tableState === "outcome" ? (
               <OutcomeTable
                 state={state}
                 setState={setState}
@@ -398,7 +419,7 @@ const DriverTreePage = () => {
               />
             ) : null}
 
-            {state.userId && tableState === "view" ? (
+            {tableState === "view" ? (
               <Row className={styles.views_container}>
                 <Col
                   style={{

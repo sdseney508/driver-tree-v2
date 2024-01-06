@@ -17,7 +17,7 @@ const Legend = ({ driverTreeObj, selOutcome }) => {
       });
     };
     getInfo();
-  }, [driverTreeObj, selOutcome]);
+  }, [selOutcome]);
 
   const handleInputChange = (e) => {
     let body = { [e.target.name]: e.target.value };
@@ -42,9 +42,9 @@ const Legend = ({ driverTreeObj, selOutcome }) => {
     return statusDefinition.map((f, ind) => {
       let statColor = colorByStatus(f.statusId);
       return (
-        <div>
+        <div key={"statusDefDiv"+f.id}>
           <Row key={"statusDefRow" + f.id} style={{display: 'flex', flexDirection: "row", width: "160px"}}>
-            <div style={{ width: "15px"}}>
+            <div style={{ width: "15px"}} key={"div"+f.id}>
               <FontAwesomeIcon
                 icon={faCircle}
                 style={{ color: statColor }}
@@ -85,7 +85,7 @@ const Legend = ({ driverTreeObj, selOutcome }) => {
       } else {
         stakes.push(temp);
         return (
-          <div>
+          <div key={'stake'+ index}>
             <Row key={"stakeRow" + index}>
               <Col key={"Sholder" + index}>
                 {driverTreeObj[index].stakeholders}
@@ -103,8 +103,8 @@ const Legend = ({ driverTreeObj, selOutcome }) => {
 
   return (
     <>
-      <div className={styles.legend}>
-        <Col className={styles.legend_col}>
+      <div className={styles.legend} key={"legend.div"}>
+        <Col className={styles.legend_col} key={'legend.col'}>
           <h4>Legend</h4>
           <h5>Stakeholders:</h5>
           {stake(driverTreeObj)}

@@ -59,7 +59,6 @@ function UserTable({ selUser, setSelUser }) {
   // It then passes the data to the parent component to be displayed in the form.
   const cellClickedListener = useCallback((event) => {
     setSelUser(selUser => event.data);
-    console.log(event.data);
   }, []);
 
 

@@ -89,6 +89,7 @@ const AdminCarouselManage = () => {
           <AdminTables
             selectedTable={selectedTable}
             setSelectedTable={setSelectedTable}
+            state={state}
           />
         </div>
       </Container>

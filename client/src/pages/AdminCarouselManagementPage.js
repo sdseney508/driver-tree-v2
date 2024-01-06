@@ -24,9 +24,6 @@ const AdminCarouselManage = () => {
   //keep the entire carousel set in state so we can update the cards when we add or delete a carousel item
   const [carouselSet, setCarouselSet] = useState([]);
 
-  let navigate = useNavigate();
-  let location = useLocation();
-  let outerArr = [];
   let stateMap;
   let id;
 

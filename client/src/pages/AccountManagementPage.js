@@ -28,7 +28,6 @@ const AccountManagement = () => {
     //the user isnt allowed to change their functional area or role.  That can only be done by the Op Limit Coordinator.
     event.preventDefault();
     let body;
-    console.log("handle form submit ran");
     if (userFormData.password !== userFormData.passVal) {
       alert("Passwords do not match");
       return;
@@ -70,7 +69,7 @@ const AccountManagement = () => {
       <div className="ips-font">
         <h2
           className="text-center fw-bolder"
-          style={{ "text-shadow": "1px 1px 1px grey" }}
+          style={{ "textShadow": "1px 1px 1px grey" }}
         >
           Account Management
         </h2>
