@@ -26,6 +26,7 @@ const DriverPage = () => {
   const [selOutcome, setSelOutcome] = useState({});
   const [showModal, setShowMod] = useState(false);
   const [allquads, setAllQuads] = useState(false);
+  const [recordLockState, setRecordLockState] = useState(false); //this is used to lock the record while someone is editing it.  It is set to true when someone is editing the record and false when they are not.
   const navigate = useNavigate();
 
   let { outcomeId, driverId } = useParams();
@@ -51,6 +52,9 @@ const DriverPage = () => {
           id: user.id,
           userRole: user.userRole,
         });
+        if (state.userRole === "Stakeholder") {
+          setRecordLockState(true);
+        }
         let userDataLength = Object.keys(user).length;
         //if the user isnt logged in with an unexpired token, send them to the login page
         if (!userDataLength > 0) {
@@ -348,14 +352,21 @@ const generateAllQuads = (selDrivers) => {
   };
 
   const handleInputChange = (e) => {
+    if (!recordLockState) {
     setSelDriver({ ...selDriver, [e.target.name]: e.target.value });
-  };
+  } else {
+    return;}
+};
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+    if (!recordLockState) {
     let body = { [e.target.name]: e.target.value };
     updateDriver(selDriver.id, state.userId, body);
     setSelDriver({ ...selDriver, [e.target.name]: e.target.value });
+    } else {
+      return;
+    }
   };
 
   const backToDriverTree = () => {

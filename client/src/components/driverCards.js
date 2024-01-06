@@ -6,7 +6,7 @@ import { Xwrapper, useXarrow } from "react-xarrows"; //for the arrows
 import { deleteArrow } from "../utils/arrows";
 import styles from "../pages/DriverTreePage.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowUp } from "@fortawesome/free-solid-svg-icons";
+import { faArrowUp, faCircle } from "@fortawesome/free-solid-svg-icons";
 import { faFlagUsa } from "@fortawesome/free-solid-svg-icons";
 import Legend from "../components/legend";
 import { useNavigate } from "react-router";
@@ -35,7 +35,6 @@ import { CreateAnArrow } from "./ArrowFunction";
 import { faCopyright } from "@fortawesome/free-solid-svg-icons";
 import ModArrows from "../components/ModArrows";
 import { getStatusDefinitionByOutcome } from "../utils/statusDefinition";
-
 
 const DriverCards = ({
   arrows,
@@ -96,7 +95,7 @@ const DriverCards = ({
     getArrows(selOutcome.id).then((data) => {
       setArrows(data.data);
     });
-    
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [driverTreeObj]);
 
@@ -124,7 +123,6 @@ const DriverCards = ({
   function allowDrop(e) {
     //this property gets set on the individual divs onDragOver property to limit where a card can be dropped
     e.preventDefault();
-    
   }
 
   async function ArrowModal(e, arrowId, tableState) {
@@ -273,11 +271,12 @@ const DriverCards = ({
         data-cardid={cardData.id}
         data-tier={tier}
         data-cluster={cardData.cluster}
-        key={"card"+cardData.id}
+        key={"card" + cardData.id}
         draggable="true"
         onDragStart={useDrag}
         style={viewCheck != -1 ? { opacity: 1 } : { opacity: opacity }}
       >
+
         {createArrow && !PDFState && !recordLockState ? (
           <FontAwesomeIcon
             className={styles.card_arrow}
@@ -323,17 +322,9 @@ const DriverCards = ({
                   />
                 </Form>
               ) : (
-                <Form>
-                  <Form.Control
-                    as="textarea"
-                    data-cardid={cardData.id}
-                    className={styles.my_card_text}
-                    defaultValue={cardData.problemStatement}
-                    //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-                    name="problemStatement"
-                    disabled
-                  />
-                </Form>
+                <div className={styles.my_card_text}>
+                  {cardData.problemStatement}
+                </div>
               )}
             </Col>
 
@@ -389,12 +380,8 @@ const DriverCards = ({
                 </Form.Control>
               </Form>
             ) : (
-              <Form>
-                <Form.Control
-                  as="select"
-                  id="status"
-                  data-cardid={cardData.id}
-                  value={cardData.status}
+              <div>
+                <FontAwesomeIcon
                   className={
                     cardData.status === "Green"
                       ? styles.green_status
@@ -402,45 +389,9 @@ const DriverCards = ({
                       ? styles.yellow_status
                       : styles.red_status
                   }
-                  //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-                  name="status"
-                  disabled
-                >
-                  <option
-                    key={1}
-                    style={{
-                      width: "30px",
-                      height: "30px",
-                      backgroundColor: "green",
-                    }}
-                    // className={styles.green_status}
-                  >
-                    Green
-                  </option>
-                  <option
-                    key={2}
-                    style={{
-                      width: "30px",
-                      height: "30px",
-                      backgroundColor: "yellow",
-                    }}
-                    // className={styles.yellow_status}
-                  >
-                    Yellow
-                  </option>
-                  <option
-                    key={3}
-                    style={{
-                      width: "30px",
-                      height: "30px",
-                      backgroundColor: "red",
-                    }}
-                    // className={styles.red_status}
-                  >
-                    Red
-                  </option>
-                </Form.Control>
-              </Form>
+                  icon={faCircle}
+                />
+              </div>
             )}
 
             {tableState === "view" ? (
@@ -487,13 +438,22 @@ const DriverCards = ({
   };
 
   const useDrag = (e) => {
+    if(recordLockState){
+      //kick them out and dont let them drag
+      return;
+    }
     e.dataTransfer.setData("text", e.target.dataset.cardid);
     e.dataTransfer.setData("type", e.target.id);
     e.dataTransfer.setData("dragStart", e.target.dataset.tier);
-  }
+  };
 
   async function drop(e) {
     //on drop, sets the drivers new Tier and subTier as required.  The driver is then updated in the database so it will be placed in its new place on the next render
+    if (recordLockState) {
+      //kick them out and dont let them drag
+      return;
+    }
+
     let aBody = {};
     let dragStart = e.dataTransfer.getData("dragStart");
     let dragEnd = e.target.dataset.tier;
@@ -992,6 +952,7 @@ const DriverCards = ({
               onClick={delCluster}
             >
               {/* text input for clusterName */}
+              {!recordLockState ? (
               <Form>
                 <Form.Control
                   size="sm"
@@ -1004,7 +965,9 @@ const DriverCards = ({
                   name="clusterName"
                   onBlur={handleClusterChange}
                 />
-              </Form>
+              </Form>) : (  
+                <div className={styles.my_cluster_name}>{clusterName}</div>)
+              }
 
               {clusterArr.map((f, ind) => {
                 if (viewObj) {
@@ -1158,7 +1121,12 @@ const DriverCards = ({
               <Row style={{ minHeight: "500px", width: "90%" }}>
                 <br />
                 <br />
-                {driverTreeObj ? <Legend driverTreeObj={driverTreeObj} selOutcome={selOutcome}  />: null}
+                {driverTreeObj ? (
+                  <Legend
+                    driverTreeObj={driverTreeObj}
+                    selOutcome={selOutcome}
+                  />
+                ) : null}
               </Row>
             </Row>
           </Col>

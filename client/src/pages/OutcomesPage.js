@@ -93,7 +93,7 @@ const OutcomesPage = () => {
   };
 
   const newOutcome = async () => {
-    let body = { command: state.command };
+    let body = { stakeholderId: state.command, userId: state.userId };
     createOutcome(body).then((data) => {
       setState({ ...state, outcomeId: data.data.id });
       setSelOutcome(data.data);
