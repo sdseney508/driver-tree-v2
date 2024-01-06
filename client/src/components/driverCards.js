@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 // import Select from "react-select";
 import { Col, Card, Row, Button, Form, Modal } from "react-bootstrap";
-import { Xwrapper, useXarrow } from "react-xarrows"; //for the arrows
+import { Xwrapper } from "react-xarrows"; //for the arrows
 import { deleteArrow } from "../utils/arrows";
 import styles from "../pages/DriverTreePage.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -27,14 +27,12 @@ import {
   getViewArrows,
   removeViewArrow,
 } from "../utils/viewArrows";
-// import { cascadeUpdate } from "../utils/cascadeUpdate";
 import { updateArrow } from "../utils/arrows";
 import { deleteCluster, updateCluster } from "../utils/cluster";
 import DriverArrows from "./DrawArrows";
 import { CreateAnArrow } from "./ArrowFunction";
 import { faCopyright } from "@fortawesome/free-solid-svg-icons";
 import ModArrows from "../components/ModArrows";
-import { getStatusDefinitionByOutcome } from "../utils/statusDefinition";
 
 const DriverCards = ({
   arrows,
@@ -64,7 +62,6 @@ const DriverCards = ({
   //4.  Draws the correct clusters around the selected drivers based on the cluster field in the drivers table
   //The arrow function is contained in the arrows.js module.  It creates the arrows that connect the cards
   let navigate = useNavigate();
-  let updateMyArrow = useXarrow();
   const [arrowID, setArrowID] = useState("");
   const [selectedElements, setSelectedElements] = useState([]);
   const [show, setShow] = useState(false);
@@ -784,7 +781,7 @@ const DriverCards = ({
   };
 
   function tierButtons(tier) {
-    if (state.Role !== "Stakeholder") {
+    if (state.userRole !== "Stakeholder") {
       return (
         <Button className={styles.my_btn} onClick={newDriver} data-tier={tier}>
           +

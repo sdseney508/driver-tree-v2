@@ -5,7 +5,7 @@ import { stateContext } from "../App";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { useNavigate } from "react-router";
 import { Link, useParams } from "react-router-dom";
-import { getAppData } from "../utils/auth";
+import { loggedIn, getToken, getUser } from "../utils/auth";
 import {
   createOutcome,
   getDriverByOutcome,
@@ -22,6 +22,7 @@ const OutcomesPage = () => {
   const [state, setState] = useContext(stateContext);
   const [selOutcome, setSelOutcome] = useState({});
   const [driverTreeObj, setDriverTreeObj] = useState([]);
+  const [recordLockState, setRecordLockState] = useState(false);
   //These are the initial states for the select boxes.  They are set to the first valuein the array, which is the default value
   let navigate = useNavigate();
 
@@ -29,33 +30,64 @@ const OutcomesPage = () => {
 
   //using the initial useEffect hook to open up the draft oplimits and prefill the form
   useEffect(() => {
-    getAppData({
-      navigate,
-      state,
-      setState,
-      outcomeId,
-      outcomeByCommand,
-      setSelOutcome,
-      getOutcome,
-  });
+    const getUserData = async () => {
+      try {
+        const token = loggedIn() ? getToken() : null;
+        if (!token) {
+          navigate("/");
+        }
+        const response = await getUser(token);
+        if (!response.data) {
+          navigate("/");
+          throw new Error("something went wrong!");
+        }
+        const user = response.data;
+        setState({
+          ...state,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          id: user.id,
+          command: user.stakeholderId,
+          userRole: user.userRole,
+        });
+        console.log(user.userRole);
+        if (user.userRole === "Stakeholder") {
+          setRecordLockState(true);
+        }
+        let userDataLength = Object.keys(user).length;
+        //if the user isnt logged in with an unexpired token, send them to the login page
+        if (!userDataLength > 0) {
+          navigate("/");
+        }
+      } catch (err) {
+        console.error(err);
+        navigate("/");
+      }
+    };
 
-    let tout;
-    if (!outcomeId) {
-    outcomeByCommand(state.command).then((data) => {
-        tout = data.data[0];
-        setSelOutcome(tout);
-      });
-      navigate("/allOutcomes/" + tout.id);
-    } else {
-      navigate("/allOutcomes/" + outcomeId);}
+    const getAppData = async () => {
+      if (!outcomeId) {
+        await outcomeByCommand(state.stakeholderId).then((data) => {
+          setSelOutcome(data.data[0]);
+        });
+      } else {
+        await getOutcome(outcomeId).then((data) => {
+          setSelOutcome(data.data);
+        });
+      }
+    };
 
-    // setState({ ...state, selOutcome: selOutcome });
+    getUserData();
+    getAppData();
+    if (state.userRole === "Stakeholder") {
+      setRecordLockState(true);
+    }
   }, []);
 
   //sets the initial selection of the drop down lists for the signatures, i couldnt get the map function to work, so brute force here we go.
   useEffect(() => {
     const getDrivers = async () => {
-      if(!selOutcome.id){
+      if (!selOutcome.id) {
         selOutcome.id = outcomeId;
       }
       await getDriverByOutcome(selOutcome.id).then((data) => {
@@ -66,7 +98,10 @@ const OutcomesPage = () => {
 
     getDrivers();
     setState({ ...state, selOutcome: selOutcome });
-    navigate("/allOutcomes/" + selOutcome.id);
+    if (state.userRole === "Stakeholder") {
+      setRecordLockState(true);
+    }
+    // navigate("/allOutcomes/" + selOutcome.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome]);
 
@@ -74,16 +109,19 @@ const OutcomesPage = () => {
 
   const barriers = () => {
     if (!driverTreeObj[0]) {
-      return <div key={'nullbarrier'}></div>;
+      return <div key={"nullbarrier"}></div>;
     } else {
       return driverTreeObj.map((f, index) => {
         if (f.tierLevel !== 1) {
           return <div></div>;
         } else {
           return (
-            <div key={'barriers'+index}>
-              <Link to={`/drpage/${selOutcome.id}/${driverTreeObj[index].id}`} key={'barrierslink'+index}>
-                <p key={'p'+index}>{driverTreeObj[index].problemStatement}</p>
+            <div key={"barriers" + index}>
+              <Link
+                to={`/drpage/${selOutcome.id}/${driverTreeObj[index].id}`}
+                key={"barrierslink" + index}
+              >
+                <p key={"p" + index}>{driverTreeObj[index].problemStatement}</p>
               </Link>
             </div>
           );
@@ -93,6 +131,10 @@ const OutcomesPage = () => {
   };
 
   const newOutcome = async () => {
+    if (recordLockState) {
+      return;
+    }
+
     let body = { stakeholderId: state.command, userId: state.userId };
     createOutcome(body).then((data) => {
       setState({ ...state, outcomeId: data.data.id });
@@ -101,14 +143,24 @@ const OutcomesPage = () => {
   };
 
   const handleInputChange = (e) => {
-    // e.preventDefault();
+    e.preventDefault();
+    if (recordLockState) {
+      return;
+    }
+    console.log(recordLockState);
+    console.log(state.userRole);
     setSelOutcome({ ...selOutcome, [e.target.name]: e.target.value });
     let body = { [e.target.name]: e.target.value };
     updateOutcome(selOutcome.id, body);
   };
 
   const handleFormSubmit = async (e) => {
+    if (recordLockState) {
+      return;
+    }
     e.preventDefault();
+    console.log(recordLockState);
+    console.log(state.userRole);
     let body;
     if (e.target.name === "outcomeTitle") {
       body = {
@@ -116,7 +168,7 @@ const OutcomesPage = () => {
         problemStatement: e.target.value,
       };
     } else {
-      body = {[e.target.name]: e.target.value };
+      body = { [e.target.name]: e.target.value };
     }
     updateOutcome(selOutcome.id, body);
     await getOutcome(selOutcome.id).then((data) => {
@@ -133,15 +185,16 @@ const OutcomesPage = () => {
       <div className={styles.outcome_page}>
         <Container>
           <div className={styles.my_div}>
-            <Col className={styles.my_col}>
-              <Button className="p-1 m-1" onClick={newOutcome}>
-                Create New Outcome
-              </Button>
-              <Button className="p-1 m-1" onClick={driverPage}>
-                View Driver Tree
-              </Button>
-            </Col>
-
+            {!recordLockState ? (
+              <Col className={styles.my_col}>
+                <Button className="p-1 m-1" onClick={newOutcome}>
+                  Create New Outcome
+                </Button>
+                <Button className="p-1 m-1" onClick={driverPage}>
+                  View Driver Tree
+                </Button>
+              </Col>
+            ) : null}
             <Form className={styles.my_form}>
               <Row className={styles.outcome_banner + styles.my_row}>
                 <Col sm={10} md={6} lg={8} className={styles.outcome_name}>
@@ -153,6 +206,7 @@ const OutcomesPage = () => {
                       name="outcomeTitle"
                       onChange={handleInputChange}
                       onBlur={handleFormSubmit}
+                      disabled={recordLockState}
                     ></Form.Control>
                   </Form.Group>
                 </Col>
@@ -170,6 +224,7 @@ const OutcomesPage = () => {
                           name="supportedCommanders"
                           onChange={handleInputChange}
                           onBlur={handleFormSubmit}
+                          disabled={recordLockState}
                         ></Form.Control>
                       </Row>
                       {/* </Form.Group>
@@ -186,6 +241,7 @@ const OutcomesPage = () => {
                           name="leadActionOfficer"
                           onChange={handleInputChange}
                           onBlur={handleFormSubmit}
+                          disabled={recordLockState}
                         ></Form.Control>
                       </Row>
                     </Form.Group>
@@ -208,6 +264,7 @@ const OutcomesPage = () => {
                       //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                       name="problemStatement"
                       onChange={handleInputChange}
+                      disabled={recordLockState}
                       onBlur={handleFormSubmit}
                     />
                   </Form.Group>
@@ -224,6 +281,7 @@ const OutcomesPage = () => {
                       name="baselinePerformance"
                       onChange={handleInputChange}
                       onBlur={handleFormSubmit}
+                      disabled={recordLockState}
                     />
                   </Form.Group>
 
@@ -239,6 +297,7 @@ const OutcomesPage = () => {
                       name="rootCauses"
                       onChange={handleInputChange}
                       onBlur={handleFormSubmit}
+                      disabled={recordLockState}
                     />
                   </Form.Group>
 
@@ -254,6 +313,7 @@ const OutcomesPage = () => {
                       name="assumptions"
                       onChange={handleInputChange}
                       onBlur={handleFormSubmit}
+                      disabled={recordLockState}
                     />
                   </Form.Group>
                 </Form>
@@ -272,6 +332,7 @@ const OutcomesPage = () => {
                       name="scope"
                       onChange={handleInputChange}
                       onBlur={handleFormSubmit}
+                      disabled={recordLockState}
                     />
                   </Form.Group>
 
@@ -287,6 +348,7 @@ const OutcomesPage = () => {
                       name="goals"
                       onChange={handleInputChange}
                       onBlur={handleFormSubmit}
+                      disabled={recordLockState}
                     />
                   </Form.Group>
 
@@ -302,6 +364,7 @@ const OutcomesPage = () => {
                       name="measurements"
                       onChange={handleInputChange}
                       onBlur={handleFormSubmit}
+                      disabled={recordLockState}
                     />
                   </Form.Group>
                 </Form>
@@ -320,6 +383,7 @@ const OutcomesPage = () => {
                     name="supportingCommanders"
                     onChange={handleInputChange}
                     onBlur={handleFormSubmit}
+                    disabled={recordLockState}
                   />
                 </Form.Group>
 
@@ -335,6 +399,7 @@ const OutcomesPage = () => {
                     name="stakeholders"
                     onChange={handleInputChange}
                     onBlur={handleFormSubmit}
+                    disabled={recordLockState}
                   />
                 </Form.Group>
 

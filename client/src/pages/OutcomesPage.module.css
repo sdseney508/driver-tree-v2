@@ -52,6 +52,19 @@
    width: 30% !important;
 }
 
+.commander_name:disabled {
+   background-color: rgba(186, 186, 251, 0.836);
+   text-align: left;
+   align-content: flex-start;
+   align-items: left;
+   color: darkblue;
+   font-weight: bold;
+   font-size: 0.8em;
+   border: none;
+   height: auto;
+   width: 30% !important;
+}
+
 .commander_label {
    width: 50%;
 }
@@ -62,6 +75,15 @@
    justify-content: left;
    text-align: left;
    align-items: center;
+   background-color: rgb(18, 16, 49);
+   color: white;
+   font-weight: bold;
+   height: 10vh;
+   border: none;
+   width: 70%;
+}
+
+.outcome_name:disabled {
    background-color: rgb(18, 16, 49);
    color: white;
    font-weight: bold;

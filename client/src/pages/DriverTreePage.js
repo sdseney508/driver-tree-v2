@@ -11,19 +11,16 @@ import {
 } from "../utils/drivers";
 
 import { createView, deleteView } from "../utils/views";
-// import { getArrows } from "../utils/arrows";
 import { useNavigate } from "react-router";
 import { useParams } from "react-router"; //to store state in the URL
 import DriverCards from "../components/driverCards";
-import { getAppData, loggedIn, getToken, getUser } from "../utils/auth";
+import { loggedIn, getToken, getUser } from "../utils/auth";
 import styles from "./DriverTreePage.module.css";
 import OutcomeTable from "../components/OutcomeTable";
 import ClusterModal from "../components/ClusterModal";
 import { getArrows } from "../utils/arrows";
 import { getViewArrows } from "../utils/viewArrows";
 import { getViewCards } from "../utils/viewCards";
-// import { exportElement } from "../utils/export-element";
-import { getUserViewsForOutcome } from "../utils/views";
 import ViewsTable from "../components/ViewsTable";
 import { Xwrapper } from "react-xarrows";
 
@@ -96,7 +93,7 @@ const DriverTreePage = () => {
             ...state,
             firstName: user.firstName,
             lastName: user.lastName,
-            Role: user.userRole,
+            userRole: user.userRole,
             command: user.stakeholderId,
             userId: user.id,
           });
@@ -118,7 +115,7 @@ const DriverTreePage = () => {
       }
     };
     getAppData();
-    if (state.Role === "Stakeholder") {
+    if (state.userRole === "Stakeholder") {
       setRecordLockState(true);
     }
     console.log(state);
@@ -149,7 +146,7 @@ const DriverTreePage = () => {
 
     getInfo();
     console.log(viewId);
-    if (state.Role === "Stakeholder") {
+    if (state.userRole === "Stakeholder") {
       setRecordLockState(true);
     }
     navigate("/drivertree/" + selOutcome.id);
@@ -314,7 +311,7 @@ const DriverTreePage = () => {
         {/* className={styles.driver_page}  */}
         <Container fluid className="justify-content-center">
           <div style={{ height: "40px" }} className="justify-content-center">
-            {state.Role !== "Stakeholder" ? (
+            {state.userRole !== "Stakeholder" ? (
               <Col style={{ maxWidth: "900px" }}>
                 <button
                   className={styles.dtree_btn}

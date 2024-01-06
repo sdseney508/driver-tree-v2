@@ -66,7 +66,7 @@ const getAppData = async ({
         ...state,
         firstName: user.firstName,
         lastName: user.lastName,
-        Role: user.userRole,
+        userRole: user.userRole,
         command: user.stakeholderId,
         userId: user.id,
       });
