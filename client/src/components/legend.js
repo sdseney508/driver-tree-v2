@@ -6,7 +6,7 @@ import { modifyStatusDefinition } from "../utils/statusDefinition";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-solid-svg-icons";
 
-const Legend = ({ driverTreeObj, selOutcome }) => {
+const Legend = ({ driverTreeObj, selOutcome, recordLockState }) => {
   //the below function gets all of the stakeholders and abbreviations from the driverTreeObj, then removes any duplicates and places them in a list under the legend
   const [statusDefinition, setStatusDefinition] = useState([]);
   useEffect(() => {
@@ -20,6 +20,9 @@ const Legend = ({ driverTreeObj, selOutcome }) => {
   }, [selOutcome]);
 
   const handleInputChange = (e) => {
+    if (recordLockState) {
+      return;
+    }
     let body = { [e.target.name]: e.target.value };
     // setOutcome({ ...outcome, [name]: value });
     modifyStatusDefinition(e.target.id, body);

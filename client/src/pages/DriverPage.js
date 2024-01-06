@@ -352,21 +352,21 @@ const generateAllQuads = (selDrivers) => {
   };
 
   const handleInputChange = (e) => {
-    if (!recordLockState) {
+    if (recordLockState) {
+      return;
+    }
     setSelDriver({ ...selDriver, [e.target.name]: e.target.value });
-  } else {
-    return;}
 };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (!recordLockState) {
+    if (recordLockState) {
+      return;
+    }
     let body = { [e.target.name]: e.target.value };
     updateDriver(selDriver.id, state.userId, body);
     setSelDriver({ ...selDriver, [e.target.name]: e.target.value });
-    } else {
-      return;
-    }
+
   };
 
   const backToDriverTree = () => {

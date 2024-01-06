@@ -411,6 +411,10 @@ const DriverCards = ({
 
   const delCluster = (e) => {
     e.preventDefault();
+    if (recordLockState) {
+      //kick them out and dont let them delete
+      return;
+    }
     if (!e.target.dataset.cluster) {
       e.stopPropagation();
       return;
@@ -1125,6 +1129,7 @@ const DriverCards = ({
                   <Legend
                     driverTreeObj={driverTreeObj}
                     selOutcome={selOutcome}
+                    recordLockState={recordLockState}
                   />
                 ) : null}
               </Row>
