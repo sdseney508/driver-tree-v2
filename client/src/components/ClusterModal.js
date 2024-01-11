@@ -49,7 +49,7 @@ const ClusterModal = ({
           <Button
             variant="primary"
             onClick={makeCluster}
-            disabled={selectedDrivers.length < 2}
+            disabled={selectedDrivers.length < 1}
           >
             Create
           </Button>
