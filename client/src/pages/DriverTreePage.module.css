@@ -13,6 +13,16 @@
   cursor: pointer;
 }
 
+.abbreviation_input {
+  height: 15px;
+  font-size: 10px;
+  width: 35px;
+  background-color: rgba(0,0,255,0.734);
+  color: white;
+  text-align: left;
+  padding: 1px;
+}
+
 .card_arrow:hover {
   cursor: pointer;
 }
@@ -110,6 +120,9 @@
   font-weight: normal;
   align-items: center;
   justify-content: center;
+  margin: 10px;
+  min-width: 185px;
+  width: auto;
 }
 
 .driver_page {
@@ -119,8 +132,7 @@
   font-weight: bold;
   align-items: center;
   justify-content: center;
-
- 
+  width: auto; 
 }
 
 .dtree_btn {

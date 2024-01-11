@@ -4,9 +4,10 @@ import styles from "./legend.module.css";
 import { getStatusDefinitionByOutcome } from "../utils/statusDefinition";
 import { modifyStatusDefinition } from "../utils/statusDefinition";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { updateDriver } from "../utils/drivers";
 import { faCircle } from "@fortawesome/free-solid-svg-icons";
 
-const Legend = ({ driverTreeObj, selOutcome, recordLockState }) => {
+const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
   //the below function gets all of the stakeholders and abbreviations from the driverTreeObj, then removes any duplicates and places them in a list under the legend
   const [statusDefinition, setStatusDefinition] = useState([]);
   useEffect(() => {
@@ -37,6 +38,12 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState }) => {
     return backGroundColor[statusId];
   }
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    let body = { [e.target.name]: e.target.value };
+      await updateDriver(e.target.id, state.userId, body);
+  };
+
   const statusDef = () => {
     if (statusDefinition.length < 1) {
       return;
@@ -45,15 +52,18 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState }) => {
     return statusDefinition.map((f, ind) => {
       let statColor = colorByStatus(f.statusId);
       return (
-        <div key={"statusDefDiv"+f.id}>
-          <Row key={"statusDefRow" + f.id} style={{display: 'flex', flexDirection: "row", width: "160px"}}>
-            <div style={{ width: "15px"}} key={"div"+f.id}>
+        <div key={"statusDefDiv" + f.id}>
+          <Row
+            key={"statusDefRow" + f.id}
+            style={{ display: "flex", flexDirection: "row", width: "160px" }}
+          >
+            <div style={{ width: "15px" }} key={"div" + f.id}>
               <FontAwesomeIcon
                 icon={faCircle}
                 style={{ color: statColor }}
               ></FontAwesomeIcon>
             </div>
-            <div  style={{ width: "135px" }}>
+            <div style={{ width: "135px" }}>
               <Form>
                 <Form.Control
                   as="textarea"
@@ -61,7 +71,7 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState }) => {
                   id={f.id}
                   defaultValue={f.statusDefinition}
                   onChange={handleInputChange}
-                  style={{fontSize: "10px"}}
+                  style={{ fontSize: "10px" }}
                 />
               </Form>
             </div>
@@ -82,19 +92,26 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState }) => {
         sholder: driverTreeObj[index].stakeholders,
         abbrev: driverTreeObj[index].stakeholderAbbreviation,
       };
-
-      const duplicate = stakes.find((s) => s.sholder === temp.sholder);
+      const duplicate = stakes.find((s) => s.abbrev === temp.abbrev);
       if (duplicate) {
       } else {
         stakes.push(temp);
         return (
-          <div key={'stake'+ index}>
+          <div key={"stake" + index}>
             <Row key={"stakeRow" + index}>
               <Col key={"Sholder" + index}>
-                {driverTreeObj[index].stakeholders}
-                {"     "}
+                <Form>
+                  <Form.Control
+                    as="input"
+                    name="stakeholders"
+                    id={driverTreeObj[index].id}
+                    defaultValue={driverTreeObj[index].stakeholders || ""}
+                    onBlur={handleSubmit}
+                    disabled={recordLockState}
+                    className={styles.legend_input}></Form.Control>
+                </Form>
               </Col>
-              <Col key={"SholderAbbrev" + index}>
+              <Col key={"SholderAbbrev" + index} style={{width: '20px'}}>
                 {driverTreeObj[index].stakeholderAbbreviation}
               </Col>
             </Row>
@@ -107,7 +124,7 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState }) => {
   return (
     <>
       <div className={styles.legend} key={"legend.div"}>
-        <Col className={styles.legend_col} key={'legend.col'}>
+        <Col className={styles.legend_col} key={"legend.col"}>
           <h4>Legend</h4>
           <h5>Stakeholders:</h5>
           {stake(driverTreeObj)}

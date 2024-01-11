@@ -23,6 +23,7 @@ import { getViewArrows } from "../utils/viewArrows";
 import { getViewCards } from "../utils/viewCards";
 import ViewsTable from "../components/ViewsTable";
 import { Xwrapper } from "react-xarrows";
+import { exportElement } from "../utils/export-element";
 
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form
 
@@ -224,15 +225,15 @@ const DriverTreePage = () => {
     //first we remove the first element in svgs
     // debugger;
     let svgs = document.querySelectorAll("svg");
-
     let svgArray = Array.from(svgs);
+    
     // eslint-disable-next-line array-callback-return
     svgArray.map((f, index) => {
       if (svgArray[index].id.slice(0, 3) === "SVG") {
         let innerSVG = svgArray[index].innerHTML;
         let width = svgArray[index].getBoundingClientRect().width;
-        if (width > 300) {
-          width = 300;
+        if (width > 400) {
+          width = 400;
         }
         let height = svgArray[index].getBoundingClientRect().height;
 
@@ -247,8 +248,9 @@ const DriverTreePage = () => {
 
         let svgtop = svgArray[index].getBoundingClientRect().top;
         //the additional offset accounts for delta between cards and column widths
-
-        let svgleft = svgArray[index].getBoundingClientRect().left * 0.997;
+        console.log(svgArray[index]);
+        console.log(svgArray[index].getBoundingClientRect());
+        let svgleft = svgArray[index].getBoundingClientRect().left*.99;
         svgdiv.setAttribute(
           "style",
           `position: absolute; top: ${svgtop}px; left: ${svgleft}px; z-index: 10; width: ${width}px; height: ${height}px;`
@@ -259,6 +261,7 @@ const DriverTreePage = () => {
         pdfExport.appendChild(svgdiv);
       }
     });
+    // console.log(consArr);
   };
   const onModalSubmit = (e) => {
     e.preventDefault();
@@ -277,16 +280,16 @@ const DriverTreePage = () => {
     if (PDFState && document.readyState === "complete") {
       setTableState("");
       svgForPdf();
-      // let options = {
-      //   papersize: "auto",
-      //   margin: "25px",
-      //   landscape: true,
-      // };
+      let options = {
+        papersize: "auto",
+        margin: "25px",
+        landscape: true,
+      };
       if (pdfExportComponent.current) {
         pdfExportComponent.current.save();
       }
-      // let pdfExport = document.getElementById("pdf-export");
-      // exportElement(pdfExport, options, selOutcome.outcomeTitle);
+      let pdfExport = document.getElementById("pdf-export");
+      exportElement(pdfExport, options, selOutcome.outcomeTitle);
       window.location.reload();
     }
     setPDFState(false);
@@ -310,7 +313,7 @@ const DriverTreePage = () => {
       <div id="topleveldiv" key="topleveldiv" className={styles.driver_page}>
         {/* className={styles.driver_page}  */}
         <Container fluid className="justify-content-center">
-          <div style={{ height: "40px" }} className="justify-content-center">
+          <div style={{ height: "40px", maxwidth: "100%" }} className="justify-content-center">
             {state.userRole !== "Stakeholder" ? (
               <Col style={{ maxWidth: "900px" }}>
                 <button

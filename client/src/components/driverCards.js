@@ -6,7 +6,7 @@ import { Xwrapper } from "react-xarrows"; //for the arrows
 import { deleteArrow } from "../utils/arrows";
 import styles from "../pages/DriverTreePage.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowUp, faCircle } from "@fortawesome/free-solid-svg-icons";
+import { faArrowUp, faCircle, faRecordVinyl } from "@fortawesome/free-solid-svg-icons";
 import { faFlagUsa } from "@fortawesome/free-solid-svg-icons";
 import Legend from "../components/legend";
 import { useNavigate } from "react-router";
@@ -286,15 +286,20 @@ const DriverCards = ({
         <Card.Body className={styles.card_body}>
           <Row className={styles.card_row}>
             <Col className={styles.card_col_abbrev}>
-              <div
+              <Form
                 className={styles.abbreviation_div}
-                onClick={goToDriver}
-                data-cardid={cardData.id}
               >
-                {cardData.stakeholderAbbreviation
-                  ? cardData.stakeholderAbbreviation
-                  : "-"}
-              </div>
+                <Form.Control
+                  as="input"
+                  name="stakeholderAbbreviation"
+                  data-cardid={cardData.id}
+                  className={styles.abbreviation_input}
+                  defaultValue={cardData.stakeholderAbbreviation || "-"}
+                  disabled={recordLockState}
+                  onBlur={handleFormSubmit}
+                />
+ 
+              </Form>
               {!PDFState && !recordLockState ? (
                 <div
                   onClick={delDriver}
@@ -790,67 +795,6 @@ const DriverCards = ({
     }
   }
 
-  // const svg = (
-  //   <svg
-  //     width="102.328125px"
-  //     height="67px"
-  //     overflow="auto"
-  //     id="SVG59b"
-  //     xmlns="http://www.w3.org/2000/svg"
-  //     // style={{position: "absolute", left: "300px", top: '150px', zIndex: '10000'}}
-
-  //   >
-  //     <path
-  //       d="M 86.328125 16 L 54.1640625 16 L 54.1640625 51 22 51"
-  //       stroke="black"
-  //       strokeDasharray="2 2"
-  //       strokeWidth="3"
-  //       fill="transparent"
-  //       pointerEvents="visibleStroke"
-  //       id="arrow59b"
-  //     ></path>
-  //     <g
-  //       fill="black"
-  //       pointerEvents="auto"
-  //       transform="translate(24,55) rotate(180) scale(8)"
-  //       opacity="1"
-  //       id="arrowhead59b"
-  //     >
-  //       <path d="M 0 0 L 1 0.5 L 0 1 L 0.25 0.5 z"></path>
-  //     </g>
-  //   </svg>
-  // );
-
-  // const svg2 = (
-  //   <svg
-  //     width="145.5"
-  //     height="259.5"
-  //     overflow="auto"
-  //     id="SVG83"
-  //     // style={{position: "absolute", left: "300px", top: '150px'}}
-  //     xmlns="http://www.w3.org/2000/svg"
-  //   >
-  //     <path
-  //       d="M 129.5 243.5 L  16 243.5 L 16 22 16 22"
-  //       stroke="green"
-  //       stroke-dasharray="0 0"
-  //       stroke-width="2"
-  //       fill="transparent"
-  //       pointerEvents="visibleStroke"
-  //       id="arrow83"
-  //     ></path>
-  //     <g
-  //       fill="black"
-  //       pointerEvents="auto"
-  //       transform="translate(12,24) rotate(270) scale(8)"
-  //       opacity="1"
-  //       id="arrowhead83"
-  //     >
-  //       <path d="M 0 0 L 1 0.5 L 0 1 L 0.25 0.5 z"></path>
-  //     </g>
-  //   </svg>
-  // );
-
   function tierCards(tier, { driverTreeObj, viewObj }) {
     let viewCheck;
     const arr = []; //just an empty arr that will be filled with driverTreeObj
@@ -1017,9 +961,6 @@ const DriverCards = ({
         <Xwrapper>
           <Col
             className={styles.driver}
-            sm={6}
-            md={6}
-            lg={2}
             key="0"
             style={{ justifyItems: "center", alignContent: "center" }}
           >
@@ -1127,39 +1068,48 @@ const DriverCards = ({
                     driverTreeObj={driverTreeObj}
                     selOutcome={selOutcome}
                     recordLockState={recordLockState}
+                    state={state}
                   />
                 ) : null}
               </Row>
             </Row>
           </Col>
-          <Col className={styles.driver} sm={6} md={6} lg={2} key="1">
+          <Col className={styles.driver} key="1">
             <Row>Tier 1 Drivers {tierButtons(1)}</Row>
             <Row id={`tier1Cards`} key={`tier1Cards`} className={styles.my_row}>
               {tierCards(1, { driverTreeObj, viewObj })}
             </Row>
           </Col>
-          <Col className={styles.driver} sm={6} md={6} lg={2} key="2">
+          <Col className={styles.driver} key="2">
             <Row>Tier 2 Drivers {tierButtons(2)}</Row>
             <Row id={`tier2Cards`} key={`tier2Cards`} className={styles.my_row}>
               {tierCards(2, { driverTreeObj, viewObj })}
             </Row>
           </Col>
-          <Col className={styles.driver} sm={6} md={6} lg={2} key="3">
+          <Col className={styles.driver} key="3">
             <Row>Tier 3 Drivers{tierButtons(3)}</Row>
             <Row id={`tier3Cards`} key={`tier3Cards`} className={styles.my_row}>
               {tierCards(3, { driverTreeObj, viewObj })}
             </Row>
           </Col>
-          <Col className={styles.driver} sm={6} md={6} lg={2} key="4">
+          <Col className={styles.driver} key="4">
             <Row>Tier 4 Drivers {tierButtons(4)}</Row>
             <Row id={`tier4Cards`} key={`tier4Cards`} className={styles.my_row}>
               {tierCards(4, { driverTreeObj, viewObj })}
             </Row>
           </Col>
-          <Col className={styles.driver} sm={6} md={6} lg={2} key="5">
+          <Col className={styles.driver} key="5">
             <Row>Tier 5 Drivers {tierButtons(5)}</Row>
             <Row id={`tier5Cards`} key={`tier5Cards`} className={styles.my_row}>
               {tierCards(5, { driverTreeObj, viewObj })}
+            </Row>
+
+   
+          </Col>
+          <Col className={styles.driver} key="6">
+            <Row>Tier 6 Drivers {tierButtons(6)}</Row>
+            <Row id={`tier5Cards`} key={`tier5Cards`} className={styles.my_row}>
+              {tierCards(6, { driverTreeObj, viewObj })}
             </Row>
 
             <p>
@@ -1167,7 +1117,6 @@ const DriverCards = ({
               Integrated Program Solutions
             </p>
           </Col>
-
           {driverTreeObj ? (
             <DriverArrows
               arrows={arrows}
