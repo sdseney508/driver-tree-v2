@@ -817,14 +817,14 @@ const DriverCards = ({
     } else {
       //find max number of droppable divs needed for any given tier, then size the columns accordingly.  This will let the columns grow with each tier
       let max = 25;
+      console.log(driverTreeObj);
       for (let i = 0; i < driverTreeObj.length; i++) {
-        //now get the number of elements in each tier
-        if (driverTreeObj[i].tierLevel === tier) {
+        //now get the number of elements in the driverTreeObj and set the max equal to it plus 1
           if (driverTreeObj[i].subTier >= max) {
             max = driverTreeObj[i].subTier + 1;
           }
-        }
       }
+      console.log(max);
       for (let i = 0; i < max; i++) {
         //needs a nested loop for those instances when the driverTreeObj is smaller than 36
         //TODO look at replacing this with a 6 by 60 grid and use React Draggable.
