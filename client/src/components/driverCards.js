@@ -6,7 +6,11 @@ import { Xwrapper } from "react-xarrows"; //for the arrows
 import { deleteArrow } from "../utils/arrows";
 import styles from "../pages/DriverTreePage.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowUp, faCircle, faRecordVinyl } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowUp,
+  faCircle,
+  faRecordVinyl,
+} from "@fortawesome/free-solid-svg-icons";
 import { faFlagUsa } from "@fortawesome/free-solid-svg-icons";
 import Legend from "../components/legend";
 import { useNavigate } from "react-router";
@@ -273,7 +277,6 @@ const DriverCards = ({
         onDragStart={useDrag}
         style={viewCheck != -1 ? { opacity: 1 } : { opacity: opacity }}
       >
-
         {createArrow && !PDFState && !recordLockState ? (
           <FontAwesomeIcon
             className={styles.card_arrow}
@@ -286,9 +289,7 @@ const DriverCards = ({
         <Card.Body className={styles.card_body}>
           <Row className={styles.card_row}>
             <Col className={styles.card_col_abbrev}>
-              <Form
-                className={styles.abbreviation_div}
-              >
+              <Form className={styles.abbreviation_div}>
                 <Form.Control
                   as="input"
                   name="stakeholderAbbreviation"
@@ -298,7 +299,6 @@ const DriverCards = ({
                   disabled={recordLockState}
                   onBlur={handleFormSubmit}
                 />
- 
               </Form>
               {!PDFState && !recordLockState ? (
                 <div
@@ -311,23 +311,26 @@ const DriverCards = ({
               ) : null}
             </Col>
             <Col className={styles.card_col_body} id={cardData.id}>
-              {!recordLockState ? (
-                <Form>
-                  <Form.Control
-                    as="textarea"
-                    data-cardid={cardData.id}
-                    className={styles.my_card_text}
-                    defaultValue={cardData.problemStatement}
-                    //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-                    name="problemStatement"
-                    onBlur={handleFormSubmit}
-                  />
-                </Form>
-              ) : (
-                <div className={styles.my_card_text}>
-                  {cardData.problemStatement}
-                </div>
-              )}
+              <div>
+                {!recordLockState ? (
+                  <Form>
+                    <Form.Control
+                      as="textarea"
+                      data-cardid={cardData.id}
+                      className={styles.my_card_text}
+                      defaultValue={cardData.problemStatement}
+                      //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                      name="problemStatement"
+                      onBlur={handleFormSubmit}
+                    />
+                  </Form>
+                ) : (
+                  <div className={styles.my_card_text}>
+                    {cardData.problemStatement}
+                  </div>
+                )}
+              </div>
+              <div></div>
             </Col>
 
             {!recordLockState ? (
@@ -396,6 +399,15 @@ const DriverCards = ({
               </div>
             )}
 
+            {PDFState === false ? (
+              <div
+                className={styles.details}
+                onClick={goToDriver}
+                data-cardid={cardData.id}
+              >
+                details
+              </div>
+            ) : null}
             {tableState === "view" ? (
               <div
                 onClick={(e) => modifyView(e, cardData.id)}
@@ -444,7 +456,7 @@ const DriverCards = ({
   };
 
   const useDrag = (e) => {
-    if(recordLockState){
+    if (recordLockState) {
       //kick them out and dont let them drag
       return;
     }
@@ -898,21 +910,22 @@ const DriverCards = ({
             >
               {/* text input for clusterName */}
               {!recordLockState ? (
-              <Form>
-                <Form.Control
-                  size="sm"
-                  type="text"
-                  data-clusterid={clusterNumber}
-                  className={styles.my_cluster_name}
-                  defaultValue={clusterName}
-                  placeholder="Cluster Name"
-                  //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-                  name="clusterName"
-                  onBlur={handleClusterChange}
-                />
-              </Form>) : (  
-                <div className={styles.my_cluster_name}>{clusterName}</div>)
-              }
+                <Form>
+                  <Form.Control
+                    size="sm"
+                    type="text"
+                    data-clusterid={clusterNumber}
+                    className={styles.my_cluster_name}
+                    defaultValue={clusterName}
+                    placeholder="Cluster Name"
+                    //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                    name="clusterName"
+                    onBlur={handleClusterChange}
+                  />
+                </Form>
+              ) : (
+                <div className={styles.my_cluster_name}>{clusterName}</div>
+              )}
 
               {clusterArr.map((f, ind) => {
                 if (viewObj) {
@@ -1103,8 +1116,6 @@ const DriverCards = ({
             <Row id={`tier5Cards`} key={`tier5Cards`} className={styles.my_row}>
               {tierCards(5, { driverTreeObj, viewObj })}
             </Row>
-
-   
           </Col>
           <Col className={styles.driver} key="6">
             <Row>Tier 6 Drivers {tierButtons(6)}</Row>

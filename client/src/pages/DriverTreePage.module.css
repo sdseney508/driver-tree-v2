@@ -64,9 +64,12 @@
 }
 
 .card_col_body {
+  display: flex;
+  flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
   align-content: flex-start;
+
 }
 
 .card_status {
@@ -110,6 +113,20 @@
 
 .del_div:hover {
   cursor: pointer;
+}
+
+.details {
+  position: absolute;
+  bottom: 0px;
+  left: 60px;
+  font-style: italic;
+  font-size: 8px;
+  z-index: 1000;
+}
+
+.details:hover {
+  cursor: pointer;
+  font-size: 110%;
 }
 
 .driver {
