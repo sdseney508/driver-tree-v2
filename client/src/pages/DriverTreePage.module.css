@@ -118,16 +118,15 @@
 .details {
   position: absolute;
   bottom: 0px;
-  left: 60px;
+  left: 55px;
   font-style: italic;
-  font-size: 8px;
+  font-size: 7px;
   width: 50px;
   z-index: 1000;
 }
 
 .details:hover {
   cursor: pointer;
-  font-size: 105%;
 }
 
 .driver {
@@ -138,8 +137,8 @@
   font-weight: normal;
   align-items: center;
   justify-content: center;
-  margin: 10px;
-  min-width: 185px;
+  margin: 20px;
+  min-width: 175px;
   width: auto;
 }
 
@@ -177,11 +176,11 @@
   z-index: 1000;
   display: flex;
   background-color: #f8f7f7;
-  font-size: 0.75em;
+  font-size: 0.55em;
   padding: 0px;
-  height: 45px;
-  max-width: 190px;
-  width: 96%;
+  height: 35px;
+  max-width: 180px;
+  width: 99%;
 }
 
 .my_card_abb {
@@ -201,11 +200,11 @@
   font-weight: normal;
   padding: 0px;
   margin: 0px;
-  font-size: 9px;
+  font-size: 8px;
   text-align: center;
   border: none;
   z-index: 500;
-  width:70%;
+  width: 68%;
   position: absolute;
   left: 35px;
   top: 1px;
@@ -216,7 +215,8 @@
 }
 
 .my_cluster {
-  width: 90%;
+  width: 98%;
+  padding: 0px !important;
   max-width: 225px;
   display: flex;
   opacity: 1;
@@ -247,8 +247,9 @@ width: 150px;
 
 .my_div {
   max-width: 250px;
+  padding: 0px !important;
   width: 100%;
-  height: 45px;
+  height: 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
