@@ -209,14 +209,14 @@ const ModArrows = ({
                 aria-label="Turn Distance"
                 onChange={(e) => {
                   console.log(e.target.value);
-                  if (arrowProps.dashness === true && arrowProps.endAnchor.position === "right" && arrowProps.endAnchor.position === "right") {
+                  if (arrowProps.dashness === true && arrowProps.endAnchor.position === "right" && arrowProps.startAnchor.position === "right") {
                     let gbreak =  -1*e.target.value.slice(0, -1);
                     setArrowProps({
                       ...arrowProps,
                       dashness: arrowProps.dashness,
                       gridBreak: gbreak,
                     });
-                  } else if (arrowProps.dashness === true && arrowProps.endAnchor.position === "left" && arrowProps.endAnchor.position === "left") {
+                  } else if (arrowProps.dashness === true && arrowProps.endAnchor.position === "left" && arrowProps.startAnchor.position === "left") {
                     let gbreak =  e.target.value.slice(0, -1);
                     setArrowProps({
                       ...arrowProps,
