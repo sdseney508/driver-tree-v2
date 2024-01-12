@@ -137,7 +137,7 @@
   font-weight: normal;
   align-items: center;
   justify-content: center;
-  margin: 20px;
+  margin: 40px;
   min-width: 175px;
   width: auto;
 }
@@ -204,7 +204,7 @@
   text-align: center;
   border: none;
   z-index: 500;
-  width: 68%;
+  width: 65%;
   position: absolute;
   left: 35px;
   top: 1px;
@@ -374,8 +374,9 @@ width: 150px;
   justify-content: flex-start;
   align-items: flex-start;
   height: 100%;
+  width:auto;
   overflow-y: scroll;
-  overflow-x: hidden;
+  overflow-x: scroll;
 }
 
 .view_container {

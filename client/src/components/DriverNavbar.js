@@ -26,7 +26,6 @@ const DriverNavbar = () => {
           throw new Error("something went wrong!");
         }
         const user = response.data;
-        console.log(user);
         setNavState({
           ...state,
           firstName: user.firstName,

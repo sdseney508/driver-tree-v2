@@ -565,14 +565,11 @@ const DriverCards = ({
         }
       }
     }
-    console.log(driverTreeObj);
+  
     await getDriverByOutcome(selOutcome.id).then((data) => {
-      console.log(data.data);
       setDriverTreeObj([]);
       setDriverTreeObj(data.data);
     });
-    console.log(driverTreeObj);
-
     window.location.reload();
   }
 
@@ -817,14 +814,12 @@ const DriverCards = ({
     } else {
       //find max number of droppable divs needed for any given tier, then size the columns accordingly.  This will let the columns grow with each tier
       let max = 25;
-      console.log(driverTreeObj);
       for (let i = 0; i < driverTreeObj.length; i++) {
         //now get the number of elements in the driverTreeObj and set the max equal to it plus 1
           if (driverTreeObj[i].subTier >= max) {
             max = driverTreeObj[i].subTier + 1;
           }
       }
-      console.log(max);
       for (let i = 0; i < max; i++) {
         //needs a nested loop for those instances when the driverTreeObj is smaller than 36
         //TODO look at replacing this with a 6 by 60 grid and use React Draggable.
@@ -972,6 +967,7 @@ const DriverCards = ({
     <>
       <div id="topdiv" className={styles.top_div}>
         <Xwrapper>
+          {/* <Row style={{width: "1400px"}}> */}
           <Col
             className={styles.driver}
             key="0"
@@ -1127,7 +1123,6 @@ const DriverCards = ({
               <FontAwesomeIcon icon={faCopyright} />
               Integrated Program Solutions
             </p>
-          </Col>
           {driverTreeObj ? (
             <DriverArrows
               arrows={arrows}
@@ -1138,6 +1133,8 @@ const DriverCards = ({
               viewId={viewId}
             />
           ) : null}
+          </Col>
+          {/* </Row> */}
         </Xwrapper>
       </div>
 

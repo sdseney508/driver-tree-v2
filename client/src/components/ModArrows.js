@@ -30,7 +30,7 @@ const ModArrows = ({
       setSelOutcome(res.data);
     });
     setArrowMod(false);
-    // window.location.reload();
+    window.location.reload();
   }
 
   async function delArrow() {
@@ -50,7 +50,6 @@ const ModArrows = ({
 
         <Row className={styles.my_row}>
           <Form>
-            {/* choose a color */}
             <Form.Group controlId="formBasicColor">
               <Form.Label>Color</Form.Label>
               <Form.Select
@@ -209,7 +208,15 @@ const ModArrows = ({
               <Form.Select
                 aria-label="Turn Distance"
                 onChange={(e) => {
-                  if (arrowProps.dashness === true) {
+                  console.log(e.target.value);
+                  if (arrowProps.dashness === true && arrowProps.endAnchor.position === "right" && arrowProps.endAnchor.position === "right") {
+                    let gbreak =  -1*e.target.value.slice(0, -1);
+                    setArrowProps({
+                      ...arrowProps,
+                      dashness: arrowProps.dashness,
+                      gridBreak: gbreak,
+                    });
+                  } else if (arrowProps.dashness === true && arrowProps.endAnchor.position === "left" && arrowProps.endAnchor.position === "left") {
                     let gbreak =  e.target.value.slice(0, -1);
                     setArrowProps({
                       ...arrowProps,
