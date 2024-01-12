@@ -57,7 +57,8 @@ const DriverTreePage = () => {
   const pdfStyle = {
     height: "fit-content",
     overFlowY: "visible",
-    overFlowX: "visible",
+    overFlowX: "hidden",
+    // maxWidth: "100%",
   };
 
   const { outcomeId } = useParams();
@@ -261,7 +262,6 @@ const DriverTreePage = () => {
         pdfExport.appendChild(svgdiv);
       }
     });
-    // console.log(consArr);
   };
   const onModalSubmit = (e) => {
     e.preventDefault();
@@ -288,8 +288,8 @@ const DriverTreePage = () => {
       if (pdfExportComponent.current) {
         pdfExportComponent.current.save();
       }
-      let pdfExport = document.getElementById("pdf-export");
-      exportElement(pdfExport, options, selOutcome.outcomeTitle);
+      // let pdfExport = document.getElementById("pdf-export");
+      // exportElement(pdfExport, options, selOutcome.outcomeTitle);
       window.location.reload();
     }
     setPDFState(false);

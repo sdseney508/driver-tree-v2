@@ -27,7 +27,7 @@ function DriverArrows({
             animateDrawing={false}
             animationSpeed={0}
             key={arrows[index].id}
-            divContainerStyle={{position: "relative", overflow: "hide"}}
+            divContainerStyle={{position: "relative", animation: "none", overflow: "hide"}}
             SVGcanvasStyle={{position: "relative", animation: "none", overflow: "hide"}}
             SVGcanvasProps={{id: "SVG"+arrows[index].id}}
             color={arrows[index].color}

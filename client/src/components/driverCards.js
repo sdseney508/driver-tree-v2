@@ -1123,6 +1123,7 @@ const DriverCards = ({
               <FontAwesomeIcon icon={faCopyright} />
               Integrated Program Solutions
             </p>
+          </Col>
           {driverTreeObj ? (
             <DriverArrows
               arrows={arrows}
@@ -1133,7 +1134,6 @@ const DriverCards = ({
               viewId={viewId}
             />
           ) : null}
-          </Col>
           {/* </Row> */}
         </Xwrapper>
       </div>
