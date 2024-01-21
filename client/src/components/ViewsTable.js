@@ -45,11 +45,19 @@ function ViewsTable({ outcomeId, setViewId, userId, viewId }) {
       resizable: false,
 
       valueSetter: async (params) => {
+        setViewId("");
         const viewName = params.newValue;
         const vId = params.data.id;
         const body = { viewName: viewName };
-        setViewId(vId);
-        await updateView(body, vId);
+        await updateView(body, vId).then((data) => {
+          if (data.status === 200) {
+            console.log("View Name Updated");
+            setViewId(vId);
+          } else {
+           console.log("View Name Update Failed");
+          }
+          setViewId(vId);
+        });
       },
     },
   ]);

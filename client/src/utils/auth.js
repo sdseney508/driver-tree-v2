@@ -115,7 +115,7 @@ const getUserData = async ({ navigate, state, setState, outcomeId }) => {
       alert("Your password has expired.  Please change it.");
       navigate("/accountmanage");
     }
-    let outcomeCommand = "0";
+
     //check if user is authorized to see that data
     if (outcomeId) {
       await getOutcome(outcomeId).then((data) => {

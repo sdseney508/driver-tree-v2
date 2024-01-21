@@ -59,7 +59,7 @@ router.put("/update/:id", async (req, res) => {
         id: req.params.id,
       },
     });
-    res.status(200).json(viewData);
+    res.status(200).json({viewData});
   } catch (err) {
     console.log(err);
     res.status(400).json(err);
