@@ -375,6 +375,40 @@ const generateAllQuads = (selDrivers) => {
                   >
                     Generate PDF
                   </button>
+
+                  <Form.Group>
+            <Col>
+              <Row style={{fontSize: '15px'}}>
+                <Form.Label className={styles.status_label}>
+                  Modified
+                </Form.Label>
+                <Form.Control
+                  as="select"
+                  id="status"
+                  value={selDriver.modified}
+                  //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                  name="modified"
+                  onChange={handleInputChange}
+                  onBlur={handleFormSubmit}
+                  style={{ width: "100px", fontSize: '15px', height: '30px' }}
+                >
+                  <option
+                    key={1}
+                    value={"Yes"}
+                  >
+                    Yes
+                  </option>
+                  <option
+                    key={2}
+                    value={"No"}
+                  >
+                    No
+                  </option>
+
+                </Form.Control>
+              </Row>
+            </Col>
+          </Form.Group>
                 </Col>
               </div>
               {generateQuad(selDriver)}

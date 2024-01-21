@@ -70,6 +70,11 @@ function OutcomeTable({
       width: 125,
       resizable: true,
     },
+    {field: 'version',
+    filter: true,
+    headerName: 'Version',
+    width: 125,
+  }
   ]);
 
   // DefaultColDef sets props common to all Columns

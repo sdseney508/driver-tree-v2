@@ -9,7 +9,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowUp,
   faCircle,
-  faRecordVinyl,
 } from "@fortawesome/free-solid-svg-icons";
 import { faFlagUsa } from "@fortawesome/free-solid-svg-icons";
 import Legend from "../components/legend";
@@ -41,14 +40,14 @@ import ModArrows from "../components/ModArrows";
 const DriverCards = ({
   arrows,
   setArrows,
-  createArrow,
+  createAnArrow,
   driverTreeObj,
   setDriverTreeObj,
   opacity,
   setOpacity,
   PDFState,
   recordLockState,
-  setCreateArrow,
+  setCreateAnArrow,
   selOutcome,
   setSelOutcome,
   state,
@@ -275,9 +274,14 @@ const DriverCards = ({
         key={"card" + cardData.id}
         draggable="true"
         onDragStart={useDrag}
-        style={viewCheck != -1 ? { opacity: 1 } : { opacity: opacity }}
+        style={
+          viewCheck !== -1 ? { opacity: 1 } : { opacity: opacity },
+          cardData.modified === "No"
+            ? { boxShadow: "0 4px 8px 0 rgba(82, 81, 81, 0.5)" }
+            : { boxShadow: "0 4px 8px 0 rgba(59, 46, 241, 0.9)" }
+        }
       >
-        {createArrow && !PDFState && !recordLockState ? (
+        {createAnArrow && !PDFState && !recordLockState ? (
           <FontAwesomeIcon
             className={styles.card_arrow}
             icon={faArrowUp}
@@ -622,6 +626,10 @@ const DriverCards = ({
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+    if (recordLockState) {
+      //kick them out and dont let them drag
+      return;
+    }
     let body = { [e.target.name]: e.target.value };
     if (e.target.name === "status") {
       //if the user changes the status, then ask if they want to update all the future cards in the driver chain's statust, if yes, then execute cascadeUpdate
@@ -670,7 +678,7 @@ const DriverCards = ({
         setShow(true);
       } else {
         CreateAnArrow({
-          setCreateArrow,
+          setCreateAnArrow,
           selectedElements,
           selOutcome,
           setSelOutcome,
@@ -690,7 +698,7 @@ const DriverCards = ({
     }
     if (selectedElements.length === 2) {
       CreateAnArrow({
-        setCreateArrow,
+        setCreateAnArrow,
         selectedElements,
         selOutcome,
         setSelOutcome,
@@ -1033,7 +1041,7 @@ const DriverCards = ({
                     </option>
                   </Form.Control>
                 </Form>
-                {createArrow && !PDFState ? (
+                {createAnArrow && !PDFState ? (
                   <FontAwesomeIcon
                     className={styles.card_arrow}
                     icon={faArrowUp}

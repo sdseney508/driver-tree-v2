@@ -8,6 +8,9 @@ const { Op } = require("sequelize");
 //create a new arrow, this gets called from driverTreePage.js when you click on the create arrow button.  The button will ask the user to select two cards then will draw the arrow between them.
 router.post("/new", async (req, res) => {
   try {
+    if (req.body.id) {
+      delete req.body.id;
+    }
     const arrowData = await arrows.create(req.body);
     res.status(200).json(arrowData);
   } catch (err) {

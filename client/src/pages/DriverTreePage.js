@@ -1,14 +1,17 @@
+/* eslint-disable no-loop-func */
 //page for viewing and updating op limits
 import React, { useState, useEffect } from "react";
 import { PDFExport } from "@progress/kendo-react-pdf";
 import { Container, Row, Col, Button, Modal } from "react-bootstrap";
 import {
+  createDriver,
   createOutcome,
   getDriverByOutcome,
   getOutcome,
   outcomeByCommand,
+  updateOutcome
 } from "../utils/drivers";
-
+import { createArrow } from "../utils/arrows";
 import { createView, deleteView } from "../utils/views";
 import { useNavigate } from "react-router";
 import { useParams } from "react-router"; //to store state in the URL
@@ -29,7 +32,7 @@ const DriverTreePage = () => {
   const [state, setState] = useState([]);
   const [clusters, setClusters] = useState([]);
   const [arrows, setArrows] = useState("");
-  const [createArrow, setCreateArrow] = useState(false);
+  const [createAnArrow, setCreateAnArrow] = useState(false);
   const [opacity, setOpacity] = useState(100);
   const [PDFState, setPDFState] = useState(false);
   const [showArrowMod, setArrowMod] = useState(false);
@@ -86,7 +89,7 @@ const DriverTreePage = () => {
     getAppData();
     setLoading(false);
 
-    if (state.userRole === "Stakeholder") {
+    if (state.userRole === "Stakeholder" || selOutcome.state === "Active") {
       setRecordLockState(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -117,7 +120,7 @@ const DriverTreePage = () => {
     };
 
     getInfo();
-    if (state.userRole === "Stakeholder") {
+    if (state.userRole === "Stakeholder" || selOutcome.state === "Active") {
       setRecordLockState(true);
     }
     setLoading(false);
@@ -187,7 +190,6 @@ const DriverTreePage = () => {
 
   //creates new outcome and then resets the selOutcome state.  This cause a a useEffect fire and refreshes the page.
   const newOutcome = async () => {
-    console.log(state);
     let body = { stakeholderId: state.command, userId: state.userId };
     createOutcome(body).then((data) => {
       setState({ ...state, outcomeId: data.data.id });
@@ -273,11 +275,104 @@ const DriverTreePage = () => {
   };
 
   const toggleArrow = () => {
-    setCreateArrow(!createArrow);
+    setCreateAnArrow(!createAnArrow);
   };
 
   const updateOpacity = (e) => {
     setOpacity(e.target.value / 100);
+  };
+
+  const versionRoll = async () => {
+    //this function will create a new version of the outcome and all drivers then update all of the views to the new version
+    if (!selOutcome.id) {
+      alert(
+        "Something went wrong.  Please refresh the page and try again.  If this error persists, please contact an administrator."
+      );
+      return;
+    }
+    updateOutcome(selOutcome.id, { State: "Active" });
+    let newOutcomeId = 0;
+    let body = { stakeholderId: state.command, userId: state.userId };
+   await createOutcome(body).then((data) => {
+      body =  selOutcome ;
+      body.version = selOutcome.version + 1;
+      delete body.id
+      newOutcomeId = data.data.id;
+      console.log(body);
+      console.log(newOutcomeId)
+      console.log(data.data);
+      updateOutcome(data.data.id, body)
+    });
+    let driverBody = driverTreeObj;
+    let arrowBody = arrows;
+
+    for (let i = 0; i < driverBody.length; i++) {
+      driverBody[i].outcomeId = newOutcomeId;
+      //note here, the id is being deleted by the driver router so we dont need to do it here
+      console.log(driverBody[i]);
+      await createDriver(driverBody[i], state.userId).then((data) => {
+        //now we look inside arrowBody for this id, if we find it, we replace it with the new id  This will allow us to create the arrows with the new ids
+        //first we do the clusters, then we do the arrows as the arrows depend on both cluster and driver ids
+
+        //now we cycle through the arrows  for cards only and update them.  We'll get to clusters in a bit
+        for (let j = 0; j < arrowBody.length; j++) {
+          arrowBody[j].outcomeId = newOutcomeId;
+          if (arrowBody[j].start.startsWith('card') && arrowBody[j].start.endsWith(JSON.stringify(driverBody[i].id))) {
+            arrowBody[j].start = arrowBody[j].start.slice(0, -JSON.stringify(driverBody[i].id).length) + data.data.id;
+          }
+          if (arrowBody[j].end.startsWith('card') && arrowBody[j].end.endsWith(JSON.stringify(driverBody[i].id))) {
+            arrowBody[j].end = arrowBody[j].end.slice(0, -JSON.stringify(driverBody[i].id).length) + data.data.id;
+          }
+        }
+      });
+      //now we create the arrows from the arrowBody
+    }
+    console.log(arrowBody);
+    for (let m= 0; m < arrowBody.length; m++) {
+      //removal of UID is handled by the arrow router
+      createArrow(arrowBody[m]);
+    }
+    //now that we've created all the drivers, we'll create the clusters.  we'll make a single new object of the drivers
+    let newDriverTree = [];
+    let oldClusterId = 0; //used to not make repeat db updates
+    let newClusterId = 0; //used to not make repeat db updates
+    let clusterObj = {};
+    let selectedDrivers = [];
+//     getDriverByOutcome(newOutcomeId).then((data) => {
+//       newDriverTree = data.data;
+//       for (let i = 0; i < newDriverTree.length; i++) {
+//         if (newDriverTree[i].clusterId && newDriverTree[i].clusterId !== oldClusterId) {
+//           //this is the same old clusterID, we dont get a new one until after createCluster is called
+//           oldClusterId = newDriverTree[i].clusterId;
+//           for (let j = i; j < newDriverTree.length; j++) {
+//             if (data.data[j].clusterId === oldClusterId) {
+//               selectedDrivers.push(data.data[j]);
+//             } else {
+//               clusterObj = {
+//                 outcomeId: newOutcomeId,
+//                 selDriversArr: selectedDrivers,
+//               };
+//               // eslint-disable-next-line no-loop-func
+//               createCluster(clusterObj).then((res) => {
+//                 //this is the new cluster id; as id's can only grow this logic is fine
+//                 newClusterId = res.data.id;
+//                 j = driverBody.length;
+//               });
+// //now that we've created the new cluster, we need to update any arrows that point to the old cluster id
+//               for (let k = 0; k < arrowBody.length; k++) {
+//                 if (arrowBody[k].start.startsWith('tier') && arrowBody[k].start.endsWith(oldClusterId)) {
+//                   arrowBody[k].start = arrowBody[k].start.slice(0, -oldClusterId.length) + newClusterId;
+//                 }
+//                 if (arrowBody[k].end.startsWith('tier') && arrowBody[k].end.endsWith(oldClusterId)) {
+//                   arrowBody[k].start = arrowBody[k].start.slice(0, -oldClusterId.length) + newClusterId;
+//                 }
+//               }
+//             }
+//           }
+        
+//         }
+//       }
+//     });
   };
 
   return (
@@ -290,7 +385,7 @@ const DriverTreePage = () => {
             className="justify-content-center"
           >
             {state.userRole !== "Stakeholder" ? (
-              <Col style={{ maxWidth: "900px" }}>
+              <Col style={{ maxWidth: "1100px" }}>
                 <button
                   className={styles.dtree_btn}
                   onClick={() => {
@@ -330,6 +425,15 @@ const DriverTreePage = () => {
                 >
                   Views
                 </button>
+                {state.userRole === "Administrator" && selOutcome.state === "Active" ? (
+                  <button
+                    className={styles.dtree_btn}
+                    onClick={() => versionRoll()}
+                  >
+                    Create Next Rev
+                  </button>
+                ) : null}
+                <div>Outcome Version: {selOutcome.version}          Outcome State: {selOutcome.state}</div>
               </Col>
             ) : (
               <Col>
@@ -354,13 +458,13 @@ const DriverTreePage = () => {
                     setDriverTreeObj={setDriverTreeObj}
                     cluster={clusters}
                     setClusters={setClusters}
-                    createArrow={createArrow}
+                    createAnArrow={createAnArrow}
                     opacity={opacity}
                     setOpacity={setOpacity}
                     PDFState={PDFState}
                     recordLockState={recordLockState}
                     state={state}
-                    setCreateArrow={setCreateArrow}
+                    setCreateAnArrow={setCreateAnArrow}
                     setArrowMod={setArrowMod}
                     selOutcome={selOutcome}
                     setSelOutcome={setSelOutcome}

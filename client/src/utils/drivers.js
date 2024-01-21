@@ -10,6 +10,11 @@ const allOutcomes = () => {
   return axios.get(apiURL + "/outcomes");
 };
 
+//used when creating a new version of an Outcome Tree
+const bulkDriverCreate = (body) => {
+  return axios.post(apiURL + "/drivers/bulkCreate", body);
+};
+
 //used for the cascading status update
 const bulkDriverStatusUpdate = (body) => {
   return axios.put(apiURL + "/drivers/bulkUpdate", body);
@@ -20,7 +25,6 @@ const outcomeByCommand = (command) => {
 };
 
 const createDriver = (body, userId) => {
-  
   return axios.post(apiURL + "/drivers/new/"+userId, body);
 };
 
@@ -29,8 +33,6 @@ const createOutcome = (body) => {
 };
 
 const deleteDriver = (id) => {
-  console.log(id);
-  console.log(apiURL + "/drivers/delete/" + id);
   return axios.delete(apiURL + "/drivers/" + id);
 };
 
@@ -108,6 +110,7 @@ export {
   allDrivers,
   allOutcomes,
   appendAdminLog,
+  bulkDriverCreate,
   bulkDriverStatusUpdate,
   createDriver,
   createOutcome,

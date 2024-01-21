@@ -3,6 +3,9 @@ import apiURL from "./apiURL";
 
 //these are the calls to create, delete, and update clusters
 
+const bulkClusterCreate = (body) => {
+  return axios.put(apiURL + "/cluster/bulkCreate", body);
+};
 
 const createCluster = (body) => {
   return axios.post(apiURL + "/cluster/new", body);
@@ -22,6 +25,7 @@ const updateCluster = (id, body) => {
 
 
 export {
+  bulkClusterCreate,
   createCluster,
   deleteCluster,
   getCluster,

@@ -9,6 +9,9 @@ router.post("/new/:userId", async (req, res) => {
   let driversData = [];
   const transaction = await sequelize.transaction();
   try {
+    //first check to see if this is a creation for a new version of an outcome of if it is a new driver for any outcome
+    if (!req.body.id) {
+      //this means it is a new driver for any outcome
     //first check for the highest subTier number under a tier and
     //outcome and increment it by 1
     let subTier = await drivers.max("subTier", {
@@ -18,6 +21,7 @@ router.post("/new/:userId", async (req, res) => {
       },
     });
     let body = req.body;
+
     body.subTier = subTier + 1;
     driversData = await drivers.create(req.body, 
       {
@@ -36,10 +40,42 @@ router.post("/new/:userId", async (req, res) => {
     );
     await transaction.commit();
     res.status(200).json(driversData);
+  } else {
+    delete req.body.id
+    driversData = await drivers.create(req.body, 
+      {
+      transaction
+    });
+    await adminAudit.create({
+      action: "Create",
+      model: "drivers",
+      tableUid: driversData.id,
+      fieldName: "All",
+      newData: JSON.stringify(driversData),
+      oldData: "new Driver",
+      userId: req.params.userId,
+    },
+    {transaction}
+    );
+    await transaction.commit();
+    res.status(200).json(driversData);
+
+  }
   } catch (err) {
     res.status(400).json(err);
   }
 });
+
+//this is used to create a new version of an Outcome Tree
+router.post("/bulkCreate", async (req, res) => {
+  try {
+    const driversData = await drivers.bulkCreate(req.body);
+    res.status(200).json(driversData);
+  } catch (err) {
+    res.status(400).json(err);
+  }
+});
+
 
 //this route is only for database seeding and testing
 router.post("/", async (req, res) => {
@@ -169,6 +205,7 @@ router.put("/adminlog/:id", async (req, res) => {
 
 router.put("/clusterUpdate/:id", async (req, res) => {
   try {
+    req.body.modified = "Yes";
     const driversData = await drivers.update(req.body, {
       where: {
         cluster: req.params.id,
@@ -197,6 +234,8 @@ router.put("/update/:id/:userId", async (req, res) => {
       res.status(404).json({ message: "No drivers found with this id!" });
       return;
     }
+    if (!req.body.modified) {
+    req.body.modified = "Yes";}
     const driversData = await drivers.update(req.body, {
       where: {
         id: req.params.id,

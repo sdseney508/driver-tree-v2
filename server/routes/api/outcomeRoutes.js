@@ -16,7 +16,7 @@ router.post("/new", async (req, res) => {
     //this is a transaction that also creates the admin log entry and the status definition entry
     console.log(req.body);
     const outcomesData = await outcomes.create(
-      { stakeholderId: req.body.stakeholderId },
+       req.body,
       { transaction }
     );
     await adminAudit.create(

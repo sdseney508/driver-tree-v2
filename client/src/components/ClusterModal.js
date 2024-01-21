@@ -2,7 +2,7 @@ import React, { useState} from "react";
 import { Button, Row } from "react-bootstrap";
 import ClusterTable from "./ClusterTable";
 import styles from "./ClusterModal.module.css";
-import { createCluster} from "../utils/cluster";
+import { createCluster } from "../utils/cluster";
 
 const ClusterModal = ({
   selDriver,

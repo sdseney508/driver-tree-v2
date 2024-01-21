@@ -100,6 +100,17 @@ drivers.init(
             type: DataTypes.STRING,
             allowNull: true,
         },
+        version: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            defaultValue: 1,
+        },
+        modified: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            defaultValue: 'No',
+        },
+
     },
     {
         sequelize,

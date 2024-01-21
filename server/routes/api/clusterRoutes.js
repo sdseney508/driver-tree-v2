@@ -18,7 +18,7 @@ router.get("/:id", async (req, res) => {
 router.post("/new", async (req, res) => {
   try {
     //first create the cluster, the req.body needs to include the outcomeID and the driverID
-    console.log(req.body.selDriversArr);
+
     const clusterData = await clusters.create({outcomeId: req.body.outcomeId});
     for (let i = 0; i < req.body.selDriversArr.length; i++) {
       await drivers.update({clusterId: clusterData.id, clusterId: clusterData.id}, {
@@ -27,6 +27,17 @@ router.post("/new", async (req, res) => {
         },
       });
     }
+    res.status(200).json(clusterData);
+  } catch (err) {
+    res.status(400).json(err);
+  }
+});
+
+//create all the new clusters for a new outcome
+router.post("/bulkCreate", async (req, res) => {
+  try {
+    //first create the cluster, the req.body needs to include the outcomeID and the driverID
+    const clusterData = await clusters.bulkCreate(req.body);
     res.status(200).json(clusterData);
   } catch (err) {
     res.status(400).json(err);
