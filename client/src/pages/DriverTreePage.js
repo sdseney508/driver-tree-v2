@@ -69,22 +69,22 @@ const DriverTreePage = () => {
 
   //using the initial useEffect hook to open up the driver trees and prefill the table at the bottom of the page
   useEffect(() => {
-      const getAppData = async () => {
-        console.log("first use effect");
-        if (!outcomeId) {
-          await outcomeByCommand(state.stakeholderId).then((data) => {
-            setSelOutcome(data.data[0]);
-          });
-        } else {
-          await getOutcome(outcomeId).then((data) => {
-            setSelOutcome(data.data);
-          });
-        }
-      };
-      
-      getUserData({navigate, state, setState, outcomeId});
-      getAppData();
-      setLoading(false);
+    const getAppData = async () => {
+      console.log("first use effect");
+      if (!outcomeId) {
+        await outcomeByCommand(state.stakeholderId).then((data) => {
+          setSelOutcome(data.data[0]);
+        });
+      } else {
+        await getOutcome(outcomeId).then((data) => {
+          setSelOutcome(data.data);
+        });
+      }
+    };
+
+    getUserData({ navigate, state, setState, outcomeId });
+    getAppData();
+    setLoading(false);
 
     if (state.userRole === "Stakeholder") {
       setRecordLockState(true);
@@ -139,7 +139,11 @@ const DriverTreePage = () => {
 
   const deleteSelectedView = async (e) => {
     e.preventDefault();
-    await deleteView(viewId);
+    if (window.confirm("Are you sure you want to delete this view?")) {
+      await deleteView(viewId);
+    } else {
+      return;
+    }
     setViewId("");
   };
 
@@ -369,7 +373,7 @@ const DriverTreePage = () => {
                     viewArrows={viewArrows}
                     setViewArrows={setViewArrows}
                   />
-                ) : null }
+                ) : null}
               </Xwrapper>
             </Row>
           </PDFExport>

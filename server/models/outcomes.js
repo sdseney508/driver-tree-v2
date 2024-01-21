@@ -92,6 +92,12 @@ outcomes.init(
             defaultValue: 'Draft',
         },
 
+        version: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            defaultValue: 1,
+        },
+
         subTierLevel: {
             type: DataTypes.INTEGER,
             allowNull: false,
