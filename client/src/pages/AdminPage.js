@@ -1,6 +1,6 @@
 //page for viewing and updating op limits
 import React, { useState,  useEffect } from "react";
-import { getUser, loggedIn, getToken, getUserData } from "../utils/auth";
+import { getUserData } from "../utils/auth";
 import { Container, Row, Col, Button, Modal } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import "./AdminPage.css";
@@ -13,6 +13,10 @@ const AdminPage = () => {
 
   useEffect(() => {
     getUserData({navigate, state, setState});
+    if (state.Role !== "Administrator") {
+      alert("You are not authorized to view this page.");
+      navigate("/user");
+    }
   }, []);
 
   const onModalSubmit = (e) => {

@@ -1,9 +1,8 @@
 //page for viewing and updating op limits
 import React, { useState, useEffect } from "react";
 import { getUserData } from "../utils/auth";
-import { getAccountStatus, getRoles } from "../utils/sign-up";
+import { getRoles } from "../utils/sign-up";
 import { getAllAccountStatus } from "../utils/accountStatus";
-import { getUsers } from "../utils/drivers";
 import { Container, Row, Button, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { updateUser } from "../utils/auth";
@@ -36,9 +35,12 @@ const AdminAccountManagement = () => {
     };
 
     //gets the data for the administrator
-    getUserData(navigate, state, setState);
-
+    getUserData({navigate, state, setState});
     getFormInfo();
+    if (state.Role !== "Administrator") {
+      alert("You are not authorized to view this page.");
+      navigate("/user");
+    }
     //gets the info for the form
   }, []);
 

@@ -1,9 +1,7 @@
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import apiURL from "./apiURL";
-import {outcomeByCommand} from "./drivers"
-
-
+import { getOutcome, outcomeByCommand } from "./drivers";
 
 const authHeader = () => {
   let id_token = localStorage.getItem("id_token");
@@ -40,7 +38,7 @@ const getAppData = async ({
   state,
   setState,
   setSelOutcome,
-  getOutcome
+  getOutcome,
 }) => {
   //this first part just ensures they whoever is on this page is an authenticated user; prevents someone from typing in the url and gaining access
   try {
@@ -86,7 +84,7 @@ const getAppData = async ({
   }
 };
 
-const getUserData = async ({navigate, state, setState}) => {
+const getUserData = async ({ navigate, state, setState, outcomeId }) => {
   try {
     const token = loggedIn() ? getToken() : null;
     if (!token) {
@@ -110,6 +108,22 @@ const getUserData = async ({navigate, state, setState}) => {
     //if the user isnt logged in with an unexpired token, send them to the login page
     if (!userDataLength > 0) {
       navigate("/");
+    }
+    const passwordExpiration = new Date(user.passwordExpiration);
+    const today = new Date();
+    if (passwordExpiration < today) {
+      alert("Your password has expired.  Please change it.");
+      navigate("/accountmanage");
+    }
+    let outcomeCommand = "0";
+    //check if user is authorized to see that data
+    if (outcomeId) {
+      await getOutcome(outcomeId).then((data) => {
+        if (data.data.stakeholderId !== user.stakeholderId) {
+          alert("You do not have permission to view this page.");
+          navigate("/user");
+        }
+      });
     }
   } catch (err) {
     console.error(err);

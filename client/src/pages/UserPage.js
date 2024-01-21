@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUserData} from "../utils/auth";
-// import { getCarousel } from "../utils/carousel";
 import UserCarousel from "../components/UserCarousel";
 import "./UserPage.css";
 import "./button.css";
@@ -13,7 +12,7 @@ const UserPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    getUserData(navigate, state, setState);
+    getUserData({navigate, state, setState});
   }, []);
 
   return (

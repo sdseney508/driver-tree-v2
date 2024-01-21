@@ -1,7 +1,6 @@
 //page for viewing and updating op limits
-import React, { useState, useContext, useEffect } from "react";
-import { stateContext } from "../App";
-import { getUser, loggedIn, getToken } from "../utils/auth";
+import React, { useState, useEffect } from "react";
+import { getUserData } from "../utils/auth";
 import { Container, Row, Col, Button, Modal, Form } from "react-bootstrap";
 import {
   getDriverById,
@@ -20,7 +19,7 @@ import { savePDF } from "@progress/kendo-react-pdf";
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form
 
 const DriverPage = () => {
-  const [state, setState] = useContext(stateContext);
+  const [state, setState] = useState([]);
   const [selDrivers, setSelDrivers] = useState([]);
   const [selDriver, setSelDriver] = useState({});
   const [selOutcome, setSelOutcome] = useState({});
@@ -32,42 +31,7 @@ const DriverPage = () => {
   let { outcomeId, driverId } = useParams();
   // this is getting the user data from the database to properly populate the form.  None of the form data is being updated in the database. until after you hit submit.
   useEffect(() => {
-    const getUserData = async () => {
-      try {
-        const token = loggedIn() ? getToken() : null;
-        if (!token) {
-          navigate("/");
-        }
-        const response = await getUser(token);
-        if (!response.data) {
-          navigate("/");
-          throw new Error("something went wrong!");
-        }
-        const user = response.data;
-        setState({
-          ...state,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          id: user.id,
-          userRole: user.userRole,
-        });
-        console.log(state.userRole);
-        if (state.userRole === "Stakeholder") {
-          setRecordLockState(true);
-        }
-        let userDataLength = Object.keys(user).length;
-        //if the user isnt logged in with an unexpired token, send them to the login page
-        if (!userDataLength > 0) {
-          navigate("/");
-        }
-      } catch (err) {
-        console.error(err);
-        navigate("/");
-      }
-    };
-
-    const getAppData = async () => {
+       const getAppData = async () => {
       if (!outcomeId) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
         outcomeId = 1;
@@ -90,7 +54,7 @@ const DriverPage = () => {
       });
     };
 
-    getUserData();
+    getUserData({navigate, state, setState, outcomeId});
     getAppData();
   }, []);
 
@@ -271,7 +235,7 @@ const DriverPage = () => {
                     <Form.Control
                       as="textarea"
                       value={selDriver.stakeholders || ""}
-                      style={{ width: "40%", height: "30px" }}
+                      style={{ width: "75%", height: "30px" }}
                       //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                       name="stakeholders"
                       onChange={handleInputChange}

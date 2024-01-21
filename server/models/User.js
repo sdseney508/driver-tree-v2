@@ -6,7 +6,6 @@ class User extends Model {
   checkPassword(loginPw) {
     return bcrypt.compareSync(loginPw, this.password);
   }
-  
 }
 
 User.init(
@@ -55,25 +54,13 @@ User.init(
     userRole: {
       type: DataTypes.STRING,
       allowNull: true,
-      //     references: {
-      //       model: 'role',
-      //       key: 'role_id',
-      //  }
     },
-    // userCommand: {
-      //   type: DataTypes.INTEGER,
-      //   allowNull: false,
-      //   references: {
-        //     model: "stakeholders",
-        //     key: "id",
-        //   },
-        // },
-
-      },
+  },
   {
     hooks: {
       beforeCreate: async (newUserData) => {
         newUserData.password = await bcrypt.hash(newUserData.password, 10);
+        newUserData.passwordExpiration = new Date(Date.now() + 90*24*60*60*1000);
         return newUserData;
       },
 
@@ -82,14 +69,17 @@ User.init(
           updatedUserData.password,
           10
         );
+        updatedUserData.passwordExpiration = new Date(Date.now() + 90*24*60*60*1000);
         return updatedUserData;
       },
     },
-    indexes: [{
-      unique: true,
-      fields: ["email"]}
+    indexes: [
+      {
+        unique: true,
+        fields: ["email"],
+      },
     ],
-    
+
     sequelize,
     timestamps: true,
     freezeTableName: true,

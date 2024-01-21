@@ -1,6 +1,5 @@
 //page for viewing and updating op limits
-import React, { useState, useContext, useEffect } from "react";
-import { stateContext } from "../App";
+import React, { useState, useEffect } from "react";
 import { PDFExport } from "@progress/kendo-react-pdf";
 import { Container, Row, Col, Button, Modal } from "react-bootstrap";
 import {
@@ -14,7 +13,7 @@ import { createView, deleteView } from "../utils/views";
 import { useNavigate } from "react-router";
 import { useParams } from "react-router"; //to store state in the URL
 import DriverCards from "../components/driverCards";
-import { loggedIn, getToken, getUser, getUserData } from "../utils/auth";
+import { getUserData } from "../utils/auth";
 import styles from "./DriverTreePage.module.css";
 import OutcomeTable from "../components/OutcomeTable";
 import ClusterModal from "../components/ClusterModal";
@@ -23,7 +22,6 @@ import { getViewArrows } from "../utils/viewArrows";
 import { getViewCards } from "../utils/viewCards";
 import ViewsTable from "../components/ViewsTable";
 import { Xwrapper } from "react-xarrows";
-// import { exportElement } from "../utils/export-element";
 
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form
 
@@ -84,7 +82,7 @@ const DriverTreePage = () => {
         }
       };
       
-      getUserData({navigate, state, setState});
+      getUserData({navigate, state, setState, outcomeId});
       getAppData();
       setLoading(false);
 

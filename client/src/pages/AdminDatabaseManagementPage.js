@@ -1,13 +1,26 @@
 //page for viewing and updating op limits
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Button} from "react-bootstrap";
+import { getUserData } from "../utils/auth";
+import { useNavigate } from "react-router-dom";
 import AdminTables from "../components/AdminTables";
 import "./DriverTreePage.module.css";
 import "./button.css";
 
-const AdminCarouselManage = () => {
+const AdminDatabaseManage = () => {
   const [state, setState] = useState([]);
   const [selectedTable, setSelectedTable] = useState("system");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    //gets the data for the administrator
+    getUserData({navigate, state, setState});
+    if (state.Role !== "Administrator") {
+      alert("You are not authorized to view this page.");
+      navigate("/user");
+    }
+    //gets the info for the form
+  }, []);
 
   const handleClick = (e) => {
     e.preventDefault();
@@ -96,4 +109,4 @@ const AdminCarouselManage = () => {
   );
 };
 
-export default AdminCarouselManage;
+export default AdminDatabaseManage;

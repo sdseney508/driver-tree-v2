@@ -1,11 +1,9 @@
 //page for viewing and updating op limits
 import React, { useState, useEffect } from "react";
-// import Select from "react-select";
-import { stateContext } from "../App";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { useNavigate } from "react-router";
 import { Link, useParams } from "react-router-dom";
-import { loggedIn, getToken, getUser } from "../utils/auth";
+import { getUserData } from "../utils/auth";
 import {
   createOutcome,
   getDriverByOutcome,
@@ -30,40 +28,6 @@ const OutcomesPage = () => {
 
   //using the initial useEffect hook to open up the draft oplimits and prefill the form
   useEffect(() => {
-    const getUserData = async () => {
-      try {
-        const token = loggedIn() ? getToken() : null;
-        if (!token) {
-          navigate("/");
-        }
-        const response = await getUser(token);
-        if (!response.data) {
-          navigate("/");
-          throw new Error("something went wrong!");
-        }
-        const user = response.data;
-        setState({
-          firstName: user.firstName,
-          lastName: user.lastName,
-          id: user.id,
-          command: user.stakeholderId,
-          userRole: user.userRole,
-        });
-        console.log(user.userRole);
-        if (user.userRole === "Stakeholder") {
-          setRecordLockState(true);
-        }
-        let userDataLength = Object.keys(user).length;
-        //if the user isnt logged in with an unexpired token, send them to the login page
-        if (!userDataLength > 0) {
-          navigate("/");
-        }
-      } catch (err) {
-        console.error(err);
-        navigate("/");
-      }
-    };
-
     const getAppData = async () => {
       if (!outcomeId) {
         await outcomeByCommand(state.stakeholderId).then((data) => {
@@ -76,12 +40,15 @@ const OutcomesPage = () => {
       }
     };
 
-    getUserData();
+    getUserData({ navigate, state, setState, outcomeId});
     getAppData();
+    setState({ ...state, selOutcome: selOutcome });
+    authCheck();
     if (state.userRole === "Stakeholder") {
       setRecordLockState(true);
     }
   }, []);
+
 
   //sets the initial selection of the drop down lists for the signatures, i couldnt get the map function to work, so brute force here we go.
   useEffect(() => {
@@ -97,14 +64,24 @@ const OutcomesPage = () => {
 
     getDrivers();
     setState({ ...state, selOutcome: selOutcome });
+    authCheck();
     if (state.userRole === "Stakeholder") {
       setRecordLockState(true);
     }
-    // navigate("/allOutcomes/" + selOutcome.id);
+    navigate("/allOutcomes/" + selOutcome.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome]);
 
   //this function gets everyone with an assigened role and sets the state for the drop down lists
+
+  const authCheck = () => {
+    //checks to see if the user has access to the desired outcome
+    //first we grab the user data from state and the outcome data from the database then compare the user command with the outcoem stakeholder
+    if (state.command !== selOutcome.stakeholderId) {
+      alert("You do not have access to this outcome");
+      navigate("/user");
+    }
+  };
 
   const barriers = () => {
     if (!driverTreeObj[0]) {

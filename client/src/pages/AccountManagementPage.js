@@ -12,7 +12,7 @@ const AccountManagement = () => {
 
   // this is getting the user data from the database to properly populate the form.  None of the form data is being updated in the database. until after you hit submit.
   useEffect(() => {
-    getUserData(navigate, state, setState);
+    getUserData({navigate, state, setState});
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -44,7 +44,7 @@ const AccountManagement = () => {
     }
 
     const firstName = userFormData.firstName;
-    const id = state.id;
+    const id = state.userId;
     const lastName = userFormData.lastName;
     const email = userFormData.email;
     const password = userFormData.password;
@@ -57,9 +57,7 @@ const AccountManagement = () => {
     }
 
     await updateUser(body, id)
-      .then()
-      .catch((err) => console.log(err));
-    form.reset();
+    navigate("/user");
   };
 
   return (
