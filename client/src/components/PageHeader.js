@@ -1,10 +1,12 @@
-import React, { useContext } from "react";
+import React, { useState } from "react";
 import { Row, Card } from "react-bootstrap";
-import { stateContext } from "../App";
 import styles from "./PageFooter.module.css"
 
 const PageHeader = () => {
-  const [state, setState] = useContext(stateContext);
+  const [state, setState] = useState({
+    selectedPMA: "PMA-262",
+    selectedPEO: "PEO(U&W)",
+  });
 
   return (
     <>

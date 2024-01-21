@@ -96,9 +96,9 @@ const DriverCards = ({
     getArrows(selOutcome.id).then((data) => {
       setArrows(data.data);
     });
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [driverTreeObj]);
+
 
   const addArrowToView = async () => {
     setConnectionShow(false);
@@ -813,7 +813,7 @@ const DriverCards = ({
       return <div></div>;
     } else {
       //find max number of droppable divs needed for any given tier, then size the columns accordingly.  This will let the columns grow with each tier
-      let max = 25;
+      let max = 30;
       for (let i = 0; i < driverTreeObj.length; i++) {
         //now get the number of elements in the driverTreeObj and set the max equal to it plus 1
           if (driverTreeObj[i].subTier >= max) {
@@ -821,8 +821,8 @@ const DriverCards = ({
           }
       }
       for (let i = 0; i < max; i++) {
-        //needs a nested loop for those instances when the driverTreeObj is smaller than 36
-        //TODO look at replacing this with a 6 by 60 grid and use React Draggable.
+        //needs a nested loop for those instances when the driverTreeObj is smaller than 30
+
         // logic as follows:  insert a placeholder row, then check to see if there should be a card or a cluster, if yes, pop that row and insert card
         arr.push("skip");
         for (let j = 0; j < driverTreeObj.length; j++) {
@@ -839,7 +839,7 @@ const DriverCards = ({
       // eslint-disable-next-line array-callback-return
       return arr.map((f, index) => {
         //first check if it is an empty div, then check if it is a cluster, then check if it is a driver.  If it is a driver, then check to see if it is part of a cluster.
-        let clusterViewCheck = -1; //this initializes the ClusterViewCheck for every row of the cloumn, the cluster opacity will be reset after the If check
+        let clusterViewCheck = -1; //this initializes the ClusterViewCheck for every row of the column, the cluster opacity will be reset after the If check
         if (arr[index] === "skip") {
           //empty div, create a spot to drop a driverCard
           return (
@@ -1069,7 +1069,7 @@ const DriverCards = ({
                   </Row>
                 </Card.Body>
               </Card>
-              <Row style={{ minHeight: "500px", width: "90%" }}>
+              <Row style={{ minHeight: "500px", width: "100%" }}>
                 <br />
                 <br />
                 {driverTreeObj ? (
@@ -1124,18 +1124,22 @@ const DriverCards = ({
               Integrated Program Solutions
             </p>
           </Col>
-          {driverTreeObj ? (
+          <Col className={styles.driver} key="7">
+          </Col>
+          {/* </Row> */}
+        </Xwrapper>
+          {(
             <DriverArrows
               arrows={arrows}
+              setArrows={setArrows}
               ArrowModal={ArrowModal}
               opacity={opacity}
+              selOutcome={selOutcome}
               tableState={tableState}
               viewArrows={viewArrows}
               viewId={viewId}
             />
-          ) : null}
-          {/* </Row> */}
-        </Xwrapper>
+          )}
       </div>
 
       <Modal show={show} size="sm">

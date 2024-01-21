@@ -1,13 +1,12 @@
 //page for viewing and updating op limits
-import React, { useState, useContext, useEffect } from "react";
-import { stateContext } from "../App";
+import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Button} from "react-bootstrap";
 import AdminTables from "../components/AdminTables";
 import "./DriverTreePage.module.css";
 import "./button.css";
 
 const AdminCarouselManage = () => {
-  const [state, setState] = useContext(stateContext);
+  const [state, setState] = useState([]);
   const [selectedTable, setSelectedTable] = useState("system");
 
   const handleClick = (e) => {

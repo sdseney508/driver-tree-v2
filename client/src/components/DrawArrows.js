@@ -1,14 +1,30 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Xarrow from "react-xarrows";
+import { getArrows } from "../utils/arrows";
 
 function DriverArrows({
   arrows, 
+  setArrows,
+  driverTreeObj,
   ArrowModal,
+  selOutcome,
   viewId,
   opacity,
   viewArrows,
   tableState,
 }) {
+  useEffect(() => {
+    //get the arrows from the database
+    // async function fetchData() {
+    //   await getArrows(selOutcome.id).then((data)=> {
+    //     setArrows(data.data);
+    //   });
+    // }
+    // fetchData();
+    console.log(arrows)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [driverTreeObj, selOutcome, arrows]);
+
     //this function maps each arrow in the arrows array to a Xarrow component
   const arrowFunc = () => {
     return arrows.map((f, index) => {
@@ -50,7 +66,7 @@ function DriverArrows({
 
   return (
     <>
-     {arrowFunc()}
+     {arrows ? arrowFunc() : null}
     </>
   );
 }

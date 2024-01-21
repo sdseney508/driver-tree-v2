@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-
 import { Link } from "react-router-dom";
 import { Navbar, Nav, Container } from "react-bootstrap";
 import styles from "./DriverNavbar.module.css";
@@ -14,7 +13,7 @@ const DriverNavbar = () => {
   const [navState, setNavState] = useState({});
 
   useEffect(() => {
-    const getUserData = async (navigate, state, setState) => {
+    const getUserData = async (navigate,setNavState) => {
       try {
         const token = loggedIn() ? getToken() : null;
         if (!token) {
@@ -27,7 +26,6 @@ const DriverNavbar = () => {
         }
         const user = response.data;
         setNavState({
-          ...state,
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
@@ -45,7 +43,7 @@ const DriverNavbar = () => {
       }
     };
 
-    getUserData(navigate, navState, setNavState);
+    getUserData(navigate,setNavState);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -93,7 +91,7 @@ const DriverNavbar = () => {
   return (
     <>
       {/* nested terniary.  First one checks if you are on the welcome screen, second one checks if you are on any of the admin pages.  This could also be modified to check if you are an admin and send you there */}
-      {location.pathname !== "/" ? (
+      {navState.userId ? location.pathname !== "/" ? (
         pName !== "/admi" ? (
           <Navbar className={styles.navbar_custom} variant="dark">
             <Container>
@@ -160,7 +158,7 @@ const DriverNavbar = () => {
         )
       ) : (
         ""
-      )}
+      ): "Loading..."}
     </>
   );
 };

@@ -1,7 +1,6 @@
 //page for viewing and updating op limits
-import React, { useState, useContext, useEffect } from "react";
-import { stateContext } from "../App";
-import { getUser, loggedIn, getToken } from "../utils/auth";
+import React, { useState, useEffect } from "react";
+import { getUserData } from "../utils/auth";
 import { getAccountStatus, getRoles } from "../utils/sign-up";
 import { getAllAccountStatus } from "../utils/accountStatus";
 import { getUsers } from "../utils/drivers";
@@ -12,88 +11,35 @@ import "./AdminAccountManage.css";
 import UserTable from "../components/UserTable";
 
 const AdminAccountManagement = () => {
-  const [state, setState] = useContext(stateContext);
+  const [state, setState] = useState([]);
   const [selUser, setSelUser] = useState([]);
   const [userFormData, setUserFormData] = useState({});
   // const [validated] = useState(false);
   const [showPassAlert, setShowPassAlert] = useState(false);
-
   //the next two states are used to set the initial values for the role and functional area dropdowns;
   const [roleState, setRoleState] = useState([]);
-  const [functionalState, setFunctionalState] = useState([]);
   const [accountState, setAccountState] = useState([]);
-
   //now we use state variables to get the initial values for role and functional for the form
   const [selectedRole, setuserRole] = useState("");
-  const [selectedFunctional, setfunctionalArea] = useState("");
   const [selectedAccountStatus, setAccountStatus] = useState("");
 
   const navigate = useNavigate();
 
   //this gets the initial data for the page
   useEffect(() => {
-    //gets the data for the administrator
-    const getUserData = async () => {
-      try {
-        // debugger;
-        const token = loggedIn() ? getToken() : null;
-        if (!token) {
-          navigate("/");
-        }
-        const response = await getUser(token);
-        if (!response.data) {
-          navigate("/");
-          throw new Error("something went wrong!");
-        }
-        const user = response.data;
-        setState({
-          ...state,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          id: user.id,
-
-          userRole: user.userRole,
-          functionalArea: user.functional,
-        });
-        await getUsers().then((data) => {
-          setSelUser(data.data[0]);
-        });
-
-        //sets the initial user for the table below the form
-        setUserFormData({
-          ...userFormData,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          userStatus: user.userStatus,
-          userRole: user.userRole,
-        });
-        // sets the intial values for the role and functional area dropdowns
-        setuserRole(user.userRole);
-        setAccountStatus(user.userStatus);
-        let userDataLength = Object.keys(user).length;
-        //if the user isnt logged in with an unexpired token, send them to the login page
-        if (!userDataLength > 0) {
-          navigate("/");
-        }
-      } catch (err) {
-        console.error(err);
-      }
-
-      //get the initial state data for Roles
-      let rolesOpts = await getRoles().then((data) => {
-        return data.data;
-      });
-      setRoleState(rolesOpts);
-
-      //get the initial state data for Account Status
-      let accStatus = await getAllAccountStatus().then((data) => {
-        return data.data;
-      });
-      setAccountState(accStatus);
+    const getFormInfo = async () => {
+      //get the roles and account statuses for the dropdowns
+      const roleData = await getRoles();
+      const accountData = await getAllAccountStatus();
+      setRoleState(roleData.data);
+      setAccountState(accountData.data);
     };
-    getUserData();
+
+    //gets the data for the administrator
+    getUserData(navigate, state, setState);
+
+    getFormInfo();
+    //gets the info for the form
   }, []);
 
   //updates the user data in the form when a new user is selected from the table
@@ -108,7 +54,6 @@ const AdminAccountManagement = () => {
       functionalArea: selUser.functional,
     });
     setuserRole(selUser.userRole);
-    setfunctionalArea(selUser.functional);
     setAccountStatus(selUser.userStatus);
   }, [selUser]);
 
@@ -140,9 +85,7 @@ const AdminAccountManagement = () => {
       setuserRole(event.target.value);
     } else if (event.target.name === "accountStatus") {
       setAccountStatus(event.target.value);
-    } else {
-      setfunctionalArea(event.target.value);
-    }
+    } 
     setUserFormData({
       ...userFormData,
       [event.target.name]: event.target.value,
@@ -195,14 +138,12 @@ const AdminAccountManagement = () => {
         userStatus,
         password,
         userRole,
+        passwordExpiration: Date.now() + 76600000,
       };
     } else {
       body = { firstName, lastName, email, userStatus, userRole };
     }
     await updateUser(body, id)
-      .then()
-      .catch((err) => console.log(err));
-    form.reset();
     window.location.reload();
   };
 

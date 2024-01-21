@@ -21,14 +21,9 @@ export const stateContext = createContext();
 // Construct request middleware that will attach the JWT token to every request as an `authorization` header
 
 function App() {
-  const [state, setState] = useState({
-    selectedPMA: "PMA-262",
-    selectedPEO: "PEO(U&W)",
-  });
 
   return (
     <div className="bkgrd">
-      <stateContext.Provider value={[state, setState]}>
         <Router>
           <>
             <DriverNavbar />
@@ -54,7 +49,6 @@ function App() {
             
           </>
         </Router>
-      </stateContext.Provider>
     </div>
   );
 }

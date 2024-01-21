@@ -1,6 +1,5 @@
 //page for viewing and updating op limits
-import React, { useState, useContext, useEffect } from "react";
-import { stateContext } from "../App";
+import React, { useState, useEffect } from "react";
 import { Container, Card, Form, Button } from "react-bootstrap";
 import {
   createCarousel,
@@ -15,7 +14,7 @@ import { useNavigate, useLocation } from "react-router";
 
 const AdminCarouselManage = () => {
   //this page will dsiplay all of the carousels on cards.  each card will have a delete and update button.  There will be a top button to add new carousel items.
-  const [state, setState] = useContext(stateContext);
+  const [state, setState] = useState([]);
   //state variable for fil upload
   const [file, setFile] = useState();
   const [fileName, setFileName] = useState("");

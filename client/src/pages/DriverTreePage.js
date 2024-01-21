@@ -14,7 +14,7 @@ import { createView, deleteView } from "../utils/views";
 import { useNavigate } from "react-router";
 import { useParams } from "react-router"; //to store state in the URL
 import DriverCards from "../components/driverCards";
-import { loggedIn, getToken, getUser } from "../utils/auth";
+import { loggedIn, getToken, getUser, getUserData } from "../utils/auth";
 import styles from "./DriverTreePage.module.css";
 import OutcomeTable from "../components/OutcomeTable";
 import ClusterModal from "../components/ClusterModal";
@@ -23,12 +23,12 @@ import { getViewArrows } from "../utils/viewArrows";
 import { getViewCards } from "../utils/viewCards";
 import ViewsTable from "../components/ViewsTable";
 import { Xwrapper } from "react-xarrows";
-import { exportElement } from "../utils/export-element";
+// import { exportElement } from "../utils/export-element";
 
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form
 
 const DriverTreePage = () => {
-  const [state, setState] = useContext(stateContext);
+  const [state, setState] = useState([]);
   const [clusters, setClusters] = useState([]);
   const [arrows, setArrows] = useState("");
   const [createArrow, setCreateArrow] = useState(false);
@@ -41,6 +41,7 @@ const DriverTreePage = () => {
   const [selDriver, setSelDriver] = useState({});
   const [recordLockState, setRecordLockState] = useState(false); //used to lock the record when a user is editing it, reads the user's account permissions and adjusts record locks accordingly, stakeholders have read only access.
   const [viewId, setViewId] = useState(""); //used to let the user cycle through their personal views, the view state is the view id in case multiple users create same named views.
+  const [loading, setLoading] = useState(true); //used to let the user cycle through their personal views, the view state is the view id in case multiple users create same named views.
   const [viewObj, setViewObj] = useState([]); //used to store the view object for the view cards
   const [viewArrows, setViewArrows] = useState([]); //used to store the view arrows for the view cards
   const [tableState, setTableState] = useState("outcome"); //used to toggle the table at the bottom of the page. const [connectionShow, setConnectionShow] = useState(false);
@@ -70,53 +71,23 @@ const DriverTreePage = () => {
 
   //using the initial useEffect hook to open up the driver trees and prefill the table at the bottom of the page
   useEffect(() => {
-    const getAppData = async () => {
-      //this first part just ensures they whoever is on this page is an authenticated user; prevents someone from typing in the url and gaining access
-      try {
-        //these comes from the utils section of the code
-        const token = loggedIn() ? getToken() : null;
-        if (!token) {
-          navigate("/");
-        }
-        const response = await getUser(token);
-        if (!response.data) {
-          navigate("/");
-          throw new Error("something went wrong!");
-        }
-        const user = response.data;
-
-        let userDataLength = Object.keys(user).length;
-        //used to make sure they have permissions to make changes
-        //if the user isnt logged in with an unexpired token, send them to the login page
-        if (!userDataLength > 0) {
-          navigate("/");
-        } else {
-          setState({
-            ...state,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            userRole: user.userRole,
-            command: user.stakeholderId,
-            userId: user.id,
+      const getAppData = async () => {
+        console.log("first use effect");
+        if (!outcomeId) {
+          await outcomeByCommand(state.stakeholderId).then((data) => {
+            setSelOutcome(data.data[0]);
           });
-          //checks to see if there was an outcomeId passed or if you entered from the user page
-          if (!outcomeId) {
-            await outcomeByCommand(user.stakeholderId).then((data) => {
-              setSelOutcome(data.data[0]);
-            });
-          } else {
-            await getOutcome(outcomeId).then((data) => {
-              setSelOutcome(data.data);
-            });
-          }
-          return state;
+        } else {
+          await getOutcome(outcomeId).then((data) => {
+            setSelOutcome(data.data);
+          });
         }
-      } catch (err) {
-        console.error(err);
-        navigate("/");
-      }
-    };
-    getAppData();
+      };
+      
+      getUserData({navigate, state, setState});
+      getAppData();
+      setLoading(false);
+
     if (state.userRole === "Stakeholder") {
       setRecordLockState(true);
     }
@@ -125,12 +96,10 @@ const DriverTreePage = () => {
 
   useEffect(() => {
     const getInfo = async () => {
+      console.log("second use effect");
       if (!selOutcome.id) {
         selOutcome.id = outcomeId;
       }
-      await getOutcome(selOutcome.id).then((data) => {
-        setState({ ...state, selOutcome: data.data });
-      });
       await getDriverByOutcome(selOutcome.id).then((data) => {
         setDriverTreeObj(data.data);
       });
@@ -153,9 +122,10 @@ const DriverTreePage = () => {
     if (state.userRole === "Stakeholder") {
       setRecordLockState(true);
     }
+    setLoading(false);
     navigate("/drivertree/" + selOutcome.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selOutcome, viewId, tableState]);
+  }, [selOutcome, viewId]);
 
   const createNewView = async (e) => {
     e.preventDefault();
@@ -374,7 +344,7 @@ const DriverTreePage = () => {
               className={styles.pdf_export}
             >
               <Xwrapper>
-                {driverTreeObj && arrows && state.selOutcome ? (
+                {!loading ? (
                   <DriverCards
                     arrows={arrows}
                     setArrows={setArrows}
@@ -390,7 +360,7 @@ const DriverTreePage = () => {
                     state={state}
                     setCreateArrow={setCreateArrow}
                     setArrowMod={setArrowMod}
-                    selOutcome={state.selOutcome}
+                    selOutcome={selOutcome}
                     setSelOutcome={setSelOutcome}
                     showArrowMod={showArrowMod}
                     tableState={tableState}
@@ -401,7 +371,7 @@ const DriverTreePage = () => {
                     viewArrows={viewArrows}
                     setViewArrows={setViewArrows}
                   />
-                ) : null}
+                ) : null }
               </Xwrapper>
             </Row>
           </PDFExport>

@@ -1,6 +1,5 @@
 //page for viewing and updating op limits
 import React, { useState, useEffect } from "react";
-import { stateContext } from "../App";
 import { useNavigate } from "react-router-dom";
 import { getUserData} from "../utils/auth";
 // import { getCarousel } from "../utils/carousel";
@@ -9,7 +8,7 @@ import "./UserPage.css";
 import "./button.css";
 
 const UserPage = () => {
-  const [state, setState] = useState(stateContext);
+  const [state, setState] = useState({});
 
   const navigate = useNavigate();
 

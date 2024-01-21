@@ -17,7 +17,6 @@ import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CS
 //and displayed in the form.
 //this is using the community edition and react hooks to selectively render the table
 function UserTable({ selUser, setSelUser }) {
-  const [state, setState] = useContext(stateContext);
   const [rowData, setRowData] = useState([]); // Set rowData to Array of Objects
   let rowD;
 
@@ -60,12 +59,6 @@ function UserTable({ selUser, setSelUser }) {
   const cellClickedListener = useCallback((event) => {
     setSelUser(selUser => event.data);
   }, []);
-
-
-  // Example using Grid's API.  i can use this to do a multi-select on the table
-  // const buttonListener = useCallback((e) => {
-  //   gridRef.current.api.deselectAll();
-  // }, []);
 
   //the return just builds the table
   return (

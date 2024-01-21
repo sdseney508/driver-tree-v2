@@ -25,7 +25,6 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
       return;
     }
     let body = { [e.target.name]: e.target.value };
-    // setOutcome({ ...outcome, [name]: value });
     modifyStatusDefinition(e.target.id, body);
   };
 
@@ -40,6 +39,7 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log(state.userId);
     let body = { [e.target.name]: e.target.value };
       await updateDriver(e.target.id, state.userId, body);
   };
@@ -98,7 +98,7 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
         stakes.push(temp);
         return (
           <div key={"stake" + index}>
-            <Row key={"stakeRow" + index}>
+            <Row key={"stakeRow" + index} className={styles.legend_row}>
               <Col key={"Sholder" + index}>
                 <Form>
                   <Form.Control
@@ -111,7 +111,7 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
                     className={styles.legend_input}></Form.Control>
                 </Form>
               </Col>
-              <Col key={"SholderAbbrev" + index} style={{width: '20px'}}>
+              <Col key={"SholderAbbrev" + index} style={{width: '35px'}} className={styles.legend_input}>
                 {driverTreeObj[index].stakeholderAbbreviation}
               </Col>
             </Row>
@@ -125,12 +125,12 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
     <>
       <div className={styles.legend} key={"legend.div"}>
         <Col className={styles.legend_col} key={"legend.col"}>
-          <h4>Legend</h4>
-          <h5>Stakeholders:</h5>
+          <h5>Legend</h5>
+          <div style={{fontSize: "12px"}}>Stakeholders:</div>
           {stake(driverTreeObj)}
           <br />
           <br />
-          <h5>Status Definitions</h5>
+          <div style={{fontSize: "12px"}}>Status Definitions</div>
           {statusDefinition ? statusDef(statusDefinition) : null}
         </Col>
       </div>

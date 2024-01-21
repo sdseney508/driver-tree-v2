@@ -1,13 +1,12 @@
 //page for viewing and updating op limits
-import React, { useState, useContext, useEffect } from "react";
-import { stateContext } from "../App";
+import React, { useState, useEffect } from "react";
 import { Container, Row, Button, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { getUserData, updateUser } from "../utils/auth";
 import "./UserPage.css";
 
 const AccountManagement = () => {
-  const [state, setState] = useContext(stateContext);
+  const [state, setState] = useState([]);
   const [userFormData, setUserFormData] = useState({});
   const navigate = useNavigate();
 

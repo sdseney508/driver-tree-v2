@@ -63,7 +63,6 @@ const getAppData = async ({
       navigate("/");
     } else {
       setState({
-        ...state,
         firstName: user.firstName,
         lastName: user.lastName,
         userRole: user.userRole,
@@ -80,7 +79,6 @@ const getAppData = async ({
           setSelOutcome(data.data);
         });
       }
-      return state;
     }
   } catch (err) {
     console.error(err);
@@ -88,7 +86,7 @@ const getAppData = async ({
   }
 };
 
-const getUserData = async (navigate, state, setState) => {
+const getUserData = async ({navigate, state, setState}) => {
   try {
     const token = loggedIn() ? getToken() : null;
     if (!token) {
@@ -101,7 +99,6 @@ const getUserData = async (navigate, state, setState) => {
     }
     const user = response.data;
     setState({
-      ...state,
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,

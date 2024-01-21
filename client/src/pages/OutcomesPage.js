@@ -1,5 +1,5 @@
 //page for viewing and updating op limits
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 // import Select from "react-select";
 import { stateContext } from "../App";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
@@ -19,7 +19,7 @@ import OutcomeTable from "../components/OutcomeTable";
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form
 
 const OutcomesPage = () => {
-  const [state, setState] = useContext(stateContext);
+  const [state, setState] = useState({});
   const [selOutcome, setSelOutcome] = useState({});
   const [driverTreeObj, setDriverTreeObj] = useState([]);
   const [recordLockState, setRecordLockState] = useState(false);
@@ -43,7 +43,6 @@ const OutcomesPage = () => {
         }
         const user = response.data;
         setState({
-          ...state,
           firstName: user.firstName,
           lastName: user.lastName,
           id: user.id,
@@ -185,6 +184,7 @@ const OutcomesPage = () => {
       <div className={styles.outcome_page}>
         <Container>
           <div className={styles.my_div}>
+            <div>Welcome {state.firstName}</div>
             {!recordLockState ? (
               <Col className={styles.my_col}>
                 <Button className="p-1 m-1" onClick={newOutcome}>

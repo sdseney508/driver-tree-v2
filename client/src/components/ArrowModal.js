@@ -23,20 +23,22 @@ const ArrowModal = ({
       !selectedElements[1].outcomeTitle
     ) {
       //both are drivers
+      body.start = `card${selectedElements[1].id}`;
+      body.end = `card${selectedElements[0].id}`;
+      //put them in correct sequence
       if (selectedElements[0].tierLevel > selectedElements[1].tierLevel) {
         body.start = `card${selectedElements[0].id}`;
         body.end = `card${selectedElements[1].id}`;
-      } else {
-      body.start = `card${selectedElements[1].id}`;
-      body.end = `card${selectedElements[0].id}`;
       }
+    
       //now check for cluster on the end card
       if (selectedElements[0].cluster !== 0) {
         body.end =
           `tier${selectedElements[0].tierLevel}cluster` +
           selectedElements[0].cluster;
+        }
         //and check for cluster on the beginning card
-      } else if (selectedElements[1].cluster !== 0) {
+      if (selectedElements[1].cluster !== 0) {
         body.start =
           `tier${selectedElements[1].tierLevel}cluster` +
           selectedElements[1].cluster;

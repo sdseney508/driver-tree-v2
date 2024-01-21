@@ -1,6 +1,5 @@
 //Initial launch page for the Driver Tree Database
-import React, { useState, useContext } from "react";
-import { stateContext } from "../App";
+import React, { useState} from "react";
 import {
   Form,
   Alert,
@@ -20,7 +19,10 @@ import PageHeader from "../components/PageHeader";
 import PageFooter from "../components/PageFooter";
 
 const Welcome = () => {
-  const [state, setState] = useContext(stateContext);
+  const [state, setState] = useState({
+    selectedPMA: "PMA-262",
+    selectedPEO: "PEO(U&W)",
+  });
   const [showSignupModal, setSignupModal] = useState(false);
   const [showResetModal, setResetModal] = useState(false);
   const [userFormData, setUserFormData] = useState({ email: "", password: "" });
