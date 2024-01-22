@@ -275,10 +275,13 @@ const DriverCards = ({
         draggable="true"
         onDragStart={useDrag}
         style={
-          viewCheck !== -1 ? { opacity: 1 } : { opacity: opacity },
-          cardData.modified === "No"
-            ? { boxShadow: "0 4px 8px 0 rgba(82, 81, 81, 0.5)" }
-            : { boxShadow: "0 4px 8px 0 rgba(59, 46, 241, 0.9)" }
+          viewCheck !== -1 ? 
+          (cardData.modified === "No" ? { opacity: 1, boxShadow: "0 4px 8px 0 rgba(82, 81, 81)"} : { opacity: 1, boxShadow: "0 4px 8px 0 rgba(59, 46, 241)"}) :  
+          (cardData.modified === "No" ? { opacity: opacity, boxShadow: "0 4px 8px 0 rgba(82, 81, 81)"} : { opacity: opacity, boxShadow: "0 4px 8px 0 rgba(59, 46, 241)"}) 
+          // ,
+          // cardData.modified === "No"
+          //   ? { boxShadow: "0 4px 8px 0 rgba(82, 81, 81, 0.5)" }
+          //   : { boxShadow: "0 4px 8px 0 rgba(59, 46, 241, 0.9)" }
         }
       >
         {createAnArrow && !PDFState && !recordLockState ? (
