@@ -92,9 +92,9 @@ const DriverCards = ({
   }, [selOutcome, opacity, viewId]);
 
   useEffect(() => {
-    getArrows(selOutcome.id).then((data) => {
-      setArrows(data.data);
-    });
+    // getArrows(selOutcome.id).then((data) => {
+    //   setArrows(data.data);
+    // });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [driverTreeObj]);
 
@@ -582,9 +582,17 @@ const DriverCards = ({
 
   const delDriver = (e) => {
     e.preventDefault();
-    if (!window.confirm("Are you sure you want to delete this driver?")) {
+    if (!window.confirm("Are you sure you want to delete this driver?  This will also delete any arrows attached to this driver.")) {
       return;
     }
+    let arrowid;
+    for (let i = 0; i < arrows.length; i++) {
+      if (arrows[i].start === e.target.id || arrows[i].end === e.target.id) {
+        arrowid = arrows[i].id;
+        deleteArrow(arrowid);
+      }
+    }
+
     deleteDriver(e.target.dataset.cardid);
     getOutcome(selOutcome.id).then((data) => {
       setSelOutcome(data.data);
