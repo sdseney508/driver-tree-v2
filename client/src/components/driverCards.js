@@ -431,6 +431,8 @@ const DriverCards = ({
   };
 
   const delCluster = (e) => {
+    debugger;
+    console.log(e.target.dataset)
     e.preventDefault();
     if (recordLockState) {
       //kick them out and dont let them delete
@@ -449,9 +451,10 @@ const DriverCards = ({
     if (!sures) {
       return;
     }
+    let clusterId = "tier" + e.target.dataset.tier + "cluster" + e.target.dataset.cluster;
     let arrowid;
     for (let i = 0; i < arrows.length; i++) {
-      if (arrows[i].start === e.target.id || arrows[i].end === e.target.id) {
+      if (arrows[i].start === clusterId || arrows[i].end === clusterId) {
         arrowid = arrows[i].id;
         deleteArrow(arrowid);
       }
@@ -582,12 +585,15 @@ const DriverCards = ({
 
   const delDriver = (e) => {
     e.preventDefault();
+    console.log(e.target.dataset.cardid);
     if (!window.confirm("Are you sure you want to delete this driver?  This will also delete any arrows attached to this driver.")) {
       return;
     }
-    let arrowid;
+
+    let arrowid =0;
+    let delCardId = "card" + e.target.dataset.cardid;
     for (let i = 0; i < arrows.length; i++) {
-      if (arrows[i].start === e.target.id || arrows[i].end === e.target.id) {
+      if (arrows[i].start === delCardId || arrows[i].end === delCardId) {
         arrowid = arrows[i].id;
         deleteArrow(arrowid);
       }
