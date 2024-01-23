@@ -275,6 +275,7 @@ const DriverTreePage = () => {
   };
 
   const makeActive = async () => {
+    debugger;
     //changes the state of the outcome from Draft to Active
     if (!selOutcome.id) {
       alert(
@@ -282,7 +283,8 @@ const DriverTreePage = () => {
       );
       return;
     }
-    updateOutcome(selOutcome.id, { State: "Active" });
+    updateOutcome(selOutcome.id, { state: "Active" });
+    window.location.reload();
   };
 
   const versionRoll = async () => {
