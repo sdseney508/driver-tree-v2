@@ -47,6 +47,7 @@ const Welcome = () => {
     const user = { email: userFormData.email, password: userFormData.password };
 
     try {
+      debugger;
       const response = await loginUser(user);
       const userData = response.data.user;
       if (!userData) {

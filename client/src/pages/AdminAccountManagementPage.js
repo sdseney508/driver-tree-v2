@@ -1,10 +1,10 @@
 //page for viewing and updating op limits
 import React, { useState, useEffect } from "react";
-import { getUserData } from "../utils/auth";
+import { getAdminUserData } from "../utils/auth";
 import { getRoles } from "../utils/sign-up";
 import { getAllAccountStatus } from "../utils/accountStatus";
 import { Container, Row, Button, Form } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { updateUser } from "../utils/auth";
 import "./AdminAccountManage.css";
 import UserTable from "../components/UserTable";
@@ -21,7 +21,8 @@ const AdminAccountManagement = () => {
   //now we use state variables to get the initial values for role and functional for the form
   const [selectedRole, setuserRole] = useState("");
   const [selectedAccountStatus, setAccountStatus] = useState("");
-
+  const location = useLocation();
+  const pName = location.pathname;
   const navigate = useNavigate();
 
   //this gets the initial data for the page
@@ -35,12 +36,8 @@ const AdminAccountManagement = () => {
     };
 
     //gets the data for the administrator
-    getUserData({navigate, state, setState});
+    getAdminUserData({navigate, state, setState, pName});
     getFormInfo();
-    if (state.Role !== "Administrator") {
-      alert("You are not authorized to view this page.");
-      navigate("/user");
-    }
     //gets the info for the form
   }, []);
 

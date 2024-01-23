@@ -74,8 +74,13 @@ const DriverNavbar = () => {
     navigate("/adminaccountmanage");
   };
 
-  const adminDrivers = () => {
-    navigate("/admindrivermanage");
+  const adminDrivers = async () => {
+    let toutcomeID;
+    await outcomeByCommand(navState.command).then((data) => {
+        toutcomeID=data.data[0].id;
+    });
+    console.log(toutcomeID);
+    navigate("/driverTree/" + toutcomeID);
   };
 
   const databaseManagement = () => {

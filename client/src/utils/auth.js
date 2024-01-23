@@ -96,6 +96,7 @@ const getUserData = async ({ navigate, state, setState, outcomeId }) => {
       throw new Error("something went wrong!");
     }
     const user = response.data;
+    console.log(user);
     setState({
       firstName: user.firstName,
       lastName: user.lastName,
@@ -125,6 +126,62 @@ const getUserData = async ({ navigate, state, setState, outcomeId }) => {
         }
       });
     }
+
+    return user;
+
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const getAdminUserData = async ({ navigate, state, setState, outcomeId }) => {
+  try {
+    const token = loggedIn() ? getToken() : null;
+    if (!token) {
+      navigate("/");
+    }
+    const response = await getUser(token);
+    if (!response.data) {
+      navigate("/");
+      throw new Error("something went wrong!");
+    }
+    const user = response.data;
+    console.log(user);
+    setState({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      userId: user.id,
+      userRole: user.userRole,
+      command: user.stakeholderId,
+    });
+    let userDataLength = Object.keys(user).length;
+    //if the user isnt logged in with an unexpired token, send them to the login page
+    if (!userDataLength > 0) {
+      navigate("/");
+    }
+    const passwordExpiration = new Date(user.passwordExpiration);
+    const today = new Date();
+    if (passwordExpiration < today) {
+      alert("Your password has expired.  Please change it.");
+      navigate("/accountmanage");
+    }
+
+    //check if user is authorized to see that data
+    if (outcomeId) {
+      await getOutcome(outcomeId).then((data) => {
+        if (data.data.stakeholderId !== user.stakeholderId) {
+          alert("You do not have permission to view this page.");
+          navigate("/user");
+        }
+      });
+    }
+
+    if (user.userRole !== "Administrator") {
+      alert("You are not authorized to view this page.");
+      navigate("/user");
+    }
+
   } catch (err) {
     console.error(err);
   }
@@ -198,6 +255,7 @@ export {
   getProfile,
   getToken,
   getUser,
+  getAdminUserData,
   getUserData,
   isTokenExpired,
   loggedIn,

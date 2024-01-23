@@ -1,8 +1,8 @@
-//page for viewing and updating op limits
+//page for viewing and updating drivers
 import React, { useState,  useEffect } from "react";
-import { getUserData } from "../utils/auth";
+import { getAdminUserData } from "../utils/auth";
 import { Container, Row, Col, Button, Modal } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./AdminPage.css";
 import Contact from "../components/Contact";
 
@@ -10,13 +10,12 @@ const AdminPage = () => {
   const [showcontactModal, setcontactModal] = useState(false);
   const [state, setState] = useState([]);
   const navigate = useNavigate();
+  const location = useLocation();
+  const pName = location.pathname;
 
-  useEffect(() => {
-    getUserData({navigate, state, setState});
-    if (state.Role !== "Administrator") {
-      alert("You are not authorized to view this page.");
-      navigate("/user");
-    }
+  useEffect( () => {
+    getAdminUserData({navigate, state, setState, pName})
+
   }, []);
 
   const onModalSubmit = (e) => {
@@ -29,12 +28,12 @@ const AdminPage = () => {
   };
 
   const outcomesManagement = () => {
-    // 👇️ navigate to outcomes management page.  this is where the administrator can add, remove, and update op limits.
+    // 👇️ navigate to outcomes management page.  this is where the administrator can add, remove, and update drivers.
     alert("This feature is disabled for demo.");
   };
 
   const driverManagement = () => {
-    // 👇️ navigate to driver management page.  this is where the administrator can add, remove, and update op limits.
+    // 👇️ navigate to driver management page.  this is where the administrator can add, remove, and update drivers.
     alert("This feature is disabled for demo.");
   };
 

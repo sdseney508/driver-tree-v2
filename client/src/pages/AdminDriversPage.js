@@ -20,7 +20,7 @@ const AdminDriversPage = () => {
   //using the initial useEffect hook to open up the draft oplimits and prefill the form
   useEffect(() => {
     getUserData({navigate, state, setState});
-    if (state.Role !== "Administrator") {
+    if (state.userRole !== "Administrator") {
       alert("You are not authorized to view this page.");
       navigate("/user");
     }
