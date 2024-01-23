@@ -133,6 +133,7 @@ useEffect(() => {
   function allowDrop(e) {
     //this property gets set on the individual divs onDragOver property to limit where a card can be dropped
     e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
   }
 
   async function ArrowModal(e, arrowId, tableState) {
@@ -585,9 +586,6 @@ useEffect(() => {
       setLoading(true);
       setDriverTreeObj(data.data);
     });
-    // getArrows(selOutcome.id).then((data) => {
-    //   setArrows(data.data);
-    // });
   }
 
   const delDriver = (e) => {
@@ -1104,7 +1102,7 @@ useEffect(() => {
               <Row style={{ minHeight: "500px", width: "100%" }}>
                 <br />
                 <br />
-                {driverTreeObj ? (
+                {!loading ? (
                   <Legend
                     driverTreeObj={driverTreeObj}
                     selOutcome={selOutcome}
@@ -1159,20 +1157,20 @@ useEffect(() => {
           <Col className={styles.driver} key="7">
           </Col>
           {/* </Row> */}
-        </Xwrapper>
           {!loading? (
             <DriverArrows
-              arrows={arrows}
-              setArrows={setArrows}
-              ArrowModal={ArrowModal}
-              driverTreeObj={driverTreeObj}
-              opacity={opacity}
-              selOutcome={selOutcome}
-              tableState={tableState}
-              viewArrows={viewArrows}
-              viewId={viewId}
+            arrows={arrows}
+            setArrows={setArrows}
+            ArrowModal={ArrowModal}
+            driverTreeObj={driverTreeObj}
+            opacity={opacity}
+            selOutcome={selOutcome}
+            tableState={tableState}
+            viewArrows={viewArrows}
+            viewId={viewId}
             />
-          ) :null}
+            ) :null}
+            </Xwrapper>
       </div>
 
       <Modal show={show} size="sm">

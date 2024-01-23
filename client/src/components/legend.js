@@ -41,7 +41,7 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
     e.preventDefault();
     console.log(state.userId);
     let body = { [e.target.name]: e.target.value };
-      await updateDriver(e.target.id, state.userId, body);
+    await updateDriver(e.target.dataset.legendId, state.userId, body);
   };
 
   const statusDef = () => {
@@ -99,19 +99,25 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
         return (
           <div key={"stake" + index}>
             <Row key={"stakeRow" + index} className={styles.legend_row}>
-              <Col key={"Sholder" + index}>
+              <Col key={"Sholder-legend" + index}>
                 <Form>
                   <Form.Control
                     as="input"
                     name="stakeholders"
-                    id={driverTreeObj[index].id}
+                    data-legendId={driverTreeObj[index].id}
                     defaultValue={driverTreeObj[index].stakeholders || ""}
                     onBlur={handleSubmit}
                     disabled={recordLockState}
-                    className={styles.legend_input}></Form.Control>
+                    className={styles.legend_input}
+                    // style={{position: 'fixed'}}
+                  ></Form.Control>
                 </Form>
               </Col>
-              <Col key={"SholderAbbrev" + index} style={{width: '35px'}} className={styles.legend_input}>
+              <Col
+                key={"S-Abbrev" + index}
+                style={{ width: "35px" }}
+                className={styles.legend_input}
+              >
                 {driverTreeObj[index].stakeholderAbbreviation}
               </Col>
             </Row>
@@ -126,11 +132,11 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
       <div className={styles.legend} key={"legend.div"}>
         <Col className={styles.legend_col} key={"legend.col"}>
           <h5>Legend</h5>
-          <div style={{fontSize: "12px"}}>Stakeholders:</div>
+          <div style={{ fontSize: "12px" }}>Stakeholders:</div>
           {stake(driverTreeObj)}
           <br />
           <br />
-          <div style={{fontSize: "12px"}}>Status Definitions</div>
+          <div style={{ fontSize: "12px" }}>Status Definitions</div>
           {statusDefinition ? statusDef(statusDefinition) : null}
         </Col>
       </div>
