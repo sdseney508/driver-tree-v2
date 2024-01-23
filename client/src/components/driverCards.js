@@ -36,6 +36,7 @@ import DriverArrows from "./DrawArrows";
 import { CreateAnArrow } from "./ArrowFunction";
 import { faCopyright } from "@fortawesome/free-solid-svg-icons";
 import ModArrows from "../components/ModArrows";
+import { get } from "../../../server/routes";
 
 const DriverCards = ({
   arrows,
@@ -608,6 +609,7 @@ useEffect(() => {
     getDriverByOutcome(selOutcome.id).then((data) => {
       setDriverTreeObj(data.data);
     });
+    window.location.reload();
 
   };
 
