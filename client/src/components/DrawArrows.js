@@ -3,8 +3,8 @@ import Xarrow from "react-xarrows";
 import { getArrows } from "../utils/arrows";
 
 function DriverArrows({
-  arrows, 
-  setArrows,
+  // arrows,
+  // setArrows,
   driverTreeObj,
   ArrowModal,
   selOutcome,
@@ -13,62 +13,82 @@ function DriverArrows({
   viewArrows,
   tableState,
 }) {
-  useEffect(() => {
-    //get the arrows from the database
-    // async function fetchData() {
-    //   await getArrows(selOutcome.id).then((data)=> {
-    //     setArrows(data.data);
-    //   });
-    // }
-    // fetchData();
-    console.log(arrows)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [driverTreeObj, selOutcome, arrows]);
+  const [arrows, setArrows] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    //this function maps each arrow in the arrows array to a Xarrow component
+  useEffect(() => {
+  //   //get the arrows from the database
+    const fetchData = async () => {
+      await getArrows(selOutcome.id).then((data)=> {
+        console.log("getArrows", data.data);
+        setArrows(data.data);
+      });
+    };
+    
+    fetchData();
+    setLoading(false);
+  // // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selOutcome]);
+
+  //this function maps each arrow in the arrows array to a Xarrow component
   const arrowFunc = () => {
+    // fetchData();
+    console.log("arrows", arrows);
     return arrows.map((f, index) => {
-      //see if the arrow is in the view, 
+      //see if the arrow is in the view,
       let opVal = 1;
       let viewCheck;
-      if (viewArrows) {viewCheck = viewArrows.findIndex((v) => v.arrowId === arrows[index].id);}
+      if (viewArrows) {
+        viewCheck = viewArrows.findIndex((v) => v.arrowId === arrows[index].id);
+      }
       //set initial condition for opacity
       if (viewCheck === -1 && viewId) {
         opVal = opacity;
       }
       return (
-          <Xarrow
-            arrowBodyProps={{ style: {opacity: opVal}, onClick: (e) => ArrowModal(e, arrows[index].id, tableState), id: "arrow" + arrows[index].id }}
-            arrowHeadProps={{ style: {opacity: opVal}, onClick: (e) => ArrowModal(e, arrows[index].id, tableState), id: "arrowhead" + arrows[index].id }}
-            animateDrawing={false}
-            animationSpeed={0}
-            key={arrows[index].id}
-            divContainerStyle={{position: "relative", animation: "none", overflow: "hide"}}
-            SVGcanvasStyle={{position: "relative", animation: "none", overflow: "hide"}}
-            SVGcanvasProps={{id: "SVG"+arrows[index].id}}
-            color={arrows[index].color}
-            dashness={arrows[index].dashness}
-            end={arrows[index].end}
-            endAnchor={arrows[index].endAnchor}
-            gridBreak={arrows[index].gridBreak}
-            headSize={4}
-            path={arrows[index].path}
-            showHead={true}
-            start={arrows[index].start}
-            startAnchor={arrows[index].startAnchor}
-            strokeWidth={arrows[index].strokeWidth}
-            zIndex={10}
-          />
-
+        <Xarrow
+          arrowBodyProps={{
+            style: { opacity: opVal },
+            onClick: (e) => ArrowModal(e, arrows[index].id, tableState),
+            id: "arrow" + arrows[index].id,
+          }}
+          arrowHeadProps={{
+            style: { opacity: opVal },
+            onClick: (e) => ArrowModal(e, arrows[index].id, tableState),
+            id: "arrowhead" + arrows[index].id,
+          }}
+          animateDrawing={false}
+          animationSpeed={0}
+          key={arrows[index].id}
+          divContainerStyle={{
+            position: "relative",
+            animation: "none",
+            overflow: "hide",
+          }}
+          SVGcanvasStyle={{
+            position: "relative",
+            animation: "none",
+            overflow: "hide",
+          }}
+          SVGcanvasProps={{ id: "SVG" + arrows[index].id }}
+          color={arrows[index].color}
+          dashness={arrows[index].dashness}
+          end={arrows[index].end}
+          endAnchor={arrows[index].endAnchor}
+          gridBreak={arrows[index].gridBreak}
+          headSize={4}
+          path={arrows[index].path}
+          showHead={true}
+          start={arrows[index].start}
+          startAnchor={arrows[index].startAnchor}
+          strokeWidth={arrows[index].strokeWidth}
+          zIndex={10}
+        />
       );
     });
   };
 
-  return (
-    <>
-     {arrows ? arrowFunc() : null}
-    </>
-  );
+  return <>{!loading ? arrowFunc(): null}</>;
 }
 
 export default DriverArrows;

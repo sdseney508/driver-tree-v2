@@ -68,36 +68,33 @@ const DriverCards = ({
   const [arrowID, setArrowID] = useState("");
   const [selectedElements, setSelectedElements] = useState([]);
   const [show, setShow] = useState(false);
-  // const [arrows, setArrows] = useState([]);
   const [connectionShow, setConnectionShow] = useState(false);
   const [showArrowMod, setArrowMod] = useState(false);
-  // const [showClusterModal, setClusterModal] = useState(false);
   const [, setArrowModal] = useState(false);
 
-  useEffect(() => {
-    const getDriversData = async (selOutcome, viewId) => {
-      if (viewId) {
-        await getViewCards(viewId).then((data) => {
-          setViewObj(data.data);
-        });
-      }
-      if (viewId) {
-        await getViewArrows(viewId).then((data) => {
-          setViewArrows(data.data);
-        });
-      }
-    };
-    getDriversData(selOutcome, viewId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selOutcome, opacity, viewId]);
+  // useEffect(() => {
+  //   const getDriversData = async (selOutcome, viewId) => {
+  //     if (viewId) {
+  //       await getViewCards(viewId).then((data) => {
+  //         setViewObj(data.data);
+  //       });
+  //     }
+  //     if (viewId) {
+  //       await getViewArrows(viewId).then((data) => {
+  //         setViewArrows(data.data);
+  //       });
+  //     }
+  //   };
+  //   getDriversData(selOutcome, viewId);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [selOutcome, opacity, viewId]);
 
-  useEffect(() => {
-    // getArrows(selOutcome.id).then((data) => {
-    //   setArrows(data.data);
-    // });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [driverTreeObj]);
-
+  // useEffect(() => {
+  //   // getArrows(selOutcome.id).then((data) => {
+  //   //   setArrows(data.data);
+  //   // });
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [driverTreeObj]);
 
   const addArrowToView = async () => {
     setConnectionShow(false);
@@ -278,10 +275,6 @@ const DriverCards = ({
           viewCheck !== -1 ? 
           (cardData.modified === "No" ? { opacity: 1, boxShadow: "0 4px 8px 0 rgba(82, 81, 81)"} : { opacity: 1, boxShadow: "0 4px 8px 0 rgba(59, 46, 241)"}) :  
           (cardData.modified === "No" ? { opacity: opacity, boxShadow: "0 4px 8px 0 rgba(82, 81, 81)"} : { opacity: opacity, boxShadow: "0 4px 8px 0 rgba(59, 46, 241)"}) 
-          // ,
-          // cardData.modified === "No"
-          //   ? { boxShadow: "0 4px 8px 0 rgba(82, 81, 81, 0.5)" }
-          //   : { boxShadow: "0 4px 8px 0 rgba(59, 46, 241, 0.9)" }
         }
       >
         {createAnArrow && !PDFState && !recordLockState ? (
@@ -629,7 +622,6 @@ const DriverCards = ({
     getOutcome(selOutcome.id).then((data) => {
       setSelOutcome(data.data);
     });
-    window.location.reload();
   };
 
   const handleClusterChange = (e) => {
@@ -814,8 +806,8 @@ const DriverCards = ({
     e.preventDefault();
     let body = { outcomeId: selOutcome.id, tierLevel: e.target.dataset.tier };
     await createDriver(body, state.userId);
-    getOutcome(selOutcome.id).then((data) => {
-      setSelOutcome(data.data);
+    getDriverByOutcome(selOutcome.id).then((data) => {
+      setDriverTreeObj(data.data);
     });
   };
 
@@ -1153,18 +1145,18 @@ const DriverCards = ({
           </Col>
           {/* </Row> */}
         </Xwrapper>
-          {(
+          {
             <DriverArrows
               arrows={arrows}
               setArrows={setArrows}
               ArrowModal={ArrowModal}
+              driverTreeObj={driverTreeObj}
               opacity={opacity}
               selOutcome={selOutcome}
               tableState={tableState}
               viewArrows={viewArrows}
               viewId={viewId}
-            />
-          )}
+            />}
       </div>
 
       <Modal show={show} size="sm">

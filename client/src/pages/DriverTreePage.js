@@ -30,7 +30,6 @@ import { Xwrapper } from "react-xarrows";
 
 const DriverTreePage = () => {
   const [state, setState] = useState([]);
-  const [clusters, setClusters] = useState([]);
   const [arrows, setArrows] = useState("");
   const [createAnArrow, setCreateAnArrow] = useState(false);
   const [opacity, setOpacity] = useState(100);
@@ -73,7 +72,6 @@ const DriverTreePage = () => {
   //using the initial useEffect hook to open up the driver trees and prefill the table at the bottom of the page
   useEffect(() => {
     const getAppData = async () => {
-      console.log("first use effect");
       if (!outcomeId) {
         await outcomeByCommand(state.stakeholderId).then((data) => {
           setSelOutcome(data.data[0]);
@@ -97,7 +95,6 @@ const DriverTreePage = () => {
 
   useEffect(() => {
     const getInfo = async () => {
-      console.log("second use effect");
       if (!selOutcome.id) {
         selOutcome.id = outcomeId;
       }
@@ -487,14 +484,12 @@ const DriverTreePage = () => {
               className={styles.pdf_export}
             >
               <Xwrapper>
-                {!loading ? (
+              {!loading ? (
                   <DriverCards
                     arrows={arrows}
                     setArrows={setArrows}
                     driverTreeObj={driverTreeObj}
                     setDriverTreeObj={setDriverTreeObj}
-                    cluster={clusters}
-                    setClusters={setClusters}
                     createAnArrow={createAnArrow}
                     opacity={opacity}
                     setOpacity={setOpacity}
@@ -519,7 +514,7 @@ const DriverTreePage = () => {
             </Row>
           </PDFExport>
           <div style={showTable.tableStyle}>
-            {tableState === "outcome" ? (
+            {state.command && tableState === "outcome" ? (
               <OutcomeTable
                 state={state}
                 setState={setState}
