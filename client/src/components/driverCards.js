@@ -66,35 +66,48 @@ const DriverCards = ({
   //The arrow function is contained in the arrows.js module.  It creates the arrows that connect the cards
   let navigate = useNavigate();
   const [arrowID, setArrowID] = useState("");
+  // const [arrows, setArrows] = useState([]);
   const [selectedElements, setSelectedElements] = useState([]);
   const [show, setShow] = useState(false);
   const [connectionShow, setConnectionShow] = useState(false);
   const [showArrowMod, setArrowMod] = useState(false);
   const [, setArrowModal] = useState(false);
+  // const [driverTreeObj, setDriverTreeObj] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // useEffect(() => {
-  //   const getDriversData = async (selOutcome, viewId) => {
-  //     if (viewId) {
-  //       await getViewCards(viewId).then((data) => {
-  //         setViewObj(data.data);
-  //       });
-  //     }
-  //     if (viewId) {
-  //       await getViewArrows(viewId).then((data) => {
-  //         setViewArrows(data.data);
-  //       });
-  //     }
-  //   };
-  //   getDriversData(selOutcome, viewId);
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [selOutcome, opacity, viewId]);
+  useEffect(() => {
+    const getDriversData = async (selOutcome, viewId) => {
+      if (viewId) {
+        await getViewCards(viewId).then((data) => {
+          setViewObj(data.data);
+        });
+      }
+      if (viewId) {
+        await getViewArrows(viewId).then((data) => {
+          setViewArrows(data.data);
+        });
+      }
 
-  // useEffect(() => {
-  //   // getArrows(selOutcome.id).then((data) => {
-  //   //   setArrows(data.data);
-  //   // });
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [driverTreeObj]);
+    };
+
+    getDriversData(selOutcome, viewId);
+    setLoading(false);
+    console.log("Primary DriverCards useEffect");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [driverTreeObj, opacity, viewId]);
+
+useEffect(() => {
+  const updateArrows = async () => {
+    await getArrows(selOutcome.id).then((data) => {
+      setArrows(data.data);
+    });
+  };
+
+  updateArrows();
+  setLoading(false);
+  console.log("DriverCards useEffect");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [driverTreeObj]);
 
   const addArrowToView = async () => {
     setConnectionShow(false);
@@ -248,10 +261,6 @@ const DriverCards = ({
     //now update the outcome
     let outcomeBody = { status: newStatus };
     updateOutcome(driverTreeObj[0].outcomeId, outcomeBody);
-
-    // await getOutcome(selOutcome.id).then((data) => {
-    //   setSelOutcome(data.data);
-    // });
 
     // //now update the driver tree object
     await getDriverByOutcome(selOutcome.id).then((data) => {
@@ -453,9 +462,12 @@ const DriverCards = ({
       }
     }
     deleteCluster(e.target.dataset.cluster);
-    getOutcome(selOutcome.id).then((data) => {
-      setSelOutcome(data.data);
-    });
+
+    getDriverByOutcome(selOutcome.id).then((data) => {
+      setDriverTreeObj(data.data);
+    }
+    );
+
   };
 
   const useDrag = (e) => {
@@ -570,10 +582,12 @@ const DriverCards = ({
     }
   
     await getDriverByOutcome(selOutcome.id).then((data) => {
-      setDriverTreeObj([]);
+      setLoading(true);
       setDriverTreeObj(data.data);
     });
-    window.location.reload();
+    // getArrows(selOutcome.id).then((data) => {
+    //   setArrows(data.data);
+    // });
   }
 
   const delDriver = (e) => {
@@ -593,9 +607,10 @@ const DriverCards = ({
     }
 
     deleteDriver(e.target.dataset.cardid);
-    getOutcome(selOutcome.id).then((data) => {
-      setSelOutcome(data.data);
+    getDriverByOutcome(selOutcome.id).then((data) => {
+      setDriverTreeObj(data.data);
     });
+
   };
 
   const goToDriver = async (e) => {
@@ -806,8 +821,8 @@ const DriverCards = ({
     e.preventDefault();
     let body = { outcomeId: selOutcome.id, tierLevel: e.target.dataset.tier };
     await createDriver(body, state.userId);
-    getDriverByOutcome(selOutcome.id).then((data) => {
-      setDriverTreeObj(data.data);
+    getOutcome(selOutcome.id).then((data) => {
+      setSelOutcome(data.data);
     });
   };
 
@@ -1145,7 +1160,7 @@ const DriverCards = ({
           </Col>
           {/* </Row> */}
         </Xwrapper>
-          {
+          {!loading? (
             <DriverArrows
               arrows={arrows}
               setArrows={setArrows}
@@ -1156,7 +1171,8 @@ const DriverCards = ({
               tableState={tableState}
               viewArrows={viewArrows}
               viewId={viewId}
-            />}
+            />
+          ) :null}
       </div>
 
       <Modal show={show} size="sm">

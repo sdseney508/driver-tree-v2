@@ -109,7 +109,7 @@ const Welcome = () => {
           userId: userData.id,
           command: userData.userCommand,
         });
-        navigate("/user", { state });
+        navigate("/user");
       }
     } catch (err) {
       console.log(err);

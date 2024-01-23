@@ -3,8 +3,11 @@ import { Button, Row } from "react-bootstrap";
 import ClusterTable from "./ClusterTable";
 import styles from "./ClusterModal.module.css";
 import { createCluster } from "../utils/cluster";
+import { getDriverByOutcome } from "../utils/drivers";
 
 const ClusterModal = ({
+  driverTreeObj,
+  setDriverTreeObj,
   selDriver,
   setSelDriver,
   selOutcome,
@@ -22,9 +25,12 @@ const ClusterModal = ({
       }
     }
     let body = {outcomeId: selOutcome.id, selDriversArr: selectedDrivers};
-    await createCluster(body).then((res) => {
+    createCluster(body);
+    //update the selected drivers with the clusterId
+    getDriverByOutcome(selOutcome.id).then((data) => {
+      setDriverTreeObj(data.data);
     });
-    setSelOutcome(selOutcome);
+
   }
 
   return (

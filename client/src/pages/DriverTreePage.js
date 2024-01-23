@@ -21,8 +21,6 @@ import styles from "./DriverTreePage.module.css";
 import OutcomeTable from "../components/OutcomeTable";
 import ClusterModal from "../components/ClusterModal";
 import { getArrows } from "../utils/arrows";
-import { getViewArrows } from "../utils/viewArrows";
-import { getViewCards } from "../utils/viewCards";
 import ViewsTable from "../components/ViewsTable";
 import { Xwrapper } from "react-xarrows";
 
@@ -30,6 +28,7 @@ import { Xwrapper } from "react-xarrows";
 
 const DriverTreePage = () => {
   const [state, setState] = useState([]);
+  const [clusters, setClusters] = useState([]);
   const [arrows, setArrows] = useState("");
   const [createAnArrow, setCreateAnArrow] = useState(false);
   const [opacity, setOpacity] = useState(100);
@@ -79,8 +78,14 @@ const DriverTreePage = () => {
       } else {
         await getOutcome(outcomeId).then((data) => {
           setSelOutcome(data.data);
-        });
+        });    
       }
+      await getDriverByOutcome(selOutcome.id).then((data) => {
+        setDriverTreeObj(data.data);
+      });
+      await getArrows(selOutcome.id).then((data) => {
+        setArrows(data.data);
+      });
     };
 
     getUserData({ navigate, state, setState, outcomeId });
@@ -104,26 +109,16 @@ const DriverTreePage = () => {
       await getArrows(selOutcome.id).then((data) => {
         setArrows(data.data);
       });
-      if (viewId) {
-        await getViewCards(viewId).then((data) => {
-          setViewObj(data.data);
-        });
-      }
-      if (viewId) {
-        await getViewArrows(viewId).then((data) => {
-          setViewArrows(data.data);
-        });
-      }
     };
 
     getInfo();
     if (state.userRole === "Stakeholder" || selOutcome.state === "Active") {
       setRecordLockState(true);
     }
-    setLoading(false);
     navigate("/drivertree/" + selOutcome.id);
+    setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selOutcome, viewId]);
+  }, [selOutcome]);
 
   const createNewView = async (e) => {
     e.preventDefault();
@@ -484,12 +479,14 @@ const DriverTreePage = () => {
               className={styles.pdf_export}
             >
               <Xwrapper>
-              {!loading ? (
+                {  !loading ?(
                   <DriverCards
                     arrows={arrows}
                     setArrows={setArrows}
                     driverTreeObj={driverTreeObj}
                     setDriverTreeObj={setDriverTreeObj}
+                    cluster={clusters}
+                    setClusters={setClusters}
                     createAnArrow={createAnArrow}
                     opacity={opacity}
                     setOpacity={setOpacity}
@@ -509,7 +506,7 @@ const DriverTreePage = () => {
                     viewArrows={viewArrows}
                     setViewArrows={setViewArrows}
                   />
-                ) : null}
+                ): null}
               </Xwrapper>
             </Row>
           </PDFExport>
@@ -592,11 +589,12 @@ const DriverTreePage = () => {
           {/*change everything in the signup form components*/}
           <ClusterModal
             onModalSubmit={onModalSubmit}
+            driverTreeObj={driverTreeObj}
+            setDriverTreeObj={setDriverTreeObj}
             selDriver={selDriver}
             setSelDriver={setSelDriver}
             selOutcome={selOutcome}
             setSelOutcome={setSelOutcome}
-            driverTreeObj={driverTreeObj}
           />
           <Button variant="secondary" onClick={handleClose}>
             Close
