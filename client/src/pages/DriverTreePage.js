@@ -1,7 +1,6 @@
 /* eslint-disable no-loop-func */
 //page for viewing and updating op limits
 import React, { useState, useEffect } from "react";
-import { PDFExport } from "@progress/kendo-react-pdf";
 import { Container, Row, Col, Button, Modal } from "react-bootstrap";
 import {
   createDriver,
@@ -28,7 +27,7 @@ import { getArrows } from "../utils/arrows";
 import ViewsTable from "../components/ViewsTable";
 import { Xwrapper } from "react-xarrows";
 import { createCluster } from "../utils/cluster";
-import { exportElement } from "../utils/pdfExport";
+import { exportElement } from "../utils/export-element";
 
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form
 
@@ -586,7 +585,6 @@ const DriverTreePage = () => {
               </Col>
             )}
           </div>
-          <PDFExport ref={pdfExportComponent} paperSize="auto" margin={40}>
             <Row
               id="pdf-export"
               style={PDFState ? pdfStyle : showTable.driverStyle}
@@ -623,7 +621,7 @@ const DriverTreePage = () => {
                 ) : null}
               </Xwrapper>
             </Row>
-          </PDFExport>
+          
           <div style={showTable.tableStyle}>
             {state.command && tableState === "outcome" ? (
               <OutcomeTable
