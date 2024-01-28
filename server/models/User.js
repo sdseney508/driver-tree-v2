@@ -55,6 +55,11 @@ User.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    //store token in database vice the local storage
+    loggedInToken: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     hooks: {

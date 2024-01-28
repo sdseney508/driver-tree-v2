@@ -132,6 +132,7 @@ router.post("/login", async (req, res) => {
       return;
     }
     const token = signToken(userData);
+    // User.update({ loggedInToken: token }, { where: { id: userData.id } });
     res.json({ token, user: userData, message: "You are now logged in!" });
   } catch (err) {
     console.log(err);

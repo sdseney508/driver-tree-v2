@@ -162,7 +162,15 @@
   justify-content: center;
   align-content: center;
   margin: 5px;
-  box-shadow: 0 4px 8px 0 rgba(53, 53, 53, 0.9);
+  box-shadow: 0 4px 8px 0 rgba(53, 53, 53);
+  transition: transform 0.3s ease;
+}
+
+.dtree_btn:hover {
+  transform: scale(1.1);
+  cursor: pointer;
+  size: 105%;
+  box-shadow: 0 4px 8px 0 rgba(1, 26, 250);
 }
 
 .my_btn {

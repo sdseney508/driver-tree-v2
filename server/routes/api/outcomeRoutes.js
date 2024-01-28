@@ -14,7 +14,6 @@ router.post("/new", async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     //this is a transaction that also creates the admin log entry and the status definition entry
-    console.log(req.body);
     const outcomesData = await outcomes.create(
        req.body,
       { transaction }

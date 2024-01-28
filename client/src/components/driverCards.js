@@ -92,7 +92,6 @@ const DriverCards = ({
 
     getDriversData(selOutcome, viewId);
     setLoading(false);
-    console.log("Primary DriverCards useEffect");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [driverTreeObj, opacity, viewId]);
 
@@ -105,7 +104,6 @@ useEffect(() => {
 
   updateArrows();
   setLoading(false);
-  console.log("DriverCards useEffect");
   // eslint-disable-next-line react-hooks/exhaustive-deps
 }, [driverTreeObj]);
 
@@ -434,8 +432,6 @@ useEffect(() => {
   };
 
   const delCluster = (e) => {
-    debugger;
-    console.log(e.target.dataset)
     e.preventDefault();
     if (recordLockState) {
       //kick them out and dont let them delete
@@ -462,6 +458,7 @@ useEffect(() => {
         deleteArrow(arrowid);
       }
     }
+    console.log("clusterId", e.target.dataset.cluster);
     deleteCluster(e.target.dataset.cluster);
 
     getDriverByOutcome(selOutcome.id).then((data) => {
@@ -590,7 +587,6 @@ useEffect(() => {
 
   const delDriver = (e) => {
     e.preventDefault();
-    console.log(e.target.dataset.cardid);
     if (!window.confirm("Are you sure you want to delete this driver?  This will also delete any arrows attached to this driver.")) {
       return;
     }
@@ -1164,11 +1160,12 @@ useEffect(() => {
           {!loading? (
             <DriverArrows
             arrows={arrows}
-            setArrows={setArrows}
             ArrowModal={ArrowModal}
             driverTreeObj={driverTreeObj}
             opacity={opacity}
+            recordLockState={recordLockState}
             selOutcome={selOutcome}
+            setArrows={setArrows}
             tableState={tableState}
             viewArrows={viewArrows}
             viewId={viewId}

@@ -125,14 +125,14 @@ const ModArrows = ({
                 }}
               >
                 <option value="null">
-                  Select an offset (neg is up and left)
+                  Select an offset (positive is up and left)
                 </option>
-                <option key={'sOff-30'}  value="-30">-30</option>
-                <option key={'sOff-20'}  value="-20">-20</option>
-                <option key={'sOff-10'}  value="-10">-10</option>
+                <option key={'sOff-30'}  value="30">-30</option>
+                <option key={'sOff-20'}  value="20">-20</option>
+                <option key={'sOff-10'}  value="10">-10</option>
                 <option key={'sOff-0'}  value="0">0</option>
-                <option key={'sOff+10'}  value="10">10</option>
-                <option key={'sOff+20'}  value="20">20</option>
+                <option key={'sOff+10'}  value="-10">10</option>
+                <option key={'sOff+20'}  value="-20">20</option>
                 <option key={'sOff+30'}  value="-30">30</option>
               </Form.Select>
 
@@ -193,15 +193,15 @@ const ModArrows = ({
                 }}
               >
                 <option value="null">
-                  Select an offset (neg is up and left)
+                  Select an offset (positive is up and left)
                 </option>
-                <option key={'eOff-30'} value="-30">-30</option>
-                <option key={'eOff-20'} value="-20">-20</option>
-                <option key={'eOff-10'} value="-10">-10</option>
+                <option key={'eOff-30'} value="30">-30</option>
+                <option key={'eOff-20'} value="20">-20</option>
+                <option key={'eOff-10'} value="10">-10</option>
                 <option key={'eOff-0'} value="0">0</option>
-                <option key={'eOff+10'} value="10">10</option>
-                <option key={'eOff+20'} value="20">20</option>
-                <option key={'eOff+30'} value="30">30</option>
+                <option key={'eOff+10'} value="-10">10</option>
+                <option key={'eOff+20'} value="-20">20</option>
+                <option key={'eOff+30'} value="-30">30</option>
               </Form.Select>
 
               <Form.Label>Turn Distance</Form.Label>

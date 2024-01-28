@@ -3,6 +3,8 @@ import { jwtDecode } from "jwt-decode";
 import apiURL from "./apiURL";
 import { getOutcome, outcomeByCommand } from "./drivers";
 
+
+
 const authHeader = () => {
   let id_token = localStorage.getItem("id_token");
 
@@ -28,7 +30,7 @@ const getToken = () => {
   return localStorage.getItem("id_token");
 };
 
-const getUser = (token) => {
+const getUser = () => {
   return axios.get(apiURL + "/users/me", { headers: authHeader() });
 };
 
@@ -84,7 +86,7 @@ const getAppData = async ({
   }
 };
 
-const getUserData = async ({ navigate, state, setState, outcomeId }) => {
+const getUserData = async ({ navigate, state, setState, outcomeId, error, setError }) => {
   try {
     const token = loggedIn() ? getToken() : null;
     if (!token) {
@@ -96,7 +98,7 @@ const getUserData = async ({ navigate, state, setState, outcomeId }) => {
       throw new Error("something went wrong!");
     }
     const user = response.data;
-    console.log(user);
+
     setState({
       firstName: user.firstName,
       lastName: user.lastName,
@@ -120,8 +122,14 @@ const getUserData = async ({ navigate, state, setState, outcomeId }) => {
     //check if user is authorized to see that data
     if (outcomeId) {
       await getOutcome(outcomeId).then((data) => {
-        if (data.data.stakeholderId !== user.stakeholderId) {
+        if(!data.data){
+          setError(true);
           alert("You do not have permission to view this page.");
+          navigate("/user");
+          return null;
+        }
+        if (data.data.stakeholderId !== user.stakeholderId) {
+          alert("You do not have permission to view this page. ");
           navigate("/user");
         }
       });
@@ -130,7 +138,10 @@ const getUserData = async ({ navigate, state, setState, outcomeId }) => {
     return user;
 
   } catch (err) {
-    console.error(err);
+    setError(true);
+    alert("You do not have permission to view this page.");
+    navigate("/user");
+    return null;
   }
 };
 

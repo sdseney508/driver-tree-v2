@@ -44,7 +44,7 @@ outcomes.hasMany(clusters, {
 });
 
 clusters.hasMany(drivers, {
-  //no need for cascade delete, the delete route in clusterRoutes updates the correct drivers.
+  //no need for cascade delete, the delete route in clusterRoutes updates the correct drivers.  And you dont want to delete the clusters and drivers in this manner because you will lose the history of the drivers.
 });
 
 drivers.belongsTo(clusters, {});

@@ -83,7 +83,6 @@ router.post("/", async (req, res) => {
     const driversData = await drivers.create(req.body);
     res.status(200).json(driversData);
   } catch (err) {
-    console.log(err);
     res.status(400).json(err);
   }
 });
@@ -97,7 +96,6 @@ router.get("/getOne/:id", async (req, res) => {
         id: req.params.id,
       },
     });
-    console.log(driversData);
     res.status(200).json(driversData);
   } catch (err) {
     res.status(500).json(err);
@@ -159,7 +157,6 @@ router.get("/stakeholders/:id", async (req, res) => {
         outcomeId: req.params.id,
       },
     });
-    console.log(driversData);
     res.status(200).json(driversData);
   } catch (err) {
     res.status(500).json(err);
@@ -185,8 +182,6 @@ router.get("/byOutcomeByTier/:id", async (req, res) => {
 router.put("/adminlog/:id", async (req, res) => {
   try {
     let comment = req.body.log;
-    console.log(typeof(comment));
-    console.log(comment.admin_log);
     await sequelize.query(
       "update drivers set admin_log = concat(admin_log, :adminLog) where id = :id",
       {
@@ -198,7 +193,6 @@ router.put("/adminlog/:id", async (req, res) => {
     );
     res.status(200).json({ message: "Admin Log Updated" });
   } catch (err) {
-    console.log(err);
     res.status(401).json(err);
   }
 });
@@ -285,7 +279,6 @@ router.put("/bulkUpdate", async (req, res) => {
 //delete drivers
 router.delete("/:id", async (req, res) => {
   try {
-    console.log("in the delete driver route, id: "+req.params.id);
     const driversData = await drivers.destroy({
       where: {
         id: req.params.id,

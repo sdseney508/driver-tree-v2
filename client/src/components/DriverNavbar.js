@@ -3,21 +3,24 @@ import { Link } from "react-router-dom";
 import { Navbar, Nav, Container } from "react-bootstrap";
 import styles from "./DriverNavbar.module.css";
 import { useNavigate, useLocation } from "react-router";
-import { loggedIn, getToken, getUser } from "../utils/auth";
-import { outcomeByCommand} from "../utils/drivers"
+import { loggedIn, getToken, getUser, logout } from "../utils/auth";
+import { outcomeByCommand } from "../utils/drivers";
 
 const DriverNavbar = () => {
   let location = useLocation();
   let navigate = useNavigate();
+  const userInfo = [];
+  const [loading, setLoading] = useState(true);
   let pName = location.pathname.slice(0, 5);
   const [navState, setNavState] = useState({});
 
   useEffect(() => {
-    const getUserData = async (navigate,setNavState) => {
+    const getUserData = async () => {
       try {
         const token = loggedIn() ? getToken() : null;
         if (!token) {
           navigate("/");
+          return;
         }
         const response = await getUser(token);
         if (!response.data) {
@@ -25,6 +28,8 @@ const DriverNavbar = () => {
           throw new Error("something went wrong!");
         }
         const user = response.data;
+        userInfo.push(user.stakeholderId);
+        console.log(JSON.stringify(userInfo[0]));
         setNavState({
           firstName: user.firstName,
           lastName: user.lastName,
@@ -38,23 +43,32 @@ const DriverNavbar = () => {
         if (!userDataLength > 0) {
           navigate("/");
         }
+        return user;
       } catch (err) {
         console.error(err);
+        navigate("/");
       }
     };
 
-    getUserData(navigate,setNavState);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    getUserData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    // This useEffect will run when navState changes
+    // If navState has the expected data, set loading to false
+    if (navState.command && navState.userId) {
+      setLoading(false);
+    }
+  }, [navState]);
 
-  const allOutcomes = async () => {
+  const allOutcomes = async (userInfo) => {
     let toutcomeID;
     await outcomeByCommand(navState.command).then((data) => {
-        toutcomeID=data.data[0].id;
+      toutcomeID = data.data[0].id;
     });
 
-    navigate("/allOutcomes/"+toutcomeID);
+    navigate("/allOutcomes/" + toutcomeID);
   };
 
   const goHome = () => {
@@ -64,7 +78,7 @@ const DriverNavbar = () => {
   const gotoDriverTree = async () => {
     let toutcomeID;
     await outcomeByCommand(navState.command).then((data) => {
-        toutcomeID=data.data[0].id;
+      toutcomeID = data.data[0].id;
     });
     console.log(toutcomeID);
     navigate("/driverTree/" + toutcomeID);
@@ -77,9 +91,8 @@ const DriverNavbar = () => {
   const adminDrivers = async () => {
     let toutcomeID;
     await outcomeByCommand(navState.command).then((data) => {
-        toutcomeID=data.data[0].id;
+      toutcomeID = data.data[0].id;
     });
-    console.log(toutcomeID);
     navigate("/driverTree/" + toutcomeID);
   };
 
@@ -96,74 +109,84 @@ const DriverNavbar = () => {
   return (
     <>
       {/* nested terniary.  First one checks if you are on the welcome screen, second one checks if you are on any of the admin pages.  This could also be modified to check if you are an admin and send you there */}
-      {navState.userId ? location.pathname !== "/" ? (
-        pName !== "/admi" ? (
-          <Navbar className={styles.navbar_custom} variant="dark">
-            <Container>
-              <Navbar.Toggle />
+      {!loading ? (
+        location.pathname !== "/" ? (
+          pName !== "/admi" ? (
+            <Navbar className={styles.navbar_custom} variant="dark">
+              <Container>
+                <Navbar.Toggle />
 
-              <Nav>
-                <Nav.Link onClick={goHome} className={styles.nav_link}>
-                  Home Page
-                </Nav.Link>
-                <Nav.Link onClick={allOutcomes} className={styles.nav_link}>
-                  Outcomes
-                </Nav.Link>
-                <Nav.Link onClick={gotoDriverTree} className={styles.nav_link}>
-                  Driver Trees
-                </Nav.Link>
-                <Nav.Link
-                  as={Link}
-                  to="/accountmanage"
-                  className="navbar-custom"
-                >
-                  Account Mngmt
-                </Nav.Link>
-              </Nav>  
-              <h5 className={styles.copyright}> &copy; Integrated Program Solutions, Inc</h5>
-            </Container>
-          </Navbar>
-        ) : (
-          <Navbar className={styles.navbar_custom} variant="dark">
-            <Container fluid>
-              <Navbar.Toggle />
-              <Navbar.Collapse id="navbar" className="navbar-custom">
                 <Nav>
-                  <Nav.Link as={Link} to="/admin" className="navbar-custom">
-                    Admin Home Page
-                  </Nav.Link>
-                  <Nav.Link onClick={adminDrivers} className="navbar-custom">
-                    Admin Drivers Page
+                  <Nav.Link onClick={goHome} className={styles.nav_link}>
+                    Home Page
                   </Nav.Link>
                   <Nav.Link
-                    onClick={adminAccountManage}
-                    className="navbar-custom"
+                    onClick={() => allOutcomes(userInfo)}
+                    className={styles.nav_link}
                   >
-                    Admin Account Mngmt
+                    Outcomes
                   </Nav.Link>
                   <Nav.Link
-                    onClick={databaseManagement}
-                    className="navbar-custom"
+                    onClick={gotoDriverTree}
+                    className={styles.nav_link}
                   >
-                    Database Mngmt
+                    Driver Trees
                   </Nav.Link>
-{/* 
                   <Nav.Link
                     as={Link}
-                    to="/admincarouselmanage"
+                    to="/accountmanage"
                     className="navbar-custom"
                   >
-                    Carousel Mngmt
-                  </Nav.Link> */}
+                    Account Mngmt
+                  </Nav.Link>
+                  <Nav.Link onClick={logout} className={styles.nav_link}>
+                    Logout
+                  </Nav.Link>
                 </Nav>
-              </Navbar.Collapse>
-            </Container>
-            <p className={styles.copyright}>&#169; Integrated Program Solutions, Inc</p>
-          </Navbar>
+                <h5 className={styles.copyright}>
+                  {" "}
+                  &copy; Integrated Program Solutions, Inc
+                </h5>
+              </Container>
+            </Navbar>
+          ) : (
+            <Navbar className={styles.navbar_custom} variant="dark">
+              <Container fluid>
+                <Navbar.Toggle />
+                <Navbar.Collapse id="navbar" className="navbar-custom">
+                  <Nav>
+                    <Nav.Link as={Link} to="/admin" className="navbar-custom">
+                      Admin Home Page
+                    </Nav.Link>
+                    <Nav.Link onClick={adminDrivers} className="navbar-custom">
+                      Admin Drivers Page
+                    </Nav.Link>
+                    <Nav.Link
+                      onClick={adminAccountManage}
+                      className="navbar-custom"
+                    >
+                      Admin Account Mngmt
+                    </Nav.Link>
+                    <Nav.Link
+                      onClick={databaseManagement}
+                      className="navbar-custom"
+                    >
+                      Database Mngmt
+                    </Nav.Link>
+                  </Nav>
+                </Navbar.Collapse>
+              </Container>
+              <p className={styles.copyright}>
+                &#169; Integrated Program Solutions, Inc
+              </p>
+            </Navbar>
+          )
+        ) : (
+          ""
         )
       ) : (
-        ""
-      ): "Loading..."}
+        "Server delay, please refresh this page"
+      )}
     </>
   );
 };

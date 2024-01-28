@@ -104,7 +104,7 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
                   <Form.Control
                     as="input"
                     name="stakeholders"
-                    data-legendId={driverTreeObj[index].id}
+                    data-legendid={driverTreeObj[index].id}
                     defaultValue={driverTreeObj[index].stakeholders || ""}
                     onBlur={handleSubmit}
                     disabled={recordLockState}

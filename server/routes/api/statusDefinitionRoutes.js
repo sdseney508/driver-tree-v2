@@ -6,6 +6,7 @@ const { Op } = require("sequelize");
 //create a statusDefinition.  This should almost never be used
 router.post('/', async (req, res) => {
   try {
+    console.log(req.body);
     const statusDefData = await statusDefinition.create(req.body);
     res.status(200).json(statusDefData);
   } catch (err) {
@@ -50,11 +51,14 @@ router.get('/:id', async (req, res) => {
 //update/change a statusDefinition info      
 router.put('/:id', async (req, res) => {
     try { 
+        console.log(req.body);
+        console.log(req.params.id);
         const statusDefData = await statusDefinition.update(req.body, {
             where: {
                 id: req.params.id,
             },
         });
+        console.log(statusDefData);
         if (!statusDefData) {
             res.status(404).json({ message: 'No status found with this id!' });
             return;

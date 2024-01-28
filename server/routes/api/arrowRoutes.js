@@ -45,7 +45,6 @@ router.get("/find/:id/:outcomeId", async (req, res) => {
         ],
       },
     });
-    console.log(arrowData);
     res.status(200).json(arrowData);
   } catch (err) {
     res.status(400).json(err);
@@ -77,7 +76,6 @@ router.get("/", async (req, res) => {
 //modify the arrow properties, this gets called from driverTreePage.js when you click on the arrow itself, it will open up a modal that has drop downs for arrow properties which then get saved to the width, color, and line type fields in the arrow table.
 router.put("/update/:id", async (req, res) => {
   try {
-    console.log(req.body);
     const arrowData = await arrows.update(req.body, {
       where: {
         id: req.params.id,

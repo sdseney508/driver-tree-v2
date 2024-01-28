@@ -4,21 +4,21 @@ import { getArrows } from "../utils/arrows";
 
 function DriverArrows({
   arrows, 
-  setArrows,
-  driverTreeObj,
   ArrowModal,
-  selOutcome,
-  viewId,
+  driverTreeObj,
   opacity,
-  viewArrows,
+  recordLockState,
+  selOutcome,
+  setArrows,
   tableState,
+  viewId,
+  viewArrows,
 }) {
   // const [arrows, setArrows] = useState([]);
 const [loading, setLoading] = useState(true);
   useEffect(() => {
     //get the arrows from the database
     const fetchData = async () => {
-      console.log("fetching arrows");
       await getArrows(selOutcome.id).then((data) => {
         setArrows(data.data);
       });
@@ -45,13 +45,12 @@ const [loading, setLoading] = useState(true);
         <Xarrow
           arrowBodyProps={{
             style: { opacity: opVal },
-            onClick: (e) => ArrowModal(e, arrows[index].id, tableState),
+            onClick: (e) => {if (!recordLockState) {ArrowModal(e, arrows[index].id, tableState)}},
             id: "arrow" + arrows[index].id,
           }}
           arrowHeadProps={{
             style: { opacity: opVal },
-            onClick: (e) => ArrowModal(e, arrows[index].id, tableState),
-            id: "arrowhead" + arrows[index].id,
+            onClick: (e) => {if (!recordLockState) {ArrowModal(e, arrows[index].id, tableState)}},
           }}
           animateDrawing={false}
           animationSpeed={0}

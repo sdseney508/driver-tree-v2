@@ -317,7 +317,6 @@ const generateAllQuads = (selDrivers) => {
   };
 
   const handleInputChange = (e) => {
-    console.log(recordLockState);
     if (recordLockState) {
       return;
     }
@@ -326,7 +325,6 @@ const generateAllQuads = (selDrivers) => {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    console.log(recordLockState);
     if (recordLockState) {
       return;
     }

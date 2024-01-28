@@ -13,6 +13,10 @@ import {
 } from "../utils/drivers";
 import { createArrow } from "../utils/arrows";
 import { createView, deleteView } from "../utils/views";
+import {
+  getStatusDefinitionByOutcome,
+  modifyStatusDefinition,
+} from "../utils/statusDefinition";
 import { useNavigate } from "react-router";
 import { useParams } from "react-router"; //to store state in the URL
 import DriverCards from "../components/driverCards";
@@ -23,12 +27,14 @@ import ClusterModal from "../components/ClusterModal";
 import { getArrows } from "../utils/arrows";
 import ViewsTable from "../components/ViewsTable";
 import { Xwrapper } from "react-xarrows";
+import { createCluster } from "../utils/cluster";
 
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form
 
 const DriverTreePage = () => {
   const [state, setState] = useState([]);
   const [clusters, setClusters] = useState([]);
+  const [error, setError] = useState(false);
   const [arrows, setArrows] = useState("");
   const [createAnArrow, setCreateAnArrow] = useState(false);
   const [opacity, setOpacity] = useState(100);
@@ -78,7 +84,7 @@ const DriverTreePage = () => {
       } else {
         await getOutcome(outcomeId).then((data) => {
           setSelOutcome(data.data);
-        });    
+        });
       }
       await getDriverByOutcome(selOutcome.id).then((data) => {
         setDriverTreeObj(data.data);
@@ -86,39 +92,71 @@ const DriverTreePage = () => {
       await getArrows(selOutcome.id).then((data) => {
         setArrows(data.data);
       });
+      if (state.userRole === "Stakeholder" || selOutcome.state === "Active") {
+        setRecordLockState(true);
+      }
+
     };
 
-    getUserData({ navigate, state, setState, outcomeId });
+    getUserData({ navigate, state, setState, outcomeId, error, setError });
     getAppData();
+    authCheck();
     setLoading(false);
-
-    if (state.userRole === "Stakeholder" || selOutcome.state === "Active") {
-      setRecordLockState(true);
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     const getInfo = async () => {
+      setRecordLockState(false);
       if (!selOutcome.id) {
         selOutcome.id = outcomeId;
       }
       await getDriverByOutcome(selOutcome.id).then((data) => {
-        setDriverTreeObj(data.data);
+        debugger;
+        if(data.data.length===0) {
+          setError(true);
+          navigate("/user");
+          return;
+        } else {
+        setDriverTreeObj(data.data);}
       });
       await getArrows(selOutcome.id).then((data) => {
+        if(data.data.length === 0) {
+          setError(true);
+          navigate("/user");
+          return;
+        }
         setArrows(data.data);
       });
+      if (state.userRole === "Stakeholder" || selOutcome.state === "Active") {
+        await setRecordLockState(true);
+      }
     };
 
     getInfo();
-    if (state.userRole === "Stakeholder" || selOutcome.state === "Active") {
-      setRecordLockState(true);
-    }
+    authCheck();
     navigate("/drivertree/" + selOutcome.id);
-    setLoading(false);
+    
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome]);
+
+
+  useEffect(() => {
+    // This useEffect will run when navState changes
+    // If navState has the expected data, set loading to false
+    if (driverTreeObj.length > 0 && state.userId && state.command && driverTreeObj[0].userId === state.userId && driverTreeObj[0].stakeholderId === state.command) {
+      setLoading(false);
+    }
+  }, [driverTreeObj]);
+
+  const authCheck = () => {
+    //checks to see if the user has access to the desired outcome
+    //first we grab the user data from state and the outcome data from the database then compare the user command with the outcoem stakeholder
+    if (state.command !== selOutcome.stakeholderId) {
+      alert("You do not have access to this outcome");
+      navigate("/user");
+    }
+  };
 
   const createNewView = async (e) => {
     e.preventDefault();
@@ -183,6 +221,7 @@ const DriverTreePage = () => {
   //creates new outcome and then resets the selOutcome state.  This cause a a useEffect fire and refreshes the page.
   const newOutcome = async () => {
     let body = { stakeholderId: state.command, userId: state.userId };
+    //the status definitions are created on the server side, no need to create them here.
     createOutcome(body).then((data) => {
       setState({ ...state, outcomeId: data.data.id });
       setSelOutcome(data.data);
@@ -192,7 +231,6 @@ const DriverTreePage = () => {
   const svgForPdf = () => {
     //this function takes in an array of svgs from the arrows, pulls out the <path> and <g> elements, then creates a new svg element and appends the path and g elements to it.  it then returns the SVG element in a div for appending to the DOM.  The <div> element has an absolute position based on the position of the arrow svg element that is passed in as part of the entering arguement.
     //first we remove the first element in svgs
-    // debugger;
     let svgs = document.querySelectorAll("svg");
     let svgArray = Array.from(svgs);
 
@@ -275,7 +313,6 @@ const DriverTreePage = () => {
   };
 
   const makeActive = async () => {
-    debugger;
     //changes the state of the outcome from Draft to Active
     if (!selOutcome.id) {
       alert(
@@ -288,6 +325,9 @@ const DriverTreePage = () => {
   };
 
   const versionRoll = async () => {
+    let statusDefBody = [];
+    let oldstatusDefBody = [];
+    //first we need to get all the status definitions for the current outcome
     //this function will create a new version of the outcome and all drivers then update all of the views to the new version
     if (!selOutcome.id) {
       alert(
@@ -295,107 +335,176 @@ const DriverTreePage = () => {
       );
       return;
     }
-    updateOutcome(selOutcome.id, { State: "Active" });
+
     let newOutcomeId = 0;
+    let oldOutcomeId = selOutcome.id;
     let body = { stakeholderId: state.command, userId: state.userId };
     await createOutcome(body).then((data) => {
-      body = selOutcome;
+      body = JSON.parse(JSON.stringify(selOutcome));
       body.version = selOutcome.version + 1;
+      body.state = "Draft";
       delete body.id;
       newOutcomeId = data.data.id;
-      console.log(body);
-      console.log(newOutcomeId);
-      console.log(data.data);
       updateOutcome(data.data.id, body);
     });
-    let driverBody = driverTreeObj;
-    let arrowBody = arrows;
+    //now we update the statusdefinitions that were created on the server side.
+    oldstatusDefBody = await getStatusDefinitionByOutcome(oldOutcomeId);
+    statusDefBody = await getStatusDefinitionByOutcome(newOutcomeId);
 
+    for (let i = 0; i < statusDefBody.data.length; i++) {
+      statusDefBody.data[i].statusDefinition =
+        oldstatusDefBody.data[i].statusDefinition;
+      console.log(statusDefBody.data[i]);
+      modifyStatusDefinition(statusDefBody.data[i].id, statusDefBody.data[i]);
+    }
+
+    let driverBody = JSON.parse(JSON.stringify(driverTreeObj));
+    let arrowBody = JSON.parse(JSON.stringify(arrows));
+    delete arrowBody.id;
+    let oldClusterId = []; //used to not make repeat db updates
+    let selectedDrivers = [];
+    let clusterArr = "";
+    let clusterName = "";
     for (let i = 0; i < driverBody.length; i++) {
       driverBody[i].outcomeId = newOutcomeId;
       //note here, the id is being deleted by the driver router so we dont need to do it here
-      console.log(driverBody[i]);
-      await createDriver(driverBody[i], state.userId).then((data) => {
-        //now we look inside arrowBody for this id, if we find it, we replace it with the new id  This will allow us to create the arrows with the new ids
-        //first we do the clusters, then we do the arrows as the arrows depend on both cluster and driver ids
 
-        //now we cycle through the arrows  for cards only and update them.  We'll get to clusters in a bit
+      const driverData = await createDriver(driverBody[i], state.userId);
+
+      //check to see if it is in  acluster
+      if (driverBody[i].clusterId) {
+        if (!clusterName)  {
+          clusterName = driverBody[i].cluster.clusterName;
+        }
+        //check to see if it is first driver in a new cluster
+        if (driverBody[i].clusterId !== oldClusterId) {
+          //check to see if there are any drivers in the selectedDrivers array from a prior cluster, if there are create a new cluster in the database tied to the new outcome
+          if (selectedDrivers.length > 0) {
+            //we need to create a new cluster from the current selectedDrivers array, then reset the array
+            body = {
+              outcomeId: newOutcomeId,
+              clusterName: clusterName,
+              selDriversArr: selectedDrivers,
+            };
+            const clusterData = await createCluster(body);
+            clusterArr = clusterData.data.id;
+            for (let j = 0; j < arrowBody.length; j++) {
+              if (
+                arrowBody[j].start.startsWith("tier") &&
+                arrowBody[j].start.endsWith("r" + oldClusterId)
+              ) {
+                arrowBody[j].start =
+                  arrowBody[j].start.slice(
+                    0,
+                    -JSON.stringify(oldClusterId).length
+                  ) + JSON.stringify(clusterArr);
+              }
+              if (
+                arrowBody[j].end.startsWith("tier") &&
+                arrowBody[j].end.endsWith("r" + JSON.stringify(oldClusterId))
+              ) {
+                arrowBody[j].end =
+                  arrowBody[j].end.slice(
+                    0,
+                    -JSON.stringify(oldClusterId).length
+                  ) + JSON.stringify(clusterArr);
+              }
+            }
+            //reset the cluster array
+            selectedDrivers = [];
+          }
+          //if it is, we need to update the cluster id to the new cluster id
+          selectedDrivers.push(driverData.data);
+          oldClusterId = driverBody[i].clusterId;
+          clusterName = driverBody[i].cluster.clusterName;
+        } else {
+          //the driver is in the same cluster as the previous driver, so we need to add it to the array
+          selectedDrivers.push(driverData.data);
+          oldClusterId = driverBody[i].clusterId;
+          //now we look inside arrowBody for this id, if we find it, we replace it with the new id  This will allow us to create the arrows with the new ids
+        }
+      }
+
+      if (i === driverBody.length - 1 && selectedDrivers.length > 0) {
+        //create the cluster, the driver is the last one in the arrray and cluster.
+        body = {
+          outcomeId: newOutcomeId,
+          clusterName: clusterName,
+          selDriversArr: selectedDrivers,
+        };
+        const clusterD = await createCluster(body);
+
+        clusterArr = clusterD.data.id;
         for (let j = 0; j < arrowBody.length; j++) {
-          arrowBody[j].outcomeId = newOutcomeId;
           if (
-            arrowBody[j].start.startsWith("card") &&
-            arrowBody[j].start.endsWith(JSON.stringify(driverBody[i].id))
+            arrowBody[j].start.startsWith("tier") &&
+            arrowBody[j].start.endsWith(
+              "cluster" + JSON.stringify(oldClusterId)
+            )
           ) {
             arrowBody[j].start =
               arrowBody[j].start.slice(
                 0,
-                -JSON.stringify(driverBody[i].id).length
-              ) + data.data.id;
+                -JSON.stringify(oldClusterId).length
+              ) + JSON.stringify(clusterArr);
           }
           if (
-            arrowBody[j].end.startsWith("card") &&
-            arrowBody[j].end.endsWith(JSON.stringify(driverBody[i].id))
+            arrowBody[j].end.startsWith("tier") &&
+            arrowBody[j].end.endsWith("cluster" + JSON.stringify(oldClusterId))
           ) {
             arrowBody[j].end =
-              arrowBody[j].end.slice(
-                0,
-                -JSON.stringify(driverBody[i].id).length
-              ) + data.data.id;
+              arrowBody[j].end.slice(0, -JSON.stringify(oldClusterId).length) +
+              JSON.stringify(clusterArr);
           }
         }
-      });
-      //now we create the arrows from the arrowBody
+      }
+      //now we cycle through the arrows for cards and outcome and update them.
+      for (let j = 0; j < arrowBody.length; j++) {
+        delete arrowBody[j].id;
+        arrowBody[j].outcomeId = newOutcomeId;
+        if (
+          arrowBody[j].start.startsWith("card") &&
+          arrowBody[j].start.endsWith("d" + JSON.stringify(driverBody[i].id))
+        ) {
+          arrowBody[j].start =
+            arrowBody[j].start.slice(
+              0,
+              -JSON.stringify(driverBody[i].id).length
+            ) + driverData.data.id;
+        }
+        if (
+          arrowBody[j].end.startsWith("card") &&
+          arrowBody[j].end.endsWith("d" + JSON.stringify(driverBody[i].id))
+        ) {
+          arrowBody[j].end =
+            arrowBody[j].end.slice(
+              0,
+              -JSON.stringify(driverBody[i].id).length
+            ) + driverData.data.id;
+        }
+        if (arrowBody[j].end === "outcomeId" + oldOutcomeId) {
+          arrowBody[j].end =
+            arrowBody[j].end.slice(0, -JSON.stringify(oldOutcomeId).length) +
+            JSON.stringify(newOutcomeId);
+        }
+      }
     }
     for (let m = 0; m < arrowBody.length; m++) {
       //removal of UID is handled by the arrow router
-      createArrow(arrowBody[m]);
+      await createArrow(arrowBody[m]);
     }
-    //now that we've created all the drivers, we'll create the clusters.  we'll make a single new object of the drivers
-    let newDriverTree = [];
-    let oldClusterId = 0; //used to not make repeat db updates
-    let newClusterId = 0; //used to not make repeat db updates
-    let clusterObj = {};
-    let selectedDrivers = [];
-    //     getDriverByOutcome(newOutcomeId).then((data) => {
-    //       newDriverTree = data.data;
-    //       for (let i = 0; i < newDriverTree.length; i++) {
-    //         if (newDriverTree[i].clusterId && newDriverTree[i].clusterId !== oldClusterId) {
-    //           //this is the same old clusterID, we dont get a new one until after createCluster is called
-    //           oldClusterId = newDriverTree[i].clusterId;
-    //           for (let j = i; j < newDriverTree.length; j++) {
-    //             if (data.data[j].clusterId === oldClusterId) {
-    //               selectedDrivers.push(data.data[j]);
-    //             } else {
-    //               clusterObj = {
-    //                 outcomeId: newOutcomeId,
-    //                 selDriversArr: selectedDrivers,
-    //               };
-    //               // eslint-disable-next-line no-loop-func
-    //               createCluster(clusterObj).then((res) => {
-    //                 //this is the new cluster id; as id's can only grow this logic is fine
-    //                 newClusterId = res.data.id;
-    //                 j = driverBody.length;
-    //               });
-    // //now that we've created the new cluster, we need to update any arrows that point to the old cluster id
-    //               for (let k = 0; k < arrowBody.length; k++) {
-    //                 if (arrowBody[k].start.startsWith('tier') && arrowBody[k].start.endsWith(oldClusterId)) {
-    //                   arrowBody[k].start = arrowBody[k].start.slice(0, -oldClusterId.length) + newClusterId;
-    //                 }
-    //                 if (arrowBody[k].end.startsWith('tier') && arrowBody[k].end.endsWith(oldClusterId)) {
-    //                   arrowBody[k].start = arrowBody[k].start.slice(0, -oldClusterId.length) + newClusterId;
-    //                 }
-    //               }
-    //             }
-    //           }
+    getOutcome(newOutcomeId).then((data) => {
+      setSelOutcome(data.data);
+    });
 
-    //         }
-    //       }
-    //     });
+    navigate("/drivertree/" + newOutcomeId);
+    window.location.reload();
+    //now that we've created all the drivers, we'll create the clusters.  we'll make a single new object of the drivers
   };
 
   return (
     <>
-      <div id="topleveldiv" key="topleveldiv" className={styles.driver_page}>
+      { !error ? <div id="topleveldiv" key="topleveldiv" className={styles.driver_page}>
         {/* className={styles.driver_page}  */}
         <Container fluid className="justify-content-center">
           <div
@@ -481,7 +590,7 @@ const DriverTreePage = () => {
               className={styles.pdf_export}
             >
               <Xwrapper>
-                {  !loading ?(
+                {!loading ? (
                   <DriverCards
                     arrows={arrows}
                     setArrows={setArrows}
@@ -508,7 +617,7 @@ const DriverTreePage = () => {
                     viewArrows={viewArrows}
                     setViewArrows={setViewArrows}
                   />
-                ): null}
+                ) : null}
               </Xwrapper>
             </Row>
           </PDFExport>
@@ -571,7 +680,7 @@ const DriverTreePage = () => {
             ) : null}
           </div>
         </Container>
-      </div>
+      </div>: null}
       {/* for creating a cluster */}
       <Modal
         name="clusterModal"

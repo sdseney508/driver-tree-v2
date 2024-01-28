@@ -2,7 +2,6 @@ import axios from "axios";
 import apiURL from "./apiURL";
 
 const createArrow = (body) => {
-  console.log(body);
   return axios.post(apiURL + "/arrows/new/", body);
 };
 
@@ -12,7 +11,6 @@ const getArrow = (id) => {
 
 //this is used with the onDrop function on the DriverPage to modify the arrow properties after you drag a card to a new tier
 const findArrows = (body) => {
-  console.log(body);
   return axios.get(apiURL + "/arrows/find/" + body.id + "/" + body.outcomeId);
 };
 

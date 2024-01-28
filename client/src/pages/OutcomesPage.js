@@ -18,6 +18,7 @@ import OutcomeTable from "../components/OutcomeTable";
 
 const OutcomesPage = () => {
   const [state, setState] = useState({});
+  const [error, setError] = useState(false);
   const [selOutcome, setSelOutcome] = useState({});
   const [driverTreeObj, setDriverTreeObj] = useState([]);
   const [recordLockState, setRecordLockState] = useState(false);
@@ -35,12 +36,16 @@ const OutcomesPage = () => {
         });
       } else {
         await getOutcome(outcomeId).then((data) => {
+          if(!data.data){
+            navigate("/user");
+            return;
+          }
           setSelOutcome(data.data);
         });
       }
     };
 
-    getUserData({ navigate, state, setState, outcomeId});
+    getUserData({ navigate, state, setState, outcomeId, error, setError});
     getAppData();
     setState({ ...state, selOutcome: selOutcome });
     authCheck();
