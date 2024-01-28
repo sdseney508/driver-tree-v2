@@ -28,6 +28,7 @@ import { getArrows } from "../utils/arrows";
 import ViewsTable from "../components/ViewsTable";
 import { Xwrapper } from "react-xarrows";
 import { createCluster } from "../utils/cluster";
+import { exportElement } from "../utils/pdfExport";
 
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form
 
@@ -134,7 +135,9 @@ const DriverTreePage = () => {
     };
 
     getInfo();
+    if (state.command && selOutcome.stakeholderId) {
     authCheck();
+    };
     navigate("/drivertree/" + selOutcome.id);
     
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -289,11 +292,11 @@ const DriverTreePage = () => {
         margin: "25px",
         landscape: true,
       };
-      if (pdfExportComponent.current) {
-        pdfExportComponent.current.save();
-      }
-      // let pdfExport = document.getElementById("pdf-export");
-      // exportElement(pdfExport, options, selOutcome.outcomeTitle);
+      // if (pdfExportComponent.current) {
+      //   pdfExportComponent.current.save();
+      // }
+      let pdfExport = document.getElementById("pdf-export");
+      exportElement(pdfExport, options, selOutcome.outcomeTitle);
       window.location.reload();
     }
     setPDFState(false);
@@ -504,7 +507,7 @@ const DriverTreePage = () => {
 
   return (
     <>
-      { !error ? <div id="topleveldiv" key="topleveldiv" className={styles.driver_page}>
+      {!error ? <div id="topleveldiv" key="topleveldiv" className={styles.driver_page}>
         {/* className={styles.driver_page}  */}
         <Container fluid className="justify-content-center">
           <div
