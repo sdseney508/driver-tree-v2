@@ -178,25 +178,6 @@ router.get("/byOutcomeByTier/:id", async (req, res) => {
   }
 });
 
-//append the admin log with what was changed
-router.put("/adminlog/:id", async (req, res) => {
-  try {
-    let comment = req.body.log;
-    await sequelize.query(
-      "update drivers set admin_log = concat(admin_log, :adminLog) where id = :id",
-      {
-        replacements: {
-          adminLog: req.body.log.admin_log,
-          id: req.params.id,
-        },
-      }
-    );
-    res.status(200).json({ message: "Admin Log Updated" });
-  } catch (err) {
-    res.status(401).json(err);
-  }
-});
-
 router.put("/clusterUpdate/:id", async (req, res) => {
   try {
     req.body.modified = "Yes";

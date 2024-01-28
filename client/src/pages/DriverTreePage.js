@@ -51,8 +51,6 @@ const DriverTreePage = () => {
   const [viewArrows, setViewArrows] = useState([]); //used to store the view arrows for the view cards
   const [tableState, setTableState] = useState("outcome"); //used to toggle the table at the bottom of the page. const [connectionShow, setConnectionShow] = useState(false);
 
-  const pdfExportComponent = React.useRef(null);
-
   let tableStyle = { height: "25vh", width: "100%", overFlowY: "scroll" };
   let driverStyle = {
     height: "60vh",
@@ -95,13 +93,11 @@ const DriverTreePage = () => {
       if (state.userRole === "Stakeholder" || selOutcome.state === "Active") {
         setRecordLockState(true);
       }
-
     };
 
     getUserData({ navigate, state, setState, outcomeId, error, setError });
     getAppData();
     authCheck();
-    setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -111,21 +107,17 @@ const DriverTreePage = () => {
       if (!selOutcome.id) {
         selOutcome.id = outcomeId;
       }
-      await getDriverByOutcome(selOutcome.id).then((data) => {
-        debugger;
-        if(data.data.length===0) {
-          setError(true);
-          navigate("/user");
-          return;
-        } else {
-        setDriverTreeObj(data.data);}
-      });
-      await getArrows(selOutcome.id).then((data) => {
-        if(data.data.length === 0) {
+      await getOutcome(selOutcome.id).then((data) => {
+        if (!data.data) {
           setError(true);
           navigate("/user");
           return;
         }
+      });
+      await getDriverByOutcome(selOutcome.id).then((data) => {
+        setDriverTreeObj(data.data);
+      });
+      await getArrows(selOutcome.id).then((data) => {
         setArrows(data.data);
       });
       if (state.userRole === "Stakeholder" || selOutcome.state === "Active") {
@@ -135,18 +127,17 @@ const DriverTreePage = () => {
 
     getInfo();
     if (state.command && selOutcome.stakeholderId) {
-    authCheck();
-    };
+      authCheck();
+    }
     navigate("/drivertree/" + selOutcome.id);
-    
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome]);
-
 
   useEffect(() => {
     // This useEffect will run when navState changes
     // If navState has the expected data, set loading to false
-    if (driverTreeObj.length > 0 && state.userId && state.command && driverTreeObj[0].userId === state.userId && driverTreeObj[0].stakeholderId === state.command) {
+    if (driverTreeObj.length > 0) {
       setLoading(false);
     }
   }, [driverTreeObj]);
@@ -375,7 +366,7 @@ const DriverTreePage = () => {
 
       //check to see if it is in  acluster
       if (driverBody[i].clusterId) {
-        if (!clusterName)  {
+        if (!clusterName) {
           clusterName = driverBody[i].cluster.clusterName;
         }
         //check to see if it is first driver in a new cluster
@@ -506,85 +497,86 @@ const DriverTreePage = () => {
 
   return (
     <>
-      {!error ? <div id="topleveldiv" key="topleveldiv" className={styles.driver_page}>
-        {/* className={styles.driver_page}  */}
-        <Container fluid className="justify-content-center">
-          <div
-            style={{ height: "40px", maxwidth: "100%" }}
-            className="justify-content-center"
-          >
-            {state.userRole !== "Stakeholder" ? (
-              <Col style={{ maxWidth: "1100px" }}>
-                <button
-                  className={styles.dtree_btn}
-                  onClick={() => {
-                    handleClick();
-                  }}
-                >
-                  Generate PDF
-                </button>
-                <button className={styles.dtree_btn} onClick={goToDriver}>
-                  Driver Details
-                </button>
-                <button className={styles.dtree_btn} onClick={newOutcome}>
-                  New Outcome
-                </button>
-                <button
-                  className={styles.dtree_btn}
-                  onClick={() => setClusterModal(true)}
-                >
-                  Create Cluster
-                </button>
+      {!error ? (
+        <div id="topleveldiv" key="topleveldiv" className={styles.driver_page}>
+          {/* className={styles.driver_page}  */}
+          <Container fluid className="justify-content-center">
+            <div
+              style={{ height: "40px", maxwidth: "100%" }}
+              className="justify-content-center"
+            >
+              {state.userRole !== "Stakeholder" ? (
+                <Col style={{ maxWidth: "1100px" }}>
+                  <button
+                    className={styles.dtree_btn}
+                    onClick={() => {
+                      handleClick();
+                    }}
+                  >
+                    Generate PDF
+                  </button>
+                  <button className={styles.dtree_btn} onClick={goToDriver}>
+                    Driver Details
+                  </button>
+                  <button className={styles.dtree_btn} onClick={newOutcome}>
+                    New Outcome
+                  </button>
+                  <button
+                    className={styles.dtree_btn}
+                    onClick={() => setClusterModal(true)}
+                  >
+                    Create Cluster
+                  </button>
 
-                <button
-                  className={styles.dtree_btn}
-                  onClick={() => toggleArrow()}
-                >
-                  Create Arrow
-                </button>
-                <button
-                  className={styles.dtree_btn}
-                  onClick={() => customStyles("outcome")}
-                >
-                  Outcomes
-                </button>
-                <button
-                  className={styles.dtree_btn}
-                  onClick={() => customStyles("view")}
-                >
-                  Views
-                </button>
-                {state.userRole === "Administrator" &&
-                selOutcome.state === "Active" ? (
                   <button
                     className={styles.dtree_btn}
-                    onClick={() => versionRoll()}
+                    onClick={() => toggleArrow()}
                   >
-                    Create Next Rev
+                    Create Arrow
                   </button>
-                ) : null}
-                {state.userRole === "Administrator" &&
-                selOutcome.state === "Draft" ? (
                   <button
                     className={styles.dtree_btn}
-                    onClick={() => makeActive()}
+                    onClick={() => customStyles("outcome")}
                   >
-                    Make Active
+                    Outcomes
                   </button>
-                ) : null}
-                <div>
-                  Outcome Version: {selOutcome.version} Outcome State:{" "}
-                  {selOutcome.state}
-                </div>
-              </Col>
-            ) : (
-              <Col>
-                <button className={styles.dtree_btn} onClick={handleClick}>
-                  Generate PDF
-                </button>
-              </Col>
-            )}
-          </div>
+                  <button
+                    className={styles.dtree_btn}
+                    onClick={() => customStyles("view")}
+                  >
+                    Views
+                  </button>
+                  {state.userRole === "Administrator" &&
+                  selOutcome.state === "Active" ? (
+                    <button
+                      className={styles.dtree_btn}
+                      onClick={() => versionRoll()}
+                    >
+                      Create Next Rev
+                    </button>
+                  ) : null}
+                  {state.userRole === "Administrator" &&
+                  selOutcome.state === "Draft" ? (
+                    <button
+                      className={styles.dtree_btn}
+                      onClick={() => makeActive()}
+                    >
+                      Make Active
+                    </button>
+                  ) : null}
+                  <div>
+                    Outcome Version: {selOutcome.version} Outcome State:{" "}
+                    {selOutcome.state}
+                  </div>
+                </Col>
+              ) : (
+                <Col>
+                  <button className={styles.dtree_btn} onClick={handleClick}>
+                    Generate PDF
+                  </button>
+                </Col>
+              )}
+            </div>
             <Row
               id="pdf-export"
               style={PDFState ? pdfStyle : showTable.driverStyle}
@@ -621,67 +613,68 @@ const DriverTreePage = () => {
                 ) : null}
               </Xwrapper>
             </Row>
-          
-          <div style={showTable.tableStyle}>
-            {state.command && tableState === "outcome" ? (
-              <OutcomeTable
-                state={state}
-                setState={setState}
-                selOutcome={selOutcome}
-                setSelOutcome={setSelOutcome}
-                command={state.command}
-                userId={state.userId}
-              />
-            ) : null}
 
-            {tableState === "view" ? (
-              <Row className={styles.views_container}>
-                <Col
-                  style={{
-                    overFlowY: "scroll",
-                    width: "500px",
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
-                  <div>Adjust Opacity</div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    defaultValue={opacity}
-                    // className={styles.slider}
-                    id="myRange"
-                    onChange={(e) => updateOpacity(e)}
-                  ></input>
-                  <button
-                    className={styles.dtree_btn}
-                    onClick={(e) => createNewView(e)}
-                    style={{ width: "150px", height: "25px" }}
-                  >
-                    Create View
-                  </button>
+            <div style={showTable.tableStyle}>
+              {state.command && tableState === "outcome" ? (
+                <OutcomeTable
+                  state={state}
+                  setState={setState}
+                  selOutcome={selOutcome}
+                  setSelOutcome={setSelOutcome}
+                  command={state.command}
+                  userId={state.userId}
+                />
+              ) : null}
 
-                  <button
-                    className={styles.dtree_btn}
-                    onClick={(e) => deleteSelectedView(e)}
-                    style={{ width: "150px", height: "25px" }}
+              {tableState === "view" ? (
+                <Row className={styles.views_container}>
+                  <Col
+                    style={{
+                      overFlowY: "scroll",
+                      width: "500px",
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
                   >
-                    Delete View
-                  </button>
-                  <ViewsTable
-                    outcomeId={outcomeId}
-                    viewId={viewId}
-                    setViewId={setViewId}
-                    userId={state.userId}
-                  />
-                </Col>
-                <Col className={styles.slidecontainer}></Col>
-              </Row>
-            ) : null}
-          </div>
-        </Container>
-      </div>: null}
+                    <div>Adjust Opacity</div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      defaultValue={opacity}
+                      // className={styles.slider}
+                      id="myRange"
+                      onChange={(e) => updateOpacity(e)}
+                    ></input>
+                    <button
+                      className={styles.dtree_btn}
+                      onClick={(e) => createNewView(e)}
+                      style={{ width: "150px", height: "25px" }}
+                    >
+                      Create View
+                    </button>
+
+                    <button
+                      className={styles.dtree_btn}
+                      onClick={(e) => deleteSelectedView(e)}
+                      style={{ width: "150px", height: "25px" }}
+                    >
+                      Delete View
+                    </button>
+                    <ViewsTable
+                      outcomeId={outcomeId}
+                      viewId={viewId}
+                      setViewId={setViewId}
+                      userId={state.userId}
+                    />
+                  </Col>
+                  <Col className={styles.slidecontainer}></Col>
+                </Row>
+              ) : null}
+            </div>
+          </Container>
+        </div>
+      ) : null}
       {/* for creating a cluster */}
       <Modal
         name="clusterModal"
