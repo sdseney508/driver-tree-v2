@@ -5,28 +5,28 @@ import { getArrows } from "../utils/arrows";
 function DriverArrows({
   arrows, 
   ArrowModal,
-  driverTreeObj,
+  // driverTreeObj,
   opacity,
   recordLockState,
-  selOutcome,
-  setArrows,
+  // selOutcome,
+  // setArrows,
   tableState,
   viewId,
   viewArrows,
 }) {
   // const [arrows, setArrows] = useState([]);
-const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    //get the arrows from the database
-    const fetchData = async () => {
-      await getArrows(selOutcome.id).then((data) => {
-        setArrows(data.data);
-      });
-    }
-    fetchData();
-    setLoading(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selOutcome, driverTreeObj]);
+// const [loading, setLoading] = useState(true);
+//   useEffect(() => {
+//     //get the arrows from the database
+//     // const fetchData = async () => {
+//     //   await getArrows(selOutcome.id).then((data) => {
+//     //     setArrows(data.data);
+//     //   });
+//     // }
+//     // fetchData();
+//     setLoading(false);
+//     // eslint-disable-next-line react-hooks/exhaustive-deps
+//   }, [selOutcome, driverTreeObj]);
 
   //this function maps each arrow in the arrows array to a Xarrow component
   const arrowFunc = () => {
@@ -83,7 +83,7 @@ const [loading, setLoading] = useState(true);
     });
   };
 
-  return <>{arrows && !loading ? arrowFunc():   null}</>;
+  return <>{arrows ? arrowFunc():   null}</>;
 }
 
 export default DriverArrows;

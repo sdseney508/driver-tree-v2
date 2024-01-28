@@ -35,7 +35,7 @@ const DriverTreePage = () => {
   const [state, setState] = useState([]);
   const [clusters, setClusters] = useState([]);
   const [error, setError] = useState(false);
-  const [arrows, setArrows] = useState("");
+  const [arrows, setArrows] = useState([]);
   const [createAnArrow, setCreateAnArrow] = useState(false);
   const [opacity, setOpacity] = useState(100);
   const [PDFState, setPDFState] = useState(false);
@@ -84,12 +84,6 @@ const DriverTreePage = () => {
           setSelOutcome(data.data);
         });
       }
-      await getDriverByOutcome(selOutcome.id).then((data) => {
-        setDriverTreeObj(data.data);
-      });
-      await getArrows(selOutcome.id).then((data) => {
-        setArrows(data.data);
-      });
       if (state.userRole === "Stakeholder" || selOutcome.state === "Active") {
         setRecordLockState(true);
       }
@@ -102,6 +96,8 @@ const DriverTreePage = () => {
   }, []);
 
   useEffect(() => {
+    setLoading(true);
+    setArrows([]);
     const getInfo = async () => {
       setRecordLockState(false);
       if (!selOutcome.id) {
@@ -114,12 +110,12 @@ const DriverTreePage = () => {
           return;
         }
       });
-      await getDriverByOutcome(selOutcome.id).then((data) => {
-        setDriverTreeObj(data.data);
-      });
-      await getArrows(selOutcome.id).then((data) => {
-        setArrows(data.data);
-      });
+      // await getDriverByOutcome(selOutcome.id).then((data) => {
+      //   setDriverTreeObj(data.data);
+      // });
+      // await getArrows(selOutcome.id).then((data) => {
+      //   setArrows(data.data);
+      // });
       if (state.userRole === "Stakeholder" || selOutcome.state === "Active") {
         await setRecordLockState(true);
       }
@@ -137,10 +133,10 @@ const DriverTreePage = () => {
   useEffect(() => {
     // This useEffect will run when navState changes
     // If navState has the expected data, set loading to false
-    if (driverTreeObj.length > 0) {
+    if (driverTreeObj && arrows) {
       setLoading(false);
     }
-  }, [driverTreeObj]);
+  }, [driverTreeObj, arrows]);
 
   const authCheck = () => {
     //checks to see if the user has access to the desired outcome

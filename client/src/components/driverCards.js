@@ -89,13 +89,13 @@ const DriverCards = ({
       }
 
     };
-
     getDriversData(selOutcome, viewId);
-    setLoading(false);
+    
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [driverTreeObj, opacity, viewId]);
 
 useEffect(() => {
+
   const updateArrows = async () => {
     await getArrows(selOutcome.id).then((data) => {
       setArrows(data.data);
@@ -103,8 +103,30 @@ useEffect(() => {
   };
 
   updateArrows();
-  setLoading(false);
+  
   // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [driverTreeObj]);
+
+useEffect(() => {
+
+  const getInfo = async () => {
+    await getDriverByOutcome(selOutcome.id).then((data) => {
+      setDriverTreeObj(data.data);
+    });
+  };
+
+  getInfo();
+  
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [selOutcome]);
+
+
+useEffect(() => {
+  // This useEffect will run when navState changes
+  // If navState has the expected data, set loading to false
+  if (driverTreeObj) {
+    setLoading(false);
+  }
 }, [driverTreeObj]);
 
   const addArrowToView = async () => {
