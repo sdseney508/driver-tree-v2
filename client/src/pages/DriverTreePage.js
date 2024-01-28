@@ -153,7 +153,7 @@ const DriverTreePage = () => {
     //checks to see if the user has access to the desired outcome
     //first we grab the user data from state and the outcome data from the database then compare the user command with the outcoem stakeholder
     if (state.command !== selOutcome.stakeholderId) {
-      alert("You do not have access to this outcome");
+      alert("You do not have access to this outcome in dtree page");
       navigate("/user");
     }
   };
