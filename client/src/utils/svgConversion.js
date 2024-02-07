@@ -1,4 +1,3 @@
-import React, { useEffect, useRef } from 'react';
 
 const arrowSVGWithConversion = async (svg) => {
         const svgString = new XMLSerializer().serializeToString(svg);
