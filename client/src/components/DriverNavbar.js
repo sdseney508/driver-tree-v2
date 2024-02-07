@@ -184,7 +184,7 @@ const DriverNavbar = () => {
         ) : (
           ""
         )
-      ) : (
+      ) : location.pathname !== "/" ? null :(
         "Server delay, please refresh this page"
       )}
     </>

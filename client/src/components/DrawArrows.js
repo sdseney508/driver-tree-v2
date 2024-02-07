@@ -1,32 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Xarrow from "react-xarrows";
-import { getArrows } from "../utils/arrows";
 
 function DriverArrows({
   arrows, 
   ArrowModal,
-  // driverTreeObj,
   opacity,
   recordLockState,
-  // selOutcome,
-  // setArrows,
   tableState,
   viewId,
   viewArrows,
 }) {
-  // const [arrows, setArrows] = useState([]);
-// const [loading, setLoading] = useState(true);
-//   useEffect(() => {
-//     //get the arrows from the database
-//     // const fetchData = async () => {
-//     //   await getArrows(selOutcome.id).then((data) => {
-//     //     setArrows(data.data);
-//     //   });
-//     // }
-//     // fetchData();
-//     setLoading(false);
-//     // eslint-disable-next-line react-hooks/exhaustive-deps
-//   }, [selOutcome, driverTreeObj]);
 
   //this function maps each arrow in the arrows array to a Xarrow component
   const arrowFunc = () => {
