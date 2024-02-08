@@ -30,7 +30,6 @@ const ModArrows = ({
       setSelOutcome(res.data);
     });
     setArrowMod(false);
-    window.location.reload();
   }
 
   async function delArrow() {
@@ -38,7 +37,6 @@ const ModArrows = ({
     getOutcome(selOutcome.id).then((res) => {
       setSelOutcome(res.data);
     });
-    setArrowMod(false);
   }
 
   return (

@@ -696,6 +696,10 @@ useEffect(() => {
     await getOutcome(selOutcome.id).then((data) => {
       setSelOutcome(data.data);
     });
+    await getDriverByOutcome(selOutcome.id).then((data) => {
+      setDriverTreeObj(data.data);
+    });
+
   };
 
   //waits for setSelectedElements to be updated, then calls the CreateAnArrow function to create the arrow

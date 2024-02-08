@@ -39,7 +39,6 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(state.userId);
     let body = { [e.target.name]: e.target.value };
     await updateDriver(e.target.dataset.legendId, state.userId, body);
   };
@@ -104,7 +103,7 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
                   <Form.Control
                     as="input"
                     name="stakeholders"
-                    data-legendid={driverTreeObj[index].id}
+                    data-legendId={driverTreeObj[index].id}
                     defaultValue={driverTreeObj[index].stakeholders || ""}
                     onBlur={handleSubmit}
                     disabled={recordLockState}

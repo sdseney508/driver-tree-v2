@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 
 // set token secret and expiration date
 const secret = "drivertree";
-const expiration = "2h";
+const expiration = "1h";
 
 module.exports = {
   // function for our authenticated routes
