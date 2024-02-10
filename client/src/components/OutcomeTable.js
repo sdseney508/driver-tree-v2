@@ -1,14 +1,6 @@
-import React, {
-  useState,
-  useRef,
-  useEffect,
-  useMemo,
-} from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
-import {
-  getOutcome,
-  outcomeByCommand
-} from "../utils/drivers";
+import { getOutcome, outcomeByCommand } from "../utils/drivers";
 import "ag-grid-community/dist/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CSS
 
@@ -17,14 +9,9 @@ import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CS
 //when a user selects a row, the row data is passed to the parent component
 //and displayed in the form.
 //this is using the community edition and react hooks to selectively render the table
-function OutcomeTable({
-  selOutcome,
-  setSelOutcome,
-  command
-}) {
-
+function OutcomeTable({ selOutcome, setSelOutcome, command }) {
   const [rowData, setRowData] = useState([]); // Set rowData to Array of Objects
-  var rowD =[];
+  var rowD = [];
 
   async function fetchData() {
     await outcomeByCommand(command).then((data) => {
@@ -48,6 +35,8 @@ function OutcomeTable({
       headerName: "Outcomes",
       width: 400,
       resizable: true,
+      sort: "asc",
+      sortIndex: 1,
     },
     {
       field: "problemStatement",
@@ -70,11 +59,13 @@ function OutcomeTable({
       width: 125,
       resizable: true,
     },
-    {field: 'version',
-    filter: true,
-    headerName: 'Version',
-    width: 125,
-  }
+    {
+      field: "version",
+      filter: true,
+      headerName: "Version",
+      width: 125,
+      resizable: true,
+    },
   ]);
 
   // DefaultColDef sets props common to all Columns
@@ -90,14 +81,13 @@ function OutcomeTable({
   async function fetchOutcomeInfo(outcomeId) {
     await getOutcome(outcomeId).then((data) => {
       setSelOutcome(data.data);
-  });
-  };
+    });
+  }
 
   const cellClickedListener = async (event) => {
     let outcomeId = event.data.id;
     await fetchOutcomeInfo(outcomeId);
   };
-
 
   //the return just builds the table
   return (
