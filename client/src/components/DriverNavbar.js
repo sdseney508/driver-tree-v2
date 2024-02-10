@@ -29,7 +29,6 @@ const DriverNavbar = () => {
         }
         const user = response.data;
         userInfo.push(user.stakeholderId);
-        console.log(JSON.stringify(userInfo[0]));
         setNavState({
           firstName: user.firstName,
           lastName: user.lastName,

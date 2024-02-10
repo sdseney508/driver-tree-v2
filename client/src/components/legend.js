@@ -108,7 +108,6 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
                     onBlur={handleSubmit}
                     disabled={recordLockState}
                     className={styles.legend_input}
-                    // style={{position: 'fixed'}}
                   ></Form.Control>
                 </Form>
               </Col>

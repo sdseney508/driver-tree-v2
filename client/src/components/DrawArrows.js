@@ -1,16 +1,26 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Xarrow from "react-xarrows";
 
 function DriverArrows({
   arrows, 
   ArrowModal,
+  driverTreeObj,
   opacity,
   recordLockState,
+  // setArrows,
   tableState,
-  viewId,
   viewArrows,
+  viewId,
 }) {
+  // useEffect(() => {
+  //   console.log("DriverArrows.js - useEffect - arrows: ", arrows);
+  // }, []);
 
+  // useEffect(() => {
+  //   console.log("DriverArrows.js - useEffect - arrows: ", arrows);
+  // }, [driverTreeObj]);
+
+  console.log("DriverArrows.js - arrows: ", arrows);
   //this function maps each arrow in the arrows array to a Xarrow component
   const arrowFunc = () => {
     return arrows.map((f, index) => {
@@ -66,7 +76,7 @@ function DriverArrows({
     });
   };
 
-  return <>{arrows ? arrowFunc():   null}</>;
+  return <>{ arrows ? arrowFunc():   null}</>;
 }
 
 export default DriverArrows;

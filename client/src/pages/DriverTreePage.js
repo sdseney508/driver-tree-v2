@@ -97,7 +97,7 @@ const DriverTreePage = () => {
 
   useEffect(() => {
     setLoading(true);
-    setArrows([]);
+    // setArrows([]);
     const getInfo = async () => {
       setRecordLockState(false);
       if (!selOutcome.id) {
@@ -110,12 +110,13 @@ const DriverTreePage = () => {
           return;
         }
       });
-      // await getDriverByOutcome(selOutcome.id).then((data) => {
-      //   setDriverTreeObj(data.data);
-      // });
-      // await getArrows(selOutcome.id).then((data) => {
-      //   setArrows(data.data);
-      // });
+      await getDriverByOutcome(selOutcome.id).then((data) => {
+        setDriverTreeObj(data.data);
+      });
+      await getArrows(selOutcome.id).then((data) => {
+        setArrows(data.data);
+      });
+
       if (state.userRole === "Stakeholder" || selOutcome.state === "Active") {
         await setRecordLockState(true);
       }
@@ -131,8 +132,6 @@ const DriverTreePage = () => {
   }, [selOutcome]);
 
   useEffect(() => {
-    // This useEffect will run when navState changes
-    // If navState has the expected data, set loading to false
     if (driverTreeObj && arrows) {
       setLoading(false);
     }

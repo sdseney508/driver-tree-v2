@@ -37,7 +37,6 @@ function OutcomeTable({
 
   useEffect(() => {
     fetchData();
-    console.log("OutcomeTable: useEffect: selOutcome: ", selOutcome);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome]);
 

@@ -87,15 +87,13 @@ const DriverCards = ({
           setViewArrows(data.data);
         });
       }
-
     };
     getDriversData(selOutcome, viewId);
     
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [driverTreeObj, opacity, viewId]);
+  }, [opacity, viewId]);
 
 useEffect(() => {
-
   const updateArrows = async () => {
     await getArrows(selOutcome.id).then((data) => {
       setArrows(data.data);
@@ -107,23 +105,21 @@ useEffect(() => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
 }, [driverTreeObj]);
 
-useEffect(() => {
+// useEffect(() => {
 
-  const getInfo = async () => {
-    await getDriverByOutcome(selOutcome.id).then((data) => {
-      setDriverTreeObj(data.data);
-    });
-  };
+//   const getInfo = async () => {
+//     await getDriverByOutcome(selOutcome.id).then((data) => {
+//       setDriverTreeObj(data.data);
+//     });
+//   };
 
-  getInfo();
+//   getInfo();
   
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [selOutcome]);
+//   // eslint-disable-next-line react-hooks/exhaustive-deps
+// }, [selOutcome]);
 
 
 useEffect(() => {
-  // This useEffect will run when navState changes
-  // If navState has the expected data, set loading to false
   if (driverTreeObj) {
     setLoading(false);
   }
@@ -1190,8 +1186,7 @@ useEffect(() => {
             driverTreeObj={driverTreeObj}
             opacity={opacity}
             recordLockState={recordLockState}
-            selOutcome={selOutcome}
-            setArrows={setArrows}
+            // setArrows={setArrows}
             tableState={tableState}
             viewArrows={viewArrows}
             viewId={viewId}
