@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { getUserData } from "../utils/auth";
 import { Container, Row, Col, Button, Modal, Form } from "react-bootstrap";
 import {
+  createOutcome,
   getDriverById,
   getDriverByOutcome,
   getOutcome,
@@ -31,7 +32,7 @@ const DriverPage = () => {
   let { outcomeId, driverId } = useParams();
   // this is getting the user data from the database to properly populate the form.  None of the form data is being updated in the database. until after you hit submit.
   useEffect(() => {
-       const getAppData = async () => {
+    const getAppData = async () => {
       if (!outcomeId) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
         outcomeId = 1;
@@ -54,252 +55,246 @@ const DriverPage = () => {
       });
     };
 
-    getUserData({navigate, state, setState, outcomeId});
+    getUserData({ navigate, state, setState, outcomeId });
     getAppData();
   }, []);
 
   useEffect(() => {
     navigate("/drpage/" + outcomeId + "/" + selDriver.id);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selDriver]);
 
   //this function generates the powerpoint style quad for the pdf export.
   const generateQuad = (selDriver) => {
-    return (   
-    <Row
-    id="pdf-export"
-    className="pdf-export"
-    style={{ margin: "1px" }}
-  >
-    <Form className={styles.my_form}>
-      <Form.Group>
-        <Row className={styles.tier_row}>
-          <Col
-            sm={3}
-            md={3}
-            lg={3}
-            style={{ display: "flex", alignContent: "center" }}
-          >
-            Driver Tier
-            <Form.Control
-              as="select"
-              id="tierLevel"
-              value={selDriver.tierLevel}
-              //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-              name="tierLevel"
-              onChange={handleInputChange}
-              onBlur={handleFormSubmit}
-              style={{ width: "40px" }}
-            >
-              <option key={1} value={1}>
-                1
-              </option>
-              <option key={2} value={2}>
-                2
-              </option>
-              <option key={3} value={3}>
-                3
-              </option>
-              <option key={4} value={4}>
-                4
-              </option>
-              <option key={5} value={5}>
-                5
-              </option>
-            </Form.Control>
-          </Col>
-          <Col sm={6} md={6} lg={6}>
-            <h2
-              className="text-center fw-bolder"
-              style={{ "textShadow": "1px 1px 1px grey" }}
-            >
-              Driver Details
-            </h2>
-          </Col>
-        </Row>
-      </Form.Group>
-      <Row className={styles.quad_format}>
-        <Col className={styles.my_col}>
-          <Form.Group style={{ width: "100%" }}>
-            <Form.Label>Problem Statement</Form.Label>
-            <Form.Control
-              as="textarea"
-              // className={styles.my_text_area}
-              value={selDriver.problemStatement || ""}
-              //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-              name="problemStatement"
-              onChange={handleInputChange}
-              onBlur={handleFormSubmit}
-            />
-          </Form.Group>
-
-          <Form.Group style={{ width: "100%" }}>
-            <Form.Label>Barriers</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={3}
-              value={selDriver.barrier || ""}
-              //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-              name="barrier"
-              onChange={handleInputChange}
-              onBlur={handleFormSubmit}
-            />
-          </Form.Group>
-        </Col>
-
-        <Col className={styles.my_col}>
+    return (
+      <Row id="pdf-export" className="pdf-export" style={{ margin: "1px" }}>
+        <Form className={styles.my_form}>
           <Form.Group>
-            <Col>
-              <Row>
-                <Form.Label className={styles.background_label}>
-                  Background
-                </Form.Label>
-                <Form.Label className={styles.status_label}>
-                  Status
-                </Form.Label>
+            <Row className={styles.tier_row}>
+              <Col
+                sm={3}
+                md={3}
+                lg={3}
+                style={{ display: "flex", alignContent: "center" }}
+              >
+                Driver Tier
                 <Form.Control
                   as="select"
-                  id="status"
-                  value={selDriver.status}
-                  className={
-                    selDriver.status === "Green"
-                      ? styles.green_status
-                      : selDriver.status === "Yellow"
-                      ? styles.yellow_status
-                      : styles.red_status
-                  }
+                  id="tierLevel"
+                  value={selDriver.tierLevel}
                   //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-                  name="status"
+                  name="tierLevel"
                   onChange={handleInputChange}
                   onBlur={handleFormSubmit}
-                  style={{ width: "100px" }}
+                  style={{ width: "40px" }}
                 >
-                  <option
-                    key={1}
-                    value={"Green"}
-                    className={styles.green_status}
-                  >
-                    Green
+                  <option key={1} value={1}>
+                    1
                   </option>
-                  <option
-                    key={2}
-                    value={"Yellow"}
-                    className={styles.yellow_status}
-                  >
-                    Yellow
+                  <option key={2} value={2}>
+                    2
                   </option>
-                  <option
-                    key={3}
-                    value={"Red"}
-                    className={styles.red_status}
-                  >
-                    Red
+                  <option key={3} value={3}>
+                    3
+                  </option>
+                  <option key={4} value={4}>
+                    4
+                  </option>
+                  <option key={5} value={5}>
+                    5
                   </option>
                 </Form.Control>
+              </Col>
+              <Col sm={6} md={6} lg={6}>
+                <h2
+                  className="text-center fw-bolder"
+                  style={{ textShadow: "1px 1px 1px grey" }}
+                >
+                  Driver Details
+                </h2>
+              </Col>
+            </Row>
+          </Form.Group>
+          <Row className={styles.quad_format}>
+            <Col className={styles.my_col}>
+              <Form.Group style={{ width: "100%" }}>
+                <Form.Label>Problem Statement</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  // className={styles.my_text_area}
+                  value={selDriver.problemStatement || ""}
+                  //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                  name="problemStatement"
+                  onChange={handleInputChange}
+                  onBlur={handleFormSubmit}
+                />
+              </Form.Group>
+
+              <Form.Group style={{ width: "100%" }}>
+                <Form.Label>Barriers</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  value={selDriver.barrier || ""}
+                  //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                  name="barrier"
+                  onChange={handleInputChange}
+                  onBlur={handleFormSubmit}
+                />
+              </Form.Group>
+            </Col>
+
+            <Col className={styles.my_col}>
+              <Form.Group>
+                <Col>
+                  <Row>
+                    <Form.Label className={styles.background_label}>
+                      Background
+                    </Form.Label>
+                    <Form.Label className={styles.status_label}>
+                      Status
+                    </Form.Label>
+                    <Form.Control
+                      as="select"
+                      id="status"
+                      value={selDriver.status}
+                      className={
+                        selDriver.status === "Green"
+                          ? styles.green_status
+                          : selDriver.status === "Yellow"
+                          ? styles.yellow_status
+                          : styles.red_status
+                      }
+                      //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                      name="status"
+                      onChange={handleInputChange}
+                      onBlur={handleFormSubmit}
+                      style={{ width: "100px" }}
+                    >
+                      <option
+                        key={1}
+                        value={"Green"}
+                        className={styles.green_status}
+                      >
+                        Green
+                      </option>
+                      <option
+                        key={2}
+                        value={"Yellow"}
+                        className={styles.yellow_status}
+                      >
+                        Yellow
+                      </option>
+                      <option
+                        key={3}
+                        value={"Red"}
+                        className={styles.red_status}
+                      >
+                        Red
+                      </option>
+                    </Form.Control>
+                  </Row>
+                </Col>
+                <Form.Control
+                  as="textarea"
+                  value={selDriver.background || ""}
+                  //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                  name="background"
+                  style={{ width: "100%" }}
+                  onChange={handleInputChange}
+                  onBlur={handleFormSubmit}
+                />
+              </Form.Group>
+            </Col>
+          </Row>
+          <Row className={styles.quad_format}>
+            <Col className={styles.my_col}>
+              <Form.Group>
+                <Form.Label>Progress</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  value={selDriver.progress || ""}
+                  style={{ height: "150px" }}
+                  //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                  name="progress"
+                  onChange={handleInputChange}
+                  onBlur={handleFormSubmit}
+                />
+              </Form.Group>
+
+              <Row className={styles.abbrev_row}>
+                <Form.Group>
+                  <Col>
+                    <Row>
+                      <Col>
+                        {" "}
+                        <Form.Label>Stakeholder</Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          value={selDriver.stakeholders || ""}
+                          style={{ width: "75%", height: "30px" }}
+                          //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                          name="stakeholders"
+                          onChange={handleInputChange}
+                          onBlur={handleFormSubmit}
+                        />
+                      </Col>
+                      <Col>
+                        {" "}
+                        <Form.Label>Abbreviation</Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          value={selDriver.stakeholderAbbreviation || ""}
+                          style={{ width: "40%", height: "30px" }}
+                          //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                          name="stakeholderAbbreviation"
+                          onChange={handleInputChange}
+                          onBlur={handleFormSubmit}
+                        />
+                      </Col>
+                    </Row>
+                  </Col>
+                </Form.Group>
               </Row>
             </Col>
-            <Form.Control
-              as="textarea"
-              value={selDriver.background || ""}
-              //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-              name="background"
-              style={{ width: "100%" }}
-              onChange={handleInputChange}
-              onBlur={handleFormSubmit}
-            />
-          </Form.Group>
-        </Col>
-      </Row>
-      <Row className={styles.quad_format}>
-        <Col className={styles.my_col}>
-          <Form.Group>
-            <Form.Label>Progress</Form.Label>
-            <Form.Control
-              as="textarea"
-              value={selDriver.progress || ""}
-              style={{ height: "150px" }}
-              //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-              name="progress"
-              onChange={handleInputChange}
-              onBlur={handleFormSubmit}
-            />
-          </Form.Group>
-
-          <Row className={styles.abbrev_row}>
-            <Form.Group>
-              <Col>
-                <Row>
-                  <Col>
-                    {" "}
-                    <Form.Label>Stakeholder</Form.Label>
-                    <Form.Control
-                      as="textarea"
-                      value={selDriver.stakeholders || ""}
-                      style={{ width: "75%", height: "30px" }}
-                      //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-                      name="stakeholders"
-                      onChange={handleInputChange}
-                      onBlur={handleFormSubmit}
-                    />
-                  </Col>
-                  <Col>
-                    {" "}
-                    <Form.Label>Abbreviation</Form.Label>
-                    <Form.Control
-                      as="textarea"
-                      value={
-                        selDriver.stakeholderAbbreviation || ""
-                      }
-                      style={{ width: "40%", height: "30px" }}
-                      //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-                      name="stakeholderAbbreviation"
-                      onChange={handleInputChange}
-                      onBlur={handleFormSubmit}
-                    />
-                  </Col>
-                </Row>
-              </Col>
-            </Form.Group>
+            <Col className={styles.my_col}>
+              <Form.Group>
+                <Form.Label>Deliverables</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  value={selDriver.deliverables || ""}
+                  name="Deliverables"
+                  //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                  onChange={handleInputChange}
+                  onBlur={handleFormSubmit}
+                />
+              </Form.Group>
+              <Form.Group>
+                <Form.Label>Desired Outcomes</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  value={selDriver.desiredOutcomes || ""}
+                  name="desiredOutcomes"
+                  //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                  onChange={handleInputChange}
+                  onBlur={handleFormSubmit}
+                />
+              </Form.Group>
+            </Col>
           </Row>
-        </Col>
-        <Col className={styles.my_col}>
-          <Form.Group>
-            <Form.Label>Deliverables</Form.Label>
-            <Form.Control
-              as="textarea"
-              value={selDriver.deliverables || ""}
-              name="Deliverables"
-              //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-              onChange={handleInputChange}
-              onBlur={handleFormSubmit}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Desired Outcomes</Form.Label>
-            <Form.Control
-              as="textarea"
-              value={selDriver.desiredOutcomes || ""}
-              name="desiredOutcomes"
-              //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-              onChange={handleInputChange}
-              onBlur={handleFormSubmit}
-            />
-          </Form.Group>
-        </Col>
+        </Form>
+        <p className={styles.copyright}>
+          <FontAwesomeIcon icon={faCopyright} /> Integrated Program Solutions,
+          Inc
+        </p>
+        <h3 className="page-break"> </h3>
       </Row>
-    </Form>
-    <p className={styles.copyright}>
-    <FontAwesomeIcon icon={faCopyright} /> Integrated Program Solutions, Inc
-    </p>
-    <h3 className='page-break'> </h3>
-  </Row>)
+    );
   };
 
-const generateAllQuads = (selDrivers) => {
-  return selDrivers.map((f, index) => {
-    return (
-      generateQuad(selDrivers[index])
-    );
+  const generateAllQuads = (selDrivers) => {
+    return selDrivers.map((f, index) => {
+      return generateQuad(selDrivers[index]);
     });
   };
 
@@ -321,7 +316,7 @@ const generateAllQuads = (selDrivers) => {
       return;
     }
     setSelDriver({ ...selDriver, [e.target.name]: e.target.value });
-};
+  };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
@@ -331,11 +326,22 @@ const generateAllQuads = (selDrivers) => {
     let body = { [e.target.name]: e.target.value };
     updateDriver(selDriver.id, state.userId, body);
     setSelDriver({ ...selDriver, [e.target.name]: e.target.value });
-
   };
 
   const backToDriverTree = () => {
     navigate("/drivertree/" + selOutcome.id);
+  };
+
+  //this function will create a new driver tree with the selected driver as the outcome.  It will then navigate to the new driver tree.
+  const createEmbeddedDriverTree = async () => {
+    //first we create the new outcome with the selected driver problem as the the outcome title
+    debugger
+    let body = { outcomeTitle: selDriver.problemStatement, stakeholderId: state.command, userId: state.userId};
+    let newOutcome = await createOutcome(body);
+    body = {embeddedOutcomeId: newOutcome.data.id}
+    console.log("newOutcome", newOutcome);
+    await updateDriver(selDriver.id, state.userId, body);
+    navigate("/drivertree/" + newOutcome.data.id);
   };
 
   const exportPDFWithMethod = () => {
@@ -373,40 +379,44 @@ const generateAllQuads = (selDrivers) => {
                   >
                     Generate PDF
                   </button>
-
+                  {selDriver.embeddedOutcomeId === 0 ? (
+                    <button
+                      className={styles.my_btn}
+                      onClick={createEmbeddedDriverTree}
+                    >
+                      Embed A Driver Tree
+                    </button>
+                  ) : null}
                   <Form.Group>
-            <Col>
-              <Row style={{fontSize: '15px'}}>
-                <Form.Label className={styles.status_label}>
-                  Modified
-                </Form.Label>
-                <Form.Control
-                  as="select"
-                  id="status"
-                  value={selDriver.modified}
-                  //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-                  name="modified"
-                  onChange={handleInputChange}
-                  onBlur={handleFormSubmit}
-                  style={{ width: "100px", fontSize: '15px', height: '30px' }}
-                >
-                  <option
-                    key={1}
-                    value={"Yes"}
-                  >
-                    Yes
-                  </option>
-                  <option
-                    key={2}
-                    value={"No"}
-                  >
-                    No
-                  </option>
-
-                </Form.Control>
-              </Row>
-            </Col>
-          </Form.Group>
+                    <Col>
+                      <Row style={{ fontSize: "15px" }}>
+                        <Form.Label className={styles.status_label}>
+                          Modified
+                        </Form.Label>
+                        <Form.Control
+                          as="select"
+                          id="status"
+                          value={selDriver.modified}
+                          //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                          name="modified"
+                          onChange={handleInputChange}
+                          onBlur={handleFormSubmit}
+                          style={{
+                            width: "100px",
+                            fontSize: "15px",
+                            height: "30px",
+                          }}
+                        >
+                          <option key={1} value={"Yes"}>
+                            Yes
+                          </option>
+                          <option key={2} value={"No"}>
+                            No
+                          </option>
+                        </Form.Control>
+                      </Row>
+                    </Col>
+                  </Form.Group>
                 </Col>
               </div>
               {generateQuad(selDriver)}
@@ -422,9 +432,11 @@ const generateAllQuads = (selDrivers) => {
               />
             </Row>
 
-            {allquads ? (<Row id="all-quads" className="all-quads">
-              {generateAllQuads(selDrivers)}
-            </Row>): null}
+            {allquads ? (
+              <Row id="all-quads" className="all-quads">
+                {generateAllQuads(selDrivers)}
+              </Row>
+            ) : null}
           </Col>
         </Container>
       </div>
@@ -453,7 +465,7 @@ const generateAllQuads = (selDrivers) => {
           <Button
             variant="secondary"
             style={{ margin: "20px" }}
-            onClick={()=> writePDF()}
+            onClick={() => writePDF()}
           >
             All Drivers
           </Button>

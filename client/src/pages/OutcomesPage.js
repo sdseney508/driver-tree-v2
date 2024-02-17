@@ -62,7 +62,7 @@ const OutcomesPage = () => {
         selOutcome.id = outcomeId;
       }
       await getDriverByOutcome(selOutcome.id).then((data) => {
-        let top = data.data;
+        let top = data.data[0];
         setDriverTreeObj(top);
       });
     };
@@ -89,6 +89,7 @@ const OutcomesPage = () => {
   };
 
   const barriers = () => {
+    console.log(driverTreeObj);
     if (!driverTreeObj[0]) {
       return <div key={"nullbarrier"}></div>;
     } else {
@@ -140,8 +141,6 @@ const OutcomesPage = () => {
       return;
     }
     e.preventDefault();
-    console.log(recordLockState);
-    console.log(state.userRole);
     let body;
     if (e.target.name === "outcomeTitle") {
       body = {

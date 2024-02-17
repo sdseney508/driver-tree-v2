@@ -3,7 +3,7 @@ const { views, viewCards } = require("../../models");
 const sequelize = require("../../config/connection");
 const { Op } = require("sequelize");
 
-// use /api/viewCards/ for all of these routes.  Uses the driver table for the create to make sure the link is maintained between driver and cluster that it is in.
+// use /api/viewCards/ for all of these routes.  
 
 //get all cards in a view
 router.get("/viewCards/:id", async (req, res) => {

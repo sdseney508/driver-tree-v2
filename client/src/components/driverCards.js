@@ -1,27 +1,21 @@
-/* eslint-disable eqeqeq */
 import React, { useEffect, useState } from "react";
-// import Select from "react-select";
 import { Col, Card, Row, Button, Form, Modal } from "react-bootstrap";
 import { Xwrapper } from "react-xarrows"; //for the arrows
 import { deleteArrow } from "../utils/arrows";
 import styles from "../pages/DriverTreePage.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faArrowUp,
-  faCircle,
-} from "@fortawesome/free-solid-svg-icons";
+import { faArrowUp, faCircle, faTree } from "@fortawesome/free-solid-svg-icons";
 import { faFlagUsa } from "@fortawesome/free-solid-svg-icons";
 import Legend from "../components/legend";
 import { useNavigate } from "react-router";
 import {
   bulkDriverStatusUpdate,
-  createDriver,
   deleteDriver,
-  getDriverById,
   getDriverByOutcome,
   getOutcome,
   updateDriver,
   updateOutcome,
+  updateOutcomeDriver,
 } from "../utils/drivers";
 import { getArrows } from "../utils/arrows";
 import { addViewCard, getViewCards, removeViewCard } from "../utils/viewCards";
@@ -34,8 +28,9 @@ import { updateArrow } from "../utils/arrows";
 import { deleteCluster, updateCluster } from "../utils/cluster";
 import DriverArrows from "./DrawArrows";
 import { CreateAnArrow } from "./ArrowFunction";
-import { faCopyright } from "@fortawesome/free-solid-svg-icons";
 import ModArrows from "../components/ModArrows";
+import DriverModal from "./DriverrModal";
+import { removeOutcomeDriver } from "../utils/outcomeDrivers";
 
 const DriverCards = ({
   arrows,
@@ -66,14 +61,14 @@ const DriverCards = ({
   //The arrow function is contained in the arrows.js module.  It creates the arrows that connect the cards
   let navigate = useNavigate();
   const [arrowID, setArrowID] = useState("");
-  // const [arrows, setArrows] = useState([]);
   const [selectedElements, setSelectedElements] = useState([]);
   const [show, setShow] = useState(false);
   const [connectionShow, setConnectionShow] = useState(false);
   const [showArrowMod, setArrowMod] = useState(false);
   const [, setArrowModal] = useState(false);
-  // const [driverTreeObj, setDriverTreeObj] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [createDriverModal, setCreateDriverModal] = useState(false);
+  const [driverTier, setDriverTier] = useState('');
 
   useEffect(() => {
     const getDriversData = async (selOutcome, viewId) => {
@@ -89,41 +84,27 @@ const DriverCards = ({
       }
     };
     getDriversData(selOutcome, viewId);
-    
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [opacity, viewId]);
 
-useEffect(() => {
-  const updateArrows = async () => {
-    await getArrows(selOutcome.id).then((data) => {
-      setArrows(data.data);
-    });
-  };
+  useEffect(() => {
+    const updateArrows = async () => {
+      await getArrows(selOutcome.id).then((data) => {
+        setArrows(data.data);
+      });
+    };
 
-  updateArrows();
-  
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [driverTreeObj]);
+    updateArrows();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [driverTreeObj]);
 
-// useEffect(() => {
-
-//   const getInfo = async () => {
-//     await getDriverByOutcome(selOutcome.id).then((data) => {
-//       setDriverTreeObj(data.data);
-//     });
-//   };
-
-//   getInfo();
-  
-//   // eslint-disable-next-line react-hooks/exhaustive-deps
-// }, [selOutcome]);
-
-
-useEffect(() => {
-  if (driverTreeObj) {
-    setLoading(false);
-  }
-}, [driverTreeObj]);
+  useEffect(() => {
+    if (driverTreeObj.length > 0) {
+      console.log(driverTreeObj);
+      setLoading(false);
+    }
+  }, [driverTreeObj]);
 
   const addArrowToView = async () => {
     setConnectionShow(false);
@@ -162,12 +143,12 @@ useEffect(() => {
     }
   }
 
-  const cascadeUpdate = async (arrows, cardId, tier, newStatus) => {
+  const cascadeUpdate = async (arrows, cardid, tier, newStatus) => {
     //this function cascades the updates to future driver cards in the driver card chain.  the first thing it does is check if the card is inside a cluster.  next it finds all the arrows that have the current card or it's clusteras a start point.  then it finds all the cards that have those arrows as startpoints and puts them into an updateArray.  Next we update those cards, then look for all arrows with those cards as start points and repeat until we hit the Outcome Card.
     //find all the arrows that have the current card as a start point
     //first check to see if the card is in a cluster
     //for loop based on tier of the driver card
-    let updateArr = [cardId];
+    let updateArr = [cardid];
     let arrayCounter = 1; //this gets updated as we go through the updateArr for the subsequent tiers so we only go through new updateArr additions and dont end up in a continuous loop
     let loopEnd;
     let startP;
@@ -182,9 +163,9 @@ useEffect(() => {
           //if it is in a cluster, we need to find all the arrows that have the cluster as a start point
           //the below string literal is based on how cluster info is passed to the arrows model.  refer to either the arrows model start or end with a cluster already made for an example or look at driverCards.js tierCards function for naming format.
           //first check driverTreeObj to see if the card is in a cluster
-          let clustCheck = driverTreeObj.findIndex((item) => item.id == cardId);
-          if (driverTreeObj[clustCheck].clusterId) {
-            startP = `tier${i}cluster${driverTreeObj[clustCheck].clusterId}`;
+          let clustCheck = driverTreeObj[0].findIndex((item) => item.id == cardid);
+          if (driverTreeObj[0][clustCheck].clusterId) {
+            startP = `tier${i}cluster${driverTreeObj[0][clustCheck].clusterId}`;
           }
           //the card is in a cluster, so we need to find all the arrows that have the cluster as a start point
           if (
@@ -281,7 +262,7 @@ useEffect(() => {
 
     // //now update the driver tree object
     await getDriverByOutcome(selOutcome.id).then((data) => {
-      setDriverTreeObj(data.data);
+      setDriverTreeObj(data.data[0]);
     });
   };
 
@@ -290,26 +271,30 @@ useEffect(() => {
     return (
       <Card
         className={styles.my_card}
-        id={"card" + cardData.id}
-        data-cardid={cardData.id}
+        id={"card" + cardData.driverId}
+        data-cardid={cardData.driverId}
         data-tier={tier}
         data-cluster={cardData.cluster}
-        key={"card" + cardData.id}
+        key={"card" + cardData.driverId}
         draggable="true"
         onDragStart={useDrag}
         style={
-          viewCheck !== -1 ? 
-          (cardData.modified === "No" ? { opacity: 1, boxShadow: "0 4px 8px 0 rgba(82, 81, 81)"} : { opacity: 1, boxShadow: "0 4px 8px 0 rgba(59, 46, 241)"}) :  
-          (cardData.modified === "No" ? { opacity: opacity, boxShadow: "0 4px 8px 0 rgba(82, 81, 81)"} : { opacity: opacity, boxShadow: "0 4px 8px 0 rgba(59, 46, 241)"}) 
+          viewCheck !== -1
+            ? cardData.modified === "No"
+              ? { opacity: 1, boxShadow: "0 4px 8px 0 rgba(82, 81, 81)" }
+              : { opacity: 1, boxShadow: "0 4px 8px 0 rgba(59, 46, 241)" }
+            : cardData.modified === "No"
+            ? { opacity: opacity, boxShadow: "0 4px 8px 0 rgba(82, 81, 81)" }
+            : { opacity: opacity, boxShadow: "0 4px 8px 0 rgba(59, 46, 241)" }
         }
       >
         {createAnArrow && !PDFState && !recordLockState ? (
           <FontAwesomeIcon
             className={styles.card_arrow}
             icon={faArrowUp}
-            data-cardid={cardData.id}
+            data-cardid={cardData.driverId}
             data-type="driver"
-            onClick={(e) => MakeAnArrow(e, cardData.id, "driver")}
+            onClick={(e) => MakeAnArrow(e, cardData, "driver")}
           />
         ) : null}
         <Card.Body className={styles.card_body}>
@@ -319,7 +304,7 @@ useEffect(() => {
                 <Form.Control
                   as="input"
                   name="stakeholderAbbreviation"
-                  data-cardid={cardData.id}
+                  data-cardid={cardData.driverId}
                   className={styles.abbreviation_input}
                   defaultValue={cardData.stakeholderAbbreviation || "-"}
                   disabled={recordLockState}
@@ -329,20 +314,20 @@ useEffect(() => {
               {!PDFState && !recordLockState ? (
                 <div
                   onClick={delDriver}
-                  data-cardid={cardData.id}
+                  data-cardid={cardData.driverId}
                   className={styles.del_div}
                 >
                   Del
                 </div>
               ) : null}
             </Col>
-            <Col className={styles.card_col_body} id={cardData.id}>
+            <Col className={styles.card_col_body} id={cardData.driverId}>
               <div>
                 {!recordLockState ? (
                   <Form>
                     <Form.Control
                       as="textarea"
-                      data-cardid={cardData.id}
+                      data-cardid={cardData.driverId}
                       className={styles.my_card_text}
                       defaultValue={cardData.problemStatement}
                       //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
@@ -364,7 +349,7 @@ useEffect(() => {
                 <Form.Control
                   as="select"
                   id="status"
-                  data-cardid={cardData.id}
+                  data-cardid={cardData.driverId}
                   data-tier={tier}
                   value={cardData.status}
                   className={
@@ -429,15 +414,28 @@ useEffect(() => {
               <div
                 className={styles.details}
                 onClick={goToDriver}
-                data-cardid={cardData.id}
+                data-cardid={cardData.driverId}
               >
                 details
               </div>
             ) : null}
+                  {PDFState === false && cardData.embeddedOutcomeId !== 0 ? (
+              <div
+                className={styles.dtree_icon}
+                data-outcomeid={cardData.embeddedOutcomeId}
+              >
+               <FontAwesomeIcon 
+               icon={faTree} 
+               data-outcomeid={cardData.embeddedOutcomeId} 
+               onClick={() => goToDriverTree(cardData.embeddedOutcomeId)}/>
+
+              </div>
+
+            ) : null}
             {tableState === "view" ? (
               <div
-                onClick={(e) => modifyView(e, cardData.id)}
-                data-cardid={cardData.id}
+                onClick={(e) => modifyView(e, cardData.driverId)}
+                data-cardid={cardData.driverId}
                 className={styles.view_div}
               >
                 V
@@ -459,16 +457,15 @@ useEffect(() => {
       e.stopPropagation();
       return;
     }
-
     //check to see if there is an arrow attached to the cluster to cascade the delete
-
     let sures = window.confirm(
       "Are you sure you want to delete this cluster?  This will also delete any arrows attached to this cluster."
     );
     if (!sures) {
       return;
     }
-    let clusterId = "tier" + e.target.dataset.tier + "cluster" + e.target.dataset.cluster;
+    let clusterId =
+      "tier" + e.target.dataset.tier + "cluster" + e.target.dataset.cluster;
     let arrowid;
     for (let i = 0; i < arrows.length; i++) {
       if (arrows[i].start === clusterId || arrows[i].end === clusterId) {
@@ -476,14 +473,11 @@ useEffect(() => {
         deleteArrow(arrowid);
       }
     }
-    console.log("clusterId", e.target.dataset.cluster);
     deleteCluster(e.target.dataset.cluster);
 
     getDriverByOutcome(selOutcome.id).then((data) => {
-      setDriverTreeObj(data.data);
-    }
-    );
-
+      setDriverTreeObj(data.data[0]);
+    });
   };
 
   const useDrag = (e) => {
@@ -502,20 +496,24 @@ useEffect(() => {
       //kick them out and dont let them drag
       return;
     }
-
+    setLoading(true);
     let aBody = {};
     let dragStart = e.dataTransfer.getData("dragStart");
     let dragEnd = e.target.dataset.tier;
+    if (!dragEnd) {
+      //they didnt drag it to a valid spot, so just return
+      setLoading(false);
+      return;
+    }
     let cardname = e.dataTransfer.getData("type");
     let data = e.dataTransfer.getData("text");
-    e.target.appendChild(document.getElementById(data));
     let body = {
       tierLevel: e.target.dataset.tier,
       subTier: e.target.dataset.subtier,
     };
 
-    await updateDriver(data, state.userId, body);
-    //look through the arrows state to find any arrows with the affected cardId as a start or endpoint then update.
+    await updateOutcomeDriver(selOutcome.id, data, state.userId, body);
+    //look through the arrows state to find any arrows with the affected cardid as a start or endpoint then update.
     if (dragStart === dragEnd) {
       //return, no change in tier so no need to change arrow logic and DOM refreshed at bottom
       // window.location.reload();
@@ -533,7 +531,7 @@ useEffect(() => {
             aBody.dashness = true;
             aBody.startAnchor = { position: "left", offset: { y: 0 } };
             aBody.endAnchor = { position: "left", offset: { y: 0 } };
-            aBody.gridBreak = "30";
+            aBody.gridBreak = "30%";
           } else if (
             dragEnd > document.getElementById(arrows[i].end).dataset.tier
           ) {
@@ -564,7 +562,7 @@ useEffect(() => {
             aBody.dashness = true;
             aBody.startAnchor = { position: "left", offset: { y: 0 } };
             aBody.endAnchor = { position: "left", offset: { y: 0 } };
-            aBody.gridBreak = "30";
+            aBody.gridBreak = "50%";
           } else if (
             dragEnd > document.getElementById(arrows[i].start).dataset.tier
           ) {
@@ -596,20 +594,24 @@ useEffect(() => {
         }
       }
     }
-  
+
     await getDriverByOutcome(selOutcome.id).then((data) => {
-      setLoading(true);
-      setDriverTreeObj(data.data);
+      setDriverTreeObj(data.data[0]);
     });
+    setLoading(false);
   }
 
   const delDriver = (e) => {
     e.preventDefault();
-    if (!window.confirm("Are you sure you want to delete this driver?  This will also delete any arrows attached to this driver.")) {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this driver?  This will also delete any arrows attached to this driver."
+      )
+    ) {
       return;
     }
 
-    let arrowid =0;
+    let arrowid = 0;
     let delCardId = "card" + e.target.dataset.cardid;
     for (let i = 0; i < arrows.length; i++) {
       if (arrows[i].start === delCardId || arrows[i].end === delCardId) {
@@ -619,14 +621,16 @@ useEffect(() => {
     }
 
     deleteDriver(e.target.dataset.cardid);
+    let body = { outcomeId: selOutcome.id, driverId: e.target.dataset.cardid };
+    removeOutcomeDriver(body);
+
     getDriverByOutcome(selOutcome.id).then((data) => {
-      setDriverTreeObj(data.data);
+      setDriverTreeObj(data.data[0]);
     });
 
     setSelOutcome(selOutcome);
 
     window.location.reload();
-
   };
 
   const goToDriver = async (e) => {
@@ -659,6 +663,12 @@ useEffect(() => {
     let body = { [e.target.name]: e.target.value };
     updateCluster(e.target.dataset.clusterid, body);
   };
+
+  const goToDriverTree = (embeddedOutcomeId) => {
+    //goes to the embedded drivertree; the outcome idea is the outcomeId of the target
+    setSelOutcome({ id: embeddedOutcomeId });
+    navigate("/drivertree/" + embeddedOutcomeId);
+  }
 
   const goToOutcome = async (e) => {
     navigate("/allOutcomes/" + selOutcome.id);
@@ -693,9 +703,8 @@ useEffect(() => {
       setSelOutcome(data.data);
     });
     await getDriverByOutcome(selOutcome.id).then((data) => {
-      setDriverTreeObj(data.data);
+      setDriverTreeObj(data.data[0]);
     });
-
   };
 
   //waits for setSelectedElements to be updated, then calls the CreateAnArrow function to create the arrow
@@ -753,19 +762,9 @@ useEffect(() => {
   };
 
   //uses the CreateArrow function to make an arrow between two cards
-  const MakeAnArrow = async (e, cardId, type) => {
+  const MakeAnArrow = async (e, cardid, type) => {
     e.preventDefault();
-    let temp;
-    if (type === "driver") {
-      await getDriverById(cardId).then((data) => {
-        temp = data.data;
-      });
-    } else {
-      await getOutcome(cardId).then((data) => {
-        temp = data.data;
-      });
-    }
-    setSelectedElements([...selectedElements, temp]);
+    setSelectedElements([...selectedElements, cardid]);
   };
 
   //used to add or remove a card from a view.  also updates / sets the opacity of any arrows that are attached to the card
@@ -836,20 +835,16 @@ useEffect(() => {
     setOpacity(val);
   };
 
-  //used to create a new driver for the Outcome
-  const newDriver = async (e) => {
+  const createNewDriver = async (e) => {
     e.preventDefault();
-    let body = { outcomeId: selOutcome.id, tierLevel: e.target.dataset.tier };
-    await createDriver(body, state.userId);
-    getOutcome(selOutcome.id).then((data) => {
-      setSelOutcome(data.data);
-    });
-  };
+    setDriverTier(e.target.dataset.tier);
+    setCreateDriverModal(true);
+  }
 
   function tierButtons(tier) {
     if (state.userRole !== "Stakeholder") {
       return (
-        <Button className={styles.my_btn} onClick={newDriver} data-tier={tier}>
+        <Button className={styles.my_btn} data-tier={`${tier}`} onClick={(e)=>createNewDriver(e)}>
           +
         </Button>
       );
@@ -865,12 +860,12 @@ useEffect(() => {
       return <div></div>;
     } else {
       //find max number of droppable divs needed for any given tier, then size the columns accordingly.  This will let the columns grow with each tier
-      let max = 30;
+      let max = 20;
       for (let i = 0; i < driverTreeObj.length; i++) {
         //now get the number of elements in the driverTreeObj and set the max equal to it plus 1
-          if (driverTreeObj[i].subTier >= max) {
-            max = driverTreeObj[i].subTier + 1;
-          }
+        if (driverTreeObj[i].subTier >= max) {
+          max = driverTreeObj[i].subTier + 1;
+        }
       }
       for (let i = 0; i < max; i++) {
         //needs a nested loop for those instances when the driverTreeObj is smaller than 30
@@ -1017,7 +1012,7 @@ useEffect(() => {
 
   return (
     <>
-      <div id="topdiv" className={styles.top_div}>
+      <Row id="topdiv" className={styles.top_div}>
         <Xwrapper>
           {/* <Row style={{width: "1400px"}}> */}
           <Col
@@ -1091,7 +1086,7 @@ useEffect(() => {
                     icon={faArrowUp}
                     data-cardid={selOutcome.id}
                     data-type="outcome"
-                    onClick={(e) => MakeAnArrow(e, selOutcome.id, "outcome")}
+                    onClick={(e) => MakeAnArrow(e, selOutcome, "outcome")}
                   />
                 ) : null}
                 <Card.Body className={styles.my_card_body}>
@@ -1171,30 +1166,21 @@ useEffect(() => {
               {tierCards(6, { driverTreeObj, viewObj })}
             </Row>
 
-            <p>
-              <FontAwesomeIcon icon={faCopyright} />
-              Integrated Program Solutions
-            </p>
           </Col>
-          <Col className={styles.driver} key="7">
-          </Col>
-          {/* </Row> */}
-          {!loading? (
+          {!loading ? (
             <DriverArrows
-            arrows={arrows}
-            ArrowModal={ArrowModal}
-            driverTreeObj={driverTreeObj}
-            opacity={opacity}
-            recordLockState={recordLockState}
-            // setArrows={setArrows}
-            tableState={tableState}
-            viewArrows={viewArrows}
-            viewId={viewId}
+              arrows={arrows}
+              ArrowModal={ArrowModal}
+              driverTreeObj={driverTreeObj}
+              opacity={opacity}
+              recordLockState={recordLockState}
+              tableState={tableState}
+              viewArrows={viewArrows}
+              viewId={viewId}
             />
-            ) :null}
-            </Xwrapper>
-      </div>
-
+          ) : null}
+        </Xwrapper>
+      </Row>
       <Modal show={show} size="sm">
         {/* onHide={handleClose} */}
         <Modal.Header closeButton>
@@ -1219,6 +1205,35 @@ useEffect(() => {
             Cluster
           </Button>
         </Modal.Footer>
+      </Modal>
+
+      <Modal
+        name="clusterModal"
+        show={createDriverModal}
+        size="lg"
+        aria-labelledby="contained-modal-title-vcenter"
+        centered
+        backdrop="static"
+        keyboard={false}
+        onHide={() => setCreateDriverModal(false)}
+        // className={styles.cluster_modal}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title id="cluster-modal">Create Cluster</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {/*change everything in the signup form components*/}
+          <DriverModal
+            setDriverTreeObj={setDriverTreeObj}
+            selOutcome={selOutcome}
+            setCreateDriverModal={setCreateDriverModal}
+            driverTier={driverTier}
+            state={state}
+          />
+          <Button variant="secondary" onClick={handleClose}>
+            Close
+          </Button>
+        </Modal.Body>
       </Modal>
 
       <Modal show={connectionShow} size="md">

@@ -123,7 +123,7 @@
 .details {
   position: absolute;
   bottom: 0px;
-  left: 55px;
+  left: 45px;
   font-style: italic;
   font-size: 7px;
   width: 50px;
@@ -134,17 +134,33 @@
   cursor: pointer;
 }
 
+
+.dtree_icon {
+  position: absolute;
+  bottom: 0px;
+  left: 75px;
+  font-style: italic;
+  width: 50px;
+  z-index: 1000; 
+}
+
+.dtree_icon:hover {
+  cursor: pointer;
+}
+
 .driver {
   display: flex;
   flex-direction: column;
-  background-color: white;
+  
+  background-color: rgb(245, 244, 244);
   color: rgb(0, 0, 0);
   font-weight: normal;
   align-items: center;
   justify-content: center;
-  margin: 40px;
+  margin: 20px;
+  padding: 10px;
   min-width: 175px;
-  width: auto;
+  box-shadow: 0 4px 8px 0 rgba(53, 53, 53, .4);
 }
 
 .driver_page {
@@ -195,6 +211,12 @@
 
 }
 
+.my_card:hover {
+  transform: scale(1.05);
+  cursor: pointer;
+  size: 105%;
+}
+
 .my_card_abb {
   position: absolute;
   top: 0;
@@ -217,6 +239,7 @@
   border: none;
   z-index: 500;
   width: 65%;
+  height: 50%;
   position: absolute;
   left: 35px;
   top: 1px;
@@ -290,9 +313,6 @@ width: 150px;
 }
 .pdf_export {
   display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  height: fit-content;
 }
 
 .welcome_btn {
@@ -378,14 +398,21 @@ width: 150px;
   cursor: pointer;
 }
 
-.top_div {
+.outer_div {
   display: flex;
+  flex-direction: column;
+/* max-width: 1250px; */
+}
+
+.top_div {
   flex-direction: row;
+  flex-wrap: nowrap;
   justify-content: flex-start;
   align-items: flex-start;
   height: 100%;
+  /* max-width: 1400px; */
   overflow-y: scroll;
-  overflow-x: hidden;
+  /* overflow-x: hidden; */
 }
 
 .view_container {

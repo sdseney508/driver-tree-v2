@@ -28,7 +28,7 @@ const ClusterModal = ({
     createCluster(body);
     //update the selected drivers with the clusterId
     getDriverByOutcome(selOutcome.id).then((data) => {
-      setDriverTreeObj(data.data);
+      setDriverTreeObj(data.data[0]);
     });
 
   }

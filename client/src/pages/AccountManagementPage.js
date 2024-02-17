@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Container, Row, Button, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { getUserData, updateUser } from "../utils/auth";
+import { passwordCheck, passwordVal } from "../utils/password";
 import "./UserPage.css";
 
 const AccountManagement = () => {
@@ -17,8 +18,8 @@ const AccountManagement = () => {
   }, []);
 
   const handleInputChange = (event) => {
-    setUserFormData({
-      ...userFormData,
+    setState({
+      ...state,
       [event.target.name]: event.target.value,
     });
   };
@@ -27,14 +28,15 @@ const AccountManagement = () => {
     //the user isnt allowed to change their functional area or role.  That can only be done by the Op Limit Coordinator.
     event.preventDefault();
     let body;
+    //first check if the old password is correct
+    
     if (userFormData.password !== userFormData.passVal) {
       alert("Passwords do not match");
       return;
-    } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#$^+=!*()@%&]).{14,}$/.test(userFormData.password)) {
-      alert('The password must contain at least 14 characters including at least 1 uppercase, 1 lowercase, 1 special character and 1 number.');
+    } else if (passwordCheck(userFormData.password) === false) {
       return;
-    } else if (!userFormData.firstName || !userFormData.lastName) {
-      alert("First name and last name are required.");
+    } else if (passwordVal(userFormData.password) === false) {
+
       return;
     }
     const form = event.currentTarget;
@@ -80,7 +82,7 @@ const AccountManagement = () => {
               name="firstName"
               placeholder={state.firstName}
               onChange={handleInputChange}
-              value={userFormData.firstName}
+              value={state.firstName}
             />
           </Form.Group>
 
@@ -91,7 +93,7 @@ const AccountManagement = () => {
               name="lastName"
               placeholder={state.lastName}
               onChange={handleInputChange}
-              value={userFormData.lastName}
+              value={state.lastName}
             />
           </Form.Group>
 
@@ -102,7 +104,7 @@ const AccountManagement = () => {
               name="email"
               placeholder={state.email}
               onChange={handleInputChange}
-              value={userFormData.email}
+              value={state.email}
               required
             ></Form.Control>
           </Form.Group>
@@ -120,9 +122,21 @@ const AccountManagement = () => {
           </Form.Group>
 
           <Form.Group>
+            <Form.Label htmlFor="password">Old Password</Form.Label>
+            <Form.Control
+              type="oldPassword"
+              placeholder="Your password"
+              name="oldPassword"
+              onChange={handleInputChange}
+              value={userFormData.oldPassword}
+            />
+          </Form.Group>
+
+          <Form.Group>
             <Form.Label htmlFor="password">New Password</Form.Label>
             <Form.Control
               type="password"
+              title="Password must contain at least 14 characters including at least 1 uppercase, 1 lowercase, 1 special character, and 1 number and no repeated characters.  It also may not reuse 8 or more characters from your previous password."
               placeholder="Your password"
               name="password"
               onChange={handleInputChange}
@@ -134,6 +148,7 @@ const AccountManagement = () => {
             <Form.Label htmlFor="passVal">New Password Check</Form.Label>
             <Form.Control
               type="password"
+              title="Password must contain at least 14 characters including at least 1 uppercase, 1 lowercase, 1 special character, and 1 number and no repeated characters.  It also may not reuse 8 or more characters from your previous password."
               placeholder="Re-enter Your Password"
               name="passVal"
               onChange={handleInputChange}

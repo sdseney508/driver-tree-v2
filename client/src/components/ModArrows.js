@@ -37,6 +37,7 @@ const ModArrows = ({
     getOutcome(selOutcome.id).then((res) => {
       setSelOutcome(res.data);
     });
+    setArrowMod(false);
   }
 
   return (

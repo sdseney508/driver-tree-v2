@@ -3,6 +3,7 @@ import { Form, Button } from "react-bootstrap";
 import { register } from "../utils/auth";
 import { getRoles } from "../utils/sign-up";
 import { allStakeholders} from "../utils/stakeholders";
+import {passwordCheck} from "../utils/password";
 
 const SignupForm = ({onModalSubmit}) => {
   const [roleState, setRoleState] = useState([]);
@@ -72,12 +73,12 @@ const SignupForm = ({onModalSubmit}) => {
   const handleFormSubmit = async (event) => {
     event.preventDefault();
 
+    //for this function, i use the passwordCheck function to validate the password
     if (userFormData.password !== userFormData.passVal) {
       setShowPassAlert(true);
       alert("Passwords do not match");
       return;
-    } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#$^+=!*()@%&]).{14,}$/.test(userFormData.password)) {
-      alert('The password must contain at least 14 characters including at least 1 uppercase, 1 lowercase, 1 special character, and 1 number.');
+    } else if (passwordCheck(userFormData.password) === false){
       return;
     }
     const form = event.currentTarget;
@@ -206,7 +207,7 @@ const SignupForm = ({onModalSubmit}) => {
           <Form.Label htmlFor="password">Password</Form.Label>
           <Form.Control
             type="password"
-            placeholder="Password of 14 characters including at least 1 uppercase, 1 lowercase, 1 special character, and 1 number"
+            placeholder="Password of 14 non-repeating characters with 1 uppercase, 1 lowercase, 1 special character, and 1 number"
             name="password"
             onChange={handleInputChange}
             required

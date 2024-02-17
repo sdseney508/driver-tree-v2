@@ -1,5 +1,5 @@
 .App {
-  /* display: flex; */
+  display: flex;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -8,10 +8,11 @@
   }
 }
 
-/* body { 
-   width: 100vw;
-  height: 80vh;
-}  */
+.bkgrd {
+  display: flex;
+  flex-direction: column;
+  max-width: 100vw;
+}
 
 @keyframes App-logo-spin {
   from {

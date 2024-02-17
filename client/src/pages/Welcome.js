@@ -109,6 +109,7 @@ const Welcome = () => {
           Role: userData.userRole,
           userId: userData.id,
           command: userData.userCommand,
+          
         });
         navigate("/user");
       }
@@ -304,7 +305,7 @@ const Welcome = () => {
       >
         <Modal.Header closeButton>
           <Modal.Title id="reset-pass" className="ms-auto">
-            Sign-up
+            Request Password Reset
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>

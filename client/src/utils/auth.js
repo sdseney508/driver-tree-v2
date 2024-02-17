@@ -3,6 +3,8 @@ import { jwtDecode } from "jwt-decode";
 import apiURL from "./apiURL";
 import { getOutcome, outcomeByCommand } from "./drivers";
 
+// import { navigate } from "@reach/router";
+
 
 
 const authHeader = () => {
@@ -123,27 +125,31 @@ const getUserData = async ({ navigate, state, setState, outcomeId, error, setErr
     if (outcomeId) {
       await getOutcome(outcomeId).then((data) => {
         if(!data.data){
-          setError(true);
           alert("You do not have permission to view this page.");
+          if(token){
           navigate("/user");
-          return null;
+
+        } else {
+          navigate("/");
+
         }
         if (data.data.stakeholderId !== user.stakeholderId) {
           alert("You do not have permission to view this page. ");
           navigate("/user");
         }
-      });
+      }});
     }
 
     return user;
 
   } catch (err) {
-    setError(true);
     alert("You do not have permission to view this page.");
-    navigate("/user");
+    navigate("/");
     return null;
   }
 };
+
+
 
 const getAdminUserData = async ({ navigate, state, setState, outcomeId }) => {
   try {
@@ -236,6 +242,28 @@ const logout = () => {
   window.location.assign("/");
 };
 
+const passwordCheck = async ({navigate}, password) => {
+  //check the password provided against the password in the database
+  const token = loggedIn() ? getToken() : null;
+  if (!token) {
+    navigate("/");
+  }
+  const response = await getUser(token);
+  if (!response.data) {
+    navigate("/");
+    throw new Error("something went wrong!");
+  }
+  const user = response.data;
+  let match;
+  //now check the provided password against the one returned from the datbase
+  if (!match) {
+    alert("The old password provided is incorrect.  If you need assistance, please contact your Driver Tree Coordinator.");
+    return false;
+  } else {
+    return true;
+  }
+}
+
 const register = (
   firstName,
   lastName,
@@ -273,6 +301,7 @@ export {
   login,
   loginUser,
   logout,
+  passwordCheck,
   register,
   updateUser,
 };

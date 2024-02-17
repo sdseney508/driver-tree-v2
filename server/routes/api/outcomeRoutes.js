@@ -4,6 +4,8 @@ const {
   stakeholders,
   adminAudit,
   statusDefinition,
+  drivers,
+  clusters,
 } = require("../../models");
 const sequelize = require("../../config/connection");
 const { Op } = require("sequelize");
@@ -188,5 +190,25 @@ router.delete("/:id", async (req, res) => {
     res.status(400).json(err);
   }
 });
+
+
+//get all drivers for an outcome
+router.get("/driverByOutcome/:id", async (req, res) => {
+  try {
+    const outcomeDriverData = await outcomes.findAll({
+      where: {
+        id: req.params.id,
+      },
+      include: [{
+        model: drivers,
+        include: [{ model: clusters }] // Assuming 'drivers' model has the association to 'clusters'
+      }]
+    });
+    res.status(200).json(outcomeDriverData);
+  } catch (err) {
+    res.status(400).json(err);
+  }
+});
+
 
 module.exports = router;

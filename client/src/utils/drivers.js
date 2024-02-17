@@ -106,6 +106,10 @@ const updateOutcome = (id, body) => {
   return axios.put(apiURL + "/outcomes/update/" + id, body);
 };
 
+const updateOutcomeDriver = (outcomeId, driverId, userId, body) => {
+  return axios.put(apiURL + "/outcomeDrivers/update/" + outcomeId + "/" + driverId+"/" + userId, body);
+}
+
 export {
   allDrivers,
   allOutcomes,
@@ -130,5 +134,6 @@ export {
   outcomeByCommand,
   updateCluster,
   updateDriver,
-  updateOutcome
+  updateOutcome,
+  updateOutcomeDriver,
 };

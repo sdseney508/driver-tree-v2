@@ -100,7 +100,6 @@
  .quad_format {
    display: flex;
    flex-direction: row;
-   /* flex-wrap: wrap; */
    width: 100%;
    height: 40vh;
    justify-content:  left;

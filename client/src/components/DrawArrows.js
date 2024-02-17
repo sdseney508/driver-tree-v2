@@ -12,15 +12,6 @@ function DriverArrows({
   viewArrows,
   viewId,
 }) {
-  // useEffect(() => {
-  //   console.log("DriverArrows.js - useEffect - arrows: ", arrows);
-  // }, []);
-
-  // useEffect(() => {
-  //   console.log("DriverArrows.js - useEffect - arrows: ", arrows);
-  // }, [driverTreeObj]);
-
-  console.log("DriverArrows.js - arrows: ", arrows);
   //this function maps each arrow in the arrows array to a Xarrow component
   const arrowFunc = () => {
     return arrows.map((f, index) => {
@@ -51,12 +42,14 @@ function DriverArrows({
           divContainerStyle={{
             position: "relative",
             animation: "none",
-            overflow: "hide",
+            width: 0, 
+            height: 0,
+            padding: 0,
+            margin: 0,
           }}
           SVGcanvasStyle={{
             position: "relative",
-            animation: "none",
-            overflow: "hide",
+            animation: "none",            
           }}
           SVGcanvasProps={{ id: "SVG" + arrows[index].id }}
           color={arrows[index].color}

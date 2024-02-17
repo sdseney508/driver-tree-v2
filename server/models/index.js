@@ -8,6 +8,7 @@ const clusters = require("./clusters");
 const deliverables = require("./deliverables");
 const drivers = require("./drivers");
 const outcomes = require("./outcomes");
+const outcomeDrivers = require("./outcomeDrivers");
 const role = require("./role");
 const stakeholders = require("./stakeholders");
 const state = require("./state");
@@ -19,11 +20,13 @@ const viewCards = require("./viewCards");
 const views = require("./views");
 
 
-outcomes.hasMany(drivers, {
-  onDelete: "CASCADE",
+outcomes.belongsToMany(drivers, {
+  through: "outcomeDrivers",
 });
 
-drivers.belongsTo(outcomes, {});
+drivers.belongsToMany(outcomes, {
+  through: "outcomeDrivers",
+});
 
 outcomes.hasMany(arrows, {
   onDelete: "CASCADE",
@@ -106,6 +109,7 @@ module.exports = {
   deliverables,
   drivers,
   outcomes,
+  outcomeDrivers,
   role,
   stakeholders,
   state,

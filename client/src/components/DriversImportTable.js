@@ -6,8 +6,7 @@ import React, {
 } from "react";
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
 import {
-  getDriverById,
-  getDriverByOutcome,
+  getDrivers, getDriverById
 } from "../utils/drivers";
 import "ag-grid-community/dist/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CSS
@@ -17,7 +16,7 @@ import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CS
 //when a user selects a row, the row data is passed to the parent component
 //and displayed in the form.
 //this is using the community edition and react hooks to selectively render the table
-function DriverTable({ selDriver, setSelDriver, selOutcome, setSelOutcome }) {
+function DriverImportTable({ selectedDriver, setSelectedDriver, selOutcome}) {
 
   const [rowData, setRowData] = useState([]); // Set rowData to Array of Objects
   let rowD;
@@ -27,15 +26,15 @@ function DriverTable({ selDriver, setSelDriver, selOutcome, setSelOutcome }) {
   //this runs on the initial to fetch the data for the table
   useEffect(() => {
     const fetchData = async () => {
-      await getDriverByOutcome(selOutcome.id).then((data) => {
+      await getDrivers().then((data) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        rowD = data.data[0];
+        rowD = data.data;
       });
       setRowData(rowD);
     };
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selOutcome, selDriver]);
+  }, []);
 
   // Each Column Definition results in one Column.  For now, we are only going to set the 7 key columns that the users might search on
   const [columnDefs, setColumnDefs] = useState([
@@ -109,13 +108,13 @@ function DriverTable({ selDriver, setSelDriver, selOutcome, setSelOutcome }) {
   async function fetchDriverInfo(driverId) {
     await getDriverById(driverId).then((data) => {
       let top = data.data;
-      setSelDriver(top);
+      setSelectedDriver(top);
     });
   }
 
   const cellClickedListener = async (event) => {
-    let driverId = event.data.id;
-    await fetchDriverInfo(driverId);
+      let driverId = event.data.id;
+      await fetchDriverInfo(driverId);
   };
 
   //the return just builds the table
@@ -137,4 +136,4 @@ function DriverTable({ selDriver, setSelDriver, selOutcome, setSelOutcome }) {
   );
 }
 
-export default DriverTable;
+export default DriverImportTable;

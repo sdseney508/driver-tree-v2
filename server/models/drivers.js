@@ -26,22 +26,6 @@ drivers.init(
             defaultValue: 'Draft Barrier For Demo',
         },
 
-        //todo:  have this autolink to the cards so that the tier ties to the correct card level
-        tierLevel: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            defaultValue: 1,
-        },
-
-        //todo: create a route to autoassign the subTier based on what else is in the Tier column.
-        //TODO update subtier based on draggable position in the column
-        subTier: {
-            type: DataTypes.INTEGER,
-            allowNull: true,
-        },
-
-
-
         //todo:  make this into a JSON for an indentured list of progress
         progress: {
             type: DataTypes.TEXT,
@@ -105,6 +89,13 @@ drivers.init(
             allowNull: true,
             defaultValue: 1,
         },
+        //outcomeId in case the driver has an embedded driver tree of its own
+        embeddedOutcomeId: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            defaultValue: 0,
+        },
+
         modified: {
             type: DataTypes.STRING,
             allowNull: true,

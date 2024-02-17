@@ -1,5 +1,3 @@
-/* eslint-disable no-loop-func */
-//page for viewing and updating op limits
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Button, Modal } from "react-bootstrap";
 import {
@@ -11,6 +9,7 @@ import {
   updateOutcome,
 } from "../utils/drivers";
 import { createArrow } from "../utils/arrows";
+import { addOutcomeDriver } from "../utils/outcomeDrivers";
 import { createView, deleteView } from "../utils/views";
 import {
   getStatusDefinitionByOutcome,
@@ -32,6 +31,35 @@ import { exportElement } from "../utils/export-element";
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form
 
 const DriverTreePage = () => {
+  const apiCall = {
+    columns: {
+      "Tier-1": {
+        id: "Tier-1",
+        items: [],
+      },
+      "Tier-2": {
+        id: "Tier-2",
+        items: [],
+      },
+      "Tier-3": {
+        id: "Tier-3",
+        items: [],
+      },
+      "Tier-4": {
+        id: "Tier-4",
+        items: [],
+      },
+      "Tier-5": {
+        id: "Tier-5",
+        items: [],
+      },
+      "Tier-6": {
+        id: "Tier-6",
+        items: [],
+      },
+      // Add more columns as needed
+    },
+  };
   const [state, setState] = useState([]);
   const [clusters, setClusters] = useState([]);
   const [error, setError] = useState(false);
@@ -41,7 +69,7 @@ const DriverTreePage = () => {
   const [PDFState, setPDFState] = useState(false);
   const [showArrowMod, setArrowMod] = useState(false);
   const [selOutcome, setSelOutcome] = useState({});
-  const [driverTreeObj, setDriverTreeObj] = useState([]);
+  const [driverTreeObj, setDriverTreeObj] = useState(apiCall);
   const [showClusterModal, setClusterModal] = useState(false);
   const [selDriver, setSelDriver] = useState({});
   const [recordLockState, setRecordLockState] = useState(false); //used to lock the record when a user is editing it, reads the user's account permissions and adjusts record locks accordingly, stakeholders have read only access.
@@ -54,7 +82,7 @@ const DriverTreePage = () => {
   let tableStyle = { height: "25vh", width: "100%", overFlowY: "scroll" };
   let driverStyle = {
     height: "60vh",
-    overFlowY: "scroll",
+    overFlowY: "hidden",
     overFlowX: "hidden",
   }; //custom styles for the divs down below
   const [showTable, setShowTable] = useState({ tableStyle, driverStyle }); //show or not show the Outcomes/views tables at the bottom of the page
@@ -62,7 +90,6 @@ const DriverTreePage = () => {
     height: "fit-content",
     overFlowY: "visible",
     overFlowX: "hidden",
-    // maxWidth: "100%",
   };
 
   const { outcomeId } = useParams();
@@ -111,7 +138,53 @@ const DriverTreePage = () => {
         }
       });
       await getDriverByOutcome(selOutcome.id).then((data) => {
-        setDriverTreeObj(data.data);
+        //formatting data for dnd interface
+        // for (let i = 0; i < data.data.length; i++) {
+
+        //   switch (data.data[i].tierLevel) {
+        //     case 1:
+        //       apiCall.columns["Tier-1"].items.push(data.data[i]);
+        //       break;
+        //     case 2:
+        //       apiCall.columns["Tier-2"].items.push(data.data[i]);
+        //       break;
+        //     case 3:
+        //       apiCall.columns["Tier-3"].items.push(data.data[i]);
+        //       break;
+        //     case 4:
+        //       apiCall.columns["Tier-4"].items.push(data.data[i]);
+        //       break;
+        //     case 5:
+        //       apiCall.columns["Tier-5"].items.push(data.data[i]);
+        //       break;
+        //     case 6:
+        //       apiCall.columns["Tier-6"].items.push(data.data[i]);
+        //       break;
+        //     default:
+        //   }
+        // }
+        //now we set the null items based on the tier level
+        // let apiCallCopy = { ...apiCall };
+        // //this function takes in the state object, then loops through the columns and adds blank items to each column so that there are 45 items in each column.  It then returns the updated state object.
+        // for (let i = 1; i < 7; i++) {
+        //   let itemArray = Array(45).fill(null);
+        //   for (let j = 0; j < 45; j++) {
+        //     if (apiCall.columns["Tier-" + i].items[j]) {
+        //       let k = apiCall.columns["Tier-" + i].items[j].subTier - 1;
+        //       itemArray[k] = apiCall.columns["Tier-" + i].items[j];
+        //     }
+        //     if (itemArray[j] === null) {
+        //       itemArray[j] = {
+        //         id: `null-${i}-item-${j + 1}`,
+        //         problemStatement: `null-${i}-item-${j + 1}`,
+        //         clusterId: null,
+        //         subTier: j + 1,
+        //       };
+        //     }
+        //   }
+        //   apiCallCopy.columns["Tier-" + i].items = itemArray;
+        // }
+        setDriverTreeObj(data.data[0]);
       });
       await getArrows(selOutcome.id).then((data) => {
         setArrows(data.data);
@@ -127,15 +200,9 @@ const DriverTreePage = () => {
       authCheck();
     }
     navigate("/drivertree/" + selOutcome.id);
-
+    setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome]);
-
-  useEffect(() => {
-    if (driverTreeObj && arrows) {
-      setLoading(false);
-    }
-  }, [driverTreeObj, arrows]);
 
   const authCheck = () => {
     //checks to see if the user has access to the desired outcome
@@ -176,7 +243,6 @@ const DriverTreePage = () => {
       driverStyle = {
         height: "80vh",
         overFlowY: "scroll",
-        overFlowX: "hidden",
       };
       setOpacity(100);
       setTableState("");
@@ -185,7 +251,6 @@ const DriverTreePage = () => {
       driverStyle = {
         height: "60vh",
         overFlowY: "scroll",
-        overFlowX: "hidden",
       };
       setOpacity(100);
       setTableState("outcome");
@@ -194,7 +259,6 @@ const DriverTreePage = () => {
       driverStyle = {
         height: "60vh",
         overFlowY: "scroll",
-        overFlowX: "hidden",
       };
       setTableState("view");
     }
@@ -243,7 +307,7 @@ const DriverTreePage = () => {
 
         let svgtop = svgArray[index].getBoundingClientRect().top;
         //the additional offset accounts for delta between cards and column widths
-        let svgleft = svgArray[index].getBoundingClientRect().left * 0.99;
+        let svgleft = svgArray[index].getBoundingClientRect().left;
         svgdiv.setAttribute(
           "style",
           `position: absolute; top: ${svgtop}px; left: ${svgleft}px; z-index: 10; width: ${width}px; height: ${height}px;`
@@ -342,10 +406,10 @@ const DriverTreePage = () => {
     for (let i = 0; i < statusDefBody.data.length; i++) {
       statusDefBody.data[i].statusDefinition =
         oldstatusDefBody.data[i].statusDefinition;
-      console.log(statusDefBody.data[i]);
       modifyStatusDefinition(statusDefBody.data[i].id, statusDefBody.data[i]);
     }
 
+    //now we need to create the new drivers and clusters.  We'll start by creating the drivers, then we'll create the clusters, then we'll create the arrows, lastly we'll create the outcomeDrivers to associate the drivers with the outcome
     let driverBody = JSON.parse(JSON.stringify(driverTreeObj));
     let arrowBody = JSON.parse(JSON.stringify(arrows));
     delete arrowBody.id;
@@ -354,10 +418,14 @@ const DriverTreePage = () => {
     let clusterArr = "";
     let clusterName = "";
     for (let i = 0; i < driverBody.length; i++) {
+      debugger;
       driverBody[i].outcomeId = newOutcomeId;
+      driverBody[i].modified = "No";
       //note here, the id is being deleted by the driver router so we dont need to do it here
 
       const driverData = await createDriver(driverBody[i], state.userId);
+      let body = { outcomeId: newOutcomeId, driverId: driverData.data.id };
+      await addOutcomeDriver(body);
 
       //check to see if it is in  acluster
       if (driverBody[i].clusterId) {
@@ -493,15 +561,18 @@ const DriverTreePage = () => {
   return (
     <>
       {!error ? (
-        <div id="topleveldiv" key="topleveldiv" className={styles.driver_page}>
-          {/* className={styles.driver_page}  */}
-          <Container fluid className="justify-content-center">
-            <div
-              style={{ height: "40px", maxwidth: "100%" }}
+        // <Container fluid className="justify-content-center">
+          <Row
+            id="topleveldiv"
+            key="topleveldiv"
+            className={styles.outer_div}
+          >
+            <Row
+              style={{ height: "40px"}}
               className="justify-content-center"
             >
               {state.userRole !== "Stakeholder" ? (
-                <Col style={{ maxWidth: "1100px" }}>
+                <Col>
                   <button
                     className={styles.dtree_btn}
                     onClick={() => {
@@ -522,7 +593,6 @@ const DriverTreePage = () => {
                   >
                     Create Cluster
                   </button>
-
                   <button
                     className={styles.dtree_btn}
                     onClick={() => toggleArrow()}
@@ -559,10 +629,8 @@ const DriverTreePage = () => {
                       Make Active
                     </button>
                   ) : null}
-                  <div>
-                    Outcome Version: {selOutcome.version} Outcome State:{" "}
-                    {selOutcome.state}
-                  </div>
+                  Outcome Version: {selOutcome.version} Outcome State:{" "}
+                  {selOutcome.state}
                 </Col>
               ) : (
                 <Col>
@@ -571,42 +639,40 @@ const DriverTreePage = () => {
                   </button>
                 </Col>
               )}
-            </div>
+            </Row>
             <Row
               id="pdf-export"
               style={PDFState ? pdfStyle : showTable.driverStyle}
               className={styles.pdf_export}
             >
-              <Xwrapper>
-                {!loading ? (
-                  <DriverCards
-                    arrows={arrows}
-                    setArrows={setArrows}
-                    driverTreeObj={driverTreeObj}
-                    setDriverTreeObj={setDriverTreeObj}
-                    cluster={clusters}
-                    setClusters={setClusters}
-                    createAnArrow={createAnArrow}
-                    opacity={opacity}
-                    setOpacity={setOpacity}
-                    PDFState={PDFState}
-                    recordLockState={recordLockState}
-                    state={state}
-                    setCreateAnArrow={setCreateAnArrow}
-                    setArrowMod={setArrowMod}
-                    selOutcome={selOutcome}
-                    setSelOutcome={setSelOutcome}
-                    showArrowMod={showArrowMod}
-                    tableState={tableState}
-                    viewId={viewId}
-                    setViewId={setViewId}
-                    viewObj={viewObj}
-                    setViewObj={setViewObj}
-                    viewArrows={viewArrows}
-                    setViewArrows={setViewArrows}
-                  />
-                ) : null}
-              </Xwrapper>
+              {!loading ? (
+                <DriverCards
+                  arrows={arrows}
+                  setArrows={setArrows}
+                  driverTreeObj={driverTreeObj}
+                  setDriverTreeObj={setDriverTreeObj}
+                  cluster={clusters}
+                  setClusters={setClusters}
+                  createAnArrow={createAnArrow}
+                  opacity={opacity}
+                  setOpacity={setOpacity}
+                  PDFState={PDFState}
+                  recordLockState={recordLockState}
+                  state={state}
+                  setCreateAnArrow={setCreateAnArrow}
+                  setArrowMod={setArrowMod}
+                  selOutcome={selOutcome}
+                  setSelOutcome={setSelOutcome}
+                  showArrowMod={showArrowMod}
+                  tableState={tableState}
+                  viewId={viewId}
+                  setViewId={setViewId}
+                  viewObj={viewObj}
+                  setViewObj={setViewObj}
+                  viewArrows={viewArrows}
+                  setViewArrows={setViewArrows}
+                />
+              ) : null}
             </Row>
 
             <div style={showTable.tableStyle}>
@@ -667,8 +733,8 @@ const DriverTreePage = () => {
                 </Row>
               ) : null}
             </div>
-          </Container>
-        </div>
+          </Row>
+        // </Container>
       ) : null}
       {/* for creating a cluster */}
       <Modal

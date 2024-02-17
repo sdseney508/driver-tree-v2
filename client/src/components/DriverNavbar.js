@@ -9,65 +9,40 @@ import { outcomeByCommand } from "../utils/drivers";
 const DriverNavbar = () => {
   let location = useLocation();
   let navigate = useNavigate();
-  const userInfo = [];
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   let pName = location.pathname.slice(0, 5);
   const [navState, setNavState] = useState({});
 
-  useEffect(() => {
-    const getUserData = async () => {
-      try {
-        const token = loggedIn() ? getToken() : null;
-        if (!token) {
-          navigate("/");
-          return;
-        }
-        const response = await getUser(token);
-        if (!response.data) {
-          navigate("/");
-          throw new Error("something went wrong!");
-        }
-        const user = response.data;
-        userInfo.push(user.stakeholderId);
-        setNavState({
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          userId: user.id,
-          userRole: user.userRole,
-          command: user.stakeholderId,
-        });
-        let userDataLength = Object.keys(user).length;
-        //if the user isnt logged in with an unexpired token, send them to the login page
-        if (!userDataLength > 0) {
-          navigate("/");
-        }
-        return user;
-      } catch (err) {
-        console.error(err);
-        navigate("/");
-      }
-    };
-
-    getUserData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    // This useEffect will run when navState changes
-    // If navState has the expected data, set loading to false
-    if (navState.command && navState.userId) {
-      setLoading(false);
-    }
-  }, [navState]);
-
   const allOutcomes = async (userInfo) => {
-    let toutcomeID;
-    await outcomeByCommand(navState.command).then((data) => {
-      toutcomeID = data.data[0].id;
-    });
+    try {
+      const token = loggedIn() ? getToken() : null;
+      if (!token) {
+        navigate("/");
+        return;
+      }
+      const response = await getUser(token);
+      if (!response.data) {
+        navigate("/");
+        throw new Error("something went wrong!");
+      }
+      const user = response.data;
+      console.log(user);
+      let userDataLength = Object.keys(user).length;
+      //if the user isnt logged in with an unexpired token, send them to the login page
+      if (!userDataLength > 0) {
+        navigate("/");
+      } else {
+        let toutcomeID;
+        await outcomeByCommand(user.stakeholderId).then((data) => {
+          toutcomeID = data.data[0].id;
+        });
 
-    navigate("/allOutcomes/" + toutcomeID);
+        navigate("/allOutcomes/" + toutcomeID);
+      }
+    } catch (err) {
+      console.error(err);
+      navigate("/");
+    }
   };
 
   const goHome = () => {
@@ -75,35 +50,44 @@ const DriverNavbar = () => {
   };
 
   const gotoDriverTree = async () => {
-    let toutcomeID;
-    await outcomeByCommand(navState.command).then((data) => {
-      toutcomeID = data.data[0].id;
-    });
-    console.log(toutcomeID);
-    navigate("/driverTree/" + toutcomeID);
+    try {
+      const token = loggedIn() ? getToken() : null;
+      if (!token) {
+        navigate("/");
+        return;
+      }
+      const response = await getUser(token);
+      if (!response.data) {
+        navigate("/");
+        throw new Error("something went wrong!");
+      }
+      const user = response.data;
+      console.log(user);
+      let userDataLength = Object.keys(user).length;
+      //if the user isnt logged in with an unexpired token, send them to the login page
+      if (!userDataLength > 0) {
+        navigate("/");
+      } else {
+        let toutcomeID;
+        await outcomeByCommand(user.stakeholderId).then((data) => {
+          toutcomeID = data.data[0].id;
+        });
+        navigate("/driverTree/" + toutcomeID);
+      }
+    } catch (err) {
+      console.error(err);
+      navigate("/");
+    }
   };
 
   const adminAccountManage = () => {
     navigate("/adminaccountmanage");
   };
 
-  const adminDrivers = async () => {
-    let toutcomeID;
-    await outcomeByCommand(navState.command).then((data) => {
-      toutcomeID = data.data[0].id;
-    });
-    navigate("/driverTree/" + toutcomeID);
-  };
-
   const databaseManagement = () => {
     // 👇️ navigate to database management.  this is where the administrator can add, remove, and update teams, functional areas, and systems.
     navigate("/admindatabasemanage");
   };
-
-  //TODO:  bonus feature to be done later, pre-filter drivers by user
-  // const myLimits = () => {
-  //   navigate("/mydrivers", { state: { driverType: "My" } });
-  // };
 
   return (
     <>
@@ -120,7 +104,7 @@ const DriverNavbar = () => {
                     Home Page
                   </Nav.Link>
                   <Nav.Link
-                    onClick={() => allOutcomes(userInfo)}
+                    onClick={() => allOutcomes(navState)}
                     className={styles.nav_link}
                   >
                     Outcomes
@@ -157,7 +141,7 @@ const DriverNavbar = () => {
                     <Nav.Link as={Link} to="/admin" className="navbar-custom">
                       Admin Home Page
                     </Nav.Link>
-                    <Nav.Link onClick={adminDrivers} className="navbar-custom">
+                    <Nav.Link onClick={gotoDriverTree} className="navbar-custom">
                       Admin Drivers Page
                     </Nav.Link>
                     <Nav.Link
@@ -172,18 +156,18 @@ const DriverNavbar = () => {
                     >
                       Database Mngmt
                     </Nav.Link>
+                    <Nav.Link onClick={logout} className={styles.nav_link}>
+                      Logout
+                    </Nav.Link>
                   </Nav>
                 </Navbar.Collapse>
               </Container>
-              <p className={styles.copyright}>
-                &#169; Integrated Program Solutions, Inc
-              </p>
             </Navbar>
           )
         ) : (
           ""
         )
-      ) : location.pathname !== "/" ? null :(
+      ) : location.pathname !== "/" ? null : (
         "Server delay, please refresh this page"
       )}
     </>

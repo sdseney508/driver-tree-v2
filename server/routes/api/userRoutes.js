@@ -122,17 +122,20 @@ router.post("/login", async (req, res) => {
     //using email since it is a unique field in the user table
     const userData = await User.findOne({ where: { email: req.body.email } });
     if (!userData) {
+      console.log("email is incorrect");
       return res
         .status(400)
         .json({ message: "Incorrect email or password, please try again" });
     }
     const validPassword = await userData.checkPassword(req.body.password);
+    // const updateLastLogin = await userData.updateLastLogin();
     if (validPassword !== true) {
-      res.status(401).json({ message: "Bad Password" });
+      console.log("password is incorrect");
+      res.status(401).json();
       return;
     }
     const token = signToken(userData);
-    // User.update({ loggedInToken: token }, { where: { id: userData.id } });
+
     res.json({ token, user: userData, message: "You are now logged in!" });
   } catch (err) {
     console.log(err);

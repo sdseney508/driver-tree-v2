@@ -13,7 +13,7 @@ const CreateAnArrow = async ({
       !selectedElements[1].outcomeTitle
     ) {
       
-      //both are drivers, now we put in the logic for where the arrow goes
+      //both are drivers, find the tier levels and compare them. the tier level is part of the driverTreeObj
       if (selectedElements[0].tierLevel > selectedElements[1].tierLevel) {
         //assume the first element is the start; now we check to see if it is a cluster
         if (selectedElements[0].clusterId !== null) {
@@ -22,12 +22,12 @@ const CreateAnArrow = async ({
             selectedElements[0].clusterId;
           
             //set the start driver id for the arrow for the use in cascading status update feature.  Explanation is in client/src/utils/statusUpdate.js
-          body.startDriver = selectedElements[0].id;
+          body.startDriver = selectedElements[0].outcomeDrivers.driverId;
   
           //and check for cluster on the beginning card
         } else {
-          body.start = `card${selectedElements[0].id}`;
-          body.startDriver = selectedElements[0].id;
+          body.start = `card${selectedElements[0].outcomeDrivers.driverId}`;
+          body.startDriver = selectedElements[0].outcomeDrivers.driverId;
         }
 
         //now we check if the end point is a cluster
@@ -37,7 +37,7 @@ const CreateAnArrow = async ({
             `tier${selectedElements[1].tierLevel}cluster` +
             selectedElements[1].clusterId;
         } else {
-          body.end = `card${selectedElements[1].id}`;
+          body.end = `card${selectedElements[1].outcomeDrivers.driverId}`;
         }
 
       } else {
@@ -49,7 +49,7 @@ const CreateAnArrow = async ({
   
           //and check for cluster on the beginning card
         } else {
-          body.start = `card${selectedElements[1].id}`;
+          body.start = `card${selectedElements[1].outcomeDrivers.driverId}`;
         }
 
         //now we check if the end point is a cluster
@@ -59,7 +59,7 @@ const CreateAnArrow = async ({
             `tier${selectedElements[0].tierLevel}cluster` +
             selectedElements[0].clusterId;
         } else {
-          body.end = `card${selectedElements[0].id}`;
+          body.end = `card${selectedElements[0].outcomeDrivers.driverId}`;
         }
       }
 
@@ -70,7 +70,7 @@ const CreateAnArrow = async ({
         body.end = `outcomeId${selectedElements[0].id}`;
         //now check to see if the other arrow comes out of a cluster or driver
         if (selectedElements[1].clusterId === null) {
-          body.start = `card${selectedElements[1].id}`;
+          body.start = `card${selectedElements[1].outcomeDrivers.driverId}`;
         } else {
           body.start =
             `tier${selectedElements[1].tierLevel}cluster` +
@@ -79,7 +79,7 @@ const CreateAnArrow = async ({
       } else {
         body.end = `outcomeId${selectedElements[1].id}`;
         if (!selectedElements[0].clusterId) {
-          body.start = `card${selectedElements[0].id}`;
+          body.start = `card${selectedElements[0].outcomeDrivers.driverId}`;
         } else {
           body.start =
             `tier${selectedElements[0].tierLevel}cluster` +

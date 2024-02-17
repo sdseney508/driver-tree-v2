@@ -6,6 +6,23 @@ class User extends Model {
   checkPassword(loginPw) {
     return bcrypt.compareSync(loginPw, this.password);
   }
+
+  // Add method to update lastLogin
+  // async updateLastLogin() {
+  //   this.lastLogin = new Date(); // Set to current date and time
+  //   this.save();
+  // }
+
+  // static async updateStatusBasedOnLastLogin(userId) {
+  //   const user = await User.findByPk(userId);
+  //   if (user && user.lastLogin) {
+  //     const daysSinceLastLogin = (new Date() - new Date(user.lastLogin)) / (1000 * 60 * 60 * 24);
+  //     if (daysSinceLastLogin > 35) {
+  //       user.userStatus = 'Inactive'; // Assuming 'Inactive' is the status you use
+  //       await user.save();
+  //     }
+  //   }
+  // }
 }
 
 User.init(
@@ -45,6 +62,11 @@ User.init(
       defaultValue: DataTypes.NOW,
     },
 
+    lastLogin: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+
     //change everything below here to strings to make it easier for end user
     userStatus: {
       type: DataTypes.STRING,
@@ -65,7 +87,9 @@ User.init(
     hooks: {
       beforeCreate: async (newUserData) => {
         newUserData.password = await bcrypt.hash(newUserData.password, 10);
-        newUserData.passwordExpiration = new Date(Date.now() + 90*24*60*60*1000);
+        newUserData.passwordExpiration = new Date(
+          Date.now() + 90 * 24 * 60 * 60 * 1000
+        );
         return newUserData;
       },
 
@@ -74,7 +98,9 @@ User.init(
           updatedUserData.password,
           10
         );
-        updatedUserData.passwordExpiration = new Date(Date.now() + 90*24*60*60*1000);
+        updatedUserData.passwordExpiration = new Date(
+          Date.now() + 90 * 24 * 60 * 60 * 1000
+        );
         return updatedUserData;
       },
     },

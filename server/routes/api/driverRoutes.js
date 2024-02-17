@@ -1,67 +1,109 @@
 const router = require("express").Router();
-const { drivers, clusters, adminAudit } = require("../../models");
+const {
+  drivers,
+  clusters,
+  adminAudit,
+  outcomes,
+  outcomeDrivers,
+  arrows,
+} = require("../../models");
 const sequelize = require("../../config/connection");
 const { Op } = require("sequelize");
 
 // use /api/drivers
-//create a new drivers; 
+//create a new driver; the body needs to include the outcomeId and the tierLevel
 router.post("/new/:userId", async (req, res) => {
-  let driversData = [];
+
   const transaction = await sequelize.transaction();
   try {
-    //first check to see if this is a creation for a new version of an outcome of if it is a new driver for any outcome
-    if (!req.body.id) {
-      //this means it is a new driver for any outcome
-    //first check for the highest subTier number under a tier and
-    //outcome and increment it by 1
-    let subTier = await drivers.max("subTier", {
+    //since this function is used to in both the single create new driver and in the create a new outcome revision, we need to check if the driver subTier already exists, if it doesnt, then we append it to the req.bdy, otherwise we use the subTier that is already in the req.body
+
+    if (!req.body.subTier) {
+    //get the correct subTier for the new driver
+    let subTier = await outcomeDrivers.max("subTier", {
       where: {
         tierLevel: req.body.tierLevel,
         outcomeId: req.body.outcomeId,
       },
     });
-    let body = req.body;
 
+    //create a deep copy of the req.body so i can mod it without changing the original
+    let body = JSON.parse(JSON.stringify(req.body));
+    //now change the body.outcomeId to 0 so that the new driver is not linked to the old outcome
+    body.outcomeId = 0;
     body.subTier = subTier + 1;
-    driversData = await drivers.create(req.body, 
-      {
-      transaction
+    const driversData = await drivers.create(body, {
+      transaction,
     });
-    await adminAudit.create({
-      action: "Create",
-      model: "drivers",
-      tableUid: driversData.id,
-      fieldName: "All",
-      newData: JSON.stringify(driversData),
-      oldData: "new Driver",
-      userId: req.params.userId,
-    },
-    {transaction}
+    console.log(driversData);
+    console.log(req.body);
+    console.log(body);
+    const outdriver = await outcomeDrivers.create(
+      {
+        outcomeId: req.body.outcomeId,
+        driverId: driversData.id,
+        tierLevel: req.body.tierLevel,
+        subTier: body.subTier,
+      },
+      { transaction }
     );
-    await transaction.commit();
-    res.status(200).json(driversData);
+      console.log(outdriver);
+      console.log(driversData.id);
+      console.log(req.params.userId);
+      console.log(driversData.dataValues);
+      const auditres = await adminAudit.create(
+        {
+          action: "Create",
+          model: "drivers",
+          tableUid: driversData.id,
+          fieldName: "All",
+          newData: JSON.stringify(driversData.dataValues),
+          oldData: "new Driver",
+          userId: req.params.userId,
+        },
+        { transaction }
+      );
+      console.log(auditres);
   } else {
-    delete req.body.id
-    driversData = await drivers.create(req.body, 
+    const driversData = await drivers.create(req.body, { transaction });
+    await outcomeDrivers.create(
       {
-      transaction
-    });
-    await adminAudit.create({
-      action: "Create",
-      model: "drivers",
-      tableUid: driversData.id,
-      fieldName: "All",
-      newData: JSON.stringify(driversData),
-      oldData: "new Driver",
-      userId: req.params.userId,
-    },
-    {transaction}
+        outcomeId: req.body.outcomeId,
+        driverId: driversData.id,
+        tierLevel: req.body.tierLevel,
+        subTier: req.body.subTier,
+      },
+      { transaction }
     );
-    await transaction.commit();
-    res.status(200).json(driversData);
-
-  }
+    console.log(driversData.id);
+    console.log(req.params.userId);
+    console.log(driversData);
+    const auditres = await adminAudit.create(
+      {
+        action: "Create",
+        model: "drivers",
+        tableUid: driversData.id,
+        fieldName: "All",
+        newData: JSON.stringify(driversData),
+        oldData: "new Driver",
+        userId: req.params.userId,
+      },
+      { transaction }
+      );
+      console.log(auditres);
+    }
+    try {
+      await transaction.commit();
+      res.status(200).json(); 
+    } catch (commitError) {
+      console.error("Commit Error:", commitError);
+      await transaction.rollback();
+      res.status(500).json({ message: "Transaction commit failed", error: commitError });
+      return; // Ensure further execution is stopped
+    }
   } catch (err) {
+    console.error("Transaction Error:", err);
+    await transaction.rollback();
     res.status(400).json(err);
   }
 });
@@ -75,7 +117,6 @@ router.post("/bulkCreate", async (req, res) => {
     res.status(400).json(err);
   }
 });
-
 
 //this route is only for database seeding and testing
 router.post("/", async (req, res) => {
@@ -102,12 +143,11 @@ router.get("/getOne/:id", async (req, res) => {
   }
 });
 
-
 //get all drivers for the drivers table.  This data will be used to populate the table underneath the form view.
 router.get("/", async (req, res) => {
   try {
     const driversData = await drivers.findAll({
-      include: [{model: clusters}],
+      include: [{ model: clusters }],
     });
     res.status(200).json(driversData);
   } catch (err) {
@@ -115,22 +155,44 @@ router.get("/", async (req, res) => {
   }
 });
 
-//get all active driverss for the drivers table. This data will be used to populate the table underneath the form view.
+//get all driverss for the by an outcome. This data will be used to populate the table underneath the form view and to populate the driverTreeObj
 router.get("/byoutcome/:id", async (req, res) => {
+  //get all drivers for an outcome
+  //include the arrows too
   try {
-    //the id is the outcome id, not the driver id, this does not return a driver, it returns the drivers for an outcome joined with the cluster information
-    const driversData = await drivers.findAll({
-      include: [{
-          model: clusters
+    const outcomeDriverData = await outcomes.findAll({
+      where: {
+        id: req.params.id,
+      },
+      include: [
+        {
+          model: drivers,
+          include: [
+            {
+              model: clusters,
+            },
+          ],
+        },
+        {
+          model: arrows,
         },
       ],
-      where: {
-        outcomeId: req.params.id,
-      },
     });
-    res.status(200).json(driversData);
+
+    // Map over the fetched data to flatten the structure
+    const flattenedData = outcomeDriverData.map((outcome) => {
+      // Assuming outcome.drivers is an array and you want to flatten each driver's data
+      return outcome.drivers.map((driver) => {
+        return {
+          ...driver.dataValues, // Spread all driver properties
+          ...driver.outcomeDrivers.dataValues, // Flatten outcomeDrivers properties into the same level
+          cluster: driver.cluster ? driver.cluster.dataValues : null, // Include cluster data if available
+        };
+      });
+    });
+    res.status(200).json(flattenedData);
   } catch (err) {
-    res.status(500).json(err);
+    res.status(400).json(err);
   }
 });
 
@@ -210,24 +272,26 @@ router.put("/update/:id/:userId", async (req, res) => {
       return;
     }
     if (!req.body.modified) {
-    req.body.modified = "Yes";}
+      req.body.modified = "Yes";
+    }
     const driversData = await drivers.update(req.body, {
       where: {
         id: req.params.id,
       },
       transaction,
     });
-
-    await adminAudit.create({
-      action: "Update",
-      model: "drivers",
-      tableUid: req.params.id,
-      fieldName: "All",
-      newData: JSON.stringify(req.body),
-      oldData: JSON.stringify(oldData),
-      userId: req.params.userId,
-    },
-    {transaction}
+    console.log(driversData);
+    await adminAudit.create(
+      {
+        action: "Update",
+        model: "drivers",
+        tableUid: req.params.id,
+        fieldName: "All",
+        newData: JSON.stringify(req.body),
+        oldData: JSON.stringify(oldData),
+        userId: req.params.userId,
+      },
+      { transaction }
     );
     await transaction.commit();
 

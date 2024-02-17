@@ -8,6 +8,7 @@ const carouselRoutes = require('./carouselRoutes');
 const clusterRoutes = require('./clusterRoutes');
 const driverRoutes = require('./driverRoutes');
 const outcomeRoutes = require('./outcomeRoutes');
+const outcomeDriversRoutes = require('./outcomeDriversRoutes');
 const roleRoutes = require('./roleRoutes');
 const statusRoutes = require('./statusRoutes');
 const statusDefinitionRoutes = require('./statusDefinitionRoutes')
@@ -25,6 +26,7 @@ router.use('/carousel', carouselRoutes);
 router.use('/cluster', clusterRoutes);
 router.use('/drivers', driverRoutes);
 router.use('/outcomes', outcomeRoutes);
+router.use('/outcomeDrivers', outcomeDriversRoutes);
 router.use('/roles', roleRoutes);
 router.use('/status', statusRoutes);
 router.use('/statusDefinition', statusDefinitionRoutes);
