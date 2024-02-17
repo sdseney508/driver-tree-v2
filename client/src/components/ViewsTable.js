@@ -73,6 +73,7 @@ function ViewsTable({ outcomeId, setViewId, userId, viewId }) {
   // It then passes the data to the parent component to be displayed in the form.
 
   const cellClickedListener = async (event) => {
+    console.log(event.data.id);
     let viewId = event.data.id;
     setViewId(viewId);
   };

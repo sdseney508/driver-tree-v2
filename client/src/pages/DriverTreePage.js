@@ -69,7 +69,7 @@ const DriverTreePage = () => {
   const [PDFState, setPDFState] = useState(false);
   const [showArrowMod, setArrowMod] = useState(false);
   const [selOutcome, setSelOutcome] = useState({});
-  const [driverTreeObj, setDriverTreeObj] = useState(apiCall);
+  const [driverTreeObj, setDriverTreeObj] = useState([]);
   const [showClusterModal, setClusterModal] = useState(false);
   const [selDriver, setSelDriver] = useState({});
   const [recordLockState, setRecordLockState] = useState(false); //used to lock the record when a user is editing it, reads the user's account permissions and adjusts record locks accordingly, stakeholders have read only access.
@@ -138,52 +138,6 @@ const DriverTreePage = () => {
         }
       });
       await getDriverByOutcome(selOutcome.id).then((data) => {
-        //formatting data for dnd interface
-        // for (let i = 0; i < data.data.length; i++) {
-
-        //   switch (data.data[i].tierLevel) {
-        //     case 1:
-        //       apiCall.columns["Tier-1"].items.push(data.data[i]);
-        //       break;
-        //     case 2:
-        //       apiCall.columns["Tier-2"].items.push(data.data[i]);
-        //       break;
-        //     case 3:
-        //       apiCall.columns["Tier-3"].items.push(data.data[i]);
-        //       break;
-        //     case 4:
-        //       apiCall.columns["Tier-4"].items.push(data.data[i]);
-        //       break;
-        //     case 5:
-        //       apiCall.columns["Tier-5"].items.push(data.data[i]);
-        //       break;
-        //     case 6:
-        //       apiCall.columns["Tier-6"].items.push(data.data[i]);
-        //       break;
-        //     default:
-        //   }
-        // }
-        //now we set the null items based on the tier level
-        // let apiCallCopy = { ...apiCall };
-        // //this function takes in the state object, then loops through the columns and adds blank items to each column so that there are 45 items in each column.  It then returns the updated state object.
-        // for (let i = 1; i < 7; i++) {
-        //   let itemArray = Array(45).fill(null);
-        //   for (let j = 0; j < 45; j++) {
-        //     if (apiCall.columns["Tier-" + i].items[j]) {
-        //       let k = apiCall.columns["Tier-" + i].items[j].subTier - 1;
-        //       itemArray[k] = apiCall.columns["Tier-" + i].items[j];
-        //     }
-        //     if (itemArray[j] === null) {
-        //       itemArray[j] = {
-        //         id: `null-${i}-item-${j + 1}`,
-        //         problemStatement: `null-${i}-item-${j + 1}`,
-        //         clusterId: null,
-        //         subTier: j + 1,
-        //       };
-        //     }
-        //   }
-        //   apiCallCopy.columns["Tier-" + i].items = itemArray;
-        // }
         setDriverTreeObj(data.data[0]);
       });
       await getArrows(selOutcome.id).then((data) => {
@@ -202,7 +156,7 @@ const DriverTreePage = () => {
     navigate("/drivertree/" + selOutcome.id);
     setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selOutcome]);
+  }, [selOutcome, viewId, opacity]);
 
   const authCheck = () => {
     //checks to see if the user has access to the desired outcome
@@ -261,6 +215,7 @@ const DriverTreePage = () => {
         overFlowY: "scroll",
       };
       setTableState("view");
+      console.log(tableState);
     }
     setShowTable({ tableStyle, driverStyle });
   };

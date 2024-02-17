@@ -72,6 +72,7 @@ const DriverCards = ({
 
   useEffect(() => {
     const getDriversData = async (selOutcome, viewId) => {
+      console.log(viewId)
       if (viewId) {
         await getViewCards(viewId).then((data) => {
           setViewObj(data.data);
@@ -148,6 +149,7 @@ const DriverCards = ({
     //find all the arrows that have the current card as a start point
     //first check to see if the card is in a cluster
     //for loop based on tier of the driver card
+    debugger;
     let updateArr = [cardid];
     let arrayCounter = 1; //this gets updated as we go through the updateArr for the subsequent tiers so we only go through new updateArr additions and dont end up in a continuous loop
     let loopEnd;
@@ -163,7 +165,7 @@ const DriverCards = ({
           //if it is in a cluster, we need to find all the arrows that have the cluster as a start point
           //the below string literal is based on how cluster info is passed to the arrows model.  refer to either the arrows model start or end with a cluster already made for an example or look at driverCards.js tierCards function for naming format.
           //first check driverTreeObj to see if the card is in a cluster
-          let clustCheck = driverTreeObj[0].findIndex((item) => item.id == cardid);
+          let clustCheck = driverTreeObj[0].findIndex((item) => item.outcomeDrivers.driverId == cardid);
           if (driverTreeObj[0][clustCheck].clusterId) {
             startP = `tier${i}cluster${driverTreeObj[0][clustCheck].clusterId}`;
           }
@@ -180,7 +182,7 @@ const DriverCards = ({
               //TODO:  Figure out why the database call is not returning the correct data
               for (let cl = 0; cl < driverTreeObj.length; cl++) {
                 if (driverTreeObj[cl].clusterId == clusterId) {
-                  updateArr.push(driverTreeObj[cl].id);
+                  updateArr.push(driverTreeObj[cl].outcomeDrivers.driverId);
                 }
               }
             } else {
@@ -227,7 +229,7 @@ const DriverCards = ({
                 //this will produce an array of driver cards that we will update using the updateDriver function
                 for (let cl = 0; cl < driverTreeObj.length; cl++) {
                   if (driverTreeObj[cl].clusterId == clusterId) {
-                    updateArr.push(driverTreeObj[cl].id);
+                    updateArr.push(driverTreeObj[cl].outcomeDrivers.driverId);
                   }
                 }
               } else {
@@ -668,6 +670,8 @@ const DriverCards = ({
     //goes to the embedded drivertree; the outcome idea is the outcomeId of the target
     setSelOutcome({ id: embeddedOutcomeId });
     navigate("/drivertree/" + embeddedOutcomeId);
+    window.location.reload();
+
   }
 
   const goToOutcome = async (e) => {
@@ -772,8 +776,8 @@ const DriverCards = ({
     //check to see if the card is already in the view
     //if it is, remove it from the view, otherwise add it to the view
     //check to see if there are already views, if not, return an error.
-    if (!viewObj) {
-      alert("You must create a view before you can add cards to it.");
+    if (!viewId) {
+      alert("You must create or select a view before you can add cards to it.");
       return;
     }
 
@@ -915,8 +919,8 @@ const DriverCards = ({
             (item) => item.clusterId === clusterNumber
           );
           for (let i = 0; i < objCheck.length; i++) {
-            if (viewObj) {
-              let idCheck = objCheck[i].id;
+            if (viewObj && viewObj.length > 0) {
+              let idCheck = objCheck[i].outcomeDrivers.driverId;
               for (let j = 0; j < viewObj.length; j++) {
                 if (viewObj[j].driverId === idCheck) {
                   clusterViewCheck = 1;
@@ -970,9 +974,9 @@ const DriverCards = ({
               )}
 
               {clusterArr.map((f, ind) => {
-                if (viewObj) {
+                if (viewObj && viewObj.length > 0) {
                   viewCheck = viewObj.findIndex(
-                    (item) => item.driverId == clusterArr[ind].id
+                    (item) => item.driverId == clusterArr[ind].outcomeDrivers.driverId
                   );
                 } else {
                   viewCheck = -1;
@@ -983,9 +987,10 @@ const DriverCards = ({
             </div>
           );
         } else if (arr[index].clusterId !== clusterNumber) {
-          if (viewObj) {
+       
+          if (viewObj && viewObj.length > 0) {
             viewCheck = viewObj.findIndex(
-              (item) => item.driverId == arr[index].id
+              (item) => item.driverId == arr[index].outcomeDrivers.driverId
             );
           } else {
             viewCheck = -1;

@@ -13,6 +13,7 @@ const ModArrows = ({
   const [arrowProps, setArrowProps] = useState({});
 
   useEffect(() => {
+    debugger;
     async function fetchArrow() {
       await getArrow(arrowID).then((res) => {
         setArrowProps(res.data);
