@@ -4,7 +4,7 @@ import apiURL from "./apiURL";
 //these are the calls to create, delete, and update the individual views, also has the database calls for all of the cards that will be full view vice transparent
 
 
-//add a driver to a view, the body is the outcomeId and driverId
+//add a driver to a view, the body is the outcomeId and driverId and the userId
 const addOutcomeDriver = (body) => {
   return axios.post(apiURL + "/outcomeDrivers/new", body);
 };

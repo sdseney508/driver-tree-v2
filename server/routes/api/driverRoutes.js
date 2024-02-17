@@ -13,44 +13,38 @@ const { Op } = require("sequelize");
 // use /api/drivers
 //create a new driver; the body needs to include the outcomeId and the tierLevel
 router.post("/new/:userId", async (req, res) => {
-
+  let body = JSON.parse(JSON.stringify(req.body));
+  //now change the body.outcomeId to 0 so that the new driver is not linked to the old outcome
+  delete body.id;
   const transaction = await sequelize.transaction();
   try {
     //since this function is used to in both the single create new driver and in the create a new outcome revision, we need to check if the driver subTier already exists, if it doesnt, then we append it to the req.bdy, otherwise we use the subTier that is already in the req.body
-
+    console.log(req.body.subTier);
     if (!req.body.subTier) {
-    //get the correct subTier for the new driver
-    let subTier = await outcomeDrivers.max("subTier", {
-      where: {
-        tierLevel: req.body.tierLevel,
-        outcomeId: req.body.outcomeId,
-      },
-    });
+      //get the correct subTier for the new driver
+      let subTier = await outcomeDrivers.max("subTier", {
+        where: {
+          tierLevel: req.body.tierLevel,
+          outcomeId: req.body.outcomeId,
+        },
+      });
 
-    //create a deep copy of the req.body so i can mod it without changing the original
-    let body = JSON.parse(JSON.stringify(req.body));
-    //now change the body.outcomeId to 0 so that the new driver is not linked to the old outcome
-    body.outcomeId = 0;
-    body.subTier = subTier + 1;
-    const driversData = await drivers.create(body, {
-      transaction,
-    });
-    console.log(driversData);
-    console.log(req.body);
-    console.log(body);
-    const outdriver = await outcomeDrivers.create(
-      {
-        outcomeId: req.body.outcomeId,
-        driverId: driversData.id,
-        tierLevel: req.body.tierLevel,
-        subTier: body.subTier,
-      },
-      { transaction }
-    );
-      console.log(outdriver);
-      console.log(driversData.id);
-      console.log(req.params.userId);
-      console.log(driversData.dataValues);
+      //create a deep copy of the req.body so i can mod it without changing the original
+
+      body.outcomeId = 0;
+      body.subTier = subTier + 1;
+      const driversData = await drivers.create(body, {
+        transaction,
+      });
+      const outdriver = await outcomeDrivers.create(
+        {
+          outcomeId: req.body.outcomeId,
+          driverId: driversData.id,
+          tierLevel: req.body.tierLevel,
+          subTier: body.subTier,
+        },
+        { transaction }
+      );
       const auditres = await adminAudit.create(
         {
           action: "Create",
@@ -63,43 +57,54 @@ router.post("/new/:userId", async (req, res) => {
         },
         { transaction }
       );
-      console.log(auditres);
-  } else {
-    const driversData = await drivers.create(req.body, { transaction });
-    await outcomeDrivers.create(
-      {
-        outcomeId: req.body.outcomeId,
-        driverId: driversData.id,
-        tierLevel: req.body.tierLevel,
-        subTier: req.body.subTier,
-      },
-      { transaction }
-    );
-    console.log(driversData.id);
-    console.log(req.params.userId);
-    console.log(driversData);
-    const auditres = await adminAudit.create(
-      {
-        action: "Create",
-        model: "drivers",
-        tableUid: driversData.id,
-        fieldName: "All",
-        newData: JSON.stringify(driversData),
-        oldData: "new Driver",
-        userId: req.params.userId,
-      },
-      { transaction }
+      try {
+        await transaction.commit();
+        res.status(200).json(driversData);
+      } catch (commitError) {
+        console.error("Commit Error:", commitError);
+        await transaction.rollback();
+        res
+          .status(500)
+          .json({ message: "Transaction commit failed", error: commitError });
+        return; // Ensure further execution is stopped
+      }
+    } else {
+      console.log("subTier exists");
+      delete req.body.id;
+      const driversData = await drivers.create(req.body, { transaction });
+      console.log(req.body.subTier);
+      await outcomeDrivers.create(
+        {
+          outcomeId: req.body.outcomeId,
+          driverId: driversData.id,
+          tierLevel: req.body.tierLevel,
+          subTier: req.body.subTier,
+        },
+        { transaction }
       );
-      console.log(auditres);
-    }
-    try {
-      await transaction.commit();
-      res.status(200).json(); 
-    } catch (commitError) {
-      console.error("Commit Error:", commitError);
-      await transaction.rollback();
-      res.status(500).json({ message: "Transaction commit failed", error: commitError });
-      return; // Ensure further execution is stopped
+      const auditres = await adminAudit.create(
+        {
+          action: "Create",
+          model: "drivers",
+          tableUid: driversData.id,
+          fieldName: "All",
+          newData: JSON.stringify(driversData),
+          oldData: "new Driver",
+          userId: req.params.userId,
+        },
+        { transaction }
+      );
+      try {
+        await transaction.commit();
+        res.status(200).json(driversData);
+      } catch (commitError) {
+        console.error("Commit Error:", commitError);
+        await transaction.rollback();
+        res
+          .status(500)
+          .json({ message: "Transaction commit failed", error: commitError });
+        return; // Ensure further execution is stopped
+      }
     }
   } catch (err) {
     console.error("Transaction Error:", err);

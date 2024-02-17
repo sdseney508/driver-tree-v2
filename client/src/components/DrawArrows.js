@@ -63,7 +63,7 @@ function DriverArrows({
           start={arrows[index].start}
           startAnchor={arrows[index].startAnchor}
           strokeWidth={arrows[index].strokeWidth}
-          zIndex={10}
+          zIndex={150}
         />
       );
     });

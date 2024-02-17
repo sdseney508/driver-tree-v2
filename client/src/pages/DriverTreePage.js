@@ -346,12 +346,14 @@ const DriverTreePage = () => {
     let newOutcomeId = 0;
     let oldOutcomeId = selOutcome.id;
     let body = { stakeholderId: state.command, userId: state.userId };
+    //first we create the new outcome, then we'll assign the same driver cards and arrows to it
     await createOutcome(body).then((data) => {
       body = JSON.parse(JSON.stringify(selOutcome));
       body.version = selOutcome.version + 1;
       body.state = "Draft";
       delete body.id;
       newOutcomeId = data.data.id;
+      console.log(body)
       updateOutcome(data.data.id, body);
     });
     //now we update the statusdefinitions that were created on the server side.
@@ -368,6 +370,7 @@ const DriverTreePage = () => {
     let driverBody = JSON.parse(JSON.stringify(driverTreeObj));
     let arrowBody = JSON.parse(JSON.stringify(arrows));
     delete arrowBody.id;
+    delete driverBody.id;
     let oldClusterId = []; //used to not make repeat db updates
     let selectedDrivers = [];
     let clusterArr = "";
@@ -376,10 +379,9 @@ const DriverTreePage = () => {
       debugger;
       driverBody[i].outcomeId = newOutcomeId;
       driverBody[i].modified = "No";
-      //note here, the id is being deleted by the driver router so we dont need to do it here
-
+      delete driverBody[i].id;
       const driverData = await createDriver(driverBody[i], state.userId);
-      let body = { outcomeId: newOutcomeId, driverId: driverData.data.id };
+      let body = { outcomeId: newOutcomeId, driverId: driverData.data.id, tierLevel: driverBody[i].tierLevel, subTier: driverBody[i].subTier, userId: state.userId};
       await addOutcomeDriver(body);
 
       //check to see if it is in  acluster
@@ -475,22 +477,22 @@ const DriverTreePage = () => {
         arrowBody[j].outcomeId = newOutcomeId;
         if (
           arrowBody[j].start.startsWith("card") &&
-          arrowBody[j].start.endsWith("d" + JSON.stringify(driverBody[i].id))
+          arrowBody[j].start.endsWith("d" + JSON.stringify(driverBody[i].outcomeDrivers.driverId))
         ) {
           arrowBody[j].start =
             arrowBody[j].start.slice(
               0,
-              -JSON.stringify(driverBody[i].id).length
+              -JSON.stringify(driverBody[i].outcomeDrivers.driverId).length
             ) + driverData.data.id;
         }
         if (
           arrowBody[j].end.startsWith("card") &&
-          arrowBody[j].end.endsWith("d" + JSON.stringify(driverBody[i].id))
+          arrowBody[j].end.endsWith("d" + JSON.stringify(driverBody[i].outcomeDrivers.driverId))
         ) {
           arrowBody[j].end =
             arrowBody[j].end.slice(
               0,
-              -JSON.stringify(driverBody[i].id).length
+              -JSON.stringify(driverBody[i].outcomeDrivers.driverId).length
             ) + driverData.data.id;
         }
         if (arrowBody[j].end === "outcomeId" + oldOutcomeId) {

@@ -30,8 +30,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-
-//update a driver for an outcome; 
+//update a driver for an outcome;
 router.put("/update/:outcomeId/:driverId/:userId", async (req, res) => {
   console.log(req.body);
   const transaction = await sequelize.transaction();
@@ -74,16 +73,23 @@ router.put("/update/:outcomeId/:driverId/:userId", async (req, res) => {
 router.post("/new", async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
+    let subTier;
+    let tierLevel;
     //first create the outcome, the req.body needs to include the outcomeId and the driverId
-    let subTier = await outcomeDrivers.max("subTier", {
-      where: {
-        tierLevel: req.body.tierLevel,
-        outcomeId: req.body.outcomeId,
-      },
-    });
-
+    if (!req.body.subTier) {
+      subTier = await outcomeDrivers.max("subTier", {
+        where: {
+          tierLevel: req.body.tierLevel,
+          outcomeId: req.body.outcomeId,
+        },
+      });
+      body.subTier = subTier + 1;
+    } else {
+      subTier = req.body.subTier;
+    }
     let body = req.body;
-    body.subTier = subTier + 1;
+    
+    console.log(body);
     const outcomeDriverData = await outcomeDrivers.create(body, {
       transaction,
     });
