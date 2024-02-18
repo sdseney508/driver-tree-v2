@@ -242,27 +242,7 @@ const logout = () => {
   window.location.assign("/");
 };
 
-const passwordCheck = async ({navigate}, password) => {
-  //check the password provided against the password in the database
-  const token = loggedIn() ? getToken() : null;
-  if (!token) {
-    navigate("/");
-  }
-  const response = await getUser(token);
-  if (!response.data) {
-    navigate("/");
-    throw new Error("something went wrong!");
-  }
-  const user = response.data;
-  let match;
-  //now check the provided password against the one returned from the datbase
-  if (!match) {
-    alert("The old password provided is incorrect.  If you need assistance, please contact your Driver Tree Coordinator.");
-    return false;
-  } else {
-    return true;
-  }
-}
+
 
 const register = (
   firstName,
@@ -301,7 +281,6 @@ export {
   login,
   loginUser,
   logout,
-  passwordCheck,
   register,
   updateUser,
 };

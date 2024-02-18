@@ -6,6 +6,7 @@ import { getAllAccountStatus } from "../utils/accountStatus";
 import { Container, Row, Button, Form } from "react-bootstrap";
 import { useNavigate, useLocation } from "react-router-dom";
 import { updateUser } from "../utils/auth";
+import { passwordCheck, passwordVal } from "../utils/password";
 import "./AdminAccountManage.css";
 import UserTable from "../components/UserTable";
 
@@ -15,6 +16,7 @@ const AdminAccountManagement = () => {
   const [userFormData, setUserFormData] = useState({});
   // const [validated] = useState(false);
   const [showPassAlert, setShowPassAlert] = useState(false);
+  
   //the next two states are used to set the initial values for the role and functional area dropdowns;
   const [roleState, setRoleState] = useState([]);
   const [accountState, setAccountState] = useState([]);
@@ -104,15 +106,12 @@ const AdminAccountManagement = () => {
     // alert("Disabled for demo purposes");
     let body;
     if (userFormData.password !== userFormData.passVal) {
-      setShowPassAlert(true);
-      window("Passwords do not match");
+      alert("Passwords do not match");
       return;
-    } else if (userFormData.password && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#$^+=!*()@%&]).{14,}$/.test(userFormData.password)) {
-      alert('The password must contain at least 14 characters including at least 1 uppercase, 1 lowercase, 1 special character and 1 number.');
+    } else if (passwordCheck(userFormData.password) === false) {
       return;
-    } else if (!userFormData.firstName || !userFormData.lastName) {
-      setShowPassAlert(false);
-      alert("First name and last name are required.");
+    } else if (passwordVal(userFormData.password) === false) {
+
       return;
     }
     const form = event.currentTarget;

@@ -18,8 +18,8 @@ const AccountManagement = () => {
   }, []);
 
   const handleInputChange = (event) => {
-    setState({
-      ...state,
+    setUserFormData({
+      ...userFormData,
       [event.target.name]: event.target.value,
     });
   };
@@ -29,7 +29,7 @@ const AccountManagement = () => {
     event.preventDefault();
     let body;
     //first check if the old password is correct
-    
+    console.log(state);
     if (userFormData.password !== userFormData.passVal) {
       alert("Passwords do not match");
       return;

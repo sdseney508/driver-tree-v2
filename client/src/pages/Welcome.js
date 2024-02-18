@@ -28,6 +28,7 @@ const Welcome = () => {
   const [userFormData, setUserFormData] = useState({ email: "", password: "" });
   const [validated] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
+  const [showInactiveAlert, setInactiveAlert] = useState(false);
 
   const navigate = useNavigate();
 
@@ -47,7 +48,6 @@ const Welcome = () => {
     const user = { email: userFormData.email, password: userFormData.password };
 
     try {
-      debugger;
       const response = await loginUser(user);
       const userData = response.data.user;
       if (!userData) {
@@ -72,8 +72,11 @@ const Welcome = () => {
         navigate("/admin", { state });
       }
     } catch (err) {
-      console.log(err);
+      if (err.response.status === 402) {
+        setInactiveAlert(true);
+      } else {
       setShowAlert(true);
+      }
     }
 
     setUserFormData({
@@ -114,8 +117,11 @@ const Welcome = () => {
         navigate("/user");
       }
     } catch (err) {
-      console.log(err);
+      if (err.response.status === 402) {
+        setInactiveAlert(true);
+      } else {
       setShowAlert(true);
+      }
     }
 
     setUserFormData({
@@ -169,6 +175,14 @@ const Welcome = () => {
                     variant="danger"
                   >
                     Whoops, something is wrong with your login credentials!
+                  </Alert>
+                  <Alert
+                    dismissible
+                    onClose={() => setInactiveAlert(false)}
+                    show={showInactiveAlert}
+                    variant="danger"
+                  >
+                    Your account isn't active yet.  Please contact your Driver Tree Admins.
                   </Alert>
                   <Form.Group className="justify-content-center text-center">
                     <Form.Label

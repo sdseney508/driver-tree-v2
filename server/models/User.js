@@ -8,21 +8,29 @@ class User extends Model {
   }
 
   // Add method to update lastLogin
-  // async updateLastLogin() {
-  //   this.lastLogin = new Date(); // Set to current date and time
-  //   this.save();
-  // }
+  async updateLastLogin() {
+    this.lastLogin = new Date(); // Set to current date and time
+    this.save();
+  }
 
-  // static async updateStatusBasedOnLastLogin(userId) {
-  //   const user = await User.findByPk(userId);
-  //   if (user && user.lastLogin) {
-  //     const daysSinceLastLogin = (new Date() - new Date(user.lastLogin)) / (1000 * 60 * 60 * 24);
-  //     if (daysSinceLastLogin > 35) {
-  //       user.userStatus = 'Inactive'; // Assuming 'Inactive' is the status you use
-  //       await user.save();
-  //     }
-  //   }
-  // }
+  // Add method to update userStatus based on lastLogin
+  async updateStatusBasedOnLastLogin(userId) {
+    console.log("userId: ", userId);
+    const user = await User.findByPk(userId);
+    console.log("user: ", user);
+    if (user && user.lastLogin) {
+      const daysSinceLastLogin = (new Date() - new Date(user.lastLogin)) / (1000 * 60 * 60 * 24);
+      console.log("daysSinceLastLogin: ", daysSinceLastLogin);
+      //0 is for testing purposes, change to 35 for production
+      if (daysSinceLastLogin > 35) {
+        user.userStatus = 'Inactive'; // Assuming 'Inactive' is the status you use
+        await user.save();
+        return false;
+      } else {
+        return true;
+      }
+    }
+  }
 }
 
 User.init(
@@ -52,7 +60,7 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        len: [14],
+        len: [14, 100]
       },
     },
     //this stores when a password was initially created and then every time it is updated.  This is used to determine if a password is expired during the login process.  the user must change their password if it is expired.  Refer
@@ -94,14 +102,15 @@ User.init(
       },
 
       beforeUpdate: async (updatedUserData) => {
-        updatedUserData.password = await bcrypt.hash(
-          updatedUserData.password,
-          10
-        );
-        updatedUserData.passwordExpiration = new Date(
-          Date.now() + 90 * 24 * 60 * 60 * 1000
-        );
-        return updatedUserData;
+   
+        //You need to check if the password has been changed since we update the last login on every login
+        if (updatedUserData.changed('password')) {    
+          // Proceed to hash the new password
+          updatedUserData.password = await bcrypt.hash(updatedUserData.password, 10);
+          updatedUserData.passwordExpiration = new Date(
+            Date.now() + 90 * 24 * 60 * 60 * 1000
+          );
+        }
       },
     },
     indexes: [
