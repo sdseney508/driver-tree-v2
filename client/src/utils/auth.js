@@ -18,6 +18,11 @@ const authHeader = () => {
   }
 };
 
+const deleteUser = (id, adminId) => {
+  console.log(id, adminId);
+  return axios.delete(apiURL + "/users/delete/" + id + "/" + adminId);
+};
+
 const getRoles = () => {
   return axios.get(apiURL + "/roles");
 };
@@ -88,7 +93,7 @@ const getAppData = async ({
   }
 };
 
-const getUserData = async ({ navigate, state, setState, outcomeId, error, setError }) => {
+const getUserData = async ({ navigate, state, setState, outcomeId}) => {
   try {
     const token = loggedIn() ? getToken() : null;
     if (!token) {
@@ -143,7 +148,8 @@ const getUserData = async ({ navigate, state, setState, outcomeId, error, setErr
     return user;
 
   } catch (err) {
-    alert("You do not have permission to view this page.");
+    console.log(err);
+    alert("Error: You do not have permission to view this page or you are not logged in.");
     navigate("/");
     return null;
   }
@@ -153,9 +159,11 @@ const getUserData = async ({ navigate, state, setState, outcomeId, error, setErr
 
 const getAdminUserData = async ({ navigate, state, setState, outcomeId }) => {
   try {
+    debugger;
     const token = loggedIn() ? getToken() : null;
     if (!token) {
       navigate("/");
+      return;
     }
     const response = await getUser(token);
     if (!response.data) {
@@ -163,7 +171,6 @@ const getAdminUserData = async ({ navigate, state, setState, outcomeId }) => {
       throw new Error("something went wrong!");
     }
     const user = response.data;
-    console.log(user);
     setState({
       firstName: user.firstName,
       lastName: user.lastName,
@@ -187,11 +194,20 @@ const getAdminUserData = async ({ navigate, state, setState, outcomeId }) => {
     //check if user is authorized to see that data
     if (outcomeId) {
       await getOutcome(outcomeId).then((data) => {
-        if (data.data.stakeholderId !== user.stakeholderId) {
+        if(!data.data){
           alert("You do not have permission to view this page.");
+          if(token){
+          navigate("/admin");
+
+        } else {
+          navigate("/");
+
+        }
+        if (data.data.stakeholderId !== user.stakeholderId) {
+          alert("You do not have permission to view this page. ");
           navigate("/user");
         }
-      });
+      }});
     }
 
     if (user.userRole !== "Administrator") {
@@ -199,8 +215,12 @@ const getAdminUserData = async ({ navigate, state, setState, outcomeId }) => {
       navigate("/user");
     }
 
+    return user;
+
   } catch (err) {
-    console.error(err);
+    alert("Error: You do not have permission to view this page or you are not logged in.");
+    navigate("/");
+    return null;
   }
 };
 
@@ -239,6 +259,7 @@ const logout = () => {
   // Clear user token and profile data from localStorage
   localStorage.removeItem("id_token");
   // this will reload the page and reset the state of the application
+  window.confirm("You have been logged out.");
   window.location.assign("/");
 };
 
@@ -269,6 +290,8 @@ const updateUser = (body, id) => {
 };
 
 export {
+  authHeader,
+  deleteUser,
   getAppData,
   getRoles,
   getProfile,

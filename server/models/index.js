@@ -10,6 +10,7 @@ const drivers = require("./drivers");
 const outcomes = require("./outcomes");
 const outcomeDrivers = require("./outcomeDrivers");
 const role = require("./role");
+const session = require("./session");
 const stakeholders = require("./stakeholders");
 const state = require("./state");
 const status = require("./status");
@@ -111,6 +112,7 @@ module.exports = {
   outcomes,
   outcomeDrivers,
   role,
+  session,
   stakeholders,
   state,
   status,

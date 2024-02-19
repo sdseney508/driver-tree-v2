@@ -8,7 +8,6 @@ import "./button.css";
 
 const UserPage = () => {
   const [state, setState] = useState({});
-  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 

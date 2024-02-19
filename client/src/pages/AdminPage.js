@@ -1,6 +1,7 @@
 //page for viewing and updating drivers
 import React, { useState,  useEffect } from "react";
 import { getAdminUserData } from "../utils/auth";
+import { getUsers} from "../utils/drivers";
 import { Container, Row, Col, Button, Modal } from "react-bootstrap";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./AdminPage.css";
@@ -14,9 +15,26 @@ const AdminPage = () => {
   const pName = location.pathname;
 
   useEffect( () => {
-    getAdminUserData({navigate, state, setState, pName})
+    getAdminUserData({navigate, state, setState, pName});
+    fetchData();
 
   }, []);
+
+  async function fetchData () {
+    let users = await getUsers().then((data) => {
+        return data.data;
+    });
+    let newUserCheck = 'false'
+    for (let i = 0; i < users.length; i++) {
+      if (users[i].userStatus === "Requested") {
+        newUserCheck = 'true';
+      }
+    }
+    if (newUserCheck === 'true') {
+      alert("There are new users to be approved.");
+    }
+    
+  };
 
   const onModalSubmit = (e) => {
     e.preventDefault();

@@ -1,5 +1,6 @@
 import axios from "axios";
 import apiURL from "./apiURL";
+import { authHeader } from "./auth";
 
 const allDrivers = () => {
   return axios.get(apiURL + "/drivers");
@@ -83,7 +84,7 @@ const getDriversByCluster = (clusterId) => {
 };
 
 const getEmails = () => {
-  return axios.get(apiURL + "/users/emails");
+  return axios.get(apiURL + "/users/emails", { headers: authHeader() });
 };
 
 const getStakeholders = (id) => {
@@ -91,7 +92,7 @@ const getStakeholders = (id) => {
 }
 
 const getUsers = () => {
-  return axios.get(apiURL + "/users");
+  return axios.get(apiURL + "/users", { headers: authHeader() });
 };
 
 const updateCluster = (id, body) => {

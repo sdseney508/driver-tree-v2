@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
 import { getUsers } from "../utils/drivers";
-import { stateContext } from "../App";
+import { loggedIn, getToken } from "../utils/auth";
 import "ag-grid-community/dist/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CSS
 
@@ -21,8 +21,8 @@ function UserTable({ selUser, setSelUser }) {
   let rowD;
 
   //fetches the full user table to fill in the row data
-  async function fetchData () {
-    rowD = await getUsers().then((data) => {
+  async function fetchData (token) {
+    rowD = await getUsers(token).then((data) => {
         return data.data;
     });
     setRowData(rowD);
@@ -31,8 +31,8 @@ function UserTable({ selUser, setSelUser }) {
   const gridRef = useRef(); // Optional - for accessing Grid's API
 
   useEffect(() => {
-  
-    fetchData();
+    const token = loggedIn() ? getToken() : null;
+    fetchData(token);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selUser]);
 

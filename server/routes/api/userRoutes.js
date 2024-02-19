@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const { User } = require("../../models");
+const { User, session, adminAudit } = require("../../models");
 const { signToken } = require("../../utils/auth");
 const sequelize = require("../../config/connection");
 const { Op } = require("sequelize");
@@ -11,10 +11,10 @@ const secret = "drivertree";
 const expiration = "2h";
 // use /api/users for all the axios calls
 
-//i do not have the ability to delete a user.  I can only change their status to inactive.  This is to prevent accidental deletion of a user.  I can change the status to active if needed.
+//I can only change their status to inactive.  This is to prevent accidental deletion of a user.  I can change the status to active if needed.
 
 //get a specific user.  will be used by the admin page to fill in the react table.  When he selects a specific user, the id of the selected user will be passed to the get /:id route
-router.get("/userbyID/:id", async (req, res) => {
+router.get("/userbyID/:id", authMiddleware, async (req, res) => {
   try {
     const userData = await User.findByPk(req.params.id);
     res.status(200).json(userData);
@@ -40,7 +40,7 @@ router.get("/me", authMiddleware, async (req, res) => {
 });
 
 // get all users.
-router.get("/", async (req, res) => {
+router.get("/", authMiddleware, async (req, res) => {
   try {
     const userData = await User.findAll();
     res.status(200).json(userData);
@@ -51,7 +51,7 @@ router.get("/", async (req, res) => {
 });
 
 // get all coordinators emails.
-router.get("/coordinators", async (req, res) => {
+router.get("/coordinators", authMiddleware, async (req, res) => {
   try {
     const userData = await User.findAll({
       where: {
@@ -102,7 +102,7 @@ router.post("/", async (req, res) => {
     if (!User) {
       return res.status(400).json({ message: "Something went wrong!" });
     }
-    const token = signToken(userData);
+    const token = signToken({ id: userData.id });
     const userUpdate = await User.update(
       { password: req.body.password },
       {
@@ -112,6 +112,15 @@ router.post("/", async (req, res) => {
       }
     );
     res.status(200).json({ token, userData });
+    await adminAudit.create({
+      action: `System created new user and assigned userId ${userData.id}`,
+      newData: JSON.stringify(userData),
+      oldData: "NA",
+      model: "User",
+      userId: userData.id,
+      fieldName: "All",
+      tableUid: userData.id,
+    });
   } catch (err) {
     console.log(err);
     res.status(400).json(err);
@@ -124,7 +133,6 @@ router.post("/login", async (req, res) => {
     //using email since it is a unique field in the user table
     const userData = await User.findOne({ where: { email: req.body.email } });
     if (!userData) {
-      console.log("email is incorrect");
       return res
         .status(400)
         .json({ message: "Incorrect email or password, please try again" });
@@ -136,14 +144,29 @@ router.post("/login", async (req, res) => {
       return;
     }
     const inactive = await userData.updateStatusBasedOnLastLogin(userData.id);
-    console.log(inactive);
-    if (inactive === false) {
-      res.status(402).json({ message: "Your account is inactive.  Please contact your administrator to reactivate your account" });
+    if (inactive === true) {
+      await adminAudit.create({
+        action: `System changed user account to inactive for ${userData.id}`,
+        newData: "Account status: Inactive",
+        oldData: "NA",
+        model: "User",
+        userId: userData.id,
+        fieldName: "userStatus",
+        tableUid: userData.id,
+      });
+      res
+        .status(402)
+        .json({
+          message:
+            "Your account is inactive.  Please contact your administrator to reactivate your account",
+        });
       return;
     }
     await userData.updateLastLogin();
-    const token = signToken(userData);
-
+    const token = signToken({ id: userData.id });
+    // Create session
+    const sessionExpiry = Date.now() + 15*60*1000;
+    await session.create({ token, userId: userData.id, expiresAt: sessionExpiry });
     res.json({ token, user: userData, message: "You are now logged in!" });
   } catch (err) {
     console.log(err);
@@ -164,10 +187,50 @@ router.put("/:id", async (req, res) => {
         results.update(req.body);
       });
     }
+    await adminAudit.create({
+      action: `user account updated by userId ${userData.id}`,
+      newData: JSON.stringify(req.body),
+      oldData: JSON.stringify(userData),
+      model: "User",
+      userId: userData.id,
+      fieldName: "All",
+      tableUid: userData.id,
+    });
     res.status(200).json();
   } catch (err) {
     console.log(err);
     res.status(405).json(err);
+  }
+});
+
+//delete a user account
+router.delete("/delete/:id/:adminId", async (req, res) => {
+  try {
+    const userData = await User.findByPk(req.params.id);
+    console.log(userData);
+    if (!userData) {
+      res.status(404).json();
+      return;
+    } else {
+      await User.destroy({
+        where: {
+          id: req.params.id,
+        },
+      });
+    }
+    await adminAudit.create({
+      action: `user account ${req.params.id} deleted by userId ${req.params.admninId}`,
+      newData: "NA",
+      oldData: JSON.stringify(userData),
+      model: "User",
+      userId: req.params.adminId,
+      fieldName: "All",
+      tableUid: req.params.id,
+    });
+    res.status(200).json({ message: "User account deleted"});
+  } catch (err) {
+    console.log(err);
+    res.status(400).json(err);
   }
 });
 

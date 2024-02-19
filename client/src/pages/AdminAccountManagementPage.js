@@ -1,6 +1,6 @@
 //page for viewing and updating op limits
 import React, { useState, useEffect } from "react";
-import { getAdminUserData } from "../utils/auth";
+import { deleteUser, getAdminUserData } from "../utils/auth";
 import { getRoles } from "../utils/sign-up";
 import { getAllAccountStatus } from "../utils/accountStatus";
 import { Container, Row, Button, Form } from "react-bootstrap";
@@ -14,9 +14,6 @@ const AdminAccountManagement = () => {
   const [state, setState] = useState([]);
   const [selUser, setSelUser] = useState([]);
   const [userFormData, setUserFormData] = useState({});
-  // const [validated] = useState(false);
-  const [showPassAlert, setShowPassAlert] = useState(false);
-  
   //the next two states are used to set the initial values for the role and functional area dropdowns;
   const [roleState, setRoleState] = useState([]);
   const [accountState, setAccountState] = useState([]);
@@ -38,7 +35,7 @@ const AdminAccountManagement = () => {
     };
 
     //gets the data for the administrator
-    getAdminUserData({navigate, state, setState, pName});
+    getAdminUserData({ navigate, state, setState, pName });
     getFormInfo();
     //gets the info for the form
   }, []);
@@ -69,7 +66,6 @@ const AdminAccountManagement = () => {
     });
   }
 
-
   function accountStatusOptions() {
     return accountState.map((f, index) => {
       return (
@@ -86,7 +82,7 @@ const AdminAccountManagement = () => {
       setuserRole(event.target.value);
     } else if (event.target.name === "accountStatus") {
       setAccountStatus(event.target.value);
-    } 
+    }
     setUserFormData({
       ...userFormData,
       [event.target.name]: event.target.value,
@@ -103,16 +99,22 @@ const AdminAccountManagement = () => {
 
   const handleFormSubmit = async (event) => {
     event.preventDefault();
-    // alert("Disabled for demo purposes");
-    let body;
-    if (userFormData.password !== userFormData.passVal) {
-      alert("Passwords do not match");
-      return;
-    } else if (passwordCheck(userFormData.password) === false) {
-      return;
-    } else if (passwordVal(userFormData.password) === false) {
 
-      return;
+    let body;
+    //first check if the old password is correct
+    if (
+      userFormData.oldPassword ||
+      userFormData.password ||
+      userFormData.passVal
+    ) {
+      if (userFormData.password !== userFormData.passVal) {
+        alert("Passwords do not match");
+        return;
+      } else if (passwordCheck(userFormData.password) === false) {
+        return;
+      } else if (passwordVal(userFormData.password) === false) {
+        return;
+      }
     }
     const form = event.currentTarget;
     if (form.checkValidity() === false) {
@@ -126,7 +128,17 @@ const AdminAccountManagement = () => {
     const email = userFormData.email;
     const password = userFormData.password;
     const userRole = userFormData.userRole;
-    const userStatus = userFormData.accountStatus;
+    let userStatus = userFormData.accountStatus;
+
+    if (userStatus === "Delete") {
+      if (window.confirm("Are you sure you want to delete this user?")) {
+        console.log("deleting user");
+        await deleteUser(id, state.userId);
+        return;
+      } else {
+        userStatus = "Active";
+      }
+    }
 
     if (password) {
       body = {
@@ -141,7 +153,7 @@ const AdminAccountManagement = () => {
     } else {
       body = { firstName, lastName, email, userStatus, userRole };
     }
-    await updateUser(body, id)
+    await updateUser(body, id);
     window.location.reload();
   };
 
@@ -151,7 +163,7 @@ const AdminAccountManagement = () => {
         <div className="admin-account">
           <h2
             className="text-center fw-bolder"
-            style={{ "textShadow": "1px 1px 1px grey" }}
+            style={{ textShadow: "1px 1px 1px grey" }}
           >
             Admin Account Management
           </h2>

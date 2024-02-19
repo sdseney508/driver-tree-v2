@@ -98,6 +98,7 @@ const Welcome = () => {
     try {
       const response = await loginUser(user);
       const userData = response.data.user;
+      console.log(userData);
       if (!userData) {
         throw new Error("huh, something went wrong!");
       } else if (userData.userStatus !== "Active") {
@@ -117,11 +118,12 @@ const Welcome = () => {
         navigate("/user");
       }
     } catch (err) {
-      if (err.response.status === 402) {
-        setInactiveAlert(true);
-      } else {
+      // console.log(err);
+      // if (err.response.status === 402) {
+      //   setInactiveAlert(true);
+      // } else {
       setShowAlert(true);
-      }
+      
     }
 
     setUserFormData({

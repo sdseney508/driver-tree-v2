@@ -1,13 +1,10 @@
 const router = require("express").Router();
 const { carousel } = require("../../models");
-const { signToken } = require("../../utils/auth");
 
 //import middleware
 // put authMiddleware anywhere we need to send a token for verification of user. this will maintain their login for up to 2 hours.
 //need to put in authMiddleware after testing is complete
 const { authMiddleware } = require("../../utils/auth");
-const secret = "oplimits";
-const expiration = "2h";
 // // use /api/carousel for all the axios calls
 
 // //get a specific carousl.  will be used by the admin page by the updateCarousel function

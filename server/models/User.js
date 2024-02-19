@@ -15,19 +15,16 @@ class User extends Model {
 
   // Add method to update userStatus based on lastLogin
   async updateStatusBasedOnLastLogin(userId) {
-    console.log("userId: ", userId);
     const user = await User.findByPk(userId);
-    console.log("user: ", user);
     if (user && user.lastLogin) {
       const daysSinceLastLogin = (new Date() - new Date(user.lastLogin)) / (1000 * 60 * 60 * 24);
-      console.log("daysSinceLastLogin: ", daysSinceLastLogin);
       //0 is for testing purposes, change to 35 for production
       if (daysSinceLastLogin > 35) {
         user.userStatus = 'Inactive'; // Assuming 'Inactive' is the status you use
         await user.save();
-        return false;
-      } else {
         return true;
+      } else {
+        return false;
       }
     }
   }

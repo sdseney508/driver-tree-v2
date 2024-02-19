@@ -1,6 +1,7 @@
-import React, { useState, createContext } from "react";
+import React, { useEffect, createContext } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-
+import { useNavigate, useLocation } from "react-router";
+import axios from 'axios';
 //pages and components
 import Welcome from "./pages/Welcome";
 import UserPage from "./pages/UserPage";
@@ -14,6 +15,7 @@ import OutcomesPage from "./pages/OutcomesPage";
 import DriverNavbar from "./components/DriverNavbar";
 import DrPage from "./pages/DriverPage";
 import DriverTreePage from "./pages/DriverTreePage";
+import apiURL from "./utils/apiURL"; 
 import "./App.css";
 
 export const stateContext = createContext();
@@ -21,6 +23,35 @@ export const stateContext = createContext();
 // Construct request middleware that will attach the JWT token to every request as an `authorization` header
 
 function App() {
+  const useActivityTracker = () => {
+    useEffect(() => {
+      const events = ['click', 'mousemove', 'keypress'];
+      const resetTimer = async () => {
+        // Assuming you have an API endpoint to refresh session activity
+        try {
+          const token = localStorage.getItem('id_token');
+          await axios.put(apiURL + '/session/refresh', {}, {
+            headers: { Authorization: token },
+          });
+        } catch (error) {
+          console.log('Error refreshing session:', error);
+          // Handle error (e.g., logging out the user if session cannot be refreshed)
+        }
+      };
+  
+      for (const event of events) {
+        window.addEventListener(event, resetTimer);
+      }
+  
+      return () => {
+        for (const event of events) {
+          window.removeEventListener(event, resetTimer);
+        }
+      };
+    }, []);
+  };
+
+  useActivityTracker();
 
   return (
     <div className="bkgrd">
