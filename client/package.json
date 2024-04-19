@@ -23,6 +23,7 @@
     "react-router-dom": "^6.4.0",
     "react-scripts": "^5.0.1",
     "react-xarrows": "^2.0.2",
+    "resolve-url-loader": "^5.0.0",
     "svgo": "^3.0.3",
     "web-vitals": "^2.1.4"
   },
