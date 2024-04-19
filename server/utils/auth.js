@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const session = require("../models/session");
+const adminAudit = require("../models/adminAudit");
 
 // set token secret and expiration date
 const secret = "drivertree";
@@ -29,7 +30,19 @@ module.exports = {
     if (inactiveTime > SESSION_TIMEOUT) {
       // Session expired
       await thisSession.destroy(); // Remove the expired session
+
+      //log the session expiration
+      await adminAudit.create({
+        action: `Session expired for token ${token}`,
+        newData: JSON.stringify(thisSession),
+        oldData: "NA",
+        model: "Session",
+        userId: thisSession.userId,
+        fieldName: "lastActivity",
+        tableUid: thisSession.userId
+      });
       return res.status(401).send("Session expired");
+
     }
 
     // Update lastActivity to the current time

@@ -192,10 +192,23 @@ router.get("/byoutcome/:id", async (req, res) => {
           ...driver.dataValues, // Spread all driver properties
           ...driver.outcomeDrivers.dataValues, // Flatten outcomeDrivers properties into the same level
           cluster: driver.cluster ? driver.cluster.dataValues : null, // Include cluster data if available
+          // arrows: outcome.arrows, // Include arrows data
         };
       });
     });
-    res.status(200).json(flattenedData);
+
+        // Group by tierLevel
+        const groupedByTier =[]
+        for (let i = 0; i < flattenedData[0].length; i++) {
+          // Use driver.tierLevel as the key for grouping
+          const tier = flattenedData[0][i].tierLevel;
+          if (!groupedByTier[tier]) {
+            groupedByTier[tier] = [];
+          }
+          groupedByTier[tier].push(flattenedData[0][i]);  
+        }    
+    //     res.status(200).json(groupedByTier);
+    res.status(200).json(groupedByTier);
   } catch (err) {
     res.status(400).json(err);
   }

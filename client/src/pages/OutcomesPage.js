@@ -62,7 +62,8 @@ const OutcomesPage = () => {
         selOutcome.id = outcomeId;
       }
       await getDriverByOutcome(selOutcome.id).then((data) => {
-        let top = data.data[0];
+        let top = data.data;
+        console.log(top);
         setDriverTreeObj(top);
       });
     };

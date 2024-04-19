@@ -1,8 +1,6 @@
 const router = require("express").Router();
 const { User, session, adminAudit } = require("../../models");
 const { signToken } = require("../../utils/auth");
-const sequelize = require("../../config/connection");
-const { Op } = require("sequelize");
 
 //import middleware
 // put authMiddleware anywhere we need to send a token for verification of user. this will maintain their login for up to 2 hours.
@@ -140,8 +138,15 @@ router.post("/login", async (req, res) => {
     //must  be done in the following order on the server, the first one checks if the user has a valid password.  if they do, then you check their status, only after both of those are complete can you update the last login date.
     const validPassword = await userData.checkPassword(req.body.password);
     if (validPassword !== true) {
+      //user has entered an incorrect password, return a 401 and update the failed login count in the user table to count+1.  if this is the first time they failed log in, set the last failed login date to now.  if they have failed 3 times, set their status to inactive.
+      console.log("password is invalid");
+      await userData.updateFailedLoginTimer(userData.id);
       res.status(401).json();
       return;
+    } else {
+      console.log("password is valid");
+      //reset the failed login count and the failed login timer
+      await userData.resetFailedLoginTimer(userData.id);
     }
     const inactive = await userData.updateStatusBasedOnLastLogin(userData.id);
     if (inactive === true) {
@@ -166,7 +171,16 @@ router.post("/login", async (req, res) => {
     const token = signToken({ id: userData.id });
     // Create session
     const sessionExpiry = Date.now() + 15*60*1000;
-    await session.create({ token, userId: userData.id, expiresAt: sessionExpiry });
+    let userSession = await session.create({ token, userId: userData.id, expiresAt: sessionExpiry });
+    await adminAudit.create({
+      action: `${userData.id} logged in to the system`,
+      newData: JSON.stringify(userSession),
+      oldData: "NA",
+      model: "User",
+      userId: userData.id,
+      fieldName: "lastLogin",
+      tableUid: userData.id,
+    });  
     res.json({ token, user: userData, message: "You are now logged in!" });
   } catch (err) {
     console.log(err);

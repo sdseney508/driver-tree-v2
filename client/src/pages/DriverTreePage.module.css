@@ -235,8 +235,8 @@
   text-align: center;
   border: none;
   z-index: 500;
-  width: 65%;
-  height: 50%;
+  width: 60%;
+  height: 40%;
   position: absolute;
   left: 35px;
   top: 1px;
@@ -265,7 +265,7 @@
 .my_cluster_name {
 text-align: center;
 font-size: .5em;
-width: 150px;
+width: 90%;
 }
 
 .my_col {

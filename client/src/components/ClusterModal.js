@@ -9,6 +9,7 @@ const ClusterModal = ({
   driverTreeObj,
   setDriverTreeObj,
   selDriver,
+  setClustModal,
   setSelDriver,
   selOutcome,
   setSelOutcome,
@@ -25,12 +26,13 @@ const ClusterModal = ({
       }
     }
     let body = {outcomeId: selOutcome.id, selDriversArr: selectedDrivers};
+    console.log("body: ", body);
     createCluster(body);
     //update the selected drivers with the clusterId
     getDriverByOutcome(selOutcome.id).then((data) => {
-      setDriverTreeObj(data.data[0]);
+      setDriverTreeObj(data.data);
     });
-
+    setClustModal(false);
   }
 
   return (

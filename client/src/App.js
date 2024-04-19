@@ -1,6 +1,7 @@
 import React, { useEffect, createContext } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { useNavigate, useLocation } from "react-router";
+
+import {logout} from "./utils/auth";
 import axios from 'axios';
 //pages and components
 import Welcome from "./pages/Welcome";
@@ -36,6 +37,8 @@ function App() {
         } catch (error) {
           console.log('Error refreshing session:', error);
           // Handle error (e.g., logging out the user if session cannot be refreshed)
+          logout();
+
         }
       };
   

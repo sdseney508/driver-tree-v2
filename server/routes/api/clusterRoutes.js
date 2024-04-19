@@ -18,11 +18,13 @@ router.get("/:id", async (req, res) => {
 router.post("/new", async (req, res) => {
   try {
     //first create the cluster, the req.body needs to include the outcomeID and the driverID
+    console.log("req.body: ", req.body);
+    console.log(req.body);
     const clusterData = await clusters.create({outcomeId: req.body.outcomeId, clusterName: req.body.clusterName});
     for (let i = 0; i < req.body.selDriversArr.length; i++) {
       await drivers.update({clusterId: clusterData.id, clusterId: clusterData.id}, {
         where: {
-          id: req.body.selDriversArr[i].id,
+          id: req.body.selDriversArr[i].driverId,
         },
       });
     }

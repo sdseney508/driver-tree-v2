@@ -149,7 +149,6 @@ const DriverCards = ({
     //find all the arrows that have the current card as a start point
     //first check to see if the card is in a cluster
     //for loop based on tier of the driver card
-    debugger;
     let updateArr = [cardid];
     let arrayCounter = 1; //this gets updated as we go through the updateArr for the subsequent tiers so we only go through new updateArr additions and dont end up in a continuous loop
     let loopEnd;
@@ -507,6 +506,10 @@ const DriverCards = ({
       setLoading(false);
       return;
     }
+
+    //now see if there is already a card in that slot, if there is, push that card and all others down a slot. then update the card(s) in the database
+
+
     let cardname = e.dataTransfer.getData("type");
     let data = e.dataTransfer.getData("text");
     let body = {
@@ -598,9 +601,9 @@ const DriverCards = ({
     }
 
     await getDriverByOutcome(selOutcome.id).then((data) => {
-      setDriverTreeObj(data.data[0]);
+      console.log(data.data);
+      setDriverTreeObj(data.data);
     });
-    setLoading(false);
   }
 
   const delDriver = (e) => {
@@ -627,6 +630,7 @@ const DriverCards = ({
     removeOutcomeDriver(body);
 
     getDriverByOutcome(selOutcome.id).then((data) => {
+      console.log(data.data);
       setDriverTreeObj(data.data[0]);
     });
 
@@ -707,7 +711,7 @@ const DriverCards = ({
       setSelOutcome(data.data);
     });
     await getDriverByOutcome(selOutcome.id).then((data) => {
-      setDriverTreeObj(data.data[0]);
+      setDriverTreeObj(data.data);
     });
   };
 
@@ -855,8 +859,9 @@ const DriverCards = ({
     }
   }
 
-  function tierCards(tier, { driverTreeObj, viewObj }) {
+  function tierCards(tier, driverTreeObj, {viewObj }) {
     let viewCheck;
+
     const arr = []; //just an empty arr that will be filled with driverTreeObj
     let clusterNumber = 0; //this is just used to see how far to expand a cluster
     let clusterName; //doing it this way to so i dont need the logic when dealing with the first element of the array.
@@ -956,7 +961,7 @@ const DriverCards = ({
             >
               {/* text input for clusterName */}
               {!recordLockState ? (
-                <Form>
+                <Form style={{alignContent: 'center'}}>
                   <Form.Control
                     size="sm"
                     type="text"
@@ -1124,51 +1129,51 @@ const DriverCards = ({
               <Row style={{ minHeight: "500px", width: "100%" }}>
                 <br />
                 <br />
-                {!loading ? (
+                {/* {!loading ? (
                   <Legend
                     driverTreeObj={driverTreeObj}
                     selOutcome={selOutcome}
                     recordLockState={recordLockState}
                     state={state}
                   />
-                ) : null}
+                ) : null} */}
               </Row>
             </Row>
           </Col>
           <Col className={styles.driver} key="1">
             <Row>Tier 1 Drivers {tierButtons(1)}</Row>
             <Row id={`tier1Cards`} key={`tier1Cards`} className={styles.my_row}>
-              {tierCards(1, { driverTreeObj, viewObj })}
+              {tierCards(1,  driverTreeObj[1], {viewObj })}
             </Row>
           </Col>
           <Col className={styles.driver} key="2">
             <Row>Tier 2 Drivers {tierButtons(2)}</Row>
             <Row id={`tier2Cards`} key={`tier2Cards`} className={styles.my_row}>
-              {tierCards(2, { driverTreeObj, viewObj })}
+              {tierCards(2, driverTreeObj[2], {viewObj })}
             </Row>
           </Col>
           <Col className={styles.driver} key="3">
             <Row>Tier 3 Drivers{tierButtons(3)}</Row>
             <Row id={`tier3Cards`} key={`tier3Cards`} className={styles.my_row}>
-              {tierCards(3, { driverTreeObj, viewObj })}
+              {tierCards(3,  driverTreeObj[3], {viewObj })}
             </Row>
           </Col>
           <Col className={styles.driver} key="4">
             <Row>Tier 4 Drivers {tierButtons(4)}</Row>
             <Row id={`tier4Cards`} key={`tier4Cards`} className={styles.my_row}>
-              {tierCards(4, { driverTreeObj, viewObj })}
+              {tierCards(4,driverTreeObj[4], {viewObj })}
             </Row>
           </Col>
           <Col className={styles.driver} key="5">
             <Row>Tier 5 Drivers {tierButtons(5)}</Row>
             <Row id={`tier5Cards`} key={`tier5Cards`} className={styles.my_row}>
-              {tierCards(5, { driverTreeObj, viewObj })}
+              {tierCards(5,  driverTreeObj[5], {viewObj })}
             </Row>
           </Col>
           <Col className={styles.driver} key="6">
             <Row>Tier 6 Drivers {tierButtons(6)}</Row>
             <Row id={`tier5Cards`} key={`tier5Cards`} className={styles.my_row}>
-              {tierCards(6, { driverTreeObj, viewObj })}
+              {tierCards(6,  driverTreeObj[6], {viewObj })}
             </Row>
 
           </Col>
@@ -1187,7 +1192,6 @@ const DriverCards = ({
         </Xwrapper>
       </Row>
       <Modal show={show} size="sm">
-        {/* onHide={handleClose} */}
         <Modal.Header closeButton>
           <Modal.Title></Modal.Title>
         </Modal.Header>

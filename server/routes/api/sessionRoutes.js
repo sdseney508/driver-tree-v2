@@ -1,6 +1,5 @@
 const router = require('express').Router();
 const { session } = require('../../models');
-const { Op } = require("sequelize");
 
 // use /api/session
 //create a session.

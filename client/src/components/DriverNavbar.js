@@ -62,7 +62,6 @@ const DriverNavbar = () => {
         throw new Error("something went wrong!");
       }
       const user = response.data;
-      console.log(user);
       let userDataLength = Object.keys(user).length;
       //if the user isnt logged in with an unexpired token, send them to the login page
       if (!userDataLength > 0) {

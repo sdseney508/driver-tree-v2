@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Button, Modal } from "react-bootstrap";
+import { Row, Col, Button, Modal } from "react-bootstrap";
 import {
   createDriver,
   createOutcome,
@@ -24,7 +24,6 @@ import OutcomeTable from "../components/OutcomeTable";
 import ClusterModal from "../components/ClusterModal";
 import { getArrows } from "../utils/arrows";
 import ViewsTable from "../components/ViewsTable";
-import { Xwrapper } from "react-xarrows";
 import { createCluster } from "../utils/cluster";
 import { exportElement } from "../utils/export-element";
 
@@ -111,6 +110,9 @@ const DriverTreePage = () => {
           setSelOutcome(data.data);
         });
       }
+      await getDriverByOutcome(selOutcome.id).then((data) => {
+        setDriverTreeObj(data.data);
+      });
       if (state.userRole === "Stakeholder" || selOutcome.state === "Active") {
         setRecordLockState(true);
       }
@@ -119,12 +121,12 @@ const DriverTreePage = () => {
     getUserData({ navigate, state, setState, outcomeId, error, setError });
     getAppData();
     authCheck();
+    setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     setLoading(true);
-    // setArrows([]);
     const getInfo = async () => {
       setRecordLockState(false);
       if (!selOutcome.id) {
@@ -138,7 +140,7 @@ const DriverTreePage = () => {
         }
       });
       await getDriverByOutcome(selOutcome.id).then((data) => {
-        setDriverTreeObj(data.data[0]);
+        setDriverTreeObj(data.data);
       });
       await getArrows(selOutcome.id).then((data) => {
         setArrows(data.data);
@@ -154,7 +156,10 @@ const DriverTreePage = () => {
       authCheck();
     }
     navigate("/drivertree/" + selOutcome.id);
-    setLoading(false);
+    if (driverTreeObj.length > 0) {
+      setLoading(false);
+      console.log(loading);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome, viewId, opacity]);
 
@@ -353,7 +358,7 @@ const DriverTreePage = () => {
       body.state = "Draft";
       delete body.id;
       newOutcomeId = data.data.id;
-      console.log(body)
+      console.log(body);
       updateOutcome(data.data.id, body);
     });
     //now we update the statusdefinitions that were created on the server side.
@@ -368,6 +373,7 @@ const DriverTreePage = () => {
 
     //now we need to create the new drivers and clusters.  We'll start by creating the drivers, then we'll create the clusters, then we'll create the arrows, lastly we'll create the outcomeDrivers to associate the drivers with the outcome
     let driverBody = JSON.parse(JSON.stringify(driverTreeObj));
+    console.log(driverBody);
     let arrowBody = JSON.parse(JSON.stringify(arrows));
     delete arrowBody.id;
     delete driverBody.id;
@@ -375,36 +381,98 @@ const DriverTreePage = () => {
     let selectedDrivers = [];
     let clusterArr = "";
     let clusterName = "";
+    let oldDriverId="";
+    //for the new driverTreeObj structure:  need to cycle through driverBody columns and drivers in each column
     for (let i = 0; i < driverBody.length; i++) {
-      debugger;
-      driverBody[i].outcomeId = newOutcomeId;
-      driverBody[i].modified = "No";
-      delete driverBody[i].id;
-      const driverData = await createDriver(driverBody[i], state.userId);
-      let body = { outcomeId: newOutcomeId, driverId: driverData.data.id, tierLevel: driverBody[i].tierLevel, subTier: driverBody[i].subTier, userId: state.userId};
-      await addOutcomeDriver(body);
+      if (driverBody[i] !== null) {
+        for (let j = 0; j < driverBody[i].length; j++) {
+          driverBody[i][j].outcomeId = newOutcomeId;
+          driverBody[i][j].modified = "No";
+          oldDriverId=driverBody[i][j].driverId;
+          delete driverBody[i][j].outcomeDrivers.driverId;
+          const driverData = await createDriver(driverBody[i][j], state.userId);
+          let body = {
+            outcomeId: newOutcomeId,
+            driverId: driverData.data.id,
+            tierLevel: driverBody[i][j].tierLevel,
+            subTier: driverBody[i][j].subTier,
+            userId: state.userId,
+          };
+          await addOutcomeDriver(body);
 
-      //check to see if it is in  acluster
-      if (driverBody[i].clusterId) {
-        if (!clusterName) {
-          clusterName = driverBody[i].cluster.clusterName;
-        }
-        //check to see if it is first driver in a new cluster
-        if (driverBody[i].clusterId !== oldClusterId) {
-          //check to see if there are any drivers in the selectedDrivers array from a prior cluster, if there are create a new cluster in the database tied to the new outcome
-          if (selectedDrivers.length > 0) {
-            //we need to create a new cluster from the current selectedDrivers array, then reset the array
+          //check to see if it is in  acluster
+          if (driverBody[i][j].clusterId) {
+            if (!clusterName) {
+              clusterName = driverBody[i][j].cluster.clusterName;
+            }
+            //check to see if it is first driver in a new cluster
+            if (driverBody[i][j].clusterId !== oldClusterId) {
+              //check to see if there are any drivers in the selectedDrivers array from a prior cluster, if there are create a new cluster in the database tied to the new outcome
+              if (selectedDrivers.length > 0) {
+                //we need to create a new cluster from the current selectedDrivers array, then reset the array
+                body = {
+                  outcomeId: newOutcomeId,
+                  clusterName: clusterName,
+                  selDriversArr: selectedDrivers,
+                };
+                const clusterData = await createCluster(body);
+                clusterArr = clusterData.data.id;
+                for (let j = 0; j < arrowBody.length; j++) {
+                  if (
+                    arrowBody[j].start.startsWith("tier") &&
+                    arrowBody[j].start.endsWith("r" + oldClusterId)
+                  ) {
+                    arrowBody[j].start =
+                      arrowBody[j].start.slice(
+                        0,
+                        -JSON.stringify(oldClusterId).length
+                      ) + JSON.stringify(clusterArr);
+                  }
+                  if (
+                    arrowBody[j].end.startsWith("tier") &&
+                    arrowBody[j].end.endsWith(
+                      "r" + JSON.stringify(oldClusterId)
+                    )
+                  ) {
+                    arrowBody[j].end =
+                      arrowBody[j].end.slice(
+                        0,
+                        -JSON.stringify(oldClusterId).length
+                      ) + JSON.stringify(clusterArr);
+                  }
+                }
+                //reset the cluster array
+                selectedDrivers = [];
+              }
+              //if it is, we need to update the cluster id to the new cluster id
+              selectedDrivers.push(driverData.data);
+              oldClusterId = driverBody[i][j].clusterId;
+              clusterName = driverBody[i][j].cluster.clusterName;
+            } else {
+              //the driver is in the same cluster as the previous driver, so we need to add it to the array
+              selectedDrivers.push(driverData.data);
+              oldClusterId = driverBody[i][j].clusterId;
+              //now we look inside arrowBody for this id, if we find it, we replace it with the new id  This will allow us to create the arrows with the new ids
+            }
+          }
+
+          if (i === driverBody.length - 1 && selectedDrivers.length > 0) {
+            //create the cluster, the driver is the last one in the arrray and cluster.
             body = {
               outcomeId: newOutcomeId,
               clusterName: clusterName,
               selDriversArr: selectedDrivers,
             };
-            const clusterData = await createCluster(body);
-            clusterArr = clusterData.data.id;
+            debugger;
+            const clusterD = await createCluster(body);
+
+            clusterArr = clusterD.data.id;
             for (let j = 0; j < arrowBody.length; j++) {
               if (
                 arrowBody[j].start.startsWith("tier") &&
-                arrowBody[j].start.endsWith("r" + oldClusterId)
+                arrowBody[j].start.endsWith(
+                  "cluster" + JSON.stringify(oldClusterId)
+                )
               ) {
                 arrowBody[j].start =
                   arrowBody[j].start.slice(
@@ -414,7 +482,9 @@ const DriverTreePage = () => {
               }
               if (
                 arrowBody[j].end.startsWith("tier") &&
-                arrowBody[j].end.endsWith("r" + JSON.stringify(oldClusterId))
+                arrowBody[j].end.endsWith(
+                  "cluster" + JSON.stringify(oldClusterId)
+                )
               ) {
                 arrowBody[j].end =
                   arrowBody[j].end.slice(
@@ -423,85 +493,48 @@ const DriverTreePage = () => {
                   ) + JSON.stringify(clusterArr);
               }
             }
-            //reset the cluster array
-            selectedDrivers = [];
           }
-          //if it is, we need to update the cluster id to the new cluster id
-          selectedDrivers.push(driverData.data);
-          oldClusterId = driverBody[i].clusterId;
-          clusterName = driverBody[i].cluster.clusterName;
-        } else {
-          //the driver is in the same cluster as the previous driver, so we need to add it to the array
-          selectedDrivers.push(driverData.data);
-          oldClusterId = driverBody[i].clusterId;
-          //now we look inside arrowBody for this id, if we find it, we replace it with the new id  This will allow us to create the arrows with the new ids
-        }
-      }
-
-      if (i === driverBody.length - 1 && selectedDrivers.length > 0) {
-        //create the cluster, the driver is the last one in the arrray and cluster.
-        body = {
-          outcomeId: newOutcomeId,
-          clusterName: clusterName,
-          selDriversArr: selectedDrivers,
-        };
-        const clusterD = await createCluster(body);
-
-        clusterArr = clusterD.data.id;
-        for (let j = 0; j < arrowBody.length; j++) {
-          if (
-            arrowBody[j].start.startsWith("tier") &&
-            arrowBody[j].start.endsWith(
-              "cluster" + JSON.stringify(oldClusterId)
-            )
-          ) {
-            arrowBody[j].start =
-              arrowBody[j].start.slice(
-                0,
-                -JSON.stringify(oldClusterId).length
-              ) + JSON.stringify(clusterArr);
+          //now we cycle through the arrows for cards and outcome and update them.
+          for (let j = 0; j < arrowBody.length; j++) {
+            delete arrowBody[j].id;
+            console.log(oldDriverId);
+            arrowBody[j].outcomeId = newOutcomeId;
+            if (
+              arrowBody[j].start.startsWith("card") &&
+              arrowBody[j].start.endsWith(
+                "d" + oldDriverId
+              )
+            ) {
+              arrowBody[j].start =
+                arrowBody[j].start.slice(
+                  0,
+                  -oldDriverId.toString().length
+                ) + driverData.data.id;
+            }
+            if (
+              arrowBody[j].end.startsWith("card") &&
+              arrowBody[j].end.endsWith(
+                "d" + oldDriverId
+              )
+            ) {
+              arrowBody[j].end =
+                arrowBody[j].end.slice(
+                  0,
+                  -oldDriverId.toString().length
+                ) + driverData.data.id;
+            }
+            if (arrowBody[j].end === "outcomeId" + oldOutcomeId) {
+              arrowBody[j].end =
+                arrowBody[j].end.slice(
+                  0,
+                  -JSON.stringify(oldOutcomeId).length
+                ) + JSON.stringify(newOutcomeId);
+            }
           }
-          if (
-            arrowBody[j].end.startsWith("tier") &&
-            arrowBody[j].end.endsWith("cluster" + JSON.stringify(oldClusterId))
-          ) {
-            arrowBody[j].end =
-              arrowBody[j].end.slice(0, -JSON.stringify(oldClusterId).length) +
-              JSON.stringify(clusterArr);
-          }
-        }
-      }
-      //now we cycle through the arrows for cards and outcome and update them.
-      for (let j = 0; j < arrowBody.length; j++) {
-        delete arrowBody[j].id;
-        arrowBody[j].outcomeId = newOutcomeId;
-        if (
-          arrowBody[j].start.startsWith("card") &&
-          arrowBody[j].start.endsWith("d" + JSON.stringify(driverBody[i].outcomeDrivers.driverId))
-        ) {
-          arrowBody[j].start =
-            arrowBody[j].start.slice(
-              0,
-              -JSON.stringify(driverBody[i].outcomeDrivers.driverId).length
-            ) + driverData.data.id;
-        }
-        if (
-          arrowBody[j].end.startsWith("card") &&
-          arrowBody[j].end.endsWith("d" + JSON.stringify(driverBody[i].outcomeDrivers.driverId))
-        ) {
-          arrowBody[j].end =
-            arrowBody[j].end.slice(
-              0,
-              -JSON.stringify(driverBody[i].outcomeDrivers.driverId).length
-            ) + driverData.data.id;
-        }
-        if (arrowBody[j].end === "outcomeId" + oldOutcomeId) {
-          arrowBody[j].end =
-            arrowBody[j].end.slice(0, -JSON.stringify(oldOutcomeId).length) +
-            JSON.stringify(newOutcomeId);
         }
       }
     }
+    debugger;
     for (let m = 0; m < arrowBody.length; m++) {
       //removal of UID is handled by the arrow router
       await createArrow(arrowBody[m]);
@@ -519,180 +552,173 @@ const DriverTreePage = () => {
     <>
       {!error ? (
         // <Container fluid className="justify-content-center">
-          <Row
-            id="topleveldiv"
-            key="topleveldiv"
-            className={styles.outer_div}
-          >
-            <Row
-              style={{ height: "40px"}}
-              className="justify-content-center"
-            >
-              {state.userRole !== "Stakeholder" ? (
-                <Col>
+        <Row id="topleveldiv" key="topleveldiv" className={styles.outer_div}>
+          <Row style={{ height: "40px" }} className="justify-content-center">
+            {state.userRole !== "Stakeholder" ? (
+              <Col>
+                <button
+                  className={styles.dtree_btn}
+                  onClick={() => {
+                    handleClick();
+                  }}
+                >
+                  Generate PDF
+                </button>
+                <button className={styles.dtree_btn} onClick={goToDriver}>
+                  Driver Details
+                </button>
+                <button className={styles.dtree_btn} onClick={newOutcome}>
+                  New Outcome
+                </button>
+                <button
+                  className={styles.dtree_btn}
+                  onClick={() => setClusterModal(true)}
+                >
+                  Create Cluster
+                </button>
+                <button
+                  className={styles.dtree_btn}
+                  onClick={() => toggleArrow()}
+                >
+                  Create Arrow
+                </button>
+                <button
+                  className={styles.dtree_btn}
+                  onClick={() => customStyles("outcome")}
+                >
+                  Outcomes
+                </button>
+                <button
+                  className={styles.dtree_btn}
+                  onClick={() => customStyles("view")}
+                >
+                  Views
+                </button>
+                {state.userRole === "Administrator" &&
+                selOutcome.state === "Active" ? (
                   <button
                     className={styles.dtree_btn}
-                    onClick={() => {
-                      handleClick();
-                    }}
+                    onClick={() => versionRoll()}
                   >
-                    Generate PDF
+                    Create Next Rev
                   </button>
-                  <button className={styles.dtree_btn} onClick={goToDriver}>
-                    Driver Details
-                  </button>
-                  <button className={styles.dtree_btn} onClick={newOutcome}>
-                    New Outcome
-                  </button>
+                ) : null}
+                {state.userRole === "Administrator" &&
+                selOutcome.state === "Draft" ? (
                   <button
                     className={styles.dtree_btn}
-                    onClick={() => setClusterModal(true)}
+                    onClick={() => makeActive()}
                   >
-                    Create Cluster
+                    Make Active
                   </button>
-                  <button
-                    className={styles.dtree_btn}
-                    onClick={() => toggleArrow()}
-                  >
-                    Create Arrow
-                  </button>
-                  <button
-                    className={styles.dtree_btn}
-                    onClick={() => customStyles("outcome")}
-                  >
-                    Outcomes
-                  </button>
-                  <button
-                    className={styles.dtree_btn}
-                    onClick={() => customStyles("view")}
-                  >
-                    Views
-                  </button>
-                  {state.userRole === "Administrator" &&
-                  selOutcome.state === "Active" ? (
-                    <button
-                      className={styles.dtree_btn}
-                      onClick={() => versionRoll()}
-                    >
-                      Create Next Rev
-                    </button>
-                  ) : null}
-                  {state.userRole === "Administrator" &&
-                  selOutcome.state === "Draft" ? (
-                    <button
-                      className={styles.dtree_btn}
-                      onClick={() => makeActive()}
-                    >
-                      Make Active
-                    </button>
-                  ) : null}
-                  Outcome Version: {selOutcome.version} Outcome State:{" "}
-                  {selOutcome.state}
-                </Col>
-              ) : (
-                <Col>
-                  <button className={styles.dtree_btn} onClick={handleClick}>
-                    Generate PDF
-                  </button>
-                </Col>
-              )}
-            </Row>
-            <Row
-              id="pdf-export"
-              style={PDFState ? pdfStyle : showTable.driverStyle}
-              className={styles.pdf_export}
-            >
-              {!loading ? (
-                <DriverCards
-                  arrows={arrows}
-                  setArrows={setArrows}
-                  driverTreeObj={driverTreeObj}
-                  setDriverTreeObj={setDriverTreeObj}
-                  cluster={clusters}
-                  setClusters={setClusters}
-                  createAnArrow={createAnArrow}
-                  opacity={opacity}
-                  setOpacity={setOpacity}
-                  PDFState={PDFState}
-                  recordLockState={recordLockState}
-                  state={state}
-                  setCreateAnArrow={setCreateAnArrow}
-                  setArrowMod={setArrowMod}
-                  selOutcome={selOutcome}
-                  setSelOutcome={setSelOutcome}
-                  showArrowMod={showArrowMod}
-                  tableState={tableState}
-                  viewId={viewId}
-                  setViewId={setViewId}
-                  viewObj={viewObj}
-                  setViewObj={setViewObj}
-                  viewArrows={viewArrows}
-                  setViewArrows={setViewArrows}
-                />
-              ) : null}
-            </Row>
-
-            <div style={showTable.tableStyle}>
-              {state.command && tableState === "outcome" ? (
-                <OutcomeTable
-                  state={state}
-                  setState={setState}
-                  selOutcome={selOutcome}
-                  setSelOutcome={setSelOutcome}
-                  command={state.command}
-                  userId={state.userId}
-                />
-              ) : null}
-
-              {tableState === "view" ? (
-                <Row className={styles.views_container}>
-                  <Col
-                    style={{
-                      overFlowY: "scroll",
-                      width: "500px",
-                      display: "flex",
-                      flexDirection: "column",
-                    }}
-                  >
-                    <div>Adjust Opacity</div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      defaultValue={opacity}
-                      // className={styles.slider}
-                      id="myRange"
-                      onChange={(e) => updateOpacity(e)}
-                    ></input>
-                    <button
-                      className={styles.dtree_btn}
-                      onClick={(e) => createNewView(e)}
-                      style={{ width: "150px", height: "25px" }}
-                    >
-                      Create View
-                    </button>
-
-                    <button
-                      className={styles.dtree_btn}
-                      onClick={(e) => deleteSelectedView(e)}
-                      style={{ width: "150px", height: "25px" }}
-                    >
-                      Delete View
-                    </button>
-                    <ViewsTable
-                      outcomeId={outcomeId}
-                      viewId={viewId}
-                      setViewId={setViewId}
-                      userId={state.userId}
-                    />
-                  </Col>
-                  <Col className={styles.slidecontainer}></Col>
-                </Row>
-              ) : null}
-            </div>
+                ) : null}
+                Outcome Version: {selOutcome.version} Outcome State:{" "}
+                {selOutcome.state}
+              </Col>
+            ) : (
+              <Col>
+                <button className={styles.dtree_btn} onClick={handleClick}>
+                  Generate PDF
+                </button>
+              </Col>
+            )}
           </Row>
-        // </Container>
-      ) : null}
+          <Row
+            id="pdf-export"
+            style={PDFState ? pdfStyle : showTable.driverStyle}
+            className={styles.pdf_export}
+          >
+            {!loading ? (
+              <DriverCards
+                arrows={arrows}
+                setArrows={setArrows}
+                driverTreeObj={driverTreeObj}
+                setDriverTreeObj={setDriverTreeObj}
+                cluster={clusters}
+                setClusters={setClusters}
+                createAnArrow={createAnArrow}
+                opacity={opacity}
+                setOpacity={setOpacity}
+                PDFState={PDFState}
+                recordLockState={recordLockState}
+                state={state}
+                setCreateAnArrow={setCreateAnArrow}
+                setArrowMod={setArrowMod}
+                selOutcome={selOutcome}
+                setSelOutcome={setSelOutcome}
+                showArrowMod={showArrowMod}
+                tableState={tableState}
+                viewId={viewId}
+                setViewId={setViewId}
+                viewObj={viewObj}
+                setViewObj={setViewObj}
+                viewArrows={viewArrows}
+                setViewArrows={setViewArrows}
+              />
+            ) : null}
+          </Row>
+
+          <div style={showTable.tableStyle}>
+            {state.command && tableState === "outcome" ? (
+              <OutcomeTable
+                state={state}
+                setState={setState}
+                selOutcome={selOutcome}
+                setSelOutcome={setSelOutcome}
+                command={state.command}
+                userId={state.userId}
+              />
+            ) : null}
+
+            {tableState === "view" ? (
+              <Row className={styles.views_container}>
+                <Col
+                  style={{
+                    overFlowY: "scroll",
+                    width: "500px",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <div>Adjust Opacity</div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    defaultValue={opacity}
+                    // className={styles.slider}
+                    id="myRange"
+                    onChange={(e) => updateOpacity(e)}
+                  ></input>
+                  <button
+                    className={styles.dtree_btn}
+                    onClick={(e) => createNewView(e)}
+                    style={{ width: "150px", height: "25px" }}
+                  >
+                    Create View
+                  </button>
+
+                  <button
+                    className={styles.dtree_btn}
+                    onClick={(e) => deleteSelectedView(e)}
+                    style={{ width: "150px", height: "25px" }}
+                  >
+                    Delete View
+                  </button>
+                  <ViewsTable
+                    outcomeId={outcomeId}
+                    viewId={viewId}
+                    setViewId={setViewId}
+                    userId={state.userId}
+                  />
+                </Col>
+                <Col className={styles.slidecontainer}></Col>
+              </Row>
+            ) : null}
+          </div>
+        </Row>
+      ) : // </Container>
+      null}
       {/* for creating a cluster */}
       <Modal
         name="clusterModal"
@@ -715,6 +741,7 @@ const DriverTreePage = () => {
             driverTreeObj={driverTreeObj}
             setDriverTreeObj={setDriverTreeObj}
             selDriver={selDriver}
+            setClusterModal={setClusterModal}
             setSelDriver={setSelDriver}
             selOutcome={selOutcome}
             setSelOutcome={setSelOutcome}

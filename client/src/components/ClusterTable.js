@@ -1,13 +1,6 @@
-import React, {
-  useState,
-  useRef,
-  useEffect,
-  useMemo,
-} from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
-import {
-  getDriverByOutcome,
-} from "../utils/drivers";
+import { getDriverByOutcome } from "../utils/drivers";
 import "ag-grid-community/dist/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CSS
 
@@ -16,10 +9,16 @@ import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CS
 //when a user selects a row, the row data is passed to the parent component
 //and displayed in the form.
 //this is using the community edition and react hooks to selectively render the table
-function ClusterTable({ selDriver, setSelDriver, selOutcome, setSelOutcome, selectedDrivers, setSelectedDrivers }) {
-
+function ClusterTable({
+  selDriver,
+  setSelDriver,
+  selOutcome,
+  setSelOutcome,
+  selectedDrivers,
+  setSelectedDrivers,
+}) {
   const [rowData, setRowData] = useState([]); // Set rowData to Array of Objects
-  let rowD;
+  let rowD = [];
 
   const gridRef = useRef(); // Optional - for accessing Grid's API
 
@@ -27,7 +26,15 @@ function ClusterTable({ selDriver, setSelDriver, selOutcome, setSelOutcome, sele
   useEffect(() => {
     const fetchData = async () => {
       await getDriverByOutcome(selOutcome.id).then((data) => {
-        rowD = data.data;
+        console.log(data.data);
+        for (let i = 1; i < data.data.length; i++) {
+          //if there are no drivers in a tier because you havent created any the array will be null
+          if (data.data[i] !== null) {
+            for (let j = 0; j < data.data[i].length; j++) {
+              rowD.push(data.data[i][j]);
+            }
+          }
+        }
       });
       setRowData(rowD);
     };
@@ -64,7 +71,7 @@ function ClusterTable({ selDriver, setSelDriver, selOutcome, setSelOutcome, sele
       resizable: true,
       sort: "asc",
       sortIndex: 0,
-    }
+    },
   ]);
 
   // DefaultColDef sets props common to all Columns
@@ -78,7 +85,7 @@ function ClusterTable({ selDriver, setSelDriver, selOutcome, setSelOutcome, sele
     var selectedRows = event.api.getSelectedRows();
     setSelectedDrivers(selectedRows);
   }
-  
+
   function onSelectionChanged(event) {
     var selectedRows = event.api.getSelectedRows();
     setSelectedDrivers(selectedRows);
@@ -88,7 +95,10 @@ function ClusterTable({ selDriver, setSelDriver, selOutcome, setSelOutcome, sele
   return (
     <div>
       {/* On div wrapping Grid a) specify theme CSS Class Class and b) sets Grid size */}
-      <div className="ag-theme-alpine" style={{ width: "100%", height: "100%" }}>
+      <div
+        className="ag-theme-alpine"
+        style={{ width: "100%", height: "100%" }}
+      >
         <AgGridReact
           ref={gridRef} // Ref for accessing Grid's API
           rowData={rowData} // Row Data for Rows
@@ -96,9 +106,9 @@ function ClusterTable({ selDriver, setSelDriver, selOutcome, setSelOutcome, sele
           defaultColDef={defaultColDef} // Default Column Properties
           animateRows={true} // Optional - set to 'true' to have rows animate when sorted
           rowSelection="multiple" // Optional - for row selection; can be "single", "multiple" or "false" (to disable)
-          suppressRowClickSelection= {true} // Options - allows click selection of rows
-          onRowSelected= {onRowSelected}
-          onSelectionChanged= {onSelectionChanged} // goes to the onselectionchanged function to change the selecteddrivers state
+          suppressRowClickSelection={true} // Options - allows click selection of rows
+          onRowSelected={onRowSelected}
+          onSelectionChanged={onSelectionChanged} // goes to the onselectionchanged function to change the selecteddrivers state
           multiSortKey="ctrl" // allows multi column sorting using 'ctrl' key
         />
       </div>

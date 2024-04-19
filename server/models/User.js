@@ -28,6 +28,28 @@ class User extends Model {
       }
     }
   }
+
+  async resetFailedLoginTimer(userId) {
+    const userData = await User.findByPk(userId);
+    userData.loginAttempts = 0;
+    userData.failedLoginTimer = null;
+    await userData.save();
+  }
+
+  // Add method to update loginAttempts and failedLoginTimer
+  async updateFailedLoginTimer(userId) {
+    console.log("updating failed login timer");
+    const userData = await User.findByPk(userId);
+    userData.loginAttempts = userData.loginAttempts + 1;
+    if (userData.loginAttempts === 1) {
+      userData.failedLoginTimer = new Date();
+    }
+    //check to see if they failed to log in three times in less than 15 minutes
+    if (userData.loginAttempts > 2 && (new Date() - new Date(userData.failedLoginTimer)) / (1000 * 15*60) < 1){
+      userData.userStatus = 'Inactive';
+    }
+    await userData.save();
+  }
 }
 
 User.init(
@@ -68,6 +90,17 @@ User.init(
     },
 
     lastLogin: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+
+    //used to track how many times the user has logged in with the wrong password in the last 15 minutes
+    loginAttempts: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
+    failedLoginTimer: {
       type: DataTypes.DATE,
       allowNull: true,
     },

@@ -7,7 +7,6 @@ import styles from "./ClusterModal.module.css";
 import { getDriverByOutcome } from "../utils/drivers";
 
 const DriverModal = ({
-  driverTreeObj,
   setDriverTreeObj,
   selOutcome,
   setCreateDriverModal,
@@ -19,11 +18,9 @@ const DriverModal = ({
 
   const makeNewDriver = async() => {
     let body = {outcomeId: selOutcome.id, tierLevel: driverTier};
-    console.log(body);
-    console.log(state.userId);
     await createDriver(body, state.userId);
     getDriverByOutcome(selOutcome.id).then((data) => {
-      setDriverTreeObj(data.data[0]);
+      setDriverTreeObj(data.data);
     });
     setCreateDriverModal(false);
   }
@@ -33,7 +30,7 @@ const DriverModal = ({
     let body = {outcomeId: selOutcome.id, driverId: selectedDriver.id, tierLevel: driverTier, userId: state.userId};
     await addOutcomeDriver(body);
     await getDriverByOutcome(selOutcome.id).then((data) => {
-      setDriverTreeObj(data.data[0]);
+      setDriverTreeObj(data.data);
     });
     console.log(setDriverTreeObj);
     setCreateDriverModal(false);

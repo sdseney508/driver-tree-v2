@@ -19,7 +19,9 @@ const UserPage = () => {
     <>
       <div>
         <div style={{ height: "100vh" }}>
+          <span>Last Login: {state.lastLogin} </span>
           <UserCarousel />
+
         </div>
       </div>
     </>

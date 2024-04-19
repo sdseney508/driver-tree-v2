@@ -113,6 +113,7 @@ const getUserData = async ({ navigate, state, setState, outcomeId}) => {
       userId: user.id,
       userRole: user.userRole,
       command: user.stakeholderId,
+      lastLogin: user.lastLogin,
     });
     let userDataLength = Object.keys(user).length;
     //if the user isnt logged in with an unexpired token, send them to the login page
