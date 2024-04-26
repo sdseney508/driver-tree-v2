@@ -29,6 +29,10 @@ function App() {
       const events = ['click', 'mousemove', 'keypress'];
       const resetTimer = async () => {
         // Assuming you have an API endpoint to refresh session activity
+        //first check if the user is or was logged in
+        if (!localStorage.getItem('id_token')) {
+          return;
+        }
         try {
           const token = localStorage.getItem('id_token');
           await axios.put(apiURL + '/session/refresh', {}, {
