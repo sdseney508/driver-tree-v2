@@ -71,6 +71,7 @@ router.put("/update/:outcomeId/:driverId/:userId", async (req, res) => {
 
 //create a new driver for an outcome, this is done by creating a new outcomeDriver and assigning it to a outcome
 router.post("/new", async (req, res) => {
+  console.log(req.body);
   const transaction = await sequelize.transaction();
   try {
     let subTier;
@@ -83,14 +84,15 @@ router.post("/new", async (req, res) => {
           outcomeId: req.body.outcomeId,
         },
       });
-      body.subTier = subTier + 1;
-    } else {
-      subTier = req.body.subTier;
-    }
-    let body = req.body;
-    
-    console.log(body);
-    const outcomeDriverData = await outcomeDrivers.create(body, {
+      console.log(subTier);
+      if (subTier === null) {
+        subTier = 1;
+      } else {
+      req.body.subTier = subTier + 1;
+      }
+    } 
+    console.log(req.body);
+    const outcomeDriverData = await outcomeDrivers.create(req.body, {
       transaction,
     });
 
@@ -106,6 +108,7 @@ router.post("/new", async (req, res) => {
       },
       { transaction }
     );
+
     await transaction.commit();
 
     res.status(200).json(outcomeDriverData);

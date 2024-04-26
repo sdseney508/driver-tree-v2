@@ -126,7 +126,7 @@ const DriverTreePage = () => {
     }, 150);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [, outcomeId]);
 
   useEffect(() => {
     setLoading(true);
@@ -405,7 +405,6 @@ const DriverTreePage = () => {
 
           //check to see if it is in a cluster
           if (driverBody[i][j].clusterId) {
-            debugger;
             if (!clusterName) {
               clusterName = driverBody[i][j].cluster.clusterName;
             }
@@ -419,6 +418,7 @@ const DriverTreePage = () => {
                   clusterName: clusterName,
                   selDriversArr: selectedDrivers,
                 };
+                debugger;
                 const clusterData = await createCluster(body);
                 clusterArr = clusterData.data.id;
                 for (let j = 0; j < arrowBody.length; j++) {
@@ -462,11 +462,20 @@ const DriverTreePage = () => {
 
           if (i === driverBody.length - 1 && selectedDrivers.length > 0) {
             //create the cluster, the driver is the last one in the arrray and cluster.
-            body = {
-              outcomeId: newOutcomeId,
-              clusterName: clusterName,
-              // selDriversArr: selectedDrivers,
-            };
+            
+            if (clusterName) {
+              body = {
+                outcomeId: newOutcomeId,
+                clusterName: clusterName,
+                selDriversArr: selectedDrivers,
+              };
+
+            } else {
+              body = {
+                outcomeId: newOutcomeId,
+                selDriversArr: selectedDrivers,
+              };
+            }
             debugger;
             const clusterD = await createCluster(body);
 

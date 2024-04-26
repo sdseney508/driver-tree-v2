@@ -1,5 +1,4 @@
-import axios from "axios";
-import apiURL from "./apiURL";
+// Initial Creation Date: 2023-09-26
 import { loggedIn, getToken, getUser } from "./auth";
 
 const passwordCheck = (password) => {

@@ -17,7 +17,7 @@ outcomes.init(
             allowNull: true,
             defaultValue: 'Draft',
         },
-        //Todo:  move this to its own table with a link to the outcome
+    
         problemStatement: {
             type: DataTypes.TEXT,
             allowNull: true,
@@ -30,7 +30,7 @@ outcomes.init(
             defaultValue: 'Draft',
         },
 
-        //TODO:  move this to its own table with a link to the outcome
+   
         rootCauses: {
             type: DataTypes.TEXT,
             allowNull: true,
@@ -60,7 +60,12 @@ outcomes.init(
             allowNull: true,
         },
 
-        //TODO:  move this to its own table with a link to the outcome or make this a JSON fed by a multi-select on a form.
+        readyorStakeholder: {
+            type: DataTypes.BOOLEAN,
+            allowNull: true,
+            defaultValue: false,
+        },
+
         supportedCommanders: {
             type: DataTypes.TEXT,
             allowNull: true,

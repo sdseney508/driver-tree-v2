@@ -1230,7 +1230,6 @@ const DriverCards = ({
         // className={styles.cluster_modal}
       >
         <Modal.Header closeButton>
-          <Modal.Title id="cluster-modal">Create Cluster</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {/*change everything in the signup form components*/}

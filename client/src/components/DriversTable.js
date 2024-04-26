@@ -17,7 +17,7 @@ import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CS
 //when a user selects a row, the row data is passed to the parent component
 //and displayed in the form.
 //this is using the community edition and react hooks to selectively render the table
-function DriverTable({ selDriver, setSelDriver, selOutcome, setSelOutcome }) {
+function DriverTable( {outcomeId, selDriver, setSelDriver, selOutcome, setSelOutcome }) {
 
   const [rowData, setRowData] = useState([]); // Set rowData to Array of Objects
   let rowD;
@@ -27,15 +27,18 @@ function DriverTable({ selDriver, setSelDriver, selOutcome, setSelOutcome }) {
   //this runs on the initial to fetch the data for the table
   useEffect(() => {
     const fetchData = async () => {
-      await getDriverByOutcome(selOutcome.id).then((data) => {
+      console.log(outcomeId);
+      console.log(selOutcome);
+      await getDriverByOutcome(outcomeId).then((data) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        rowD = data.data[0];
+        console.log(data.data.flat());
+        rowD = data.data.flat();
       });
       setRowData(rowD);
     };
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selOutcome, selDriver]);
+  }, [outcomeId, selOutcome, selDriver]);
 
   // Each Column Definition results in one Column.  For now, we are only going to set the 7 key columns that the users might search on
   const [columnDefs, setColumnDefs] = useState([

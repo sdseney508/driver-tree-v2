@@ -21,6 +21,7 @@ import { savePDF } from "@progress/kendo-react-pdf";
 
 const DriverPage = () => {
   const [state, setState] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [selDrivers, setSelDrivers] = useState([]);
   const [selDriver, setSelDriver] = useState({});
   const [selOutcome, setSelOutcome] = useState({});
@@ -43,12 +44,14 @@ const DriverPage = () => {
       });
       await getOutcome(outcomeId).then((data) => {
         let top = data.data;
+        console.log(top);
         setSelOutcome(top);
       });
       if (!driverId) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
         driverId = selDrivers[0].id;
       }
+
       await getDriverById(driverId).then((data) => {
         let top = data.data;
         setSelDriver(top);
@@ -57,6 +60,9 @@ const DriverPage = () => {
 
     getUserData({ navigate, state, setState, outcomeId });
     getAppData();
+    setTimeout(() => {
+      setLoading(true);
+    }, 150);
   }, []);
 
   useEffect(() => {
@@ -421,16 +427,19 @@ const DriverPage = () => {
               </div>
               {generateQuad(selDriver)}
             </Row>
-            <Row style={{ height: "250px" }}>
+            {loading ? ( 
+              <Row style={{ height: "250px" }}>
               <DriverTable
+                outcomeId={outcomeId}
                 selDrivers={selDrivers}
                 setSelDrivers={setSelDrivers}
                 selDriver={selDriver}
                 setSelDriver={setSelDriver}
                 selOutcome={selOutcome}
                 setSelOutcome={setSelOutcome}
-              />
-            </Row>
+                />
+            </Row>) : null
+              }
 
             {allquads ? (
               <Row id="all-quads" className="all-quads">

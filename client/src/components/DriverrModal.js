@@ -26,19 +26,18 @@ const DriverModal = ({
   }
 
   const importDriver = async() => {
-    console.log(selectedDriver);
+    debugger;
     let body = {outcomeId: selOutcome.id, driverId: selectedDriver.id, tierLevel: driverTier, userId: state.userId};
     await addOutcomeDriver(body);
     await getDriverByOutcome(selOutcome.id).then((data) => {
       setDriverTreeObj(data.data);
     });
-    console.log(setDriverTreeObj);
+
     setCreateDriverModal(false);
   }
 
   return (
     <>
-      {/* This is needed for the validation functionality above */}
       <div className={styles.modal_h}>
         <h2>Create / Import Driver</h2>
       </div>
