@@ -156,7 +156,7 @@ const DriverTreePage = () => {
 
     getInfo();
     if (state.command && selOutcome.stakeholderId) {
-      authCheck();
+      authCheck(state.command, selOutcome.stakeholderId);
     }
     navigate("/drivertree/" + selOutcome.id);
     if (driverTreeObj.length > 0) {
@@ -166,10 +166,12 @@ const DriverTreePage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome, viewId, opacity]);
 
-  const authCheck = () => {
+  const authCheck = (command, stakeholder) => {
     //checks to see if the user has access to the desired outcome
     //first we grab the user data from state and the outcome data from the database then compare the user command with the outcoem stakeholder
-    if (state.command !== selOutcome.stakeholderId) {
+    console.log(command);
+    console.log(stakeholder);
+    if (command !== stakeholder) {
       alert("You do not have access to this outcome in dtree page");
       navigate("/user");
     }

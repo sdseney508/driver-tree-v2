@@ -72,7 +72,6 @@ const DriverCards = ({
 
   useEffect(() => {
     const getDriversData = async (selOutcome, viewId) => {
-      console.log(viewId)
       if (viewId) {
         await getViewCards(viewId).then((data) => {
           setViewObj(data.data);
@@ -84,7 +83,6 @@ const DriverCards = ({
         });
       }
     };
-    console.log('drivercards');
     getDriversData(selOutcome, viewId);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -96,17 +94,14 @@ const DriverCards = ({
         setArrows(data.data);
       });
     };
-    console.log('drivercards');
     updateArrows();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [driverTreeObj]);
 
   useEffect(() => {
     if (driverTreeObj.length > 0) {
-      console.log(driverTreeObj);
       setLoading(false);
     }
-    console.log('drivercards');
   }, [driverTreeObj]);
 
   const addArrowToView = async () => {
@@ -603,7 +598,6 @@ const DriverCards = ({
     }
 
     await getDriverByOutcome(selOutcome.id).then((data) => {
-      console.log(data.data);
       setDriverTreeObj(data.data);
     });
   }
@@ -632,12 +626,10 @@ const DriverCards = ({
     removeOutcomeDriver(body);
 
     getDriverByOutcome(selOutcome.id).then((data) => {
-      console.log(data.data);
       setDriverTreeObj(data.data[0]);
     });
 
     setSelOutcome(selOutcome);
-
     window.location.reload();
   };
 

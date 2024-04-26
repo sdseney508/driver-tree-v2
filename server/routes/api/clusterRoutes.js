@@ -20,10 +20,18 @@ router.post("/new", async (req, res) => {
     //first create the cluster, the req.body needs to include the outcomeID and the driverID
     console.log("req.body: ", req.body);
     const clusterData = await clusters.create({outcomeId: req.body.outcomeId, clusterName: req.body.clusterName});
+    //TODO:  this is a workaround because the data models are slightly off; in a perfect world, i would update the createDriver call on driverTreePage.js to use id instead of driverId 
+    
     for (let i = 0; i < req.body.selDriversArr.length; i++) {
-      await drivers.update({clusterId: clusterData.id, clusterId: clusterData.id}, {
+      let tempId;
+      if(req.body.selDriversArr[i].driverId){
+        tempId = req.body.selDriversArr[i].driverId;
+      } else {
+        tempId = req.body.selDriversArr[i].id;
+      }
+      await drivers.update({clusterId: clusterData.dataValues.id}, {
         where: {
-          id: req.body.selDriversArr[i].driverId,
+          id: tempId,
         },
       });
     }

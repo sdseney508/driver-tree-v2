@@ -60,7 +60,7 @@ outcomes.init(
             allowNull: true,
         },
 
-        readyorStakeholder: {
+        readyForStakeholder: {
             type: DataTypes.BOOLEAN,
             allowNull: true,
             defaultValue: false,
@@ -74,7 +74,7 @@ outcomes.init(
             type: DataTypes.STRING,
             allowNull: true,
         },
-            //TODO:  make this a JSON so we can turn it into a bullet selected list
+
         relatedEfforts: {
             type: DataTypes.STRING,
             allowNull: true,
