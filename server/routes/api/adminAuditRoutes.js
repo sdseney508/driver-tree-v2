@@ -10,6 +10,7 @@ module.exports = router;
 
 router.post('/', async (req, res) => {
     try {
+        console.log(req.body);
         const adminAuditData = await adminAudit.create(req.body);
         res.status(200).json(adminAuditData);
     } catch (err) {
@@ -40,7 +41,7 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-//update/change a adminAudit info
+//update/change an adminAudit info
 router.put('/:id', async (req, res) => {
     try {
         const adminAuditData = await adminAudit.update(req.body, {
@@ -61,7 +62,7 @@ router.put('/:id', async (req, res) => {
 
 });
 
-//delete a adminAudit
+//delete an adminAudit
 router.delete('/:id', async (req, res) => {
     try {
         const adminAuditData = await adminAudit.destroy({

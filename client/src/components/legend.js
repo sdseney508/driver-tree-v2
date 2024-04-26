@@ -10,6 +10,10 @@ import { faCircle } from "@fortawesome/free-solid-svg-icons";
 const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
   //the below function gets all of the stakeholders and abbreviations from the driverTreeObj, then removes any duplicates and places them in a list under the legend
   const [statusDefinition, setStatusDefinition] = useState([]);
+
+  //flatten the driverTreeObj for the map function, also allows it to be searched for duplicates
+  let flatDriverTreeObj = driverTreeObj.flat();
+
   useEffect(() => {
     const getInfo = async () => {
       let outcomeId = selOutcome.id;
@@ -18,8 +22,9 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
       });
     };
     getInfo();
+    console.log(flatDriverTreeObj);
   }, [selOutcome]);
-
+  //updating the color codes definitions at the bottom of the page
   const handleInputChange = (e) => {
     if (recordLockState) {
       return;
@@ -37,10 +42,18 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
     return backGroundColor[statusId];
   }
 
+  //updating the Stakeholders Table and the associated drivers.  Here we cycle throught the flatDriverTreeObj and update the stakeholders in the driver model
   const handleSubmit = async (e) => {
     e.preventDefault();
-    let body = { [e.target.name]: e.target.value };
-    await updateDriver(e.target.dataset.legendId, state.userId, body);
+    debugger;
+    for (let i = 0; i < flatDriverTreeObj.length; i++) {
+      if (
+        flatDriverTreeObj[i] !== null && flatDriverTreeObj[i].stakeholderAbbreviation === e.target.dataset.abbr
+      ) {
+        let body = { [e.target.name]: e.target.value };
+        await updateDriver(flatDriverTreeObj[i].driverId, state.userId, body);
+      }
+    }
   };
 
   const statusDef = () => {
@@ -82,17 +95,23 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
 
   const stake = (driverTreeObj) => {
     let stakes = [];
-    if (driverTreeObj.length < 1) {
+    if (!driverTreeObj || driverTreeObj.length < 1) {
       return;
     }
+
+    //first we flatten the array of objects to an array of strings.  This allows the map to work correctly
+    const flatDriverTreeObj = driverTreeObj.flat();
     // eslint-disable-next-line array-callback-return
-    return driverTreeObj.map((f, index) => {
-      let temp = {
-        sholder: driverTreeObj[index].stakeholders,
-        abbrev: driverTreeObj[index].stakeholderAbbreviation,
-      };
+    return flatDriverTreeObj.map((f, index) => {
+      let temp = {};
+      if (flatDriverTreeObj[index] !== null) {
+        temp = {
+          sholder: flatDriverTreeObj[index].stakeholders,
+          abbrev: flatDriverTreeObj[index].stakeholderAbbreviation,
+        };
+      }
       const duplicate = stakes.find((s) => s.abbrev === temp.abbrev);
-      if (duplicate) {
+      if (duplicate || flatDriverTreeObj[index] === null) {
       } else {
         stakes.push(temp);
         return (
@@ -103,8 +122,9 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
                   <Form.Control
                     as="input"
                     name="stakeholders"
-                    data-legendid={driverTreeObj[index].id}
-                    defaultValue={driverTreeObj[index].stakeholders || ""}
+                    data-legendid={flatDriverTreeObj[index].driverId}
+                    defaultValue={flatDriverTreeObj[index].stakeholders || ""}
+                    data-abbr={flatDriverTreeObj[index].stakeholderAbbreviation}
                     onBlur={handleSubmit}
                     disabled={recordLockState}
                     className={styles.legend_input}
@@ -116,7 +136,7 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
                 style={{ width: "35px" }}
                 className={styles.legend_input}
               >
-                {driverTreeObj[index].stakeholderAbbreviation}
+                {flatDriverTreeObj[index].stakeholderAbbreviation}
               </Col>
             </Row>
           </div>

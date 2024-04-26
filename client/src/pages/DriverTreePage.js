@@ -400,8 +400,9 @@ const DriverTreePage = () => {
           };
           await addOutcomeDriver(body);
 
-          //check to see if it is in  acluster
+          //check to see if it is in a cluster
           if (driverBody[i][j].clusterId) {
+            debugger;
             if (!clusterName) {
               clusterName = driverBody[i][j].cluster.clusterName;
             }
@@ -461,7 +462,7 @@ const DriverTreePage = () => {
             body = {
               outcomeId: newOutcomeId,
               clusterName: clusterName,
-              selDriversArr: selectedDrivers,
+              // selDriversArr: selectedDrivers,
             };
             debugger;
             const clusterD = await createCluster(body);
@@ -534,7 +535,6 @@ const DriverTreePage = () => {
         }
       }
     }
-    debugger;
     for (let m = 0; m < arrowBody.length; m++) {
       //removal of UID is handled by the arrow router
       await createArrow(arrowBody[m]);
@@ -544,7 +544,7 @@ const DriverTreePage = () => {
     });
 
     navigate("/drivertree/" + newOutcomeId);
-    window.location.reload();
+    // window.location.reload();
     //now that we've created all the drivers, we'll create the clusters.  we'll make a single new object of the drivers
   };
 
@@ -570,18 +570,19 @@ const DriverTreePage = () => {
                 <button className={styles.dtree_btn} onClick={newOutcome}>
                   New Outcome
                 </button>
-                <button
+                {selOutcome.state === "Draft" ? (<button
                   className={styles.dtree_btn}
                   onClick={() => setClusterModal(true)}
                 >
                   Create Cluster
-                </button>
-                <button
+                </button>): null}
+                {selOutcome.state === "Draft" ? (<button
                   className={styles.dtree_btn}
                   onClick={() => toggleArrow()}
                 >
                   Create Arrow
-                </button>
+                </button>): null}
+
                 <button
                   className={styles.dtree_btn}
                   onClick={() => customStyles("outcome")}
@@ -738,7 +739,6 @@ const DriverTreePage = () => {
           {/*change everything in the signup form components*/}
           <ClusterModal
             onModalSubmit={onModalSubmit}
-            driverTreeObj={driverTreeObj}
             setDriverTreeObj={setDriverTreeObj}
             selDriver={selDriver}
             setClusterModal={setClusterModal}

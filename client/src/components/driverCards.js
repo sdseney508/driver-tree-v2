@@ -84,6 +84,7 @@ const DriverCards = ({
         });
       }
     };
+    console.log('drivercards');
     getDriversData(selOutcome, viewId);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -95,7 +96,7 @@ const DriverCards = ({
         setArrows(data.data);
       });
     };
-
+    console.log('drivercards');
     updateArrows();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [driverTreeObj]);
@@ -105,6 +106,7 @@ const DriverCards = ({
       console.log(driverTreeObj);
       setLoading(false);
     }
+    console.log('drivercards');
   }, [driverTreeObj]);
 
   const addArrowToView = async () => {
@@ -1129,14 +1131,14 @@ const DriverCards = ({
               <Row style={{ minHeight: "500px", width: "100%" }}>
                 <br />
                 <br />
-                {/* {!loading ? (
+                {!loading ? (
                   <Legend
                     driverTreeObj={driverTreeObj}
                     selOutcome={selOutcome}
                     recordLockState={recordLockState}
                     state={state}
                   />
-                ) : null} */}
+                ) : null}
               </Row>
             </Row>
           </Col>
