@@ -124,10 +124,12 @@ User.init(
   {
     hooks: {
       beforeCreate: async (newUserData) => {
+        console.log("passwords has been encrypted");
         newUserData.password = await bcrypt.hash(newUserData.password, 10);
         newUserData.passwordExpiration = new Date(
           Date.now() + 90 * 24 * 60 * 60 * 1000
         );
+        console.log(newUserData);
         return newUserData;
       },
 
@@ -136,11 +138,13 @@ User.init(
         //You need to check if the password has been changed since we update the last login on every login
         if (updatedUserData.changed('password')) {    
           // Proceed to hash the new password
+          console.log("password has been changed");
           updatedUserData.password = await bcrypt.hash(updatedUserData.password, 10);
           updatedUserData.passwordExpiration = new Date(
             Date.now() + 90 * 24 * 60 * 60 * 1000
           );
         }
+        return updatedUserData;
       },
     },
     indexes: [

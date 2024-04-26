@@ -99,10 +99,12 @@ router.post("/", async (req, res) => {
     const userData = await User.create(req.body);
     if (!User) {
       return res.status(400).json({ message: "Something went wrong!" });
+    } else {
+      console.log('User created with hashed password:', userData.password);
     }
     const token = signToken({ id: userData.id });
     const userUpdate = await User.update(
-      { password: req.body.password },
+      { password: userData.password },
       {
         where: {
           id: userData.id,
