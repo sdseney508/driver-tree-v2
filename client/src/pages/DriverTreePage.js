@@ -121,7 +121,10 @@ const DriverTreePage = () => {
     getUserData({ navigate, state, setState, outcomeId, error, setError });
     getAppData();
     authCheck();
-    setLoading(false);
+    setTimeout(() => {
+      setLoading(false);
+    }, 150);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -381,14 +384,14 @@ const DriverTreePage = () => {
     let selectedDrivers = [];
     let clusterArr = "";
     let clusterName = "";
-    let oldDriverId="";
+    let oldDriverId = "";
     //for the new driverTreeObj structure:  need to cycle through driverBody columns and drivers in each column
     for (let i = 0; i < driverBody.length; i++) {
       if (driverBody[i] !== null) {
         for (let j = 0; j < driverBody[i].length; j++) {
           driverBody[i][j].outcomeId = newOutcomeId;
           driverBody[i][j].modified = "No";
-          oldDriverId=driverBody[i][j].driverId;
+          oldDriverId = driverBody[i][j].driverId;
           delete driverBody[i][j].outcomeDrivers.driverId;
           const driverData = await createDriver(driverBody[i][j], state.userId);
           let body = {
@@ -502,27 +505,19 @@ const DriverTreePage = () => {
             arrowBody[j].outcomeId = newOutcomeId;
             if (
               arrowBody[j].start.startsWith("card") &&
-              arrowBody[j].start.endsWith(
-                "d" + oldDriverId
-              )
+              arrowBody[j].start.endsWith("d" + oldDriverId)
             ) {
               arrowBody[j].start =
-                arrowBody[j].start.slice(
-                  0,
-                  -oldDriverId.toString().length
-                ) + driverData.data.id;
+                arrowBody[j].start.slice(0, -oldDriverId.toString().length) +
+                driverData.data.id;
             }
             if (
               arrowBody[j].end.startsWith("card") &&
-              arrowBody[j].end.endsWith(
-                "d" + oldDriverId
-              )
+              arrowBody[j].end.endsWith("d" + oldDriverId)
             ) {
               arrowBody[j].end =
-                arrowBody[j].end.slice(
-                  0,
-                  -oldDriverId.toString().length
-                ) + driverData.data.id;
+                arrowBody[j].end.slice(0, -oldDriverId.toString().length) +
+                driverData.data.id;
             }
             if (arrowBody[j].end === "outcomeId" + oldOutcomeId) {
               arrowBody[j].end =
@@ -570,19 +565,22 @@ const DriverTreePage = () => {
                 <button className={styles.dtree_btn} onClick={newOutcome}>
                   New Outcome
                 </button>
-                {selOutcome.state === "Draft" ? (<button
-                  className={styles.dtree_btn}
-                  onClick={() => setClusterModal(true)}
-                >
-                  Create Cluster
-                </button>): null}
-                {selOutcome.state === "Draft" ? (<button
-                  className={styles.dtree_btn}
-                  onClick={() => toggleArrow()}
-                >
-                  Create Arrow
-                </button>): null}
-
+                {selOutcome.state === "Draft" ? (
+                  <button
+                    className={styles.dtree_btn}
+                    onClick={() => setClusterModal(true)}
+                  >
+                    Create Cluster
+                  </button>
+                ) : null}
+                {selOutcome.state === "Draft" ? (
+                  <button
+                    className={styles.dtree_btn}
+                    onClick={() => toggleArrow()}
+                  >
+                    Create Arrow
+                  </button>
+                ) : null}
                 <button
                   className={styles.dtree_btn}
                   onClick={() => customStyles("outcome")}
