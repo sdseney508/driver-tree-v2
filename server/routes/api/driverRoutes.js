@@ -207,7 +207,6 @@ router.get("/byoutcome/:id", async (req, res) => {
           }
           groupedByTier[tier].push(flattenedData[0][i]);  
         }    
-    //     res.status(200).json(groupedByTier);
     res.status(200).json(groupedByTier);
   } catch (err) {
     res.status(400).json(err);

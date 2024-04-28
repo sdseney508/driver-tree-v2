@@ -35,9 +35,10 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
 
   function colorByStatus(statusId) {
     const backGroundColor = {
-      1: "green",
-      2: "yellow",
-      3: "red",
+      1: "blue",
+      2: "green",
+      3: "yellow",
+      4: "red",
     };
     return backGroundColor[statusId];
   }
