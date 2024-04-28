@@ -11,7 +11,6 @@ const addOutcomeDriver = (body) => {
 
 //removes a driver from a view; the body is the outcomeId and the driverId
 const removeOutcomeDriver = (body) => {
-  console.log(body);
   return axios.delete(apiURL + "/outcomeDrivers/delete/"+ body.outcomeId + "/" + body.driverId);
 }
 

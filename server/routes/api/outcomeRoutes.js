@@ -3,6 +3,7 @@ const {
   outcomes,
   stakeholders,
   adminAudit,
+  status,
   statusDefinition,
   drivers,
   clusters,
@@ -33,33 +34,42 @@ router.post("/new", async (req, res) => {
       { transaction }
     );
 
-    //create the new status definition for red yellow green, these can be modified in the Legend section of the DriverTreePage
-    await statusDefinition.create(
-      {
-        outcomeId: outcomesData.id,
-        statusId: 1,
-        statusDefinition: "On Schedule",
-      },
-      { transaction }
-    );
+    //create the new status definitions, these are pulled from the status model and the definitions can be modified in the Legend section of the DriverTreePage
+    let statuses = await status.findAll({transaction});
+    console.log("statuses 1: " + statuses[0].status);
+    console.log("statuses 2: " + statuses[1].status);
+    console.log("statuses 3: " + statuses[2].status);
+    console.log("statuses 4: " + statuses[3].status);
+
+    for (let i = 0; i < statuses.length; i++) {
 
     await statusDefinition.create(
       {
         outcomeId: outcomesData.id,
-        statusId: 2,
-        statusDefinition: ">1 month behind",
+        statusId: i + 1,
+        statusDefinition: "New Outcome, please update me",
       },
       { transaction }
     );
 
-    await statusDefinition.create(
-      {
-        outcomeId: outcomesData.id,
-        statusId: 3,
-        statusDefinition: ">2 months behind",
-      },
-      { transaction }
-    );
+    // await statusDefinition.create(
+    //   {
+    //     outcomeId: outcomesData.id,
+    //     statusId: 2,
+    //     statusDefinition: ">1 month behind",
+    //   },
+    //   { transaction }
+    // );
+
+    // await statusDefinition.create(
+    //   {
+    //     outcomeId: outcomesData.id,
+    //     statusId: 3,
+    //     statusDefinition: ">2 months behind",
+    //   },
+    //   { transaction }
+    // );
+    }
     await transaction.commit();
     res.status(200).json(outcomesData);
   } catch (err) {

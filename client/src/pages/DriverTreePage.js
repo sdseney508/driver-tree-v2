@@ -161,7 +161,6 @@ const DriverTreePage = () => {
     navigate("/drivertree/" + selOutcome.id);
     if (driverTreeObj.length > 0) {
       setLoading(false);
-      console.log(loading);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome, viewId, opacity]);
@@ -169,8 +168,6 @@ const DriverTreePage = () => {
   const authCheck = (command, stakeholder) => {
     //checks to see if the user has access to the desired outcome
     //first we grab the user data from state and the outcome data from the database then compare the user command with the outcoem stakeholder
-    console.log(command);
-    console.log(stakeholder);
     if (command !== stakeholder) {
       alert("You do not have access to this outcome in dtree page");
       navigate("/user");
@@ -363,7 +360,6 @@ const DriverTreePage = () => {
       body.state = "Draft";
       delete body.id;
       newOutcomeId = data.data.id;
-      console.log(body);
       updateOutcome(data.data.id, body);
     });
     //now we update the statusdefinitions that were created on the server side.
@@ -378,7 +374,6 @@ const DriverTreePage = () => {
 
     //now we need to create the new drivers and clusters.  We'll start by creating the drivers, then we'll create the clusters, then we'll create the arrows, lastly we'll create the outcomeDrivers to associate the drivers with the outcome
     let driverBody = JSON.parse(JSON.stringify(driverTreeObj));
-    console.log(driverBody);
     let arrowBody = JSON.parse(JSON.stringify(arrows));
     delete arrowBody.id;
     delete driverBody.id;
@@ -512,7 +507,6 @@ const DriverTreePage = () => {
           //now we cycle through the arrows for cards and outcome and update them.
           for (let j = 0; j < arrowBody.length; j++) {
             delete arrowBody[j].id;
-            console.log(oldDriverId);
             arrowBody[j].outcomeId = newOutcomeId;
             if (
               arrowBody[j].start.startsWith("card") &&
@@ -622,7 +616,7 @@ const DriverTreePage = () => {
                     Make Active
                   </button>
                 ) : null}
-                Outcome Version: {selOutcome.version} Outcome State:{" "}
+                Outcome Version: {selOutcome.version} &nbsp; &nbsp; &nbsp; &nbsp; Outcome State: &nbsp; &nbsp; 
                 {selOutcome.state}
               </Col>
             ) : (

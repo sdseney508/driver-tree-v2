@@ -75,7 +75,6 @@ router.post("/new", async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     let subTier;
-    let tierLevel;
     //first create the outcome, the req.body needs to include the outcomeId and the driverId
     if (!req.body.subTier) {
       subTier = await outcomeDrivers.max("subTier", {
@@ -84,14 +83,13 @@ router.post("/new", async (req, res) => {
           outcomeId: req.body.outcomeId,
         },
       });
-      console.log(subTier);
+      //null check for the subTier and initialize it to 0 if it is null
       if (subTier === null) {
-        subTier = 1;
-      } else {
+        subTier = 0;
+      } 
       req.body.subTier = subTier + 1;
-      }
+    
     } 
-    console.log(req.body);
     const outcomeDriverData = await outcomeDrivers.create(req.body, {
       transaction,
     });
