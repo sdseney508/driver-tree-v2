@@ -45,7 +45,7 @@ router.post("/new/:userId", async (req, res) => {
         },
         { transaction }
       );
-      const auditres = await adminAudit.create(
+      await adminAudit.create(
         {
           action: "Create",
           model: "drivers",
@@ -258,6 +258,7 @@ router.get("/byOutcomeByTier/:id", async (req, res) => {
 });
 
 router.put("/clusterUpdate/:id", async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
     req.body.modified = "Yes";
     const driversData = await drivers.update(req.body, {
@@ -269,6 +270,19 @@ router.put("/clusterUpdate/:id", async (req, res) => {
       res.status(404).json({ message: "No clusters found with this id!" });
       return;
     }
+    await adminAudit.create(
+      {
+        action: "Update",
+        model: "drivers",
+        tableUid: req.params.id,
+        fieldName: "All",
+        newData: JSON.stringify(req.body),
+        oldData: JSON.stringify(oldData),
+        userId: req.params.userId,
+      },
+      { transaction }
+    );
+    await transaction.commit();
     res.status(200).json(driversData);
   } catch (err) {
     res.status(400).json(err);
@@ -297,7 +311,6 @@ router.put("/update/:id/:userId", async (req, res) => {
       },
       transaction,
     });
-    console.log(driversData);
     await adminAudit.create(
       {
         action: "Update",

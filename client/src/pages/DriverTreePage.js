@@ -227,11 +227,6 @@ const DriverTreePage = () => {
     setShowTable({ tableStyle, driverStyle });
   };
 
-  const goToDriver = async (e) => {
-    e.preventDefault();
-    navigate("/drpage/" + selOutcome.id + "/" + driverTreeObj[0].id);
-  };
-
   //creates new outcome and then resets the selOutcome state.  This cause a a useEffect fire and refreshes the page.
   const newOutcome = async () => {
     let body = { stakeholderId: state.command, userId: state.userId };
@@ -564,9 +559,6 @@ const DriverTreePage = () => {
                 >
                   Generate PDF
                 </button>
-                <button className={styles.dtree_btn} onClick={goToDriver}>
-                  Driver Details
-                </button>
                 <button className={styles.dtree_btn} onClick={newOutcome}>
                   New Outcome
                 </button>
@@ -748,6 +740,7 @@ const DriverTreePage = () => {
             setSelDriver={setSelDriver}
             selOutcome={selOutcome}
             setSelOutcome={setSelOutcome}
+            state={state}
           />
           <Button variant="secondary" onClick={handleClose}>
             Close

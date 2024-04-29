@@ -100,7 +100,9 @@ const DriverCards = ({
 
   useEffect(() => {
     if (driverTreeObj.length > 0) {
-      setLoading(false);
+      setTimeout(() => {
+        setLoading(false);
+      }, 250);
     }
   }, [driverTreeObj]);
 
@@ -152,20 +154,30 @@ const DriverCards = ({
     let startP;
     let body = { status: newStatus };
     //initialize the update array with the current card.  the update array will be used to update all the cards in the chain and will be changed on every iteration of the tier for loop
-
+    //flatten the drvierTreeObj so we can search it for the clusterId
+    let flatDriverTree = driverTreeObj.flat();
     for (let i = tier; 1 < i; i--) {
+      let clustCheck =0;
       //either look at just the card cause you're in the first loop, or you need to search through the remainder of the updateArr beginning at where the last loop left off
       if (i === tier) {
         //this is the first loop, so we need to look at the card
         for (let k = 0; k < arrows.length; k++) {
           //if it is in a cluster, we need to find all the arrows that have the cluster as a start point
           //the below string literal is based on how cluster info is passed to the arrows model.  refer to either the arrows model start or end with a cluster already made for an example or look at driverCards.js tierCards function for naming format.
+          //first we flatten the driver tree obj
           //first check driverTreeObj to see if the card is in a cluster
-          let clustCheck = driverTreeObj[0].findIndex((item) => item.outcomeDrivers.driverId == cardid);
-          if (driverTreeObj[0][clustCheck].clusterId) {
-            startP = `tier${i}cluster${driverTreeObj[0][clustCheck].clusterId}`;
+          
+          
+          for (let m = 1; m < flatDriverTree.length; m++) {
+            if (flatDriverTree[m].driverId == cardid && clustCheck == 0) {
+              clustCheck = m;
+              m = flatDriverTree.length;
+            }
           }
-          //the card is in a cluster, so we need to find all the arrows that have the cluster as a start point
+          // the below looks at id the card is in a cluster, so we need to find all the arrows that have the cluster as a start point
+          if (flatDriverTree[clustCheck].clusterId) {
+            startP = `tier${i}cluster${flatDriverTree[clustCheck].clusterId}`;
+          }
           if (
             arrows[k].start === startP ||
             arrows[k].start === `card${updateArr[0]}`
@@ -175,10 +187,9 @@ const DriverCards = ({
               //we need to find all the cards in the cluster and update them
               let clusterId = endPoint.slice(12);
               //this will produce an array of driver cards that we will update using the updateDriver function
-              //TODO:  Figure out why the database call is not returning the correct data
-              for (let cl = 0; cl < driverTreeObj.length; cl++) {
-                if (driverTreeObj[cl].clusterId == clusterId) {
-                  updateArr.push(driverTreeObj[cl].outcomeDrivers.driverId);
+              for (let cl = 1; cl < flatDriverTree.length; cl++) {
+                if (flatDriverTree[cl].clusterId == clusterId) {
+                  updateArr.push(flatDriverTree[cl].outcomeDrivers.driverId);
                 }
               }
             } else {
@@ -197,34 +208,40 @@ const DriverCards = ({
           loopEnd = updateArr.length;
         }
       } else {
+        debugger;
+        let clustCheck=0;
         //this is not the first loop, so we need to look at the updateArr
         for (let j = arrayCounter; j < loopEnd; j++) {
           arrayCounter++;
+
           //we need to find all the arrows that have the card as a start point
           for (let k = 0; k < arrows.length; k++) {
             //if it is in a cluster, we need to find all the arrows that have the cluster as a start point
             //the below string literal is based on how cluster info is passed to the arrows model.  refer to either the arrows model start or end with a cluster already made for an example or look at driverCards.js tierCards function for naming format.
             //first check driverTreeObj to see if the card is in a cluster
-            let clustCheck = driverTreeObj.findIndex(
-              (item) => item.id == updateArr[j]
-            );
-            if (driverTreeObj[clustCheck].clusterId) {
-              startP = `tier${i}cluster${driverTreeObj[clustCheck].clusterId}`;
+            
+            for (let n = 1; n < flatDriverTree.length; n++) {
+              if (flatDriverTree[n].driverId == updateArr[j] && clustCheck == 0) {
+                clustCheck = n;
+                n = flatDriverTree.length;
+              }
+            }
+            if (clustCheck !== 0 && flatDriverTree[clustCheck].clusterId) {
+              startP = `tier${i}cluster${flatDriverTree[clustCheck].clusterId}`;
             }
             //the card is in a cluster, so we need to find all the arrows that have the cluster as a start point
             if (
               arrows[k].start === startP ||
               arrows[k].start === `card${updateArr[j]}`
             ) {
-              //the card is in a cluster, so we need to find all the arrows that have the cluster as a start point
               //the arrow has a start point that is valid, so we need to look at the endpoint of the arrow, beginning with finding out if the endpoint is a cluster.  if it is a cluster, we do a database call and update all cards in the cluster.  if it is not a cluster, we update the card.
               let endPoint = arrows[k].end;
               if (endPoint.includes("cluster")) {
                 //we need to find all the cards in the cluster and update them
                 let clusterId = endPoint.slice(12);
                 //this will produce an array of driver cards that we will update using the updateDriver function
-                for (let cl = 0; cl < driverTreeObj.length; cl++) {
-                  if (driverTreeObj[cl].clusterId == clusterId) {
+                for (let cl = 1; cl < flatDriverTree.length; cl++) {
+                  if (flatDriverTree[cl].clusterId == clusterId) {
                     updateArr.push(driverTreeObj[cl].outcomeDrivers.driverId);
                   }
                 }
@@ -256,12 +273,14 @@ const DriverCards = ({
 
     //now update the outcome
     let outcomeBody = { status: newStatus };
-    updateOutcome(driverTreeObj[0].outcomeId, outcomeBody);
-
-    // //now update the driver tree object
-    await getDriverByOutcome(selOutcome.id).then((data) => {
-      setDriverTreeObj(data.data[0]);
-    });
+    await updateOutcome(selOutcome.id, outcomeBody);
+    let updatedoutcome = await getOutcome(selOutcome.id);
+    setSelOutcome(updatedoutcome.data);
+    // window.location.reload();
+    // // //now update the driver tree object
+    // await getDriverByOutcome(selOutcome.id).then((data) => {
+    //   setDriverTreeObj(data.data[0]);
+    // });
   };
 
   //used in the Tier cards to create the driver cards for both the regular and the cluser
@@ -445,7 +464,7 @@ const DriverCards = ({
     );
   };
 
-  const delCluster = (e) => {
+  const delCluster = async (e) => {
     e.preventDefault();
     if (recordLockState) {
       //kick them out and dont let them delete
@@ -473,9 +492,10 @@ const DriverCards = ({
     }
     deleteCluster(e.target.dataset.cluster);
 
-    getDriverByOutcome(selOutcome.id).then((data) => {
-      setDriverTreeObj(data.data[0]);
+    await getOutcome(selOutcome.id).then((data) => {
+      setSelOutcome(data.data);
     });
+    window.location.reload();
   };
 
   const useDrag = (e) => {
@@ -602,7 +622,7 @@ const DriverCards = ({
     });
   }
 
-  const delDriver = (e) => {
+  const delDriver = async (e) => {
     e.preventDefault();
     if (
       !window.confirm(
@@ -625,12 +645,8 @@ const DriverCards = ({
     let body = { outcomeId: selOutcome.id, driverId: e.target.dataset.cardid };
     removeOutcomeDriver(body);
 
-    getDriverByOutcome(selOutcome.id).then((data) => {
-      setDriverTreeObj(data.data[0]);
-    });
-
-    setSelOutcome(selOutcome);
-    window.location.reload();
+    let updatedoutcome = await getOutcome(selOutcome.id);
+    setSelOutcome(updatedoutcome.data);
   };
 
   const goToDriver = async (e) => {
@@ -855,7 +871,6 @@ const DriverCards = ({
 
   function tierCards(tier, driverTreeObj, {viewObj }) {
     let viewCheck;
-
     const arr = []; //just an empty arr that will be filled with driverTreeObj
     let clusterNumber = 0; //this is just used to see how far to expand a cluster
     let clusterName; //doing it this way to so i dont need the logic when dealing with the first element of the array.
@@ -1134,7 +1149,7 @@ const DriverCards = ({
               </Row>
             </Row>
           </Col>
-          <Col className={styles.driver} key="1">
+         {!loading ? (<><Col className={styles.driver} key="1">
             <Row>Tier 1 Drivers {tierButtons(1)}</Row>
             <Row id={`tier1Cards`} key={`tier1Cards`} className={styles.my_row}>
               {tierCards(1,  driverTreeObj[1], {viewObj })}
@@ -1170,7 +1185,7 @@ const DriverCards = ({
               {tierCards(6,  driverTreeObj[6], {viewObj })}
             </Row>
 
-          </Col>
+          </Col></>): null}
           {!loading ? (
             <DriverArrows
               arrows={arrows}

@@ -22,7 +22,6 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
       });
     };
     getInfo();
-    console.log(flatDriverTreeObj);
   }, [selOutcome]);
   //updating the color codes definitions at the bottom of the page
   const handleInputChange = (e) => {
@@ -63,7 +62,6 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
     }
     statusDefinition.sort((a, b) => a.statusId - b.statusId);
     return statusDefinition.map((f, ind) => {
-      console.log(f);
       let statColor = colorByStatus(f.statusId);
       return (
         <div key={"statusDefDiv" + f.id}>

@@ -3,32 +3,34 @@ import { Button, Row } from "react-bootstrap";
 import ClusterTable from "./ClusterTable";
 import styles from "./ClusterModal.module.css";
 import { createCluster } from "../utils/cluster";
-import { getDriverByOutcome } from "../utils/drivers";
+import { getOutcome } from "../utils/drivers";
 
 const ClusterModal = ({
-  setDriverTreeObj,
   selDriver,
   setClusterModal,
   setSelDriver,
   selOutcome,
   setSelOutcome,
+  state
 }) => {
   const [selectedDrivers, setSelectedDrivers] = useState([]);
 
   //creates a cluster from the selected drivers. 
   //New logic:  create a new cluster in the cluster model, this will then append the clusterId to the driver model.  This will allow for the cluster to be updated and deleted without having to update the driver model.
   const makeCluster = async() => {
+    debugger;
     for (let i = 0; i < selectedDrivers.length - 1; i++) {
       if (selectedDrivers[i].tierLevel !== selectedDrivers[i + 1].tierLevel) {
         alert("Drivers must be in the same tier");
         return;
       }
     }
-    let body = {outcomeId: selOutcome.id, selDriversArr: selectedDrivers, clusterName: "For Test"};
-    createCluster(body);
+    let body = {outcomeId: selOutcome.id, selDriversArr: selectedDrivers, userId: state.userId, clusterName: "For Test"};
+    await createCluster(body);
     //update the selected drivers with the clusterId
-    getDriverByOutcome(selOutcome.id).then((data) => {
-      setDriverTreeObj(data.data);
+    await getOutcome(selOutcome.id).then((data) => {
+      console.log(data.data);
+      setSelOutcome(data.data);
     });
     window.location.reload();
     setClusterModal(false);

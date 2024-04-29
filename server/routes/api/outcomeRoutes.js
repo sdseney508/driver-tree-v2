@@ -35,11 +35,7 @@ router.post("/new", async (req, res) => {
     );
 
     //create the new status definitions, these are pulled from the status model and the definitions can be modified in the Legend section of the DriverTreePage
-    let statuses = await status.findAll({transaction});
-    console.log("statuses 1: " + statuses[0].status);
-    console.log("statuses 2: " + statuses[1].status);
-    console.log("statuses 3: " + statuses[2].status);
-    console.log("statuses 4: " + statuses[3].status);
+    let statuses = await status.findAll({transaction})
 
     for (let i = 0; i < statuses.length; i++) {
 
@@ -51,24 +47,6 @@ router.post("/new", async (req, res) => {
       },
       { transaction }
     );
-
-    // await statusDefinition.create(
-    //   {
-    //     outcomeId: outcomesData.id,
-    //     statusId: 2,
-    //     statusDefinition: ">1 month behind",
-    //   },
-    //   { transaction }
-    // );
-
-    // await statusDefinition.create(
-    //   {
-    //     outcomeId: outcomesData.id,
-    //     statusId: 3,
-    //     statusDefinition: ">2 months behind",
-    //   },
-    //   { transaction }
-    // );
     }
     await transaction.commit();
     res.status(200).json(outcomesData);
@@ -154,7 +132,6 @@ router.get("/draft", async (req, res) => {
 
 router.get("/retired", async (req, res) => {
   try {
-    // console.log("i started the get to sign route");
     const outcomesData = await outcomes.findAll({
       where: { olstat: "Retired" },
     });

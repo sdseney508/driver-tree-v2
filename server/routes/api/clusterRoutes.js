@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const { clusters, drivers } = require("../../models");
+const { clusters, drivers, adminAudit } = require("../../models");
 const sequelize = require("../../config/connection");
 const { Op } = require("sequelize");
 
@@ -14,29 +14,36 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-//create a new cluster; 
+//create a new cluster;
 router.post("/new", async (req, res) => {
+  // const transaction = await sequelize.transaction();
   try {
     //first create the cluster, the req.body needs to include the outcomeID and the driverID
-    console.log("req.body: ", req.body);
-    const clusterData = await clusters.create({outcomeId: req.body.outcomeId, clusterName: req.body.clusterName});
-    //TODO:  this is a workaround because the data models are slightly off; in a perfect world, i would update the createDriver call on driverTreePage.js to use id instead of driverId 
-    
+    const clusterData = await clusters.create(
+      { outcomeId: req.body.outcomeId, clusterName: req.body.clusterName }
+    );
+    //the below code doesnt work with any trasnactions
     for (let i = 0; i < req.body.selDriversArr.length; i++) {
       let tempId;
-      if(req.body.selDriversArr[i].driverId){
+      if (req.body.selDriversArr[i].driverId) {
         tempId = req.body.selDriversArr[i].driverId;
       } else {
         tempId = req.body.selDriversArr[i].id;
       }
-      await drivers.update({clusterId: clusterData.dataValues.id}, {
-        where: {
-          id: tempId,
-        },
-      });
+
+      await drivers.update(
+        { clusterId: clusterData.dataValues.id },
+        {
+          where: {
+            id: tempId,
+          },
+        }
+      );
     }
+
     res.status(200).json(clusterData);
   } catch (err) {
+    console.log(err);
     res.status(400).json(err);
   }
 });
@@ -67,7 +74,7 @@ router.put("/update/:id", async (req, res) => {
 });
 
 //delete cluster
-//TODO:  make sure you put an "Are you sure" prompt and only let this be done 
+//TODO:  make sure you put an "Are you sure" prompt and only let this be done
 router.delete("/:id", async (req, res) => {
   try {
     //delete from clusters model
@@ -78,11 +85,14 @@ router.delete("/:id", async (req, res) => {
     });
 
     //update the drivers model
-    const driversData = await drivers.update({clusterId: null}, {
-      where: {
-        clusterId: req.params.id,
-      },
-    });
+    const driversData = await drivers.update(
+      { clusterId: null },
+      {
+        where: {
+          clusterId: req.params.id,
+        },
+      }
+    );
 
     res.status(200).json(clusterData);
   } catch (err) {
