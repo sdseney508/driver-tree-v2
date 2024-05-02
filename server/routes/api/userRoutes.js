@@ -240,6 +240,7 @@ router.delete("/delete/:id/:adminId", async (req, res) => {
       model: "User",
       userId: req.params.adminId,
       fieldName: "All",
+      tableUid: req.params.id,
     });
     res.status(200).json({ message: "User account deleted"});
   } catch (err) {
