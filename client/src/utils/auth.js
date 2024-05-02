@@ -19,7 +19,6 @@ const authHeader = () => {
 };
 
 const deleteUser = (id, adminId) => {
-  console.log(id, adminId);
   return axios.delete(apiURL + "/users/delete/" + id + "/" + adminId);
 };
 
@@ -160,7 +159,6 @@ const getUserData = async ({ navigate, state, setState, outcomeId}) => {
 
 const getAdminUserData = async ({ navigate, state, setState, outcomeId }) => {
   try {
-    debugger;
     const token = loggedIn() ? getToken() : null;
     if (!token) {
       navigate("/");

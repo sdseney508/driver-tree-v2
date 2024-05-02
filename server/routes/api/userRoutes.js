@@ -223,7 +223,6 @@ router.put("/:id", async (req, res) => {
 router.delete("/delete/:id/:adminId", async (req, res) => {
   try {
     const userData = await User.findByPk(req.params.id);
-    console.log(userData);
     if (!userData) {
       res.status(404).json();
       return;
@@ -241,7 +240,6 @@ router.delete("/delete/:id/:adminId", async (req, res) => {
       model: "User",
       userId: req.params.adminId,
       fieldName: "All",
-      tableUid: req.params.id,
     });
     res.status(200).json({ message: "User account deleted"});
   } catch (err) {

@@ -97,6 +97,10 @@ const AdminAccountManagement = () => {
     });
   };
 
+  const deleteAccount = async () => {
+    await deleteUser(selUser.id, state.userId);
+  };
+
   const handleFormSubmit = async (event) => {
     event.preventDefault();
 
@@ -134,6 +138,7 @@ const AdminAccountManagement = () => {
       if (window.confirm("Are you sure you want to delete this user?")) {
         console.log("deleting user");
         await deleteUser(id, state.userId);
+        window.location.reload();
         return;
       } else {
         userStatus = "Active";
@@ -261,6 +266,7 @@ const AdminAccountManagement = () => {
                 <Button className="m-3" type="submit" variant="success">
                   Submit
                 </Button>
+
               </Form>
             </Row>
           </div>
