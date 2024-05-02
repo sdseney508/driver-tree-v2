@@ -93,7 +93,7 @@ const SignupForm = ({onModalSubmit}) => {
     const password = userFormData.password;
     const userStatus = "Requested";
     const userRole = userFormData.userRole;
-    const userCommand = userFormData.command;
+    const stakeholderId = userFormData.command;
 
     //couldnt pass the state object so had to pass each value individually
     register(
@@ -103,7 +103,7 @@ const SignupForm = ({onModalSubmit}) => {
       password,
       userStatus,
       userRole,
-      userCommand
+      stakeholderId
     )
       .then((res) => console.log(res))
       .catch((err) => console.log(err));
