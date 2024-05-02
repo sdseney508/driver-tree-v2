@@ -235,7 +235,7 @@ router.delete("/delete/:id/:adminId", async (req, res) => {
     }
     await adminAudit.create({
       action: `user account ${req.params.id} deleted by userId ${req.params.admninId}`,
-      newData: "NA",
+      newData: "Account Deleted",
       oldData: JSON.stringify(userData),
       model: "User",
       userId: req.params.adminId,
