@@ -17,7 +17,7 @@ const PageHeader = () => {
           <p className={styles.CUI}>CUI Category: Controlled Technical Information</p>
           <p className={styles.CUI}>
             This document contains Controlled Unclassified Information (CUI),
-            which is for official use only.
+            which is for Official Use Only.
           </p>
           <br></br>
           <p className={styles.CUI}>
@@ -25,7 +25,7 @@ const PageHeader = () => {
             Distribution Statement D: Distribution authorized to the DoD and
             U.S. DOD contractors only to protect proprietary and/or critical
             technology information. (2 Feb 2021). Other request shall be
-            referred to {state.selectedPMA}, Naval Air Systems Command, Patuxent
+            referred to Naval Air Systems Command, Patuxent
             River, Maryland 20670
           </p>
           <p className={styles.CUI}>

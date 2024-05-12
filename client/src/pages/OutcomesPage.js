@@ -8,9 +8,9 @@ import {
   createOutcome,
   getDriverByOutcome,
   getOutcome,
-  outcomeByCommand,
   updateOutcome,
 } from "../utils/drivers";
+import { getAllClassificationDefinitions } from "../utils/classification";
 import styles from "./OutcomesPage.module.css";
 import OutcomeTable from "../components/OutcomeTable";
 
@@ -30,10 +30,12 @@ const OutcomesPage = () => {
   //using the initial useEffect hook to open up the draft oplimits and prefill the form
   useEffect(() => {
     const getAppData = async () => {
-      if (!outcomeId) {
-        await outcomeByCommand(state.stakeholderId).then((data) => {
-          setSelOutcome(data.data[0]);
-        });
+      if (outcomeId === 0) {
+        //if the outcomeId is 0, then we are creating a new outcome
+        newOutcome();
+        // await outcomeByCommand(state.stakeholderId).then((data) => {
+        //   setSelOutcome(data.data[0]);
+        // });
       } else {
         await getOutcome(outcomeId).then((data) => {
           if(!data.data){
@@ -209,9 +211,6 @@ const OutcomesPage = () => {
                           disabled={recordLockState}
                         ></Form.Control>
                       </Row>
-                      {/* </Form.Group>
-    
-                    <Form.Group style={{ width: "100%" }}> */}
                       <Row className={styles.my_row}>
                         <Form.Label className={styles.commander_label}>
                           Action Officer:

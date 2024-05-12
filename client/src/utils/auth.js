@@ -2,6 +2,7 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import apiURL from "./apiURL";
 import { getOutcome, outcomeByCommand } from "./drivers";
+import { prefix } from "@fortawesome/free-solid-svg-icons";
 
 // import { navigate } from "@reach/router";
 
@@ -93,6 +94,7 @@ const getAppData = async ({
 };
 
 const getUserData = async ({ navigate, state, setState, outcomeId}) => {
+  
   try {
     const token = loggedIn() ? getToken() : null;
     if (!token) {
@@ -105,7 +107,8 @@ const getUserData = async ({ navigate, state, setState, outcomeId}) => {
     }
     const user = response.data;
 
-    setState({
+    await setState(prevState =>({
+      ...prevState,
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
@@ -113,7 +116,7 @@ const getUserData = async ({ navigate, state, setState, outcomeId}) => {
       userRole: user.userRole,
       command: user.stakeholderId,
       lastLogin: user.lastLogin,
-    });
+    }));
     let userDataLength = Object.keys(user).length;
     //if the user isnt logged in with an unexpired token, send them to the login page
     if (!userDataLength > 0) {
@@ -127,7 +130,7 @@ const getUserData = async ({ navigate, state, setState, outcomeId}) => {
     }
 
     //check if user is authorized to see that data
-    if (outcomeId) {
+    if (outcomeId && outcomeId !== "0") {
       await getOutcome(outcomeId).then((data) => {
         if(!data.data){
           alert("You do not have permission to view this page.");

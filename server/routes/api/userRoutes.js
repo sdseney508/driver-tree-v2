@@ -190,7 +190,8 @@ router.post("/login", async (req, res) => {
   }
 });
 
-//update User info
+//update User info, satisfies Application STIG numbers:
+//
 router.put("/:id", async (req, res) => {
   try {
     const userData = await User.findByPk(req.params.id);

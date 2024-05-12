@@ -7,7 +7,7 @@ const { Op } = require("sequelize");
 router.post('/', async (req, res) => {
   try {
     const statusData = await status.create();
-    res.status(200).json(accountStatusData);
+    res.status(200).json(statusData);
   } catch (err) {
     console.log(err);
     res.status(400).json(err);

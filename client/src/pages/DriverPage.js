@@ -9,6 +9,7 @@ import {
   getOutcome,
   updateDriver,
 } from "../utils/drivers";
+import { getAllClassificationDefinitions } from "../utils/classification";
 import DriverTable from "../components/DriversTable";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopyright } from "@fortawesome/free-solid-svg-icons";
@@ -27,6 +28,8 @@ const DriverPage = () => {
   const [selOutcome, setSelOutcome] = useState({});
   const [showModal, setShowMod] = useState(false);
   const [allquads, setAllQuads] = useState(false);
+  const [classificationState, setClassificationState] = useState([])
+  const [selectedClassificationState, setSelectedClassificationState] = useState("CUI");
   const [recordLockState, setRecordLockState] = useState(false); //this is used to lock the record while someone is editing it.  It is set to true when someone is editing the record and false when they are not.
   const navigate = useNavigate();
 
@@ -47,6 +50,9 @@ const DriverPage = () => {
         console.log(top);
         setSelOutcome(top);
       });
+      await getAllClassificationDefinitions().then((data) => {
+        setClassificationState(data.data);
+      })
       if (!driverId) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
         driverId = selDrivers[0].id;
@@ -334,6 +340,11 @@ const DriverPage = () => {
     setSelDriver({ ...selDriver, [e.target.name]: e.target.value });
   };
 
+  //this function creates the drop down list for selecting the classification of a driver
+  const classificationSelect = () => {
+
+  }
+
   const backToDriverTree = () => {
     navigate("/drivertree/" + selOutcome.id);
   };
@@ -426,6 +437,7 @@ const DriverPage = () => {
                 </Col>
               </div>
               {generateQuad(selDriver)}
+
             </Row>
             {loading ? ( 
               <Row style={{ height: "250px" }}>

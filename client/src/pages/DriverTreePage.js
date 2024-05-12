@@ -5,7 +5,6 @@ import {
   createOutcome,
   getDriverByOutcome,
   getOutcome,
-  outcomeByCommand,
   updateOutcome,
 } from "../utils/drivers";
 import { createArrow } from "../utils/arrows";
@@ -100,26 +99,30 @@ const DriverTreePage = () => {
 
   //using the initial useEffect hook to open up the driver trees and prefill the table at the bottom of the page
   useEffect(() => {
-    const getAppData = async () => {
-      if (!outcomeId) {
-        await outcomeByCommand(state.stakeholderId).then((data) => {
-          setSelOutcome(data.data[0]);
-        });
+    const getAppData = async (user) => {
+      if (outcomeId === "0") {
+        //there is no outcomeId, so we need to create a new outcome
+        await newOutcome(user);
+        // await outcomeByCommand(state.stakeholderId).then((data) => {
+        //   setSelOutcome(data.data[0]);
+        // });
       } else {
         await getOutcome(outcomeId).then((data) => {
           setSelOutcome(data.data);
         });
       }
       await getDriverByOutcome(selOutcome.id).then((data) => {
+        debugger;
         setDriverTreeObj(data.data);
       });
-      if (state.userRole === "Stakeholder" || selOutcome.state === "Active") {
+      if (user.userRole === "Stakeholder" || selOutcome.state === "Active") {
         setRecordLockState(true);
       }
     };
 
-    getUserData({ navigate, state, setState, outcomeId, error, setError });
-    getAppData();
+    let user = getUserData({ navigate, state, setState, outcomeId, error, setError });
+
+    getAppData(user);
     authCheck();
     setTimeout(() => {
       setLoading(false);
@@ -129,6 +132,7 @@ const DriverTreePage = () => {
   }, [, outcomeId]);
 
   useEffect(() => {
+    debugger;
     setLoading(true);
     const getInfo = async () => {
       setRecordLockState(false);
@@ -159,9 +163,9 @@ const DriverTreePage = () => {
       authCheck(state.command, selOutcome.stakeholderId);
     }
     navigate("/drivertree/" + selOutcome.id);
-    if (driverTreeObj.length > 0) {
+    // if (driverTreeObj.length > 0) {
       setLoading(false);
-    }
+    // }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome, viewId, opacity]);
 
@@ -228,10 +232,15 @@ const DriverTreePage = () => {
   };
 
   //creates new outcome and then resets the selOutcome state.  This cause a a useEffect fire and refreshes the page.
-  const newOutcome = async () => {
+  const newOutcome = async (user) => {
     let body = { stakeholderId: state.command, userId: state.userId };
+    if (!state.command) {
+      body.stakeholderId = user.stakeholderId;
+      body.userId = user.id;
+    }
     //the status definitions are created on the server side, no need to create them here.
-    createOutcome(body).then((data) => {
+    await createOutcome(body).then((data) => {
+      debugger;
       setState({ ...state, outcomeId: data.data.id });
       setSelOutcome(data.data);
     });
@@ -454,14 +463,13 @@ const DriverTreePage = () => {
 
           if (i === driverBody.length - 1 && selectedDrivers.length > 0) {
             //create the cluster, the driver is the last one in the arrray and cluster.
-            
+
             if (clusterName) {
               body = {
                 outcomeId: newOutcomeId,
                 clusterName: clusterName,
                 selDriversArr: selectedDrivers,
               };
-
             } else {
               body = {
                 outcomeId: newOutcomeId,
@@ -608,7 +616,8 @@ const DriverTreePage = () => {
                     Make Active
                   </button>
                 ) : null}
-                Outcome Version: {selOutcome.version} &nbsp; &nbsp; &nbsp; &nbsp; Outcome State: &nbsp; &nbsp; 
+                Outcome Version: {selOutcome.version} &nbsp; &nbsp; &nbsp;
+                &nbsp; Outcome State: &nbsp; &nbsp;
                 {selOutcome.state}
               </Col>
             ) : (
@@ -651,7 +660,7 @@ const DriverTreePage = () => {
                 viewArrows={viewArrows}
                 setViewArrows={setViewArrows}
               />
-            ) : null}
+            ) : <div>Hi</div>}
           </Row>
 
           <div style={showTable.tableStyle}>

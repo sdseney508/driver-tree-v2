@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Logo</title>
+</head>
+<body>
+<canvas id="logoCanvas" width="512" height="256" style="border:1px solid #000000;"></canvas>
+<script>
+    const canvas = document.getElementById('logoCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Define colors and styles
+    const squareColor = '#7bb241'; // Green color for the squares
+    const lineWidth = 8;           // Line width for the squares
+
+    // Function to draw outlined squares
+    function drawOutlinedSquares() {
+        ctx.strokeStyle = squareColor;
+        ctx.lineWidth = lineWidth;
+        ctx.globalAlpha = 1; // Full opacity for the outermost lines
+
+        // Draw large square
+        ctx.strokeRect(50, 75, 70, 70);  // position and size of the large square
+
+        // Adjust alpha for overlapping regions
+        ctx.globalAlpha = 0.6; // Reduced opacity for overlapping lines
+
+        // Draw medium square
+        ctx.strokeRect(90, 115, 50, 50);  // position and size of the medium square
+
+        // Draw small square
+        ctx.strokeRect(110, 135, 20, 20);  // position and size of the small square
+    }
+
+    // Draw the squares
+    drawOutlinedSquares();
+
+    // Text settings
+    ctx.globalAlpha = 1; // Reset alpha for text
+    ctx.fillStyle = squareColor;
+    ctx.font = 'bold 48px Arial';
+    ctx.fillText('IPS', 170, 130); // Position the text next to the squares
+
+    ctx.font = '16px Arial';
+    ctx.fillText('INTEGRATED PROGRAM SOLUTIONS, INC.', 50, 180); // Subtitle
+
+</script>
+</body>
+</html>

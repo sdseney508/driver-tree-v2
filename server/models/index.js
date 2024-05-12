@@ -4,8 +4,8 @@ const arrows = require("./arrows");
 const attachments = require("./attachments");
 const audit = require("./audit");
 const carousel = require("./carousel");
+const classification = require('./classification');
 const clusters = require("./clusters");
-const deliverables = require("./deliverables");
 const drivers = require("./drivers");
 const outcomes = require("./outcomes");
 const outcomeDrivers = require("./outcomeDrivers");
@@ -106,8 +106,8 @@ module.exports = {
   attachments,
   audit,
   carousel,
+  classification,
   clusters,
-  deliverables,
   drivers,
   outcomes,
   outcomeDrivers,

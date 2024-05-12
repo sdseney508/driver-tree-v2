@@ -101,6 +101,11 @@ drivers.init(
             allowNull: true,
             defaultValue: 'No',
         },
+        classification: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            defaultValue: 'CUI'
+        }
 
     },
     {
