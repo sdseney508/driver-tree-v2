@@ -15,10 +15,10 @@ require('dotenv').config({path: '../.env'});
 const PORT = process.env.PORT || 8080;
 var corsOptions = {
   //for online use
-  // origin: "https://drivertreev3-3350125317e2.herokuapp.com",
+  origin: "https://drivertreev3-3350125317e2.herokuapp.com",
 // 
   //for local use and AWS Testing
-  origin: "http://localhost:3000"
+  // origin: "http://localhost:3000"
 // 
 };
 
@@ -29,6 +29,8 @@ app.use(cors(corsOptions));
 app.use(express.json());
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
+
+app.set('trust proxy', true); // Trust the first proxy
 
 //the below two are for deployed builds
 if (process.env.NODE_ENV === 'production') {
@@ -62,13 +64,21 @@ app.use(router);
 router.use(async (req, res, next) => {
   const { headers, method, url, body, session } = req;
   const userId = session.userId; // Assuming you store userId in session on login
-
+  let xforward;
+  if (headers['x-forwarded-for']) {
+    xforward = headers['x-forwarded-for'];
+  } else {
+    xforward = req.ips.length > 0 ? req.ips[0] : req.ip;
+  }
+  
+  console.log('headers: ' + xforward);
+  
   const logData = {
       method,
       url,
       user_agent: headers['user-agent'],
       referer: headers['referer'] || headers['referrer'],
-      x_forwarded_for: headers['x-forwarded-for'],
+      x_forwarded_for: xforward,
       date: headers['date'],
       expires: headers['expires'],
       post_data: method === 'POST' ? JSON.stringify(body) : null,

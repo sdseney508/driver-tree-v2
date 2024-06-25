@@ -95,6 +95,7 @@ const SignupForm = ({onModalSubmit}) => {
     const userRole = userFormData.userRole;
     const stakeholderId = userFormData.command;
 
+    
     //couldnt pass the state object so had to pass each value individually
     register(
       firstName,

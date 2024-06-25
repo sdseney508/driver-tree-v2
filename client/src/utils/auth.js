@@ -274,7 +274,7 @@ const register = (
   password,
   userStatus,
   userRole,
-  userCommand
+  stakeholderId
 ) => {
   return axios.post(apiURL + "/users", {
     firstName,
@@ -283,7 +283,7 @@ const register = (
     password,
     userStatus,
     userRole,
-    userCommand,
+    stakeholderId,
   });
 };
 

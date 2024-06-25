@@ -65,7 +65,7 @@ router.get("/coordinators", authMiddleware, async (req, res) => {
 });
 
 // post all users emails.  used for the admin notification page.
-router.get("/emails", async (req, res) => {
+router.get("/emails", authMiddleware, async (req, res) => {
   try {
     const userData = await User.findAll({
       where: {
@@ -96,6 +96,7 @@ router.get("/role/:urole", async (req, res) => {
 //create a user
 router.post("/", async (req, res) => {
   try {
+    console.log(req.body);
     const userData = await User.create(req.body);
     if (!User) {
       return res.status(400).json({ message: "Something went wrong!" });
