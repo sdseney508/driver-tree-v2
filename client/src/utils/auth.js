@@ -131,10 +131,6 @@ const getUserData = async ({ navigate, state, setState, outcomeId}) => {
           alert("You do not have permission to view this page.");
           if(token){
           navigate("/user");
-
-        } else {
-          navigate("/");
-
         }
         if (data.data.stakeholderId !== user.stakeholderId) {
           alert("You do not have permission to view this page. ");

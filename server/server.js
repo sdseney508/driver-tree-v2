@@ -70,9 +70,6 @@ router.use(async (req, res, next) => {
   } else {
     xforward = req.ips.length > 0 ? req.ips[0] : req.ip;
   }
-  
-  console.log('headers: ' + xforward);
-  
   const logData = {
       method,
       url,

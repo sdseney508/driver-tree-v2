@@ -6,11 +6,13 @@ import { Link, useParams } from "react-router-dom";
 import { getUserData } from "../utils/auth";
 import {
   createOutcome,
+  deleteOutcome,
   getDriverByOutcome,
   getOutcome,
+  outcomeByCommand,
   updateOutcome,
 } from "../utils/drivers";
-import { getAllClassificationDefinitions } from "../utils/classification";
+// import { getAllClassificationDefinitions } from "../utils/classification";
 import styles from "./OutcomesPage.module.css";
 import OutcomeTable from "../components/OutcomeTable";
 
@@ -29,16 +31,13 @@ const OutcomesPage = () => {
 
   //using the initial useEffect hook to open up the draft oplimits and prefill the form
   useEffect(() => {
-    const getAppData = async () => {
+    const getAppData = async (state) => {
       if (outcomeId === 0) {
-        //if the outcomeId is 0, then we are creating a new outcome
         newOutcome();
-        // await outcomeByCommand(state.stakeholderId).then((data) => {
-        //   setSelOutcome(data.data[0]);
-        // });
       } else {
         await getOutcome(outcomeId).then((data) => {
-          if(!data.data){
+          // debugger;
+          if (!data.data) {
             navigate("/user");
             return;
           }
@@ -46,16 +45,14 @@ const OutcomesPage = () => {
         });
       }
     };
-
-    getUserData({ navigate, state, setState, outcomeId, error, setError});
-    getAppData();
+    
+    getUserData({ navigate, state, setState, outcomeId });
+    getAppData(state);
     setState({ ...state, selOutcome: selOutcome });
-    authCheck();
     if (state.userRole === "Stakeholder") {
       setRecordLockState(true);
     }
   }, []);
-
 
   //sets the initial selection of the drop down lists for the signatures, i couldnt get the map function to work, so brute force here we go.
   useEffect(() => {
@@ -65,14 +62,11 @@ const OutcomesPage = () => {
       }
       await getDriverByOutcome(selOutcome.id).then((data) => {
         let top = data.data;
-        console.log(top);
         setDriverTreeObj(top);
       });
     };
 
     getDrivers();
-    setState({ ...state, selOutcome: selOutcome });
-    authCheck();
     if (state.userRole === "Stakeholder") {
       setRecordLockState(true);
     }
@@ -80,38 +74,42 @@ const OutcomesPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome]);
 
-  //this function gets everyone with an assigened role and sets the state for the drop down lists
-
-  const authCheck = () => {
-    //checks to see if the user has access to the desired outcome
-    //first we grab the user data from state and the outcome data from the database then compare the user command with the outcoem stakeholder
-    if (state.command !== selOutcome.stakeholderId) {
-      alert("You do not have access to this outcome");
-      navigate("/user");
-    }
-  };
-
-  const barriers = () => {
+const barriers = () => {
     console.log(driverTreeObj);
-    if (!driverTreeObj[0]) {
+    if (!driverTreeObj[1]) {
       return <div key={"nullbarrier"}></div>;
     } else {
-      return driverTreeObj.map((f, index) => {
-        if (f.tierLevel !== 1) {
-          return <div></div>;
-        } else {
+      return driverTreeObj[1].map((f, index) => {
           return (
             <div key={"barriers" + index}>
               <Link
-                to={`/drpage/${selOutcome.id}/${driverTreeObj[index].id}`}
+                to={`/drpage/${selOutcome.id}/${driverTreeObj[1][index].id}`}
                 key={"barrierslink" + index}
               >
-                <p key={"p" + index}>{driverTreeObj[index].problemStatement}</p>
+                <p key={"p" + index}>{driverTreeObj[1][index].problemStatement}</p>
               </Link>
             </div>
           );
+      });
+    }
+  };
+
+  const deleteOutcomeFunc = async () => {
+    //creates a temporary pop up modal to require the user to type in delete before executing the deleteOutcome call
+    let del = prompt("Type 'delete' to delete this outcome");
+    if (del === "delete") {
+      deleteOutcome(selOutcome.id);
+      let toutcomeID;
+      console.log(state);
+      await outcomeByCommand(state.command).then((data) => {
+        console.log(data.data);
+        if (data) {
+          toutcomeID = data.data[0].id;
+        } else {
+          toutcomeID = 0;
         }
       });
+      navigate("/allOutcomes/" + toutcomeID);
     }
   };
 
@@ -132,8 +130,6 @@ const OutcomesPage = () => {
     if (recordLockState) {
       return;
     }
-    console.log(recordLockState);
-    console.log(state.userRole);
     setSelOutcome({ ...selOutcome, [e.target.name]: e.target.value });
     let body = { [e.target.name]: e.target.value };
     updateOutcome(selOutcome.id, body);
@@ -169,16 +165,18 @@ const OutcomesPage = () => {
         <Container>
           <div className={styles.my_div}>
             <div>Welcome {state.firstName}</div>
-            {!recordLockState ? (
-              <Col className={styles.my_col}>
-                <Button className="p-1 m-1" onClick={newOutcome}>
-                  Create New Outcome
-                </Button>
-                <Button className="p-1 m-1" onClick={driverPage}>
-                  View Driver Tree
-                </Button>
-              </Col>
-            ) : null}
+            <Col className={styles.my_col}>
+              <Button className="p-1 m-1" onClick={newOutcome}>
+                Create New Outcome
+              </Button>
+              <Button className="p-1 m-1" onClick={driverPage}>
+                View Driver Tree
+              </Button>
+              <Button variant="danger" className="p-1 m-1" onClick={deleteOutcomeFunc}>
+                Delete Outcome
+              </Button>
+            </Col>
+
             <Form className={styles.my_form}>
               <Row className={styles.outcome_banner + styles.my_row}>
                 <Col sm={10} md={6} lg={8} className={styles.outcome_name}>

@@ -9,13 +9,12 @@ const {
   clusters,
 } = require("../../models");
 const sequelize = require("../../config/connection");
-const { Op } = require("sequelize");
-
 // use /api/outcomes
+
 //create new outcomes; also logs the creation in the admin poriton of the database
 router.post("/new", async (req, res) => {
-  const transaction = await sequelize.transaction();
   try {
+    const transaction = await sequelize.transaction();
     //this is a transaction that also creates the admin log entry and the status definition entry
     const outcomesData = await outcomes.create(
        req.body,
@@ -27,7 +26,7 @@ router.post("/new", async (req, res) => {
         model: "outcomes",
         tableUid: outcomesData.id,
         fieldName: "All",
-        newData: "created a new Outcome",
+        newData: JSON.stringify(outcomesData),
         oldData: "new Outcome",
         userId: req.body.userId,
       },
@@ -147,15 +146,34 @@ router.get("/retired", async (req, res) => {
 //TODO add in the call to update the admin log as well
 router.put("/update/:id", async (req, res) => {
   try {
-    const outcomesData = await outcomes.update(req.body, {
+    const transaction = await sequelize.transaction();
+    const oldData = await outcomes.findOne({
       where: {
         id: req.params.id,
       },
     });
+    const outcomesData = await outcomes.update(req.body, {
+      where: {
+        id: req.params.id,
+      },
+    }, { transaction });
     if (!outcomesData) {
       res.status(404).json({ message: "No outcomes found with this id!" });
       return;
     }
+    await adminAudit.create(
+      {
+        action: "Update",
+        model: "outcomes",
+        tableUid: req.params.id,
+        fieldName: "All",
+        newData: JSON.stringify(req.body),
+        oldData: JSON.stringify(oldData),
+        userId: req.body.userId,
+      },
+      { transaction }
+    );
+    await transaction.commit();
     res.status(200).json(outcomesData);
     // console.log(outcomesData);
   } catch (err) {

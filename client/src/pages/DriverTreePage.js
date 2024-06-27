@@ -119,7 +119,7 @@ const DriverTreePage = () => {
       }
     };
 
-    let user = getUserData({ navigate, state, setState, outcomeId, error, setError });
+    let user = getUserData({ navigate, state, setState, outcomeId });
 
     getAppData(user);
     authCheck();
@@ -224,7 +224,6 @@ const DriverTreePage = () => {
         overFlowY: "scroll",
       };
       setTableState("view");
-      console.log(tableState);
     }
     setShowTable({ tableStyle, driverStyle });
   };
@@ -335,7 +334,7 @@ const DriverTreePage = () => {
       );
       return;
     }
-    updateOutcome(selOutcome.id, { state: "Active" });
+    updateOutcome(selOutcome.id, { state: "Active", userId: state.userId});
     window.location.reload();
   };
 
@@ -360,6 +359,7 @@ const DriverTreePage = () => {
       body = JSON.parse(JSON.stringify(selOutcome));
       body.version = selOutcome.version + 1;
       body.state = "Draft";
+      body.userId = state.userId;
       delete body.id;
       newOutcomeId = data.data.id;
       updateOutcome(data.data.id, body);

@@ -258,9 +258,14 @@ router.get("/byOutcomeByTier/:id", async (req, res) => {
 });
 
 router.put("/clusterUpdate/:id", async (req, res) => {
-  const transaction = await sequelize.transaction();
   try {
+    const transaction = await sequelize.transaction();
     req.body.modified = "Yes";
+    const oldData = await drivers.findOne({
+      where: {
+        id: req.params.id,
+      },
+    });
     const driversData = await drivers.update(req.body, {
       where: {
         cluster: req.params.id,
@@ -291,8 +296,8 @@ router.put("/clusterUpdate/:id", async (req, res) => {
 
 //update drivers info
 router.put("/update/:id/:userId", async (req, res) => {
-  const transaction = await sequelize.transaction();
   try {
+    const transaction = await sequelize.transaction();
     const oldData = await drivers.findOne({
       where: {
         id: req.params.id,

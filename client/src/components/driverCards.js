@@ -272,7 +272,7 @@ const DriverCards = ({
     bulkDriverStatusUpdate(body);
 
     //now update the outcome
-    let outcomeBody = { status: newStatus };
+    let outcomeBody = { status: newStatus, userId: state.userId };
     await updateOutcome(selOutcome.id, outcomeBody);
     let updatedoutcome = await getOutcome(selOutcome.id);
     setSelOutcome(updatedoutcome.data);
@@ -651,6 +651,7 @@ const DriverCards = ({
 
   const goToDriver = async (e) => {
     e.preventDefault();
+    debugger;
     navigate("/drpage/" + selOutcome.id + "/" + e.target.dataset.cardid);
   };
 
@@ -664,11 +665,12 @@ const DriverCards = ({
   const handleClose = () => {
     setArrowModal(false);
     setArrowMod(false);
+    setCreateDriverModal(false);
   };
 
   const handleSelOutcomeChange = (e) => {
     e.preventDefault();
-    let body = { [e.target.name]: e.target.value };
+    let body = { [e.target.name]: e.target.value, userId: state.userId};
     updateOutcome(e.target.dataset.cardid, body);
     getOutcome(selOutcome.id).then((data) => {
       setSelOutcome(data.data);
@@ -1234,7 +1236,6 @@ const DriverCards = ({
         backdrop="static"
         keyboard={false}
         onHide={() => setCreateDriverModal(false)}
-        // className={styles.cluster_modal}
       >
         <Modal.Header closeButton>
         </Modal.Header>
@@ -1253,7 +1254,7 @@ const DriverCards = ({
         </Modal.Body>
       </Modal>
 
-      <Modal show={connectionShow} size="md">
+      <Modal show={connectionShow} size="md" onHide={()=> setConnectionShow(false)}>
         <Modal.Header closeButton>
           <Modal.Title></Modal.Title>
         </Modal.Header>

@@ -33,15 +33,18 @@ const DriverPage = () => {
   const [recordLockState, setRecordLockState] = useState(false); //this is used to lock the record while someone is editing it.  It is set to true when someone is editing the record and false when they are not.
   const navigate = useNavigate();
 
-  let { outcomeId, driverId } = useParams();
+  debugger;
+  const { outcomeId, driverId } = useParams();
   // this is getting the user data from the database to properly populate the form.  None of the form data is being updated in the database. until after you hit submit.
   useEffect(() => {
     const getAppData = async () => {
+      debugger;
       if (!outcomeId) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
         outcomeId = 1;
       }
       await getDriverByOutcome(outcomeId).then((data) => {
+        debugger;
         let top = data.data;
         setSelDrivers(top);
       });
@@ -50,15 +53,17 @@ const DriverPage = () => {
         console.log(top);
         setSelOutcome(top);
       });
-      await getAllClassificationDefinitions().then((data) => {
-        setClassificationState(data.data);
-      })
+      //TODO:  Open Classification is not working.  Need to fix this.
+      // await getAllClassificationDefinitions().then((data) => {
+      //   setClassificationState(data.data);
+      // })
       if (!driverId) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
         driverId = selDrivers[0].id;
       }
 
       await getDriverById(driverId).then((data) => {
+        debugger;
         let top = data.data;
         setSelDriver(top);
       });
@@ -68,11 +73,12 @@ const DriverPage = () => {
     getAppData();
     setTimeout(() => {
       setLoading(true);
-    }, 150);
+    }, 220);
   }, []);
 
   useEffect(() => {
-    navigate("/drpage/" + outcomeId + "/" + selDriver.id);
+    if (selDriver.id) {
+    navigate("/drpage/" + outcomeId + "/" + selDriver.id);}
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selDriver]);
 
@@ -340,10 +346,10 @@ const DriverPage = () => {
     setSelDriver({ ...selDriver, [e.target.name]: e.target.value });
   };
 
-  //this function creates the drop down list for selecting the classification of a driver
-  const classificationSelect = () => {
+  // //this function creates the drop down list for selecting the classification of a driver
+  // const classificationSelect = () => {
 
-  }
+  // }
 
   const backToDriverTree = () => {
     navigate("/drivertree/" + selOutcome.id);
@@ -352,7 +358,7 @@ const DriverPage = () => {
   //this function will create a new driver tree with the selected driver as the outcome.  It will then navigate to the new driver tree.
   const createEmbeddedDriverTree = async () => {
     //first we create the new outcome with the selected driver problem as the the outcome title
-    debugger
+    debugger;
     let body = { outcomeTitle: selDriver.problemStatement, stakeholderId: state.command, userId: state.userId};
     let newOutcome = await createOutcome(body);
     body = {embeddedOutcomeId: newOutcome.data.id}
@@ -470,7 +476,6 @@ const DriverPage = () => {
         backdrop="static"
         keyboard={false}
         onHide={() => setShowMod(false)}
-        // className={styles.cluster_modal}
       >
         <Modal.Header closeButton>
           <Modal.Title id="pdf-modal">PDF Selection</Modal.Title>

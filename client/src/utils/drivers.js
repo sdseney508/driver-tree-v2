@@ -37,6 +37,10 @@ const deleteDriver = (id) => {
   return axios.delete(apiURL + "/drivers/" + id);
 };
 
+const deleteOutcome = (id) => {
+  return axios.delete(apiURL + "/outcomes/" + id);
+};
+
 const getCluster = (id, body) => {
   return axios.get(apiURL + "/drivers/byOutcomeByTier/" + id, body);
 }
@@ -120,6 +124,7 @@ export {
   createDriver,
   createOutcome,
   deleteDriver,
+  deleteOutcome,
   findUser,
   getCluster,
   getCoords,
