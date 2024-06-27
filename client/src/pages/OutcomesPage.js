@@ -20,7 +20,6 @@ import OutcomeTable from "../components/OutcomeTable";
 
 const OutcomesPage = () => {
   const [state, setState] = useState({});
-  const [error, setError] = useState(false);
   const [selOutcome, setSelOutcome] = useState({});
   const [driverTreeObj, setDriverTreeObj] = useState([]);
   const [recordLockState, setRecordLockState] = useState(false);
@@ -75,7 +74,6 @@ const OutcomesPage = () => {
   }, [selOutcome]);
 
 const barriers = () => {
-    console.log(driverTreeObj);
     if (!driverTreeObj[1]) {
       return <div key={"nullbarrier"}></div>;
     } else {
@@ -100,7 +98,6 @@ const barriers = () => {
     if (del === "delete") {
       deleteOutcome(selOutcome.id);
       let toutcomeID;
-      console.log(state);
       await outcomeByCommand(state.command).then((data) => {
         console.log(data.data);
         if (data) {

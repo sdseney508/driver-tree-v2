@@ -88,8 +88,7 @@ const getAppData = async ({
   }
 };
 
-const getUserData = async ({ navigate, state, setState, outcomeId}) => {
-  
+const getUserData = async ({ navigate, state, setState, outcomeId }) => {
   try {
     const token = loggedIn() ? getToken() : null;
     if (!token) {
@@ -102,7 +101,7 @@ const getUserData = async ({ navigate, state, setState, outcomeId}) => {
     }
     const user = response.data;
 
-    await setState(prevState =>({
+    await setState((prevState) => ({
       ...prevState,
       firstName: user.firstName,
       lastName: user.lastName,
@@ -126,24 +125,30 @@ const getUserData = async ({ navigate, state, setState, outcomeId}) => {
 
     //check if user is authorized to see that data
     if (outcomeId && outcomeId !== "0") {
+      debugger;
       await getOutcome(outcomeId).then((data) => {
-        if(!data.data){
+        debugger;
+        if (!data.data) {
           alert("You do not have permission to view this page.");
-          if(token){
-          navigate("/user");
+          if (token) {
+            navigate("/user");
+          } else {
+            navigate("/");
+          }
         }
         if (data.data.stakeholderId !== user.stakeholderId) {
           alert("You do not have permission to view this page. ");
           navigate("/user");
         }
-      }});
+      });
     }
 
     return user;
-
   } catch (err) {
     console.log(err);
-    alert("Error: You do not have permission to view this page or you are not logged in.");
+    alert(
+      "Error: You do not have permission to view this page or you are not logged in."
+    );
     navigate("/");
     return null;
   }
@@ -185,20 +190,19 @@ const getAdminUserData = async ({ navigate, state, setState, outcomeId }) => {
     //check if user is authorized to see that data
     if (outcomeId) {
       await getOutcome(outcomeId).then((data) => {
-        if(!data.data){
+        if (!data.data) {
           alert("You do not have permission to view this page.");
-          if(token){
-          navigate("/admin");
-
-        } else {
-          navigate("/");
-
+          if (token) {
+            navigate("/admin");
+          } else {
+            navigate("/");
+          }
+          if (data.data.stakeholderId !== user.stakeholderId) {
+            alert("You do not have permission to view this page. ");
+            navigate("/user");
+          }
         }
-        if (data.data.stakeholderId !== user.stakeholderId) {
-          alert("You do not have permission to view this page. ");
-          navigate("/user");
-        }
-      }});
+      });
     }
 
     if (user.userRole !== "Administrator") {
@@ -207,9 +211,10 @@ const getAdminUserData = async ({ navigate, state, setState, outcomeId }) => {
     }
 
     return user;
-
   } catch (err) {
-    alert("Error: You do not have permission to view this page or you are not logged in.");
+    alert(
+      "Error: You do not have permission to view this page or you are not logged in."
+    );
     navigate("/");
     return null;
   }
