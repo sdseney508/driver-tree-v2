@@ -358,11 +358,9 @@ const DriverPage = () => {
   //this function will create a new driver tree with the selected driver as the outcome.  It will then navigate to the new driver tree.
   const createEmbeddedDriverTree = async () => {
     //first we create the new outcome with the selected driver problem as the the outcome title
-    debugger;
     let body = { outcomeTitle: selDriver.problemStatement, stakeholderId: state.command, userId: state.userId};
     let newOutcome = await createOutcome(body);
     body = {embeddedOutcomeId: newOutcome.data.id}
-    console.log("newOutcome", newOutcome);
     await updateDriver(selDriver.id, state.userId, body);
     navigate("/drivertree/" + newOutcome.data.id);
   };

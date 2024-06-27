@@ -96,10 +96,11 @@ const barriers = () => {
     //creates a temporary pop up modal to require the user to type in delete before executing the deleteOutcome call
     let del = prompt("Type 'delete' to delete this outcome");
     if (del === "delete") {
-      deleteOutcome(selOutcome.id);
+      let body = {userId: state.userId};
+      console.log(body);
+      deleteOutcome(selOutcome.id, state.userId);
       let toutcomeID;
       await outcomeByCommand(state.command).then((data) => {
-        console.log(data.data);
         if (data) {
           toutcomeID = data.data[0].id;
         } else {

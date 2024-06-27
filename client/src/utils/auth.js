@@ -125,9 +125,7 @@ const getUserData = async ({ navigate, state, setState, outcomeId }) => {
 
     //check if user is authorized to see that data
     if (outcomeId && outcomeId !== "0") {
-      debugger;
       await getOutcome(outcomeId).then((data) => {
-        debugger;
         if (!data.data) {
           alert("You do not have permission to view this page.");
           if (token) {

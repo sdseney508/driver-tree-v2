@@ -208,7 +208,6 @@ const DriverCards = ({
           loopEnd = updateArr.length;
         }
       } else {
-        debugger;
         let clustCheck=0;
         //this is not the first loop, so we need to look at the updateArr
         for (let j = arrayCounter; j < loopEnd; j++) {
@@ -651,7 +650,6 @@ const DriverCards = ({
 
   const goToDriver = async (e) => {
     e.preventDefault();
-    debugger;
     navigate("/drpage/" + selOutcome.id + "/" + e.target.dataset.cardid);
   };
 
@@ -685,9 +683,8 @@ const DriverCards = ({
   const goToDriverTree = (embeddedOutcomeId) => {
     //goes to the embedded drivertree; the outcome idea is the outcomeId of the target
     setSelOutcome({ id: embeddedOutcomeId });
-    navigate("/drivertree/" + embeddedOutcomeId);
-    window.location.reload();
-
+    // navigate("/drivertree/" + embeddedOutcomeId);
+    // window.location.reload();
   }
 
   const goToOutcome = async (e) => {

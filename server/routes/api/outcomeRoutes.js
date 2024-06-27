@@ -181,15 +181,50 @@ router.put("/update/:id", async (req, res) => {
   }
 });
 
-//delete outcomes, this should only be used on the admin page
+//delete outcomes, this should only be used on the outcomes page, also changes all the drivers with that embedded outcome id to 0.
 //TODO:  add in a call to note the action in the admin log table
-router.delete("/:id", async (req, res) => {
+router.delete("/:id/:userId", async (req, res) => {
   try {
+    console.log(req.params.id, req.params.userId);
+    const transaction = await sequelize.transaction();
+    const oldData = await outcomes.findOne({
+      where: {
+        id: req.params.id,
+      },
+    }, { transaction });
     const outcomesData = await outcomes.destroy({
       where: {
         id: req.params.id,
       },
-    });
+    }, { transaction });
+
+    //need to update the drivers table to remove the outcome id
+    const driverData = await drivers.update(
+      {
+        outcomeId: 0,
+      },
+      {
+        where: {
+          embeddedOutcomeId: req.params.id,
+        },
+      },
+      { transaction }
+    );
+
+    //mow add it to the admin log
+    await adminAudit.create(
+      {
+        action: "Delete",
+        model: "outcomes",
+        tableUid: req.params.id,
+        fieldName: "All",
+        newData: "Deleted",
+        oldData: JSON.stringify(oldData),
+        userId: req.params.userId,
+      },
+      { transaction }
+    );
+    await transaction.commit();
     res.status(200).json(outcomesData);
   } catch (err) {
     res.status(400).json(err);

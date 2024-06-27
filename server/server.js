@@ -85,7 +85,6 @@ router.use(async (req, res, next) => {
 
   try {
       await audit.create(logData);
-      console.log('Session and request logged.');
   } catch (err) {
       console.error('Error saving log to database:', err);
   }

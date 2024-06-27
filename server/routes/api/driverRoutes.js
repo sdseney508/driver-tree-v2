@@ -294,7 +294,7 @@ router.put("/clusterUpdate/:id", async (req, res) => {
   }
 });
 
-//update drivers info
+//update drivers info.  This is used to update the driver information in the form view.  If the driver is also an outcome with an embedded tree and the driver is updated, the tree will also be updated.
 router.put("/update/:id/:userId", async (req, res) => {
   try {
     const transaction = await sequelize.transaction();
@@ -307,9 +307,20 @@ router.put("/update/:id/:userId", async (req, res) => {
       res.status(404).json({ message: "No drivers found with this id!" });
       return;
     }
-    if (!req.body.modified) {
-      req.body.modified = "Yes";
+
+    if (oldData.embeddedOutcomeId !==0 && req.body.problemStatement) {
+      //update the embedded outcome title
+      const outcomeData = await outcomes.update(
+        { outcomeTitle: req.body.problemStatement },
+        {
+          where: {
+            id: oldData.embeddedOutcomeId,
+          },
+        },
+        {transaction}
+      );
     }
+
     const driversData = await drivers.update(req.body, {
       where: {
         id: req.params.id,
