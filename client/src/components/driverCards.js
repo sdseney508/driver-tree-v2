@@ -859,7 +859,7 @@ const DriverCards = ({
   }
 
   function tierButtons(tier) {
-    if (state.userRole !== "Stakeholder") {
+    if (state.userRole !== "Stakeholder" && !recordLockState) {
       return (
         <Button className={styles.my_btn} data-tier={`${tier}`} onClick={(e)=>createNewDriver(e)}>
           +
