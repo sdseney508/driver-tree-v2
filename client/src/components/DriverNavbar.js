@@ -72,7 +72,6 @@ const DriverNavbar = () => {
       } else {
         let toutcomeID;
         await outcomeByCommand(user.stakeholderId).then((data) => {
-          console.log(data.data);
           if (data.data.length > 0) {
             toutcomeID = data.data[0].id;
           } else {

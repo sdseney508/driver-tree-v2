@@ -39,6 +39,13 @@ function OutcomeTable({ selOutcome, setSelOutcome, command }) {
       sortIndex: 1,
     },
     {
+      field:"id",
+      filter: true,
+      headerName: "ID",
+      width: 100,
+      resizable: true,
+    },
+    {
       field: "problemStatement",
       filter: true,
       headerName: "Problem Statement",

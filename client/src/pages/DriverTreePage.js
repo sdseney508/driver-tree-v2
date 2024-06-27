@@ -374,6 +374,7 @@ const DriverTreePage = () => {
 
     //now we need to create the new drivers and clusters.  We'll start by creating the drivers, then we'll create the clusters, then we'll create the arrows, lastly we'll create the outcomeDrivers to associate the drivers with the outcome
     let driverBody = JSON.parse(JSON.stringify(driverTreeObj));
+    console.log(driverBody);
     let arrowBody = JSON.parse(JSON.stringify(arrows));
     delete arrowBody.id;
     delete driverBody.id;
@@ -385,6 +386,7 @@ const DriverTreePage = () => {
     //for the new driverTreeObj structure:  need to cycle through driverBody columns and drivers in each column
     for (let i = 0; i < driverBody.length; i++) {
       if (driverBody[i] !== null) {
+        debugger;
         for (let j = 0; j < driverBody[i].length; j++) {
           driverBody[i][j].outcomeId = newOutcomeId;
           driverBody[i][j].modified = "No";
