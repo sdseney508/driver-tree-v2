@@ -2,11 +2,6 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import apiURL from "./apiURL";
 import { getOutcome, outcomeByCommand } from "./drivers";
-import { prefix } from "@fortawesome/free-solid-svg-icons";
-
-// import { navigate } from "@reach/router";
-
-
 
 const authHeader = () => {
   let id_token = localStorage.getItem("id_token");
@@ -158,8 +153,6 @@ const getUserData = async ({ navigate, state, setState, outcomeId}) => {
   }
 };
 
-
-
 const getAdminUserData = async ({ navigate, state, setState, outcomeId }) => {
   try {
     const token = loggedIn() ? getToken() : null;
@@ -264,8 +257,6 @@ const logout = () => {
   window.confirm("You have been logged out.");
   window.location.assign("/");
 };
-
-
 
 const register = (
   firstName,

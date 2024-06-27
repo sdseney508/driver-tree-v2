@@ -4,8 +4,8 @@ const adminAudit = require("../models/adminAudit");
 require('dotenv').config({path: '../.env'});
 
 // set token secret and expiration date
-const secret = process.env.DB_SECRET;
-const expiration = process.env.DB_TIMEOUT;
+const secret = "drivertree";
+const expiration = "2h";
 
 const SESSION_TIMEOUT = 10*60*1000; // 10 minutes in milliseconds to meet both user and admin requirements
 
