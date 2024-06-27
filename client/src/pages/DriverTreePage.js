@@ -112,7 +112,6 @@ const DriverTreePage = () => {
         });
       }
       await getDriverByOutcome(selOutcome.id).then((data) => {
-        debugger;
         setDriverTreeObj(data.data);
       });
       if (user.userRole === "Stakeholder" || selOutcome.state === "Active") {
@@ -132,7 +131,6 @@ const DriverTreePage = () => {
   }, [, outcomeId]);
 
   useEffect(() => {
-    debugger;
     setLoading(true);
     const getInfo = async () => {
       setRecordLockState(false);
@@ -240,7 +238,6 @@ const DriverTreePage = () => {
     }
     //the status definitions are created on the server side, no need to create them here.
     await createOutcome(body).then((data) => {
-      debugger;
       setState({ ...state, outcomeId: data.data.id });
       setSelOutcome(data.data);
     });
@@ -370,7 +367,7 @@ const DriverTreePage = () => {
     //now we update the statusdefinitions that were created on the server side.
     oldstatusDefBody = await getStatusDefinitionByOutcome(oldOutcomeId);
     statusDefBody = await getStatusDefinitionByOutcome(newOutcomeId);
-
+debugger;
     for (let i = 0; i < statusDefBody.data.length; i++) {
       statusDefBody.data[i].statusDefinition =
         oldstatusDefBody.data[i].statusDefinition;

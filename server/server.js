@@ -18,7 +18,7 @@ var corsOptions = {
   origin: "https://drivertreev3-3350125317e2.herokuapp.com",
 // 
   //for local use and AWS Testing
-  // origin: "http://local`host:3000"
+  // origin: "http://localhost:3000"
 // 
 };
 

@@ -17,6 +17,7 @@ const DriverModal = ({
   //gives the user the option to either create a new blank driver or import an existing driver from the driver table into the outcome
 
   const makeNewDriver = async() => {
+    console.log('button clokec')
     let body = {outcomeId: selOutcome.id, tierLevel: driverTier};
     await createDriver(body, state.userId);
     getDriverByOutcome(selOutcome.id).then((data) => {
@@ -26,7 +27,6 @@ const DriverModal = ({
   }
 
   const importDriver = async() => {
-    debugger;
     let body = {outcomeId: selOutcome.id, driverId: selectedDriver.id, tierLevel: driverTier, userId: state.userId};
     await addOutcomeDriver(body);
     await getDriverByOutcome(selOutcome.id).then((data) => {

@@ -18,7 +18,6 @@ const ClusterModal = ({
   //creates a cluster from the selected drivers. 
   //New logic:  create a new cluster in the cluster model, this will then append the clusterId to the driver model.  This will allow for the cluster to be updated and deleted without having to update the driver model.
   const makeCluster = async() => {
-    debugger;
     for (let i = 0; i < selectedDrivers.length - 1; i++) {
       if (selectedDrivers[i].tierLevel !== selectedDrivers[i + 1].tierLevel) {
         alert("Drivers must be in the same tier");

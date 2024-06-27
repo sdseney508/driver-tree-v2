@@ -1254,7 +1254,6 @@ const DriverCards = ({
       </Modal>
 
       <Modal show={connectionShow} size="md">
-        {/* onHide={handleClose} */}
         <Modal.Header closeButton>
           <Modal.Title></Modal.Title>
         </Modal.Header>
@@ -1279,7 +1278,6 @@ const DriverCards = ({
         </Modal.Footer>
       </Modal>
 
-      {/* for modifying arrows */}
       <Modal
         name="arrowModModal"
         show={showArrowMod}
