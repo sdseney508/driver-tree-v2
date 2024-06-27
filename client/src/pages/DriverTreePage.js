@@ -343,6 +343,7 @@ const DriverTreePage = () => {
   };
 
   const versionRoll = async () => {
+    debugger;
     let statusDefBody = [];
     let oldstatusDefBody = [];
     //first we need to get all the status definitions for the current outcome
@@ -547,7 +548,6 @@ const DriverTreePage = () => {
     });
 
     navigate("/drivertree/" + newOutcomeId);
-    // window.location.reload();
     //now that we've created all the drivers, we'll create the clusters.  we'll make a single new object of the drivers
   };
 
