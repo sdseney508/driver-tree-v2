@@ -35,7 +35,6 @@ const OutcomesPage = () => {
         newOutcome();
       } else {
         await getOutcome(outcomeId).then((data) => {
-          // debugger;
           if (!data.data) {
             navigate("/user");
             return;

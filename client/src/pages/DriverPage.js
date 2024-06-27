@@ -33,24 +33,20 @@ const DriverPage = () => {
   const [recordLockState, setRecordLockState] = useState(false); //this is used to lock the record while someone is editing it.  It is set to true when someone is editing the record and false when they are not.
   const navigate = useNavigate();
 
-  debugger;
   const { outcomeId, driverId } = useParams();
   // this is getting the user data from the database to properly populate the form.  None of the form data is being updated in the database. until after you hit submit.
   useEffect(() => {
     const getAppData = async () => {
-      debugger;
       if (!outcomeId) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
         outcomeId = 1;
       }
       await getDriverByOutcome(outcomeId).then((data) => {
-        debugger;
         let top = data.data;
         setSelDrivers(top);
       });
       await getOutcome(outcomeId).then((data) => {
         let top = data.data;
-        console.log(top);
         setSelOutcome(top);
       });
       //TODO:  Open Classification is not working.  Need to fix this.
@@ -63,7 +59,6 @@ const DriverPage = () => {
       }
 
       await getDriverById(driverId).then((data) => {
-        debugger;
         let top = data.data;
         setSelDriver(top);
       });

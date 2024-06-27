@@ -339,7 +339,6 @@ const DriverTreePage = () => {
   };
 
   const versionRoll = async () => {
-    debugger;
     let statusDefBody = [];
     let oldstatusDefBody = [];
     //first we need to get all the status definitions for the current outcome
@@ -367,7 +366,6 @@ const DriverTreePage = () => {
     //now we update the statusdefinitions that were created on the server side.
     oldstatusDefBody = await getStatusDefinitionByOutcome(oldOutcomeId);
     statusDefBody = await getStatusDefinitionByOutcome(newOutcomeId);
-debugger;
     for (let i = 0; i < statusDefBody.data.length; i++) {
       statusDefBody.data[i].statusDefinition =
         oldstatusDefBody.data[i].statusDefinition;
@@ -417,7 +415,6 @@ debugger;
                   clusterName: clusterName,
                   selDriversArr: selectedDrivers,
                 };
-                debugger;
                 const clusterData = await createCluster(body);
                 clusterArr = clusterData.data.id;
                 for (let j = 0; j < arrowBody.length; j++) {
@@ -474,7 +471,6 @@ debugger;
                 selDriversArr: selectedDrivers,
               };
             }
-            debugger;
             const clusterD = await createCluster(body);
 
             clusterArr = clusterD.data.id;

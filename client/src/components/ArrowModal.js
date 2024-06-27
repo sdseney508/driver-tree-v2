@@ -15,7 +15,6 @@ const ArrowModal = ({
   const [selectedElements, setSelectedElements] = useState([]);
 
   async function createAnArrow() {
-    debugger;
     let body = {};
     body.outcomeId = selOutcome.id;
 

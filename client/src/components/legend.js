@@ -45,7 +45,6 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
   //updating the Stakeholders Table and the associated drivers.  Here we cycle throught the flatDriverTreeObj and update the stakeholders in the driver model
   const handleSubmit = async (e) => {
     e.preventDefault();
-    debugger;
     for (let i = 0; i < flatDriverTreeObj.length; i++) {
       if (
         flatDriverTreeObj[i] !== null && flatDriverTreeObj[i].stakeholderAbbreviation === e.target.dataset.abbr
