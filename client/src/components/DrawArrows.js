@@ -7,7 +7,6 @@ function DriverArrows({
   driverTreeObj,
   opacity,
   recordLockState,
-  // setArrows,
   tableState,
   viewArrows,
   viewId,

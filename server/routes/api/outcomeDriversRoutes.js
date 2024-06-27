@@ -70,7 +70,7 @@ router.put("/update/:outcomeId/:driverId/:userId", async (req, res) => {
 router.post("/new", async (req, res) => {
   console.log(req.body);
   try {
-    const transaction = await sequelize.transaction();
+    // const transaction = await sequelize.transaction();
     let subTier;
 
     //first create the outcome, the req.body needs to include the outcomeId and the driverId
@@ -88,8 +88,8 @@ router.post("/new", async (req, res) => {
       req.body.subTier = subTier + 1;
     
     } 
-    const outcomeDriverData = await outcomeDrivers.create(req.body, 
-      { transaction}
+    const outcomeDriverData = await outcomeDrivers.create(req.body 
+      // ,{ transaction}
     );
 
     await adminAudit.create(
@@ -101,11 +101,12 @@ router.post("/new", async (req, res) => {
         newData: JSON.stringify(outcomeDriverData),
         oldData: "new Outcome Driver",
         userId: req.body.userId,
-      },
-      { transaction }
+      }
+      // ,
+      // { transaction }
     );
 
-    await transaction.commit();
+    // await transaction.commit();
 
     res.status(200).json(outcomeDriverData);
   } catch (err) {

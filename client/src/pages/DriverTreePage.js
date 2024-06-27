@@ -137,13 +137,14 @@ const DriverTreePage = () => {
       if (!selOutcome.id) {
         selOutcome.id = outcomeId;
       }
-      await getOutcome(selOutcome.id).then((data) => {
-        if (!data.data) {
-          setError(true);
-          navigate("/user");
-          return;
-        }
-      });
+      //troubleshooting:  removed on 27 June 2024 at 1910 EST
+      // await getOutcome(selOutcome.id).then((data) => {
+      //   if (!data.data) {
+      //     setError(true);
+      //     navigate("/user");
+      //     return;
+      //   }
+      // });
       await getDriverByOutcome(selOutcome.id).then((data) => {
         setDriverTreeObj(data.data);
       });
@@ -354,14 +355,14 @@ const DriverTreePage = () => {
     let oldOutcomeId = selOutcome.id;
     let body = { stakeholderId: state.command, userId: state.userId };
     //first we create the new outcome, then we'll assign the same driver cards and arrows to it
-    await createOutcome(body).then((data) => {
+    await createOutcome(body).then(async (data) => {
       body = JSON.parse(JSON.stringify(selOutcome));
       body.version = selOutcome.version + 1;
       body.state = "Draft";
       body.userId = state.userId;
       delete body.id;
       newOutcomeId = data.data.id;
-      updateOutcome(data.data.id, body);
+      await updateOutcome(data.data.id, body);
     });
     //now we update the statusdefinitions that were created on the server side.
     oldstatusDefBody = await getStatusDefinitionByOutcome(oldOutcomeId);
@@ -371,7 +372,6 @@ const DriverTreePage = () => {
         oldstatusDefBody.data[i].statusDefinition;
       modifyStatusDefinition(statusDefBody.data[i].id, statusDefBody.data[i]);
     }
-    debugger;
     //now we need to create the new drivers and clusters.  We'll start by creating the drivers, then we'll create the clusters, then we'll create the arrows, lastly we'll create the outcomeDrivers to associate the drivers with the outcome
     let driverBody = JSON.parse(JSON.stringify(driverTreeObj));
     console.log(driverBody);
