@@ -371,7 +371,7 @@ const DriverTreePage = () => {
         oldstatusDefBody.data[i].statusDefinition;
       modifyStatusDefinition(statusDefBody.data[i].id, statusDefBody.data[i]);
     }
-
+    debugger;
     //now we need to create the new drivers and clusters.  We'll start by creating the drivers, then we'll create the clusters, then we'll create the arrows, lastly we'll create the outcomeDrivers to associate the drivers with the outcome
     let driverBody = JSON.parse(JSON.stringify(driverTreeObj));
     console.log(driverBody);
