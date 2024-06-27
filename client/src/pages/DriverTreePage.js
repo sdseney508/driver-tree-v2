@@ -402,6 +402,7 @@ const DriverTreePage = () => {
             subTier: driverBody[i][j].subTier,
             userId: state.userId,
           };
+          console.log(body);
           await addOutcomeDriver(body);
 
           //check to see if it is in a cluster

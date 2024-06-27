@@ -98,7 +98,6 @@ const Welcome = () => {
     try {
       const response = await loginUser(user);
       const userData = response.data.user;
-      console.log(userData);
       if (!userData) {
         throw new Error("huh, something went wrong!");
       } else if (userData.userStatus !== "Active") {
