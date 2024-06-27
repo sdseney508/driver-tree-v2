@@ -392,7 +392,9 @@ const DriverTreePage = () => {
           driverBody[i][j].modified = "No";
           oldDriverId = driverBody[i][j].driverId;
           delete driverBody[i][j].outcomeDrivers.driverId;
+          console.log(driverBody[i][j]);
           const driverData = await createDriver(driverBody[i][j], state.userId);
+          console.log(driverData);
           let body = {
             outcomeId: newOutcomeId,
             driverId: driverData.data.id,

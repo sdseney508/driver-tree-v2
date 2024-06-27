@@ -26,7 +26,7 @@ export const stateContext = createContext();
 function App() {
   const useActivityTracker = () => {
     useEffect(() => {
-      const events = ['click', 'mousemove', 'keypress'];
+      const events = ['click', 'keypress'];
       const resetTimer = async () => {
         // Assuming you have an API endpoint to refresh session activity
         //first check if the user is or was logged in
