@@ -403,8 +403,8 @@ const DriverTreePage = () => {
             userId: state.userId,
           };
           console.log(body);
-          await addOutcomeDriver(body);
-
+          let outcomeD = await addOutcomeDriver(body);
+          console.log("made it to addOutcomeDriver", outcomeD.data);
           //check to see if it is in a cluster
           if (driverBody[i][j].clusterId) {
             if (!clusterName) {
@@ -420,6 +420,7 @@ const DriverTreePage = () => {
                   clusterName: clusterName,
                   selDriversArr: selectedDrivers,
                 };
+                console.log("made it to createCluster")
                 const clusterData = await createCluster(body);
                 clusterArr = clusterData.data.id;
                 for (let j = 0; j < arrowBody.length; j++) {

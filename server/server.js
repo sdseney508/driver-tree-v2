@@ -85,9 +85,9 @@ router.use(async (req, res, next) => {
 
   try {
     //log everything but seesion refreshes
-    if (url !== '/api/session/refresh') {
-      await audit.create(logData);
-    }
+    // if (url !== '/api/session/refresh') {
+    //   await audit.create(logData);
+    // }
   } catch (err) {
       console.error('Error saving log to database:', err);
   }

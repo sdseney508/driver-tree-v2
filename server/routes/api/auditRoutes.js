@@ -5,7 +5,6 @@ const sequelize = require("../../config/connection");
 // use /api/audits
 
 
-
 router.post('/', async (req, res) => {
     try {
         const auditData = await audit.create(req.body);
