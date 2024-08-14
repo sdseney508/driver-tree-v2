@@ -129,7 +129,7 @@ const barriers = () => {
     }
     setSelOutcome({ ...selOutcome, [e.target.name]: e.target.value });
     let body = { [e.target.name]: e.target.value };
-    updateOutcome(selOutcome.id, body);
+    updateOutcome(selOutcome.id, state.userId, body);
   };
 
   const handleFormSubmit = async (e) => {
@@ -146,7 +146,7 @@ const barriers = () => {
     } else {
       body = { [e.target.name]: e.target.value };
     }
-    updateOutcome(selOutcome.id, body);
+    updateOutcome(selOutcome.id, state.userId, body);
     await getOutcome(selOutcome.id).then((data) => {
       setSelOutcome(data.data);
     });
@@ -181,7 +181,7 @@ const barriers = () => {
                     <Form.Control
                       className={styles.outcome_name}
                       as="input"
-                      defaultValue={selOutcome.outcomeTitle}
+                      value={selOutcome.outcomeTitle}
                       name="outcomeTitle"
                       onChange={handleInputChange}
                       onBlur={handleFormSubmit}
@@ -199,7 +199,7 @@ const barriers = () => {
                         <Form.Control
                           className={styles.commander_name}
                           as="input"
-                          defaultValue={selOutcome.supportedCommanders || ""}
+                          value={selOutcome.supportedCommanders || ""}
                           name="supportedCommanders"
                           onChange={handleInputChange}
                           onBlur={handleFormSubmit}
@@ -213,7 +213,7 @@ const barriers = () => {
                         <Form.Control
                           className={styles.commander_name}
                           as="input"
-                          defaultValue={selOutcome.leadActionOfficer || ""}
+                          value={selOutcome.leadActionOfficer || ""}
                           name="leadActionOfficer"
                           onChange={handleInputChange}
                           onBlur={handleFormSubmit}
@@ -236,7 +236,7 @@ const barriers = () => {
                     <Form.Control
                       as="textarea"
                       className={styles.my_text_area}
-                      defaultValue={selOutcome.problemStatement || ""}
+                      value={selOutcome.problemStatement || ""}
                       //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                       name="problemStatement"
                       onChange={handleInputChange}
@@ -252,7 +252,7 @@ const barriers = () => {
                     <Form.Control
                       as="textarea"
                       className={styles.my_text_area}
-                      defaultValue={selOutcome.baselinePerformance || ""}
+                      value={selOutcome.baselinePerformance || ""}
                       //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                       name="baselinePerformance"
                       onChange={handleInputChange}
@@ -268,7 +268,7 @@ const barriers = () => {
                     <Form.Control
                       as="textarea"
                       className={styles.my_text_area}
-                      defaultValue={selOutcome.rootCauses || ""}
+                      value={selOutcome.rootCauses || ""}
                       //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                       name="rootCauses"
                       onChange={handleInputChange}
@@ -284,7 +284,7 @@ const barriers = () => {
                     <Form.Control
                       as="textarea"
                       className={styles.my_text_area}
-                      defaultValue={selOutcome.assumptions || ""}
+                      value={selOutcome.assumptions || ""}
                       //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                       name="assumptions"
                       onChange={handleInputChange}
@@ -303,7 +303,7 @@ const barriers = () => {
                     <Form.Control
                       as="textarea"
                       className={styles.my_text_area}
-                      defaultValue={selOutcome.scope || ""}
+                      value={selOutcome.scope || ""}
                       //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                       name="scope"
                       onChange={handleInputChange}
@@ -319,7 +319,7 @@ const barriers = () => {
                     <Form.Control
                       as="textarea"
                       className={styles.my_text_area}
-                      defaultValue={selOutcome.goals || ""}
+                      value={selOutcome.goals || ""}
                       //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                       name="goals"
                       onChange={handleInputChange}
@@ -335,7 +335,7 @@ const barriers = () => {
                     <Form.Control
                       as="textarea"
                       className={styles.my_text_area}
-                      defaultValue={selOutcome.measurements || ""}
+                      value={selOutcome.measurements || ""}
                       //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                       name="measurements"
                       onChange={handleInputChange}
@@ -354,7 +354,7 @@ const barriers = () => {
                   <Form.Control
                     as="textarea"
                     className={styles.my_text_area}
-                    defaultValue={selOutcome.supportingCommanders || ""}
+                    value={selOutcome.supportingCommanders || ""}
                     //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                     name="supportingCommanders"
                     onChange={handleInputChange}
@@ -370,7 +370,7 @@ const barriers = () => {
                   <Form.Control
                     as="textarea"
                     className={styles.my_text_area}
-                    defaultValue={selOutcome.stakeholders || ""}
+                    value={selOutcome.stakeholders || ""}
                     //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                     name="stakeholders"
                     onChange={handleInputChange}

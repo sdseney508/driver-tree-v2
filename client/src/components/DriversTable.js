@@ -30,11 +30,8 @@ function DriverTable( {outcomeId, selDriver, setSelDriver, selOutcome, setSelOut
   //this runs on the initial to fetch the data for the table
   useEffect(() => {
     const fetchData = async () => {
-      console.log(outcomeId);
-      console.log(selOutcome);
       await getDriverByOutcome(outcomeId).then((data) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        console.log(data.data.flat());
         rowD = data.data.flat();
       });
       setRowData(rowD);

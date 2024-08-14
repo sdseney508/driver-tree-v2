@@ -598,13 +598,13 @@ const DriverTreePage = () => {
                   Views
                 </button>
                 {state.userRole === "Administrator" &&
-                selOutcome.state === "Active" ? (
-                  <button
-                    className={styles.dtree_btn}
-                    onClick={() => versionRoll()}
-                  >
-                    Create Next Rev
-                  </button>
+                selOutcome.state === "Active" ? (null
+                  // <button
+                  //   className={styles.dtree_btn}
+                  //   onClick={() => versionRoll()}
+                  // >
+                  //   Create Next Rev
+                  // </button>
                 ) : null}
                 {state.userRole === "Administrator" &&
                 selOutcome.state === "Draft" ? (

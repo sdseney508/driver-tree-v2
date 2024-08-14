@@ -19,7 +19,7 @@ var corsOptions = {
 
   //for local use and AWS Testing
   // origin: "http://localhost:3000"
-// 
+
 };
 
 app.disable("x-powered-by");

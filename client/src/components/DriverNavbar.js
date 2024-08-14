@@ -182,25 +182,6 @@ const DriverNavbar = () => {
       ) : location.pathname !== "/" ? null : (
         "Server delay, please refresh this page"
       )}
-
-      <Modal
-        name="helpModal"
-        show={helpModal}
-        size="lg"
-        aria-labelledby="contained-modal-title-vcenter"
-        centered
-        backdrop="static"
-        keyboard={false}
-        onHide={() => setHelpModal(false)}
-      >
-        <Modal.Header closeButton>
-        </Modal.Header>
-        <iframe
-          src="../../public/assets/UserGuide.pdf"
-          title="User Guide"
-          style={{ width: "100%", height: "80vh" }}
-        >hi</iframe>
-      </Modal>
     </>
   );
 };

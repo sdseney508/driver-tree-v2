@@ -144,7 +144,7 @@ router.get("/retired", async (req, res) => {
 
 //update outcomes info
 //TODO add in the call to update the admin log as well
-router.put("/update/:id", async (req, res) => {
+router.put("/update/:id/:userId", async (req, res) => {
   try {
     const transaction = await sequelize.transaction();
     const oldData = await outcomes.findOne({
@@ -169,7 +169,7 @@ router.put("/update/:id", async (req, res) => {
         fieldName: "All",
         newData: JSON.stringify(req.body),
         oldData: JSON.stringify(oldData),
-        userId: req.body.userId,
+        userId: req.params.userId,
       },
       { transaction }
     );

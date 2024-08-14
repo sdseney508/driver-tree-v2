@@ -108,8 +108,8 @@ const updateDriver = (id, userId, body) => {
   return axios.put(apiURL + "/drivers/update/" + id + "/" + userId, body);
 };
 
-const updateOutcome = (id, body) => {
-  return axios.put(apiURL + "/outcomes/update/" + id, body);
+const updateOutcome = (id, userId, body) => {
+  return axios.put(apiURL + "/outcomes/update/" + id + "/" + userId, body);
 };
 
 const updateOutcomeDriver = (outcomeId, driverId, userId, body) => {

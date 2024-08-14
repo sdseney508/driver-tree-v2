@@ -36,7 +36,6 @@ outcomes.hasMany(arrows, {
 arrows.belongsTo(outcomes, {});
 
 stakeholders.hasMany(outcomes, {
-  // foreignKey: 'stakeholderID',
 });
 
 outcomes.belongsTo(stakeholders, {});
