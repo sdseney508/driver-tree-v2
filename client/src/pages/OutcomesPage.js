@@ -73,6 +73,7 @@ const OutcomesPage = () => {
   }, [selOutcome]);
 
 const barriers = () => {
+  console.log(driverTreeObj[1]);
     if (!driverTreeObj[1]) {
       return <div key={"nullbarrier"}></div>;
     } else {
@@ -80,7 +81,7 @@ const barriers = () => {
           return (
             <div key={"barriers" + index}>
               <Link
-                to={`/drpage/${selOutcome.id}/${driverTreeObj[1][index].id}`}
+                to={`/drpage/${selOutcome.id}/${driverTreeObj[1][index].outcomeDrivers.driverId}`}
                 key={"barrierslink" + index}
               >
                 <p key={"p" + index}>{driverTreeObj[1][index].problemStatement}</p>
