@@ -97,6 +97,28 @@ function DriverTable( {outcomeId, selDriver, setSelDriver, selOutcome, setSelOut
       width: 200,
       resizable: true,
     },
+    {
+      field: "driverOwner",
+      filter: true,
+      headerName: "Driver Owner",
+      width: 200,
+      resizable: true,
+    },
+    {
+      field: 'ecd',
+      filter: true,
+      headerName: 'ECD',
+      width: 125,
+      resizable: true,
+    },
+    {
+    field: 'dueDate',
+    filter: true,
+    headerName: 'Due Date',
+    width: 125,
+    resizable: true,
+    },
+
   ]);
 
   // DefaultColDef sets props common to all Columns

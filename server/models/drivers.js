@@ -58,6 +58,11 @@ drivers.init(
             allowNull: true,
         },
 
+        driverOwner: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
+
         status: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -94,6 +99,17 @@ drivers.init(
             type: DataTypes.INTEGER,
             allowNull: true,
             defaultValue: 0,
+        },
+
+        //ECD - Estimated Completion Date
+        ecd: {
+            type: DataTypes.DATE,
+            allowNull: true,
+        },
+
+        dueDate: {
+            type: DataTypes.DATE,
+            allowNull: true,
         },
 
         modified: {

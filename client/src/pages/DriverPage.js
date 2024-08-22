@@ -7,6 +7,7 @@ import {
   getDriverById,
   getDriverByOutcome,
   getOutcome,
+  getUsers,
   updateDriver,
 } from "../utils/drivers";
 import { getAllClassificationDefinitions } from "../utils/classification";
@@ -22,14 +23,16 @@ import { savePDF } from "@progress/kendo-react-pdf";
 
 const DriverPage = () => {
   const [state, setState] = useState([]);
+  const [users, setUserState] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selDrivers, setSelDrivers] = useState([]);
   const [selDriver, setSelDriver] = useState({});
   const [selOutcome, setSelOutcome] = useState({});
   const [showModal, setShowMod] = useState(false);
   const [allquads, setAllQuads] = useState(false);
-  const [classificationState, setClassificationState] = useState([])
-  const [selectedClassificationState, setSelectedClassificationState] = useState("CUI");
+  const [classificationState, setClassificationState] = useState([]);
+  const [selectedClassificationState, setSelectedClassificationState] =
+    useState("CUI");
   const [recordLockState, setRecordLockState] = useState(false); //this is used to lock the record while someone is editing it.  It is set to true when someone is editing the record and false when they are not.
   const navigate = useNavigate();
 
@@ -66,6 +69,7 @@ const DriverPage = () => {
 
     getUserData({ navigate, state, setState, outcomeId });
     getAppData();
+    getAllUsers();
     setTimeout(() => {
       setLoading(true);
     }, 220);
@@ -73,9 +77,45 @@ const DriverPage = () => {
 
   useEffect(() => {
     if (selDriver.id) {
-    navigate("/drpage/" + outcomeId + "/" + selDriver.id);}
+      navigate("/drpage/" + outcomeId + "/" + selDriver.id);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selDriver]);
+
+  // //this function creates the drop down list for selecting the classification of a driver
+  // const classificationSelect = () => {
+
+  // }
+
+  const backToDriverTree = () => {
+    navigate("/drivertree/" + selOutcome.id);
+  };
+
+  //this function will create a new driver tree with the selected driver as the outcome.  It will then navigate to the new driver tree.
+  const createEmbeddedDriverTree = async () => {
+    //first we create the new outcome with the selected driver problem as the the outcome title
+    let body = {
+      outcomeTitle: selDriver.problemStatement,
+      stakeholderId: state.command,
+      userId: state.userId,
+    };
+    let newOutcome = await createOutcome(body);
+    body = { embeddedOutcomeId: newOutcome.data.id };
+    await updateDriver(selDriver.id, state.userId, body);
+    navigate("/drivertree/" + newOutcome.data.id);
+  };
+
+  const exportPDFWithMethod = () => {
+    handleClose();
+    let element = document.querySelector(".pdf-export");
+    savePDF(element, {
+      paperSize: "Letter",
+      fileName: `${selDriver.problemStatement}.pdf`,
+      landscape: true,
+      scale: 0.55,
+      margin: "1cm",
+    });
+  };
 
   //this function generates the powerpoint style quad for the pdf export.
   const generateQuad = (selDriver) => {
@@ -265,6 +305,23 @@ const DriverPage = () => {
                           onBlur={handleFormSubmit}
                         />
                       </Col>
+                      <Col>
+                        {" "}
+                        <Form.Label>Driver Owner</Form.Label>
+                        <Form.Select
+                          name="driverOwner"
+                          style={{ width: "100%", height: "50px" }}
+                          //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                          onChange={handleInputChange}
+                          onBlur={handleFormSubmit}
+                          defaultValue={selDriver.driverOwner}
+                        >
+                          <option disabled selected="selected">
+                            --Select a Driver Owner-
+                          </option>
+                          {userOptions()}
+                        </Form.Select>
+                      </Col>
                     </Row>
                   </Col>
                 </Form.Group>
@@ -311,17 +368,27 @@ const DriverPage = () => {
     });
   };
 
-  //this function loops through all the selDrivers, creates the quad style format for each driver, and then writes it to the pdf.  The page-break on the end of the loop is what creates the new page for each driver.
-  const writePDF = async () => {
-    handleClose();
-    //TODO:  Move this to a server side rendering function.  This is a temporary fix to get the pdf to render properly.
-    await setAllQuads(true);
-    let element = document.querySelector(".all-quads");
-    //then write all of the elements to the pdf
-    exportElement(element, {
-      forcePageBreak: ".page-break",
+  async function getAllUsers() {
+    let userOpts = await getUsers().then((data) => {
+      return data.data;
     });
-    setAllQuads(false);
+    setUserState(userOpts);
+  }
+
+  // create the options for the stakeholder dropdown
+  function userOptions() {
+    return users.map((f, index) => {
+      return (
+        <option key={index} value={f.id}>
+          {f.firstName} {f.lastName}
+        </option>
+      );
+    });
+  }
+
+  //close the modal
+  const handleClose = () => {
+    setShowMod(false);
   };
 
   const handleInputChange = (e) => {
@@ -341,40 +408,17 @@ const DriverPage = () => {
     setSelDriver({ ...selDriver, [e.target.name]: e.target.value });
   };
 
-  // //this function creates the drop down list for selecting the classification of a driver
-  // const classificationSelect = () => {
-
-  // }
-
-  const backToDriverTree = () => {
-    navigate("/drivertree/" + selOutcome.id);
-  };
-
-  //this function will create a new driver tree with the selected driver as the outcome.  It will then navigate to the new driver tree.
-  const createEmbeddedDriverTree = async () => {
-    //first we create the new outcome with the selected driver problem as the the outcome title
-    let body = { outcomeTitle: selDriver.problemStatement, stakeholderId: state.command, userId: state.userId};
-    let newOutcome = await createOutcome(body);
-    body = {embeddedOutcomeId: newOutcome.data.id}
-    await updateDriver(selDriver.id, state.userId, body);
-    navigate("/drivertree/" + newOutcome.data.id);
-  };
-
-  const exportPDFWithMethod = () => {
+  //this function loops through all the selDrivers, creates the quad style format for each driver, and then writes it to the pdf.  The page-break on the end of the loop is what creates the new page for each driver.
+  const writePDF = async () => {
     handleClose();
-    let element = document.querySelector(".pdf-export");
-    savePDF(element, {
-      paperSize: "Letter",
-      fileName: `${selDriver.problemStatement}.pdf`,
-      landscape: true,
-      scale: 0.55,
-      margin: "1cm",
+    //TODO:  Move this to a server side rendering function.  This is a temporary fix to get the pdf to render properly.
+    await setAllQuads(true);
+    let element = document.querySelector(".all-quads");
+    //then write all of the elements to the pdf
+    exportElement(element, {
+      forcePageBreak: ".page-break",
     });
-  };
-
-  //close the modal
-  const handleClose = () => {
-    setShowMod(false);
+    setAllQuads(false);
   };
 
   return (
@@ -436,21 +480,20 @@ const DriverPage = () => {
                 </Col>
               </div>
               {generateQuad(selDriver)}
-
             </Row>
-            {loading ? ( 
+            {loading ? (
               <Row style={{ height: "250px" }}>
-              <DriverTable
-                outcomeId={outcomeId}
-                selDrivers={selDrivers}
-                setSelDrivers={setSelDrivers}
-                selDriver={selDriver}
-                setSelDriver={setSelDriver}
-                selOutcome={selOutcome}
-                setSelOutcome={setSelOutcome}
+                <DriverTable
+                  outcomeId={outcomeId}
+                  selDrivers={selDrivers}
+                  setSelDrivers={setSelDrivers}
+                  selDriver={selDriver}
+                  setSelDriver={setSelDriver}
+                  selOutcome={selOutcome}
+                  setSelOutcome={setSelOutcome}
                 />
-            </Row>) : null
-              }
+              </Row>
+            ) : null}
 
             {allquads ? (
               <Row id="all-quads" className="all-quads">
