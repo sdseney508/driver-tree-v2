@@ -73,6 +73,7 @@ const DriverPage = () => {
     setTimeout(() => {
       setLoading(true);
     }, 220);
+    console.log(selDriver);
   }, []);
 
   useEffect(() => {
@@ -198,7 +199,7 @@ const DriverPage = () => {
             </Col>
 
             <Col className={styles.my_col}>
-              <Form.Group>
+            <Form.Group style={{ width: "100%" }}>
                 <Col>
                   <Row>
                     <Form.Label className={styles.background_label}>
@@ -216,7 +217,9 @@ const DriverPage = () => {
                           ? styles.green_status
                           : selDriver.status === "Yellow"
                           ? styles.yellow_status
-                          : styles.red_status
+                          : selDriver.status === "Red"
+                          ? styles.red_status
+                          : styles.blue_status
                       }
                       //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                       name="status"
@@ -262,7 +265,7 @@ const DriverPage = () => {
           </Row>
           <Row className={styles.quad_format}>
             <Col className={styles.my_col}>
-              <Form.Group>
+              <Form.Group style={{width: "100%"}}>
                 <Form.Label>Progress</Form.Label>
                 <Form.Control
                   as="textarea"
@@ -308,19 +311,21 @@ const DriverPage = () => {
                       <Col>
                         {" "}
                         <Form.Label>Driver Owner</Form.Label>
-                        <Form.Select
+                        <Form.Control
+                          as="select"
                           name="driverOwner"
-                          style={{ width: "100%", height: "50px" }}
+                          style={{ width: "85%", height: "50px" }}
                           //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                           onChange={handleInputChange}
                           onBlur={handleFormSubmit}
-                          defaultValue={selDriver.driverOwner}
+                          value={
+                            selDriver.driverOwner || " "}
                         >
-                          <option disabled selected="selected">
-                            --Select a Driver Owner-
+                          <option>
+                          --Select a Driver Owner--
                           </option>
                           {userOptions()}
-                        </Form.Select>
+                        </Form.Control>
                       </Col>
                     </Row>
                   </Col>
@@ -328,7 +333,7 @@ const DriverPage = () => {
               </Row>
             </Col>
             <Col className={styles.my_col}>
-              <Form.Group>
+            <Form.Group style={{ width: "100%" }}>
                 <Form.Label>Deliverables</Form.Label>
                 <Form.Control
                   as="textarea"
@@ -339,7 +344,7 @@ const DriverPage = () => {
                   onBlur={handleFormSubmit}
                 />
               </Form.Group>
-              <Form.Group>
+              <Form.Group style={{ width: "100%" }}>
                 <Form.Label>Desired Outcomes</Form.Label>
                 <Form.Control
                   as="textarea"
@@ -379,7 +384,7 @@ const DriverPage = () => {
   function userOptions() {
     return users.map((f, index) => {
       return (
-        <option key={index} value={f.id}>
+        <option key={index} value={f.firstName + " " + f.lastName}>
           {f.firstName} {f.lastName}
         </option>
       );

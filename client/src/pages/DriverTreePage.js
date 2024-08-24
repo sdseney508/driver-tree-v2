@@ -335,7 +335,7 @@ const DriverTreePage = () => {
       );
       return;
     }
-    updateOutcome(selOutcome.id, { state: "Active", userId: state.userId});
+    updateOutcome(selOutcome.id, state.userId, { state: "Active"});
     window.location.reload();
   };
 
@@ -362,7 +362,7 @@ const DriverTreePage = () => {
       body.userId = state.userId;
       delete body.id;
       newOutcomeId = data.data.id;
-      await updateOutcome(data.data.id, body);
+      await updateOutcome(data.data.id, state.userId, body);
     });
     //now we update the statusdefinitions that were created on the server side.
     oldstatusDefBody = await getStatusDefinitionByOutcome(oldOutcomeId);
@@ -374,7 +374,6 @@ const DriverTreePage = () => {
     }
     //now we need to create the new drivers and clusters.  We'll start by creating the drivers, then we'll create the clusters, then we'll create the arrows, lastly we'll create the outcomeDrivers to associate the drivers with the outcome
     let driverBody = JSON.parse(JSON.stringify(driverTreeObj));
-    console.log(driverBody);
     let arrowBody = JSON.parse(JSON.stringify(arrows));
     delete arrowBody.id;
     delete driverBody.id;
@@ -392,9 +391,7 @@ const DriverTreePage = () => {
           driverBody[i][j].modified = "No";
           oldDriverId = driverBody[i][j].driverId;
           delete driverBody[i][j].outcomeDrivers.driverId;
-          console.log(driverBody[i][j]);
           const driverData = await createDriver(driverBody[i][j], state.userId);
-          console.log(driverData);
           let body = {
             outcomeId: newOutcomeId,
             driverId: driverData.data.id,
@@ -404,7 +401,6 @@ const DriverTreePage = () => {
           };
           console.log(body);
           let outcomeD = await addOutcomeDriver(body);
-          console.log("made it to addOutcomeDriver", outcomeD.data);
           //check to see if it is in a cluster
           if (driverBody[i][j].clusterId) {
             if (!clusterName) {
@@ -420,7 +416,6 @@ const DriverTreePage = () => {
                   clusterName: clusterName,
                   selDriversArr: selectedDrivers,
                 };
-                console.log("made it to createCluster")
                 const clusterData = await createCluster(body);
                 clusterArr = clusterData.data.id;
                 for (let j = 0; j < arrowBody.length; j++) {

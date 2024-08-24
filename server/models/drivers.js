@@ -59,7 +59,7 @@ drivers.init(
         },
 
         driverOwner: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.TEXT,
             allowNull: true,
         },
 

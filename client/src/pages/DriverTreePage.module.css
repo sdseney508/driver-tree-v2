@@ -323,8 +323,8 @@ width: 90%;
   border-radius: 10px;
   top: 0;
   right: 0;
-  width: 15px;
-  height: 15px;
+  width: 20px;
+  height: 20px;
   padding: 0px;
   text-align: center;
 }
@@ -336,8 +336,8 @@ width: 90%;
   top: 0;
   right: 0;
   border-radius: 10px;
-  width: 15px;
-  height: 15px;
+  width: 20px;
+  height: 20px;
   padding: 0px;
   text-align: center;
 }
@@ -346,12 +346,27 @@ width: 90%;
   background-color: rgb(44, 255, 2);
   position: absolute;
   color: rgb(44, 255, 2);
+  text-align: start;
   top: 0;
   right: 0;
   border-radius: 10px;
-  width: 15px;
-  height: 15px;
+  width: 20px;
+  height: 20px;
   padding: 0px;
+  /* font-size: 150%; */
+  text-align: top;
+}
+
+.blue_status {
+  background-color: blue;
+  position: absolute;
+  color: blue;
+  top: 0;
+  right: 0;
+  border-radius: 10px;
+  width: 20px;
+  height: 20px;
+  padding:0px;
   text-align: center;
 }
 
