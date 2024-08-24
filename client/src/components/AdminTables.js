@@ -35,8 +35,8 @@ import {
   deleteView,
   getAllViews,
 } from "../utils/views";
-import "ag-grid-community/dist/styles/ag-grid.css"; // Core grid CSS, always needed
-import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CSS
+import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
+import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
 
 //This component is used to display the limits in a table.
 //it also provides the capability to sort and filter the data.

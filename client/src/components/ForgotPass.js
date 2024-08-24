@@ -9,6 +9,7 @@ const ForgotPass = ({onModalSubmit}) => {
   useEffect(() => {
     getEmailAdds();
     setFormData({ ...formData, subject: "Driver Tree Database Password Reset" });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function getEmailAdds() {

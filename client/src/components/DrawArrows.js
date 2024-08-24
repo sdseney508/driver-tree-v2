@@ -1,10 +1,9 @@
-import React, { useEffect } from "react";
+import React from "react";
 import Xarrow from "react-xarrows";
 
 function DriverArrows({
   arrows, 
   ArrowModal,
-  driverTreeObj,
   opacity,
   recordLockState,
   tableState,

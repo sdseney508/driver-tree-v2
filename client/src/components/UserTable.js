@@ -8,8 +8,8 @@ import React, {
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
 import { getUsers } from "../utils/drivers";
 import { loggedIn, getToken } from "../utils/auth";
-import "ag-grid-community/dist/styles/ag-grid.css"; // Core grid CSS, always needed
-import "ag-grid-community/dist/styles/ag-theme-alpine.css"; // Optional theme CSS
+import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
+import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
 
 //This component is used to display the users in a table on the administrator's form.  it will allow the admin to change all of the info about a user.
 //it also provides the capability to sort and filter the data.

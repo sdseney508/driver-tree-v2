@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Navbar, Nav, Container, Modal, Button } from "react-bootstrap";
+import { Navbar, Nav, Container } from "react-bootstrap";
 import styles from "./DriverNavbar.module.css";
 import { useNavigate, useLocation } from "react-router";
 import { loggedIn, getToken, getUser, logout } from "../utils/auth";
@@ -9,10 +9,9 @@ import { outcomeByCommand } from "../utils/drivers";
 const DriverNavbar = () => {
   let location = useLocation();
   let navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [helpModal, setHelpModal] = useState(false);
+  const [loading] = useState(false);
   let pName = location.pathname.slice(0, 5);
-  const [navState, setNavState] = useState({});
+  const [navState] = useState({});
 
   const allOutcomes = async (userInfo) => {
     try {
