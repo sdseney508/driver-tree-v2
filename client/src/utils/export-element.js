@@ -4,7 +4,7 @@ import { saveAs } from "@progress/kendo-file-saver";
 export function exportElement(element, options, outcomeTitle) {
  
 
-
+debugger;
   drawDOM(element, options)
     .then((group) => {
       return exportPDF(group);

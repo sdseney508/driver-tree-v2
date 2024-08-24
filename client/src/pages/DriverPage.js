@@ -18,6 +18,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import styles from "./DriverPage.module.css";
 import { exportElement } from "../utils/export-element";
 import { savePDF } from "@progress/kendo-react-pdf";
+import exportToPDF from "../utils/exportToPDF";
+import e from "cors";
 
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form
 
@@ -45,7 +47,11 @@ const DriverPage = () => {
         outcomeId = 1;
       }
       await getDriverByOutcome(outcomeId).then((data) => {
-        let top = data.data;
+        let top = data.data.flat();
+        //remove the nulls
+        top = top.filter((el) => {
+          return el != null;
+        });
         setSelDrivers(top);
       });
       await getOutcome(outcomeId).then((data) => {
@@ -72,8 +78,7 @@ const DriverPage = () => {
     getAllUsers();
     setTimeout(() => {
       setLoading(true);
-    }, 220);
-    console.log(selDriver);
+    }, 500);
   }, []);
 
   useEffect(() => {
@@ -108,14 +113,7 @@ const DriverPage = () => {
 
   const exportPDFWithMethod = () => {
     handleClose();
-    let element = document.querySelector(".pdf-export");
-    savePDF(element, {
-      paperSize: "Letter",
-      fileName: `${selDriver.problemStatement}.pdf`,
-      landscape: true,
-      scale: 0.55,
-      margin: "1cm",
-    });
+    exportToPDF("pdf-export");
   };
 
   //this function generates the powerpoint style quad for the pdf export.
@@ -199,7 +197,7 @@ const DriverPage = () => {
             </Col>
 
             <Col className={styles.my_col}>
-            <Form.Group style={{ width: "100%" }}>
+              <Form.Group style={{ width: "100%" }}>
                 <Col>
                   <Row>
                     <Form.Label className={styles.background_label}>
@@ -265,7 +263,7 @@ const DriverPage = () => {
           </Row>
           <Row className={styles.quad_format}>
             <Col className={styles.my_col}>
-              <Form.Group style={{width: "100%"}}>
+              <Form.Group style={{ width: "100%" }}>
                 <Form.Label>Progress</Form.Label>
                 <Form.Control
                   as="textarea"
@@ -318,12 +316,9 @@ const DriverPage = () => {
                           //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                           onChange={handleInputChange}
                           onBlur={handleFormSubmit}
-                          value={
-                            selDriver.driverOwner || " "}
+                          value={selDriver.driverOwner || " "}
                         >
-                          <option>
-                          --Select a Driver Owner--
-                          </option>
+                          <option>--Select a Driver Owner--</option>
                           {userOptions()}
                         </Form.Control>
                       </Col>
@@ -333,7 +328,7 @@ const DriverPage = () => {
               </Row>
             </Col>
             <Col className={styles.my_col}>
-            <Form.Group style={{ width: "100%" }}>
+              <Form.Group style={{ width: "100%" }}>
                 <Form.Label>Deliverables</Form.Label>
                 <Form.Control
                   as="textarea"

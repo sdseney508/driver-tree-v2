@@ -19,7 +19,7 @@ import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
 
 //TODO:  Figure out why the fetchCellListener is looking for embedded driver tree data
 
-function DriverTable( {outcomeId, selDriver, setSelDriver, selOutcome, setSelOutcome }) {
+function DriverTable( {outcomeId, selDrivers, setSelDrivers, selDriver, setSelDriver, selOutcome, setSelOutcome }) {
 
   const [rowData, setRowData] = useState([]); // Set rowData to Array of Objects
   let rowD;
@@ -28,16 +28,10 @@ function DriverTable( {outcomeId, selDriver, setSelDriver, selOutcome, setSelOut
 
   //this runs on the initial to fetch the data for the table
   useEffect(() => {
-    const fetchData = async () => {
-      await getDriverByOutcome(outcomeId).then((data) => {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        rowD = data.data.flat();
-      });
-      setRowData(rowD);
-    };
-    fetchData();
+    console.log("selDrivers", selDrivers);
+    setRowData(selDrivers);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [outcomeId, selOutcome, selDriver]);
+  }, [, selDrivers]);
 
   // Each Column Definition results in one Column.  For now, we are only going to set the 7 key columns that the users might search on
   const [columnDefs, setColumnDefs] = useState([
@@ -131,14 +125,19 @@ function DriverTable( {outcomeId, selDriver, setSelDriver, selOutcome, setSelOut
   // It then passes the data to the parent component to be displayed in the form.
 
   async function fetchDriverInfo(driverId) {
+    debugger;
+    console.log("driverId", driverId);
     await getDriverById(driverId).then((data) => {
+      debugger;
+      console.log("data", data);
       let top = data.data;
       setSelDriver(top);
     });
   }
 
   const cellClickedListener = async (event) => {
-    let driverId = event.data.id;
+    debugger;
+    let driverId = event.data.driverId;
     await fetchDriverInfo(driverId);
   };
 
