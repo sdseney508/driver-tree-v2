@@ -339,6 +339,7 @@ const DriverTreePage = () => {
   };
 
   const versionRoll = async () => {
+    debugger;
     let statusDefBody = [];
     let oldstatusDefBody = [];
     //first we need to get all the status definitions for the current outcome
