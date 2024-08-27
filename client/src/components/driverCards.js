@@ -1234,7 +1234,7 @@ const DriverCards = ({
                   {tierCards(5, driverTreeObj[5], { viewObj })}
                 </Row>
               </Col>
-              <Col className={styles.driver} key="6">
+              {/* <Col className={styles.driver} key="6">
                 <Row>Tier 6 Drivers {tierButtons(6)}</Row>
                 <Row
                   id={`tier5Cards`}
@@ -1243,7 +1243,7 @@ const DriverCards = ({
                 >
                   {tierCards(6, driverTreeObj[6], { viewObj })}
                 </Row>
-              </Col>
+              </Col> */}
             </>
           ) : null}
           {!loading ? (

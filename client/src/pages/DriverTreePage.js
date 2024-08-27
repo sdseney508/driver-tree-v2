@@ -313,6 +313,7 @@ const DriverTreePage = () => {
       };
       let pdfExport = document.getElementById("pdf-export");
       exportElement(pdfExport, options, selOutcome.outcomeTitle);
+      
       exportToPDF("pdf-export");
 
       setTimeout(() => {
