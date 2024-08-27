@@ -301,8 +301,11 @@ const DriverTreePage = () => {
   useEffect(() => {
     //needed to prevent a random pdf from generating on every page load
     if (PDFState && document.readyState === "complete") {
+      debugger;
       setTableState("");
       svgForPdf();
+      // setTimeout(() => {
+      // },250);
       // let options = {
       //   papersize: "auto",
       //   margin: "25px",
@@ -311,6 +314,7 @@ const DriverTreePage = () => {
       // let pdfExport = document.getElementById("pdf-export");
       // exportElement(pdfExport, options, selOutcome.outcomeTitle);
       exportToPDF("pdf-export");
+
       setTimeout(() => {
       window.location.reload()}, 250);
     }
