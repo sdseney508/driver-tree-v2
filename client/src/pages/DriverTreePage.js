@@ -271,7 +271,7 @@ const DriverTreePage = () => {
 
         let svgtop = svgArray[index].getBoundingClientRect().top;
         //the additional offset accounts for delta between cards and column widths
-        let svgleft = svgArray[index].getBoundingClientRect().left - 5;
+        let svgleft = svgArray[index].getBoundingClientRect().left - 10;
         console.log(svgArray[index].getBoundingClientRect());
         console.log(svgtop, svgleft);
         svgdiv.setAttribute(
@@ -314,7 +314,7 @@ const DriverTreePage = () => {
       let pdfExport = document.getElementById("pdf-export");
       exportElement(pdfExport, options, selOutcome.outcomeTitle);
       
-      exportToPDF("pdf-export");
+      // exportToPDF("pdf-export");
 
       setTimeout(() => {
       window.location.reload()}, 250);

@@ -66,7 +66,7 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
         <div key={"statusDefDiv" + f.id}>
           <Row
             key={"statusDefRow" + f.id}
-            style={{ display: "flex", flexDirection: "row", width: "160px" }}
+            style={{ display: "flex", flexDirection: "row", width: "190px" }}
           >
             <div style={{ width: "15px" }} key={"div" + f.id}>
               <FontAwesomeIcon
@@ -74,7 +74,7 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
                 style={{ color: statColor }}
               ></FontAwesomeIcon>
             </div>
-            <div style={{ width: "135px" }}>
+            <div style={{ width: "155px" }}>
               <Form>
                 <Form.Control
                   as="textarea"
@@ -82,7 +82,7 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
                   id={f.id}
                   defaultValue={f.statusDefinition}
                   onChange={handleInputChange}
-                  style={{ fontSize: "10px" }}
+                  style={{ fontSize: "9px", padding: "0px" }}
                 />
               </Form>
             </div>
