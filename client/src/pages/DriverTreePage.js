@@ -271,7 +271,7 @@ const DriverTreePage = () => {
 
         let svgtop = svgArray[index].getBoundingClientRect().top;
         //the additional offset accounts for delta between cards and column widths
-        let svgleft = svgArray[index].getBoundingClientRect().left - 10.5;
+        let svgleft = svgArray[index].getBoundingClientRect().left - 2;
         svgdiv.setAttribute(
           "style",
           `position: absolute; top: ${svgtop}px; left: ${svgleft}px; z-index: 10; width: ${width}px; height: ${height}px;`
@@ -279,6 +279,7 @@ const DriverTreePage = () => {
 
         svgdiv.innerHTML = svgstuff;
         let pdfExport = document.getElementById("pdf-export");
+        
         pdfExport.appendChild(svgdiv);
       }
     });
@@ -591,13 +592,13 @@ const DriverTreePage = () => {
                   Views
                 </button>
                 {state.userRole === "Administrator" &&
-                selOutcome.state === "Active" ? (null
-                  // <button
-                  //   className={styles.dtree_btn}
-                  //   onClick={() => versionRoll()}
-                  // >
-                  //   Create Next Rev
-                  // </button>
+                selOutcome.state === "Active" ? (
+                  <button
+                    className={styles.dtree_btn}
+                    onClick={() => versionRoll()}
+                  >
+                    Create Next Rev
+                  </button>
                 ) : null}
                 {state.userRole === "Administrator" &&
                 selOutcome.state === "Draft" ? (
