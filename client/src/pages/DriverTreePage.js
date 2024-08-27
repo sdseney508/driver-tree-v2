@@ -272,8 +272,8 @@ const DriverTreePage = () => {
         let svgtop = svgArray[index].getBoundingClientRect().top;
         //the additional offset accounts for delta between cards and column widths
         let svgleft = svgArray[index].getBoundingClientRect().left - 50;
-        console.log(svgleft);
-        console.log(svgArray[index].getBoundingClientRect().left);  
+        console.log(svgArray[index].getBoundingClientRect());
+        console.log(svgtop, svgleft);
         svgdiv.setAttribute(
           "style",
           `position: absolute; top: ${svgtop}px; left: ${svgleft}px; z-index: 10; width: ${width}px; height: ${height}px;`
@@ -311,9 +311,10 @@ const DriverTreePage = () => {
       // let pdfExport = document.getElementById("pdf-export");
       // exportElement(pdfExport, options, selOutcome.outcomeTitle);
       exportToPDF("pdf-export");
+      window.location.reload();
     }
     setPDFState(false);
-    window.location.reload();
+   
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [PDFState]);
 
