@@ -133,6 +133,7 @@ const AdminAccountManagement = () => {
     const password = userFormData.password;
     const userRole = userFormData.userRole;
     let userStatus = userFormData.accountStatus;
+    let lastLogin = Date.now();
 
     if (userStatus === "Delete") {
       if (window.confirm("Are you sure you want to delete this user?")) {
