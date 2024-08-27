@@ -24,7 +24,7 @@ import ClusterModal from "../components/ClusterModal";
 import { getArrows } from "../utils/arrows";
 import ViewsTable from "../components/ViewsTable";
 import { createCluster } from "../utils/cluster";
-// import { exportElement } from "../utils/export-element";
+import { exportElement } from "../utils/export-element";
 import exportToPDF from "../utils/exportToPDF";
 
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form
@@ -271,7 +271,7 @@ const DriverTreePage = () => {
 
         let svgtop = svgArray[index].getBoundingClientRect().top;
         //the additional offset accounts for delta between cards and column widths
-        let svgleft = svgArray[index].getBoundingClientRect().left - 50;
+        let svgleft = svgArray[index].getBoundingClientRect().left - 5;
         console.log(svgArray[index].getBoundingClientRect());
         console.log(svgtop, svgleft);
         svgdiv.setAttribute(
@@ -306,13 +306,13 @@ const DriverTreePage = () => {
       svgForPdf();
       // setTimeout(() => {
       // },250);
-      // let options = {
-      //   papersize: "auto",
-      //   margin: "25px",
-      //   landscape: true,
-      // };
-      // let pdfExport = document.getElementById("pdf-export");
-      // exportElement(pdfExport, options, selOutcome.outcomeTitle);
+      let options = {
+        papersize: "auto",
+        margin: "25px",
+        landscape: true,
+      };
+      let pdfExport = document.getElementById("pdf-export");
+      exportElement(pdfExport, options, selOutcome.outcomeTitle);
       exportToPDF("pdf-export");
 
       setTimeout(() => {

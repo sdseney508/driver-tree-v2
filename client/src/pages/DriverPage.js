@@ -246,6 +246,13 @@ const DriverPage = () => {
                       >
                         Red
                       </option>
+                      <option
+                        key={4}
+                        value={"Blue"}
+                        className={styles.blue_status}
+                      >
+                        Red
+                      </option>
                     </Form.Control>
                   </Row>
                 </Col>
