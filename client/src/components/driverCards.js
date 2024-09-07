@@ -52,6 +52,7 @@ const DriverCards = ({
   setViewObj,
   viewArrows,
   setViewArrows,
+  legendState
 }) => {
   //This module has four functions:
   //1.  It creates the divs that go into the driver tree columns
@@ -542,7 +543,6 @@ const DriverCards = ({
 
     let cardname = e.dataTransfer.getData("type");
     let data = e.dataTransfer.getData("text");
-    debugger;
     console.log(data);
     let body = {
       tierLevel: e.target.dataset.tier,
@@ -993,7 +993,7 @@ const DriverCards = ({
             >
               {/* text input for clusterName */}
               {!recordLockState ? (
-                <Form style={{ alignContent: "center" }}>
+                <Form >
                   <Form.Control
                     size="sm"
                     type="text"
@@ -1171,7 +1171,7 @@ const DriverCards = ({
               <Row style={{ minHeight: "500px", width: "100%" }}>
                 <br />
                 <br />
-                {!loading ? (
+                {!loading  && legendState ? (
                   <Legend
                     driverTreeObj={driverTreeObj}
                     selOutcome={selOutcome}

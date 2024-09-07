@@ -132,7 +132,7 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
               </Col>
               <Col
                 key={"S-Abbrev" + index}
-                style={{ width: "35px" }}
+                style={{ width: "45px" }}
                 className={styles.legend_input}
               >
                 {flatDriverTreeObj[index].stakeholderAbbreviation}

@@ -17,9 +17,8 @@ import { faCopyright } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate, useParams } from "react-router-dom";
 import styles from "./DriverPage.module.css";
 import { exportElement } from "../utils/export-element";
-import { savePDF } from "@progress/kendo-react-pdf";
+
 import exportToPDF from "../utils/exportToPDF";
-import e from "cors";
 
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form
 

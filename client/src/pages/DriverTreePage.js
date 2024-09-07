@@ -70,6 +70,7 @@ const DriverTreePage = () => {
   const [selOutcome, setSelOutcome] = useState({});
   const [driverTreeObj, setDriverTreeObj] = useState([]);
   const [showClusterModal, setClusterModal] = useState(false);
+  const [showPDFModal, setPDFModal] = useState(false);
   const [selDriver, setSelDriver] = useState({});
   const [recordLockState, setRecordLockState] = useState(false); //used to lock the record when a user is editing it, reads the user's account permissions and adjusts record locks accordingly, stakeholders have read only access.
   const [viewId, setViewId] = useState(""); //used to let the user cycle through their personal views, the view state is the view id in case multiple users create same named views.
@@ -77,6 +78,7 @@ const DriverTreePage = () => {
   const [viewObj, setViewObj] = useState([]); //used to store the view object for the view cards
   const [viewArrows, setViewArrows] = useState([]); //used to store the view arrows for the view cards
   const [tableState, setTableState] = useState("outcome"); //used to toggle the table at the bottom of the page. const [connectionShow, setConnectionShow] = useState(false);
+  const [legendState, setLegendState] = useState(true); //used to toggle the legend at the bottom of the page.
 
   let tableStyle = { height: "25vh", width: "100%", overFlowY: "scroll" };
   let driverStyle = {
@@ -86,9 +88,9 @@ const DriverTreePage = () => {
   }; //custom styles for the divs down below
   const [showTable, setShowTable] = useState({ tableStyle, driverStyle }); //show or not show the Outcomes/views tables at the bottom of the page
   const pdfStyle = {
-    height: "fit-content",
-    overFlowY: "visible",
-    overFlowX: "hidden",
+    height: "100%",
+    // overFlowY: "visible",
+    // overFlowX: "hidden",
   };
 
   const { outcomeId } = useParams();
@@ -138,14 +140,7 @@ const DriverTreePage = () => {
       if (!selOutcome.id) {
         selOutcome.id = outcomeId;
       }
-      //troubleshooting:  removed on 27 June 2024 at 1910 EST
-      // await getOutcome(selOutcome.id).then((data) => {
-      //   if (!data.data) {
-      //     setError(true);
-      //     navigate("/user");
-      //     return;
-      //   }
-      // });
+
       await getDriverByOutcome(selOutcome.id).then((data) => {
         setDriverTreeObj(data.data);
       });
@@ -164,7 +159,7 @@ const DriverTreePage = () => {
     }
     navigate("/drivertree/" + selOutcome.id);
     // if (driverTreeObj.length > 0) {
-      setLoading(false);
+    setLoading(false);
     // }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome, viewId, opacity]);
@@ -206,7 +201,7 @@ const DriverTreePage = () => {
     if (tableState === table) {
       tableStyle = { height: "0vh", overFlowY: "scroll" };
       driverStyle = {
-        height: "80vh",
+        height: "100%",
         overFlowY: "scroll",
       };
       setOpacity(100);
@@ -255,9 +250,9 @@ const DriverTreePage = () => {
       if (svgArray[index].id.slice(0, 3) === "SVG") {
         let innerSVG = svgArray[index].innerHTML;
         let width = svgArray[index].getBoundingClientRect().width;
-        if (width > 400) {
-          width = 400;
-        }
+        // if (width > 400) {
+        //   width = 400;
+        // }
         let height = svgArray[index].getBoundingClientRect().height;
 
         let svgstuff = `<svg
@@ -267,13 +262,12 @@ const DriverTreePage = () => {
         >
           ${innerSVG}
     </svg>`;
+
         let svgdiv = document.createElement("div");
 
         let svgtop = svgArray[index].getBoundingClientRect().top;
         //the additional offset accounts for delta between cards and column widths
-        let svgleft = svgArray[index].getBoundingClientRect().left - 10;
-        console.log(svgArray[index].getBoundingClientRect());
-        console.log(svgtop, svgleft);
+        let svgleft = svgArray[index].getBoundingClientRect().left-10;
         svgdiv.setAttribute(
           "style",
           `position: absolute; top: ${svgtop}px; left: ${svgleft}px; z-index: 10; width: ${width}px; height: ${height}px;`
@@ -281,11 +275,12 @@ const DriverTreePage = () => {
 
         svgdiv.innerHTML = svgstuff;
         let pdfExport = document.getElementById("pdf-export");
-        
+
         pdfExport.appendChild(svgdiv);
       }
     });
   };
+
   const onModalSubmit = (e) => {
     e.preventDefault();
     handleClose();
@@ -295,37 +290,33 @@ const DriverTreePage = () => {
   const handleClose = () => {
     setClusterModal(false);
     setArrowMod(false);
+    setPDFModal(false);
   };
 
   //used to clean the cards up for a PDF generation
   useEffect(() => {
     //needed to prevent a random pdf from generating on every page load
     if (PDFState && document.readyState === "complete") {
-      debugger;
-      setTableState("");
+      setPDFModal(false);
+      customStyles(tableState);
+      // setTableState("");
       svgForPdf();
-      // setTimeout(() => {
-      // },250);
-      let options = {
-        papersize: "auto",
-        margin: "25px",
-        landscape: true,
-      };
-      let pdfExport = document.getElementById("pdf-export");
-      exportElement(pdfExport, options, selOutcome.outcomeTitle);
-      
-      // exportToPDF("pdf-export");
 
+      let pdfExport = document.getElementById("pdf-export");
+      exportToPDF("pdf-export");
       setTimeout(() => {
-      window.location.reload()}, 250);
+        window.location.reload();
+      }, 1000);
+      
     }
+
     setPDFState(false);
-   
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [PDFState]);
 
   const handleClick = () => {
-    setPDFState(true);
+    setPDFModal(true);
   };
 
   const toggleArrow = () => {
@@ -344,7 +335,7 @@ const DriverTreePage = () => {
       );
       return;
     }
-    updateOutcome(selOutcome.id, state.userId, { state: "Active"});
+    updateOutcome(selOutcome.id, state.userId, { state: "Active" });
     window.location.reload();
   };
 
@@ -663,8 +654,11 @@ const DriverTreePage = () => {
                 setViewObj={setViewObj}
                 viewArrows={viewArrows}
                 setViewArrows={setViewArrows}
+                legendState={legendState}
               />
-            ) : <div>Hi</div>}
+            ) : (
+              <div>Hi</div>
+            )}
           </Row>
 
           <div style={showTable.tableStyle}>
@@ -759,6 +753,42 @@ const DriverTreePage = () => {
             Close
           </Button>
         </Modal.Body>
+      </Modal>
+
+      <Modal
+        name="pdfModal"
+        show={showPDFModal}
+        size="lg"
+        aria-labelledby="contained-modal-title-vcenter"
+        centered
+        backdrop="static"
+        keyboard={false}
+        onHide={() => setPDFModal(false)}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title id="cluster-modal">Legend Option</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className={styles.my_modal}>
+          <Button
+            variant="secondary"
+            style={{ margin: "20px" }}
+            onClick={()=> {setLegendState(true); setPDFState(true)}}
+          >
+            With Legend
+          </Button>
+          <Button
+            variant="secondary"
+            style={{ margin: "20px" }}
+            onClick={() => {setLegendState(false); setPDFState(true)}}
+          >
+            Without Legend
+          </Button>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Close
+          </Button>
+        </Modal.Footer>
       </Modal>
     </>
   );

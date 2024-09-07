@@ -28,7 +28,6 @@ function DriverTable( {outcomeId, selDrivers, setSelDrivers, selDriver, setSelDr
 
   //this runs on the initial to fetch the data for the table
   useEffect(() => {
-    console.log("selDrivers", selDrivers);
     setRowData(selDrivers);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [, selDrivers]);

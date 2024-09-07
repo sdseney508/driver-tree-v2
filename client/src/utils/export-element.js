@@ -11,5 +11,7 @@ debugger;
     })
     .then((dataUri) => {
       saveAs(dataUri, `${outcomeTitle}.pdf`);
+    }).then(() => {
+      window.location.reload();
     });
 }
