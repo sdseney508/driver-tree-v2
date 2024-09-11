@@ -52,7 +52,7 @@ const DriverCards = ({
   setViewObj,
   viewArrows,
   setViewArrows,
-  legendState
+  legendState,
 }) => {
   //This module has four functions:
   //1.  It creates the divs that go into the driver tree columns
@@ -342,7 +342,7 @@ const DriverCards = ({
             </Col>
             <Col className={styles.card_col_body} id={cardData.driverId}>
               <div>
-                {!recordLockState ? (
+                {!recordLockState && !PDFState ? (
                   <Form>
                     <Form.Control
                       as="textarea"
@@ -550,7 +550,7 @@ const DriverCards = ({
     };
 
     await updateOutcomeDriver(selOutcome.id, data, state.userId, body);
-    body = {modified: "Yes"};
+    body = { modified: "Yes" };
     //tag the driver as updated since you moved it
     await updateDriver(data, state.userId, body);
     //look through the arrows state to find any arrows with the affected cardid as a start or endpoint then update.
@@ -993,7 +993,7 @@ const DriverCards = ({
             >
               {/* text input for clusterName */}
               {!recordLockState ? (
-                <Form >
+                <Form>
                   <Form.Control
                     size="sm"
                     type="text"
@@ -1119,8 +1119,7 @@ const DriverCards = ({
                         height: "30px",
                         backgroundColor: "red",
                       }}
-                    >
-                    </option>
+                    ></option>
                     <option
                       key={4}
                       style={{
@@ -1128,8 +1127,7 @@ const DriverCards = ({
                         height: "30px",
                         backgroundColor: "blue",
                       }}
-                    >
-                    </option>
+                    ></option>
                   </Form.Control>
                 </Form>
                 {createAnArrow && !PDFState ? (
@@ -1153,17 +1151,23 @@ const DriverCards = ({
                       />
                     </Col>
                     <Col className={styles.card_col_body}>
-                      <Form>
-                        <Form.Control
-                          as="textarea"
-                          data-cardid={selOutcome.id}
-                          className={styles.my_card_text}
-                          defaultValue={selOutcome.outcomeTitle}
-                          //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-                          name="outcomeTitle"
-                          onBlur={handleSelOutcomeChange}
-                        />
-                      </Form>
+                      {!PDFState ? (
+                        <Form>
+                          <Form.Control
+                            as="textarea"
+                            data-cardid={selOutcome.id}
+                            className={styles.my_card_text}
+                            defaultValue={selOutcome.outcomeTitle}
+                            //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                            name="outcomeTitle"
+                            onBlur={handleSelOutcomeChange}
+                          />
+                        </Form>
+                      ) : (
+                        <div className={styles.my_card_text}>
+                          {selOutcome.outcomeTitle}
+                        </div>
+                      )}
                     </Col>
                   </Row>
                 </Card.Body>
@@ -1171,7 +1175,7 @@ const DriverCards = ({
               <Row style={{ minHeight: "500px", width: "100%" }}>
                 <br />
                 <br />
-                {!loading  && legendState ? (
+                {!loading && legendState ? (
                   <Legend
                     driverTreeObj={driverTreeObj}
                     selOutcome={selOutcome}

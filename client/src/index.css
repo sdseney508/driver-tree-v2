@@ -1,6 +1,6 @@
 body {
   margin: 0;
-  font-family: 'DM Serif Display', serif; 
+  font-family: Helvetica, sans-serif, serif; 
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-size: 10px;

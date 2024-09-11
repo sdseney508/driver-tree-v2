@@ -228,16 +228,17 @@
   background-color: #f8f7f7;
   color: rgb(0, 0, 0);
   font-weight: normal;
+  text-wrap: wrap;
   padding: 0px;
   margin: 0px;
   font-size: 8px;
   text-align: center;
   border: none;
   z-index: 500;
-  width: 60%;
-  height: 40%;
+  width: 55%;
+  height: 50%;
   position: absolute;
-  left: 35px;
+  left: 38px;
   top: 1px;
 }
 
