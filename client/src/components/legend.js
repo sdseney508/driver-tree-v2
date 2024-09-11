@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { updateDriver } from "../utils/drivers";
 import { faCircle } from "@fortawesome/free-solid-svg-icons";
 
-const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
+const Legend = ({ driverTreeObj, selOutcome, recordLockState, state, PDFState }) => {
   //the below function gets all of the stakeholders and abbreviations from the driverTreeObj, then removes any duplicates and places them in a list under the legend
   const [statusDefinition, setStatusDefinition] = useState([]);
 
@@ -75,7 +75,7 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
               ></FontAwesomeIcon>
             </div>
             <div style={{ width: "155px" }}>
-              <Form>
+              {!PDFState ? <Form>
                 <Form.Control
                   as="textarea"
                   name="statusDefinition"
@@ -84,7 +84,7 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
                   onChange={handleInputChange}
                   style={{ fontSize: "9px", padding: "0px" }}
                 />
-              </Form>
+              </Form>: f.statusDefinition}
             </div>
           </Row>
         </div>
@@ -92,7 +92,7 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
     });
   };
 
-  const stake = (driverTreeObj) => {
+  const stake = (driverTreeObj, PDFState) => {
     let stakes = [];
     if (!driverTreeObj || driverTreeObj.length < 1) {
       return;
@@ -117,7 +117,7 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
           <div key={"stake" + index}>
             <Row key={"stakeRow" + index} className={styles.legend_row}>
               <Col key={"Sholder-legend" + index}>
-                <Form>
+                {!PDFState ? <Form>
                   <Form.Control
                     as="input"
                     name="stakeholders"
@@ -128,7 +128,7 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
                     disabled={recordLockState}
                     className={styles.legend_input}
                   ></Form.Control>
-                </Form>
+                </Form>: flatDriverTreeObj[index].stakeholders}
               </Col>
               <Col
                 key={"S-Abbrev" + index}
@@ -150,11 +150,11 @@ const Legend = ({ driverTreeObj, selOutcome, recordLockState, state }) => {
         <Col className={styles.legend_col} key={"legend.col"}>
           <h5>Legend</h5>
           <div style={{ fontSize: "12px" }}>Stakeholders:</div>
-          {stake(driverTreeObj)}
+          {stake(driverTreeObj, PDFState)}
           <br />
           <br />
           <div style={{ fontSize: "12px" }}>Status Definitions</div>
-          {statusDefinition ? statusDef(statusDefinition) : null}
+          {statusDefinition ? statusDef(statusDefinition, PDFState) : null}
         </Col>
       </div>
     </>

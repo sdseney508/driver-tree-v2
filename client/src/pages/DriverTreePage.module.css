@@ -231,7 +231,7 @@
   text-wrap: wrap;
   padding: 0px;
   margin: 0px;
-  font-size: 8px;
+  font-size: 7px;
   text-align: center;
   border: none;
   z-index: 500;
@@ -242,8 +242,28 @@
   top: 1px;
 }
 
+
+
 .my_card_text:hover {
   cursor: pointer;
+}
+
+.my_card_text_pdf {
+  background-color: #f8f7f7;
+  color: rgb(0, 0, 0);
+  font-weight: normal;
+  text-wrap: wrap;
+  padding: 0px;
+  margin: 0px;
+  font-size: 10px;
+  text-align: center;
+  border: none;
+  z-index: 500;
+  width: 55%;
+  height: 50%;
+  position: absolute;
+  left: 38px;
+  top: 1px;
 }
 
 .my_cluster {

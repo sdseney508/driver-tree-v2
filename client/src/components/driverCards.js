@@ -342,22 +342,23 @@ const DriverCards = ({
             </Col>
             <Col className={styles.card_col_body} id={cardData.driverId}>
               <div>
-                {!recordLockState && !PDFState ? (
-                  <Form>
-                    <Form.Control
-                      as="textarea"
-                      data-cardid={cardData.driverId}
-                      className={styles.my_card_text}
-                      defaultValue={cardData.problemStatement}
-                      //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-                      name="problemStatement"
-                      onBlur={handleFormSubmit}
-                    />
-                  </Form>
+                {PDFState || recordLockState ? (
+                    <div className={styles.my_card_text_pdf}>
+                       {cardData.problemStatement}
+                    </div>
+  
                 ) : (
-                  <div className={styles.my_card_text}>
-                    {cardData.problemStatement}
-                  </div>
+                  <Form>
+                  <Form.Control
+                    as="textarea"
+                    data-cardid={cardData.driverId}
+                    className={styles.my_card_text}
+                    defaultValue={cardData.problemStatement}
+                    //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                    name="problemStatement"
+                    onBlur={handleFormSubmit}
+                  />
+                </Form>
                 )}
               </div>
               <div></div>
@@ -1164,7 +1165,7 @@ const DriverCards = ({
                           />
                         </Form>
                       ) : (
-                        <div className={styles.my_card_text}>
+                        <div className={styles.my_card_text_pdf}>
                           {selOutcome.outcomeTitle}
                         </div>
                       )}
@@ -1181,6 +1182,7 @@ const DriverCards = ({
                     selOutcome={selOutcome}
                     recordLockState={recordLockState}
                     state={state}
+                    PDFState={PDFState}
                   />
                 ) : null}
               </Row>
