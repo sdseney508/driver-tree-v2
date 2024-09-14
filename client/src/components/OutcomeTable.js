@@ -16,6 +16,8 @@ function OutcomeTable({ selOutcome, setSelOutcome, command }) {
   async function fetchData() {
     await outcomeByCommand(command).then((data) => {
       rowD = data.data;
+      //remove all rows where state = retired to clean up the table
+      rowD = rowD.filter((row) => row.state !== "Retired");
     });
     setRowData(rowD);
   }

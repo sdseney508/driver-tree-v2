@@ -4,8 +4,9 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 // import html2pdf from "html2pdf.js";
 
-const exportToPDF = async (title) => {
-  const input = document.getElementById(title);
+const exportToPDF = async (element, title) => {
+  const input = document.getElementById(element);
+  let pdf;
   await html2canvas(input, { scale: 3, useCORS: true }).then((canvas) => {
     const imgData = canvas.toDataURL("image/png");
 
@@ -34,15 +35,12 @@ const exportToPDF = async (title) => {
     }
 
     // Ensure the entire image fits on one page
-    const pdf = new jsPDF("landscape", "mm",[imgWidth, imgHeight]);
+    pdf = new jsPDF("landscape", "mm",[imgWidth, imgHeight]);
 
     pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-
-    pdf.save("download.pdf"); 
   });
-  setTimeout(() => {
+  await pdf.save(title+".pdf"); 
   window.location.reload(); //removes the temporary svgs from the webpage
-  }, 1000);
 };
 
 export default exportToPDF;

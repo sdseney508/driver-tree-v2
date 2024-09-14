@@ -267,7 +267,7 @@ const DriverTreePage = () => {
 
         let svgtop = svgArray[index].getBoundingClientRect().top;
         //the additional offset accounts for delta between cards and column widths
-        let svgleft = svgArray[index].getBoundingClientRect().left-10;
+        let svgleft = svgArray[index].getBoundingClientRect().left - 10;
         svgdiv.setAttribute(
           "style",
           `position: absolute; top: ${svgtop}px; left: ${svgleft}px; z-index: 10; width: ${width}px; height: ${height}px;`
@@ -302,12 +302,10 @@ const DriverTreePage = () => {
       // setTableState("");
       svgForPdf();
 
-      let pdfExport = document.getElementById("pdf-export");
-      exportToPDF("pdf-export");
+      exportToPDF("pdf-export", selOutcome.outcomeTitle);
       setTimeout(() => {
         window.location.reload();
       }, 1000);
-      
     }
 
     setPDFState(false);
@@ -349,6 +347,23 @@ const DriverTreePage = () => {
     }
     updateOutcome(selOutcome.id, state.userId, { state: "Draft" });
     window.location.reload();
+  };
+
+  const makeRetired = async () => {
+    //changes the state of the outcome from Active to Retired
+    //make the user confirm the action
+    if (
+      window.confirm("Are you sure you want to retire this decision tree?  This action can only be undone by an Administrator.")
+    ) {
+      if (!selOutcome.id) {
+        alert(
+          "Something went wrong.  Please refresh the page and try again.  If this error persists, please contact an administrator."
+        );
+        return;
+      }
+      updateOutcome(selOutcome.id, state.userId, { state: "Retired" });
+      window.location.reload();
+    }
   };
 
   const versionRoll = async () => {
@@ -614,20 +629,30 @@ const DriverTreePage = () => {
                     Create Next Rev
                   </button>
                 ) : null}
-                {state.userRole === "Administrator" &&
-                selOutcome.state === "Draft" ? (
+                {selOutcome.state === "Draft" ? (
                   <button
                     className={styles.dtree_btn}
                     onClick={() => makeActive()}
                   >
                     Make Active
                   </button>
-                ) :                <button
-                className={styles.dtree_btn}
-                onClick={() => makeDraft()}
-              >
-                Revert To Draft
-              </button>}
+                ) : (
+                  <>
+                    <button
+                      className={styles.dtree_btn}
+                      onClick={() => makeDraft()}
+                    >
+                      Revert To Draft
+                    </button>
+
+                    <button
+                      className={styles.dtree_btn}
+                      onClick={() => makeRetired()}
+                    >
+                      Retire Decision Tree
+                    </button>
+                  </>
+                )}
                 Outcome Version: {selOutcome.version} &nbsp; &nbsp; &nbsp;
                 &nbsp; Outcome State: &nbsp; &nbsp;
                 {selOutcome.state}
@@ -789,14 +814,20 @@ const DriverTreePage = () => {
           <Button
             variant="secondary"
             style={{ margin: "20px" }}
-            onClick={()=> {setLegendState(true); setPDFState(true)}}
+            onClick={() => {
+              setLegendState(true);
+              setPDFState(true);
+            }}
           >
             With Legend
           </Button>
           <Button
             variant="secondary"
             style={{ margin: "20px" }}
-            onClick={() => {setLegendState(false); setPDFState(true)}}
+            onClick={() => {
+              setLegendState(false);
+              setPDFState(true);
+            }}
           >
             Without Legend
           </Button>

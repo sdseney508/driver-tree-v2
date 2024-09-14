@@ -342,12 +342,14 @@ const DriverCards = ({
             </Col>
             <Col className={styles.card_col_body} id={cardData.driverId}>
               <div>
-                {PDFState || recordLockState ? (
+                {PDFState ? (
                     <div className={styles.my_card_text_pdf}>
                        {cardData.problemStatement}
                     </div>
   
-                ) : (
+                ) :recordLockState ? (   <div className={styles.my_card_text}>
+                  {cardData.problemStatement}
+               </div>): (
                   <Form>
                   <Form.Control
                     as="textarea"
@@ -994,7 +996,8 @@ const DriverCards = ({
             >
               {/* text input for clusterName */}
               {!recordLockState ? (
-                <Form>
+                <Form
+                style={{width: "95%"}}>
                   <Form.Control
                     size="sm"
                     type="text"
