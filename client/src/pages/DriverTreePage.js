@@ -339,6 +339,18 @@ const DriverTreePage = () => {
     window.location.reload();
   };
 
+  const makeDraft = async () => {
+    //changes the state of the outcome from Draft to Active
+    if (!selOutcome.id) {
+      alert(
+        "Something went wrong.  Please refresh the page and try again.  If this error persists, please contact an administrator."
+      );
+      return;
+    }
+    updateOutcome(selOutcome.id, state.userId, { state: "Draft" });
+    window.location.reload();
+  };
+
   const versionRoll = async () => {
     debugger;
     let statusDefBody = [];
@@ -610,7 +622,12 @@ const DriverTreePage = () => {
                   >
                     Make Active
                   </button>
-                ) : null}
+                ) :                <button
+                className={styles.dtree_btn}
+                onClick={() => makeDraft()}
+              >
+                Revert To Draft
+              </button>}
                 Outcome Version: {selOutcome.version} &nbsp; &nbsp; &nbsp;
                 &nbsp; Outcome State: &nbsp; &nbsp;
                 {selOutcome.state}
