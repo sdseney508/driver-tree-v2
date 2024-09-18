@@ -278,11 +278,6 @@ const DriverCards = ({
     await updateOutcome(selOutcome.id, state.userId, outcomeBody);
     let updatedoutcome = await getOutcome(selOutcome.id);
     setSelOutcome(updatedoutcome.data);
-    // window.location.reload();
-    // // //now update the driver tree object
-    // await getDriverByOutcome(selOutcome.id).then((data) => {
-    //   setDriverTreeObj(data.data[0]);
-    // });
   };
 
   //used in the Tier cards to create the driver cards for both the regular and the cluser
@@ -560,7 +555,6 @@ const DriverCards = ({
     //look through the arrows state to find any arrows with the affected cardid as a start or endpoint then update.
     if (dragStart === dragEnd) {
       //return, no change in tier so no need to change arrow logic and DOM refreshed at bottom
-      // window.location.reload();
     } else {
       //The user moved the card up / down a tier, so the arrows need to be updated to reflect the new tier
       //cycle through arrow array and update the arrows as needed
@@ -707,8 +701,6 @@ const DriverCards = ({
   const goToDriverTree = (embeddedOutcomeId) => {
     //goes to the embedded drivertree; the outcome idea is the outcomeId of the target
     setSelOutcome({ id: embeddedOutcomeId });
-    // navigate("/drivertree/" + embeddedOutcomeId);
-    // window.location.reload();
   };
 
   const goToOutcome = async (e) => {
@@ -902,9 +894,10 @@ const DriverCards = ({
     let clusterNumber = 0; //this is just used to see how far to expand a cluster
     let clusterName; //doing it this way to so i dont need the logic when dealing with the first element of the array.
     if (!driverTreeObj) {
+      const blankDiv = []
       for (let i = 0; i < 20; i++) {
         //create 20 empty divs for the user to drop a driverCard
-        return (
+        blankDiv.push(
           <div
             className={styles.my_div}
             data-tier={tier} //this is used by the update arrows logic to compare the ending and starting div of a drag and if an arrow needs to be updated.
@@ -916,6 +909,7 @@ const DriverCards = ({
           ></div>
         );
       }
+      return blankDiv;
     } else {
       //find max number of droppable divs needed for any given tier, then size the columns accordingly.  This will let the columns grow with each tier
       let max = 20;
