@@ -343,24 +343,25 @@ const DriverCards = ({
             <Col className={styles.card_col_body} id={cardData.driverId}>
               <div>
                 {PDFState ? (
-                    <div className={styles.my_card_text_pdf}>
-                       {cardData.problemStatement}
-                    </div>
-  
-                ) :recordLockState ? (   <div className={styles.my_card_text}>
-                  {cardData.problemStatement}
-               </div>): (
+                  <div className={styles.my_card_text_pdf}>
+                    {cardData.problemStatement}
+                  </div>
+                ) : recordLockState ? (
+                  <div className={styles.my_card_text}>
+                    {cardData.problemStatement}
+                  </div>
+                ) : (
                   <Form>
-                  <Form.Control
-                    as="textarea"
-                    data-cardid={cardData.driverId}
-                    className={styles.my_card_text}
-                    defaultValue={cardData.problemStatement}
-                    //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-                    name="problemStatement"
-                    onBlur={handleFormSubmit}
-                  />
-                </Form>
+                    <Form.Control
+                      as="textarea"
+                      data-cardid={cardData.driverId}
+                      className={styles.my_card_text}
+                      defaultValue={cardData.problemStatement}
+                      //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
+                      name="problemStatement"
+                      onBlur={handleFormSubmit}
+                    />
+                  </Form>
                 )}
               </div>
               <div></div>
@@ -901,7 +902,20 @@ const DriverCards = ({
     let clusterNumber = 0; //this is just used to see how far to expand a cluster
     let clusterName; //doing it this way to so i dont need the logic when dealing with the first element of the array.
     if (!driverTreeObj) {
-      return <div></div>;
+      for (let i = 0; i < 20; i++) {
+        //create 20 empty divs for the user to drop a driverCard
+        return (
+          <div
+            className={styles.my_div}
+            data-tier={tier} //this is used by the update arrows logic to compare the ending and starting div of a drag and if an arrow needs to be updated.
+            data-subtier={i + 1}
+            id={"tier1subTier" + (i + 1)}
+            onDragOver={allowDrop}
+            onDrop={drop}
+            key={`${tier}div${i + 1}`}
+          ></div>
+        );
+      }
     } else {
       //find max number of droppable divs needed for any given tier, then size the columns accordingly.  This will let the columns grow with each tier
       let max = 20;
@@ -996,8 +1010,7 @@ const DriverCards = ({
             >
               {/* text input for clusterName */}
               {!recordLockState ? (
-                <Form
-                style={{width: "95%"}}>
+                <Form style={{ width: "95%" }}>
                   <Form.Control
                     size="sm"
                     type="text"
