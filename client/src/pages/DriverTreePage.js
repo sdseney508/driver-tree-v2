@@ -5,7 +5,9 @@ import {
   createOutcome,
   getDriverByOutcome,
   getOutcome,
+  updateDriver,
   updateOutcome,
+  updateOutcomeDriver,
 } from "../utils/drivers";
 import { createArrow } from "../utils/arrows";
 import { addOutcomeDriver } from "../utils/outcomeDrivers";
@@ -14,70 +16,38 @@ import {
   getStatusDefinitionByOutcome,
   modifyStatusDefinition,
 } from "../utils/statusDefinition";
+import { createCluster } from "../utils/cluster";
 import { useNavigate } from "react-router";
 import { useParams } from "react-router"; //to store state in the URL
 import DriverCards from "../components/driverCards";
 import { getUserData } from "../utils/auth";
 import styles from "./DriverTreePage.module.css";
 import OutcomeTable from "../components/OutcomeTable";
-import ClusterModal from "../components/ClusterModal";
 import { getArrows } from "../utils/arrows";
 import ViewsTable from "../components/ViewsTable";
-import { createCluster } from "../utils/cluster";
-import { exportElement } from "../utils/export-element";
 import exportToPDF from "../utils/exportToPDF";
 
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form
 
 const DriverTreePage = () => {
-  const apiCall = {
-    columns: {
-      "Tier-1": {
-        id: "Tier-1",
-        items: [],
-      },
-      "Tier-2": {
-        id: "Tier-2",
-        items: [],
-      },
-      "Tier-3": {
-        id: "Tier-3",
-        items: [],
-      },
-      "Tier-4": {
-        id: "Tier-4",
-        items: [],
-      },
-      "Tier-5": {
-        id: "Tier-5",
-        items: [],
-      },
-      "Tier-6": {
-        id: "Tier-6",
-        items: [],
-      },
-      // Add more columns as needed
-    },
-  };
   const [state, setState] = useState([]);
-  const [clusters, setClusters] = useState([]);
+  const [cluster, createACluster] = useState(false);
+  const [clusterArray, setClusterArray] = useState([]);
   const [error, setError] = useState(false);
   const [arrows, setArrows] = useState([]);
   const [createAnArrow, setCreateAnArrow] = useState(false);
-  const [opacity, setOpacity] = useState(100);
+  const [opacity, setOpacity] = useState(100); //passed down the component tree so users canngo back and forth between briefing state and details state
   const [PDFState, setPDFState] = useState(false);
   const [showArrowMod, setArrowMod] = useState(false);
   const [selOutcome, setSelOutcome] = useState({});
   const [driverTreeObj, setDriverTreeObj] = useState([]);
-  const [showClusterModal, setClusterModal] = useState(false);
   const [showPDFModal, setPDFModal] = useState(false);
-  const [selDriver, setSelDriver] = useState({});
   const [recordLockState, setRecordLockState] = useState(false); //used to lock the record when a user is editing it, reads the user's account permissions and adjusts record locks accordingly, stakeholders have read only access.
-  const [viewId, setViewId] = useState(""); //used to let the user cycle through their personal views, the view state is the view id in case multiple users create same named views.
+  const [viewId, setViewId] = useState(""); //used to let the user cycle through their personal views, the view state is the view id in case multiple users create same named views.  passed down the component tree so users canngo back and forth between briefing state and details state
   const [loading, setLoading] = useState(true); //used to let the user cycle through their personal views, the view state is the view id in case multiple users create same named views.
   const [viewObj, setViewObj] = useState([]); //used to store the view object for the view cards
   const [viewArrows, setViewArrows] = useState([]); //used to store the view arrows for the view cards
-  const [tableState, setTableState] = useState("outcome"); //used to toggle the table at the bottom of the page. const [connectionShow, setConnectionShow] = useState(false);
+  const [tableState, setTableState] = useState("outcome"); //used to toggle the table at the bottom of the page. passed down the component tree so users canngo back and forth between briefing state and details state
   const [legendState, setLegendState] = useState(true); //used to toggle the legend at the bottom of the page.
 
   let tableStyle = { height: "25vh", width: "100%", overFlowY: "scroll" };
@@ -128,8 +98,7 @@ const DriverTreePage = () => {
     authCheck();
     setTimeout(() => {
       setLoading(false);
-    }, 150);
-
+    }, 50);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [, outcomeId]);
 
@@ -164,6 +133,23 @@ const DriverTreePage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selOutcome, viewId, opacity]);
 
+  //used to clean the cards up for a PDF generation
+  useEffect(() => {
+    //needed to prevent a random pdf from generating on every page load
+    if (PDFState && document.readyState === "complete") {
+      setPDFModal(false);
+      customStyles(tableState);
+      // setTableState("");
+      svgForPdf();
+
+      exportToPDF("pdf-export", selOutcome.outcomeTitle);
+    }
+
+    setPDFState(false);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [PDFState]);
+
   const authCheck = (command, stakeholder) => {
     //checks to see if the user has access to the desired outcome
     //first we grab the user data from state and the outcome data from the database then compare the user command with the outcoem stakeholder
@@ -171,6 +157,11 @@ const DriverTreePage = () => {
       alert("You do not have access to this outcome in dtree page");
       navigate("/user");
     }
+  };
+
+  const cancelCluster = () => {
+    setClusterArray([]);
+    createACluster(false);
   };
 
   const createNewView = async (e) => {
@@ -185,18 +176,10 @@ const DriverTreePage = () => {
     });
   };
 
-  const deleteSelectedView = async (e) => {
-    e.preventDefault();
-    if (window.confirm("Are you sure you want to delete this view?")) {
-      await deleteView(viewId);
-    } else {
-      return;
-    }
-    setViewId("");
-  };
-
   //use the showTable state to show or hide the table at the bottom of the page by changing the height of the div and passing that variable to the inline style
   const customStyles = (table) => {
+    //first, remove the arrow symbol or C from the card so it is only replaced with a V
+
     //first check to see if the user is trying to hide the table, then toggle the styles
     if (tableState === table) {
       tableStyle = { height: "0vh", overFlowY: "scroll" };
@@ -220,9 +203,148 @@ const DriverTreePage = () => {
         height: "60vh",
         overFlowY: "scroll",
       };
+      createACluster(false); //remove the cluster C if it is open
+      setCreateAnArrow(false); //remove the arrow if it is open
       setTableState("view");
     }
     setShowTable({ tableStyle, driverStyle });
+  };
+
+  const deleteSelectedView = async (e) => {
+    e.preventDefault();
+    if (window.confirm("Are you sure you want to delete this view?")) {
+      await deleteView(viewId);
+    } else {
+      return;
+    }
+    setViewId("");
+  };
+
+  const handleClick = () => {
+    setPDFModal(true);
+  };
+  //close the modal
+  const handleClose = () => {
+    setArrowMod(false);
+    setPDFModal(false);
+  };
+
+  const makeActive = async () => {
+    //changes the state of the outcome from Draft to Active
+    if (!selOutcome.id) {
+      alert(
+        "Something went wrong.  Please refresh the page and try again.  If this error persists, please contact an administrator."
+      );
+      return;
+    }
+    updateOutcome(selOutcome.id, state.userId, { state: "Active" });
+    window.location.reload();
+  };
+
+  const makeCluster = async () => {
+    //reorder the drivers subtiers using the subtier of the first selected driver and then create the cluster
+    //first we need to sort the drivers by tier and subTier
+    let startSubTier = clusterArray[0].subTier;  //find where the cluster starts
+    let shift = clusterArray.length; //how far we have to shift the other drivers
+    let subTier = startSubTier;
+
+    //now we shift all other drivers by the delta
+    for (let i = 1; i < clusterArray.length; i++) {
+      subTier++;
+      clusterArray[i].subTier = subTier;
+
+      await updateOutcomeDriver(
+        selOutcome.id,
+        clusterArray[i].driverId,
+        state.userId,
+        {
+          subTier: clusterArray[i].subTier,
+          tierLevel: clusterArray[i].tierLevel,
+          driverId: clusterArray[i].driverId,
+        }
+      );
+      await updateDriver(clusterArray[i].driverId, state.userId, {
+        modified: "Yes",
+      });
+    }
+    //now create the cluster
+    let body = {
+      outcomeId: selOutcome.id,
+      selDriversArr: clusterArray,
+      userId: state.userId,
+    };
+    let newClust = await createCluster(body);
+    let clustId = newClust.data.id;
+    //get updated driverTreeObj so we can shift the other cards out of the way if required.
+    let tempTree = await getDriverByOutcome(selOutcome.id);
+    tempTree = tempTree.data;
+    //sort tempTree[clusterArray[0].tierLevel] by subtier
+    tempTree[clusterArray[0].tierLevel].sort((a, b) =>
+      a.subTier > b.subTier ? 1 : -1
+    );
+
+
+    //now we go through and see if we have any repeat subTiers, if we do we shift by the delta
+
+    let shiftReq = false;
+    for (let i = 1; i < tempTree[clusterArray[0].tierLevel].length; i++) {
+      if (
+        tempTree[clusterArray[0].tierLevel][i].subTier <=
+        tempTree[clusterArray[0].tierLevel][i - 1].subTier && !shiftReq
+      ) {
+        shiftReq = true;
+        shift = clusterArray.length;
+      } 
+      if (
+        shiftReq 
+        &&
+        tempTree[clusterArray[0].tierLevel][i].clusterId !== clustId
+      ) //ignore cards in the cluster 
+      {
+        let body = {
+          subTier: tempTree[clusterArray[0].tierLevel][i].subTier+=shift,
+          tierLevel: tempTree[clusterArray[0].tierLevel][i].tierLevel,
+        };
+        await updateOutcomeDriver(
+          selOutcome.id,
+          tempTree[clusterArray[0].tierLevel][i].driverId,
+          state.userId,
+          body
+        );
+      }
+    }
+    window.location.reload();
+  };
+
+  const makeDraft = async () => {
+    //changes the state of the outcome from Draft to Active
+    if (!selOutcome.id) {
+      alert(
+        "Something went wrong.  Please refresh the page and try again.  If this error persists, please contact an administrator."
+      );
+      return;
+    }
+    updateOutcome(selOutcome.id, state.userId, { state: "Draft" });
+    window.location.reload();
+  };
+
+  const makeRetired = async () => {
+    //changes the state of the outcome from Active to Retired
+    //make the user confirm the action
+    if (
+      window.confirm(
+        "Are you sure you want to retire this decision tree?  This action can only be undone by an Administrator."
+      )
+    ) {
+      if (!selOutcome.id) {
+        alert(
+          "Something went wrong.  Please refresh the page and try again.  If this error persists, please contact an administrator."
+        );
+        return;
+      }
+      updateOutcome(selOutcome.id, state.userId, { state: "Retired" });
+      window.location.reload();
+    }
   };
 
   //creates new outcome and then resets the selOutcome state.  This cause a a useEffect fire and refreshes the page.
@@ -286,84 +408,24 @@ const DriverTreePage = () => {
     handleClose();
   };
 
-  //close the modal
-  const handleClose = () => {
-    setClusterModal(false);
-    setArrowMod(false);
-    setPDFModal(false);
-  };
-
-  //used to clean the cards up for a PDF generation
-  useEffect(() => {
-    //needed to prevent a random pdf from generating on every page load
-    if (PDFState && document.readyState === "complete") {
-      setPDFModal(false);
-      customStyles(tableState);
-      // setTableState("");
-      svgForPdf();
-
-      exportToPDF("pdf-export", selOutcome.outcomeTitle);
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    }
-
-    setPDFState(false);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [PDFState]);
-
-  const handleClick = () => {
-    setPDFModal(true);
-  };
-
   const toggleArrow = () => {
+    createACluster(false); //turn off cluster if it is on
+    if (tableState === "view") {
+      customStyles("view");
+    }
     setCreateAnArrow(!createAnArrow);
+  };
+
+  const toggleCluster = () => {
+    setCreateAnArrow(false);
+    if (tableState === "view") {
+      customStyles("view");
+    }
+    createACluster(!cluster);
   };
 
   const updateOpacity = (e) => {
     setOpacity(e.target.value / 100);
-  };
-
-  const makeActive = async () => {
-    //changes the state of the outcome from Draft to Active
-    if (!selOutcome.id) {
-      alert(
-        "Something went wrong.  Please refresh the page and try again.  If this error persists, please contact an administrator."
-      );
-      return;
-    }
-    updateOutcome(selOutcome.id, state.userId, { state: "Active" });
-    window.location.reload();
-  };
-
-  const makeDraft = async () => {
-    //changes the state of the outcome from Draft to Active
-    if (!selOutcome.id) {
-      alert(
-        "Something went wrong.  Please refresh the page and try again.  If this error persists, please contact an administrator."
-      );
-      return;
-    }
-    updateOutcome(selOutcome.id, state.userId, { state: "Draft" });
-    window.location.reload();
-  };
-
-  const makeRetired = async () => {
-    //changes the state of the outcome from Active to Retired
-    //make the user confirm the action
-    if (
-      window.confirm("Are you sure you want to retire this decision tree?  This action can only be undone by an Administrator.")
-    ) {
-      if (!selOutcome.id) {
-        alert(
-          "Something went wrong.  Please refresh the page and try again.  If this error persists, please contact an administrator."
-        );
-        return;
-      }
-      updateOutcome(selOutcome.id, state.userId, { state: "Retired" });
-      window.location.reload();
-    }
   };
 
   const versionRoll = async () => {
@@ -412,7 +474,6 @@ const DriverTreePage = () => {
     //for the new driverTreeObj structure:  need to cycle through driverBody columns and drivers in each column
     for (let i = 0; i < driverBody.length; i++) {
       if (driverBody[i] !== null) {
-        debugger;
         for (let j = 0; j < driverBody[i].length; j++) {
           driverBody[i][j].outcomeId = newOutcomeId;
           driverBody[i][j].modified = "No";
@@ -426,7 +487,6 @@ const DriverTreePage = () => {
             subTier: driverBody[i][j].subTier,
             userId: state.userId,
           };
-          console.log(body);
           let outcomeD = await addOutcomeDriver(body);
           //check to see if it is in a cluster
           if (driverBody[i][j].clusterId) {
@@ -592,13 +652,28 @@ const DriverTreePage = () => {
                 <button className={styles.dtree_btn} onClick={newOutcome}>
                   New Outcome
                 </button>
-                {selOutcome.state === "Draft" ? (
+                {selOutcome.state === "Draft" && cluster === false ? (
                   <button
                     className={styles.dtree_btn}
-                    onClick={() => setClusterModal(true)}
+                    onClick={() => toggleCluster()}
                   >
-                    Create Cluster
+                    Cluster Actions
                   </button>
+                ) : cluster === true ? (
+                  <>
+                  <button
+                    className={styles.cluster_btn}
+                    onClick={() => makeCluster()}
+                  >
+                    Execute
+                  </button>
+                  <button
+                    className={styles.cancel_cluster_btn}
+                    onClick={() => cancelCluster()}
+                  >
+                    Cancel Cluster
+                  </button>
+                  </>
                 ) : null}
                 {selOutcome.state === "Draft" ? (
                   <button
@@ -674,10 +749,12 @@ const DriverTreePage = () => {
               <DriverCards
                 arrows={arrows}
                 setArrows={setArrows}
+                clusterArray={clusterArray}
+                setClusterArray={setClusterArray}
                 driverTreeObj={driverTreeObj}
                 setDriverTreeObj={setDriverTreeObj}
-                cluster={clusters}
-                setClusters={setClusters}
+                cluster={cluster}
+                createACluster={createACluster}
                 createAnArrow={createAnArrow}
                 opacity={opacity}
                 setOpacity={setOpacity}
@@ -764,38 +841,6 @@ const DriverTreePage = () => {
         </Row>
       ) : // </Container>
       null}
-      {/* for creating a cluster */}
-      <Modal
-        name="clusterModal"
-        show={showClusterModal}
-        size="lg"
-        aria-labelledby="contained-modal-title-vcenter"
-        centered
-        backdrop="static"
-        keyboard={false}
-        onHide={() => setClusterModal(false)}
-        // className={styles.cluster_modal}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title id="cluster-modal">Create Cluster</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {/*change everything in the signup form components*/}
-          <ClusterModal
-            onModalSubmit={onModalSubmit}
-            setDriverTreeObj={setDriverTreeObj}
-            selDriver={selDriver}
-            setClusterModal={setClusterModal}
-            setSelDriver={setSelDriver}
-            selOutcome={selOutcome}
-            setSelOutcome={setSelOutcome}
-            state={state}
-          />
-          <Button variant="secondary" onClick={handleClose}>
-            Close
-          </Button>
-        </Modal.Body>
-      </Modal>
 
       <Modal
         name="pdfModal"

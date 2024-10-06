@@ -5,6 +5,18 @@
   justify-content: center;
 }
 
+.my_button {
+  background-color: #23262e;
+  width: 30px;
+  text-align: center;
+  align-self: center;
+  color: #ffffffbb;
+  border: none;
+  border-radius: 5px;
+  margin: 10px;
+  cursor: pointer;
+}
+
 .my_row {
   display: flex;
   flex-direction: column;

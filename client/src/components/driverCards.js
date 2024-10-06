@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Col, Card, Row, Button, Form, Modal } from "react-bootstrap";
 import { Xwrapper } from "react-xarrows"; //for the arrows
 import { deleteArrow } from "../utils/arrows";
@@ -24,9 +24,11 @@ import {
   getViewArrows,
   removeViewArrow,
 } from "../utils/viewArrows";
+// import ClusterModal from "../components/ClusterModal";
 import { updateArrow } from "../utils/arrows";
 import { deleteCluster, updateCluster } from "../utils/cluster";
 import DriverArrows from "./DrawArrows";
+import TierModal from "./TierModal";
 import { CreateAnArrow } from "./ArrowFunction";
 import ModArrows from "../components/ModArrows";
 import DriverModal from "./DriverrModal";
@@ -35,7 +37,11 @@ import { removeOutcomeDriver } from "../utils/outcomeDrivers";
 const DriverCards = ({
   arrows,
   setArrows,
+  clusterArray,
+  setClusterArray,
   createAnArrow,
+  cluster,
+  createACluster,
   driverTreeObj,
   setDriverTreeObj,
   opacity,
@@ -61,8 +67,11 @@ const DriverCards = ({
   //4.  Draws the correct clusters around the selected drivers based on the cluster field in the drivers table
   //The arrow function is contained in the arrows.js module.  It creates the arrows that connect the cards
   let navigate = useNavigate();
+  const cardRefs = useRef({}); //so i can use the dataset assigned to each card to determine the tier and subTier of the card even druing a refresh
   const [arrowID, setArrowID] = useState("");
   const [selectedElements, setSelectedElements] = useState([]);
+  const [tierModal, setTierModal] = useState(false);
+  const [showClusterModal, setShowClusterModal] = useState(false);
   const [show, setShow] = useState(false);
   const [connectionShow, setConnectionShow] = useState(false);
   const [showArrowMod, setArrowMod] = useState(false);
@@ -70,6 +79,7 @@ const DriverCards = ({
   const [loading, setLoading] = useState(true);
   const [createDriverModal, setCreateDriverModal] = useState(false);
   const [driverTier, setDriverTier] = useState("");
+  const [clusterTier, setClusterTier] = useState(""); //initial value for clsuterTier, used in the MakeCluster function to determine which tier to put a new cluster if they select cards from multiple tiers.
 
   useEffect(() => {
     const getDriversData = async (selOutcome, viewId) => {
@@ -90,22 +100,50 @@ const DriverCards = ({
   }, [opacity, viewId]);
 
   useEffect(() => {
-    const updateArrows = async () => {
+    const updateTheArrows = async () => {
       await getArrows(selOutcome.id).then((data) => {
         setArrows(data.data);
       });
     };
-    updateArrows();
+    updateTheArrows();
+    setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [driverTreeObj]);
 
+  //waits for setSelectedElements to be updated, then calls the CreateAnArrow function to create the arrow
   useEffect(() => {
-    if (driverTreeObj.length > 0) {
-      setTimeout(() => {
-        setLoading(false);
-      }, 250);
+    //first section determines if either the starting or ending arrow is a cluster.  uses the Modal to ask the user if they want to connect to the cluster or the driver then changes the appropriate selectedElement.cluster to 0 using the handle select function
+    //needed for initial render
+    if (selectedElements.length === 0) {
+      return;
+    } else if (selectedElements.length === 1) {
+      if (!selectedElements[0].outcomeTitle && selectedElements[0].clusterId) {
+        setShow(true);
+        return;
+      }
+    } else if (selectedElements.length === 2) {
+      //pop the second element in the array in case the user accidentally clicked twice, otherwise, proceed as normal.
+      if (
+        selectedElements[0].id === selectedElements[1].id &&
+        !selectedElements[0].outcomeTitle &&
+        !selectedElements[1].outcomeTitle
+      ) {
+        selectedElements.pop();
+        return;
+      } else if (selectedElements[1].clusterId) {
+        setShow(true);
+      } else {
+        CreateAnArrow({
+          setCreateAnArrow,
+          selectedElements,
+          selOutcome,
+          setSelOutcome,
+        });
+        setSelectedElements([]);
+      }
     }
-  }, [driverTreeObj]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedElements]);
 
   const addArrowToView = async () => {
     setConnectionShow(false);
@@ -126,6 +164,80 @@ const DriverCards = ({
       val = opacity - 0.01;
     }
     setOpacity(val);
+  };
+
+  //used with the cluster-mod-modal to add cards to the cluster selected
+  const addToThisCluster = async () => {
+    //create a body with these values for each driver in the selectedElements array
+    //todo:  make this a single bulk update
+    let subTier = clusterArray[clusterArray.length - 1].subTier;
+
+    //figure out how far down to shift the other cards in the cluster
+    let shift = clusterArray.length - 1;
+
+    for (let i = 0; i < clusterArray.length - 1; i++) {
+      subTier++;
+      let body = {
+        tierLevel: clusterArray[clusterArray.length - 1].tierLevel,
+        clusterId: clusterArray[clusterArray.length - 1].clusterId,
+        subTier: subTier,
+        modified: "Yes",
+      };
+
+      await updateOutcomeDriver(
+        selOutcome.id,
+        clusterArray[i].driverId,
+        state.userId,
+        body
+      );
+      await updateDriver(clusterArray[i].driverId, state.userId, body);
+    }
+    let clusterIDCheck = clusterArray[clusterArray.length - 1].clusterId;
+    //now move all the other ones out of the way
+    let tempTree = await getDriverByOutcome(selOutcome.id);
+    tempTree = tempTree.data;
+    //now we need to update the subTiers on the remainder of the cards in the tier column so nothing gets overlapped.  This will be done by looking at all the cards in the tier column with a subTier less than the length of the cluster + the subTier of the first card.  for all of these drivers, we'll add the subTier value to their subtier then update.
+    //first we need to find the subTier of the last card in the cluster
+
+    let firstSubTier = null;
+    let count = 0;
+
+    for (let subArray of driverTreeObj) {
+      if (!Array.isArray(subArray)) continue; // Skip thw null or non-array elements like the Tier 0
+      for (let driver of subArray) {
+        if (
+          driver.clusterId ===
+            clusterArray[clusterArray.length - 1].clusterId &&
+          driver.subTier > clusterArray[clusterArray.length - 1].subTier
+        ) {
+          //move this down the minimum number of spots to make room for the cluster
+          updateOutcomeDriver(selOutcome.id, driver.driverId, state.userId, {
+            subTier: driver.subTier + shift,
+          });
+        }
+      }
+    }
+
+    for (let i = 0; i < tempTree[clusterArray[0].tierLevel].length; i++) {
+      if (
+        tempTree[clusterArray[0].tierLevel][i].subTier >= firstSubTier &&
+        tempTree[clusterArray[0].tierLevel][i].clusterId !== clusterIDCheck
+      ) {
+        //move it down the minimum number of spots to make room for the cluster, so first calculate the number of spots needed to move it down
+        let shift = clusterArray.length - 1; //move things by the number of added cards
+
+        let body = {
+          subTier: tempTree[clusterArray[0].tierLevel][i].subTier + shift,
+        };
+        await updateOutcomeDriver(
+          selOutcome.id,
+          tempTree[clusterArray[0].tierLevel][i].driverId,
+          state.userId,
+          body
+        );
+      }
+    }
+    window.location.reload();
   };
 
   function allowDrop(e) {
@@ -280,15 +392,33 @@ const DriverCards = ({
     setSelOutcome(updatedoutcome.data);
   };
 
+  const createNewDriver = async (e) => {
+    e.preventDefault();
+    setDriverTier(e.target.dataset.tierlevel);
+    setCreateDriverModal(true);
+  };
+
   //used in the Tier cards to create the driver cards for both the regular and the cluser
-  const DCards = (cardData, tier, viewCheck) => {
+  const DCards = (cardData, tierLevel, viewCheck) => {
+    const isSelectedForCluster = clusterArray.some(
+      (item) => item.driverId === cardData.driverId
+    );
+
+    const isSelectedForArrow = selectedElements.some(
+      (item) => item.driverId === cardData.driverId
+    );
+
     return (
       <Card
         className={styles.my_card}
+        ref={(el) => {
+          cardRefs.current[cardData.driverId] = el;
+        }}
         id={"card" + cardData.driverId}
         data-cardid={cardData.driverId}
-        data-tier={tier}
-        data-cluster={cardData.cluster}
+        data-tierlevel={tierLevel}
+        data-subtier={cardData.subTier}
+        data-cluster={cardData.clusterId}
         key={"card" + cardData.driverId}
         draggable="true"
         onDragStart={useDrag}
@@ -302,16 +432,10 @@ const DriverCards = ({
             : { opacity: opacity, boxShadow: "0 4px 8px 0 rgba(59, 46, 241)" }
         }
       >
-        {createAnArrow && !PDFState && !recordLockState ? (
-          <FontAwesomeIcon
-            className={styles.card_arrow}
-            icon={faArrowUp}
-            data-cardid={cardData.driverId}
-            data-type="driver"
-            onClick={(e) => MakeAnArrow(e, cardData, "driver")}
-          />
-        ) : null}
-        <Card.Body className={styles.card_body}>
+        <Card.Body
+          className={styles.card_body}
+          data-cluster={cardData.clusterNumber}
+        >
           <Row className={styles.card_row}>
             <Col className={styles.card_col_abbrev}>
               <Form className={styles.abbreviation_div}>
@@ -368,7 +492,6 @@ const DriverCards = ({
                   as="select"
                   id="status"
                   data-cardid={cardData.driverId}
-                  data-tier={tier}
                   value={cardData.status}
                   className={
                     cardData.status === "Green"
@@ -472,6 +595,28 @@ const DriverCards = ({
                 V
               </div>
             ) : null}
+            {createAnArrow && !PDFState && !recordLockState ? (
+              <FontAwesomeIcon
+                className={`${styles.card_arrow} ${
+                  isSelectedForArrow ? styles.selected_cluster : ""
+                }`}
+                icon={faArrowUp}
+                data-cardid={selOutcome.id}
+                data-type="outcome"
+                onClick={(e) => MakeAnArrow(e, cardData, "outcome")}
+              />
+            ) : null}
+            {cluster && !PDFState ? (
+              <div
+                className={`${styles.card_arrow} ${
+                  isSelectedForCluster ? styles.selected_cluster : ""
+                }`}
+                onClick={(e) => MakeCluster(e, cardData)}
+                data-carddata={cardData.clusterId}
+              >
+                C{" "}
+              </div>
+            ) : null}
           </Row>
         </Card.Body>
       </Card>
@@ -496,7 +641,10 @@ const DriverCards = ({
       return;
     }
     let clusterId =
-      "tier" + e.target.dataset.tier + "cluster" + e.target.dataset.cluster;
+      "tier" +
+      e.target.dataset.tierlevel +
+      "cluster" +
+      e.target.dataset.cluster;
     let arrowid;
     for (let i = 0; i < arrows.length; i++) {
       if (arrows[i].start === clusterId || arrows[i].end === clusterId) {
@@ -504,65 +652,220 @@ const DriverCards = ({
         deleteArrow(arrowid);
       }
     }
+ 
     deleteCluster(e.target.dataset.cluster);
-
     await getOutcome(selOutcome.id).then((data) => {
       setSelOutcome(data.data);
     });
     window.location.reload();
   };
 
-  const useDrag = (e) => {
-    if (recordLockState) {
-      //kick them out and dont let them drag
-      return;
-    }
-    e.dataTransfer.setData("text", e.target.dataset.cardid);
-    e.dataTransfer.setData("type", e.target.id);
-    e.dataTransfer.setData("dragStart", e.target.dataset.tier);
-  };
-
   async function drop(e) {
-    //on drop, sets the drivers new Tier and subTier as required.  The driver is then updated in the database so it will be placed in its new place on the next render
+    e.preventDefault();
+    //on drop, sets the drivers new Tier and subTier as required.  The driver is then updated in the database so it will be placed in its new place on the next render.  it also looks to see if there are cards already in that tier and subtier and shifts the existing cards down.
     if (recordLockState) {
       //kick them out and dont let them drag
       return;
     }
     setLoading(true);
-    let aBody = {};
-    let dragStart = e.dataTransfer.getData("dragStart");
-    let dragEnd = e.target.dataset.tier;
+    let shift = 1; //minimum shift value
+    let count = 0; //used to count size of the cluster
+    const data = JSON.parse(e.dataTransfer.getData("application/json"));
+    let aBody = {}; //for arrow updates
+    let clusterArray = [];
+    let shiftReq = false; //starting assumption is it is a movement into a blank spot
+    let cardname = data.cardname;
+    let dragStart = Number(data.tierlevel);
+    let dragEnd = Number(e.currentTarget.dataset.tierlevel); //the ending tier
+    let targetSubTier = Number(e.currentTarget.dataset.subtier);
+    let clusterId = Number(data.cluster); //will be null if not draggin a cluster
+    let clusterTarget = Number(e.currentTarget.dataset.cluster);
+    let driverId = Number(data.cardid);
+    let tempDriverTree = driverTreeObj[dragEnd].sort((a, b) =>
+      a.subTier > b.subTier ? 1 : -1
+    );
+
+    if (clusterId > 0) {
+      clusterArray = driverTreeObj[dragStart].filter(
+        (item) => item.clusterId === clusterId
+      );
+    }
+
     if (!dragEnd) {
       //they didnt drag it to a valid spot, so just return
       setLoading(false);
       return;
     }
+    //check if there is a card in the slot, shift the cards down, else, just update the card
+    for (const drivers of tempDriverTree) {
+      if (drivers.subTier === targetSubTier) {
+        shiftReq = true;
+        if (clusterTarget > 0) {
+          //this means that the drop spot is in a cluster, so we need to find the top spot in the cluster, make that the subTier for the dropped card and shift all cards below that spot down by one
+          count = tempDriverTree.filter(
+            (item) => item.clusterId === clusterTarget
+          );
+          targetSubTier = count[0].subTier;
+        }
+        //kick out of loop
+        break;
+      } else if (
+        drivers.subTier > targetSubTier &&
+        drivers.subTier <= targetSubTier + clusterArray.length &&
+        clusterArray.length > 0 &&
+        drivers.clusterId !== clusterId
+      ) {
+        shiftReq = true;
+        break;
+      }
+    }
 
-    //now see if there is already a card in that slot, if there is, push that card and all others down a slot. then update the card(s) in the database
-
-    let cardname = e.dataTransfer.getData("type");
-    let data = e.dataTransfer.getData("text");
-    console.log(data);
+    //make the move, do this after the cluster check so that you get the right subtier
     let body = {
-      tierLevel: e.target.dataset.tier,
-      subTier: e.target.dataset.subtier,
-    };
-
-    await updateOutcomeDriver(selOutcome.id, data, state.userId, body);
-    body = { modified: "Yes" };
-    //tag the driver as updated since you moved it
-    await updateDriver(data, state.userId, body);
-    //look through the arrows state to find any arrows with the affected cardid as a start or endpoint then update.
-    if (dragStart === dragEnd) {
-      //return, no change in tier so no need to change arrow logic and DOM refreshed at bottom
+      tierLevel: dragEnd,
+      subTier: targetSubTier,
+    }; //set the data to update the moved card
+    if (clusterArray.length === 0) {
+      await updateOutcomeDriver(selOutcome.id, driverId, state.userId, body);
     } else {
+      for (let i = 0; i < clusterArray.length; i++) {
+        let body = {
+          tierLevel: dragEnd,
+          subTier: targetSubTier + i,
+        }; //set the data to update the moved card
+        await updateOutcomeDriver(
+          selOutcome.id,
+          clusterArray[i].driverId,
+          state.userId,
+          body
+        );
+      }
+    }
+    if (shiftReq && isNaN(clusterId)) {
+      //remove the card from the temp array, this frees up thta spot for the moved card
+      tempDriverTree = tempDriverTree.filter(
+        (item) => item.driverId !== Number(driverId)
+      );
+      //now shift the other cards down
+      for (let i = 0; i < tempDriverTree.length; i++) {
+        //since there is already a card there, shift all of the cards with a subTier equal to or higher down one spot until you hit an empty spot, then stop;
+        if (tempDriverTree[i].subTier >= targetSubTier) {
+          //not dropping onto a cluster, so just move them down by 1
+          body = {
+            tierLevel: tempDriverTree[i].tierLevel,
+            subTier: tempDriverTree[i].subTier + shift,
+          };
+          await updateOutcomeDriver(
+            selOutcome.id,
+            tempDriverTree[i].driverId,
+            state.userId,
+            body
+          );
+          //checking for blank spot
+          if (i < tempDriverTree.length - 1) {
+            if (tempDriverTree[i + 1].subTier - tempDriverTree[i].subTier > 1) {
+              i = tempDriverTree.length; //make this last month then exit loop
+            }
+          }
+        }
+      }
+    } else if (shiftReq && clusterId > 0) {
+      //you are moving a cluster.
+      //now shift the cards below that spot by the length of the cluster
+      let maxShift = clusterArray.length;
+      shift = maxShift;
+      tempDriverTree = tempDriverTree.filter(
+        (item) => item.clusterId !== Number(clusterId)
+      );
+      for (let i = 0; i < tempDriverTree.length; i++) {
+        //since there is already a card there, shift all of the cards with a subTier equal to or higher down one spot until you hit an empty spot, then stop;
+        if (
+          tempDriverTree[i].clusterId !== clusterId &&
+          tempDriverTree[i].subTier === targetSubTier
+        ) {
+          //if the card is exactly equal, it shifts by max
+          body = {
+            tierLevel: tempDriverTree[i].tierLevel,
+            subTier: tempDriverTree[i].subTier + maxShift,
+          };
+          await updateOutcomeDriver(
+            selOutcome.id,
+            tempDriverTree[i].driverId,
+            state.userId,
+            body
+          );
+          //now see if the next card needs to shift by the same amount or less if there is a gap
+          if (i < tempDriverTree.length - 1) {
+            if (tempDriverTree[i + 1].subTier - tempDriverTree[i].subTier > 1) {
+              shift -=
+                tempDriverTree[i + 1].subTier - tempDriverTree[i].subTier;
+            }
+            if (shift < 0) {shift =0};
+          }
+        } else if (
+          tempDriverTree[i].clusterId !== clusterId &&
+          tempDriverTree[i].subTier > targetSubTier &&
+          shift > 0
+        ) {
+          //now see if the next card needs to shift and shift it then adjust shift
+          if(tempDriverTree[i].subTier < targetSubTier + maxShift){
+            body = {
+              tierLevel: tempDriverTree[i].tierLevel,
+              subTier: tempDriverTree[i].subTier + shift,
+            };
+            await updateOutcomeDriver(
+              selOutcome.id,
+              tempDriverTree[i].driverId,
+              state.userId,
+              body
+            );
+            shift--;
+          }
+          if (i < tempDriverTree.length - 1) {
+            if (tempDriverTree[i + 1].subTier - tempDriverTree[i].subTier > 1) {
+              shift -=
+                tempDriverTree[i + 1].subTier - tempDriverTree[i].subTier;
+            }
+            if (shift < 0) {shift =0};
+          }
+        }
+        //the number of spots to shift depends on whether you are dropping it right on top or offset, calculate the shift value then apply it to the cards below
+        //not dropping onto a cluster, so just move them down by shift
+      }
+    }
+    //look through the arrows state to find any arrows with the affected cardid as a start or endpoint then update.
+    if (dragStart !== dragEnd) {
       //The user moved the card up / down a tier, so the arrows need to be updated to reflect the new tier
-      //cycle through arrow array and update the arrows as needed
+      //cycle through arrow array and update the arrows as needed.  look in the drivertreeobj for the tiers of the other cards as the DOM will be mid refresh so its a challenge grab by element id
       for (let i = 0; i < arrows.length; i++) {
-        //see if the card was the start or end of the arrow
+        //get aStart and aEnd from the arrows array by getting the element by parsing out the cluster or card from the beginning of the string
         if (arrows[i].start === cardname) {
+          //pull the outcome or cluster id from the drivertreeobj based on the cardname found in the arrows array
           //compare the tiers of the start and end points, the starting card moved up a tier so compare the dropped tier with the end tier then adjust the arrow accordingly
-          if (dragEnd === document.getElementById(arrows[i].end).dataset.tier) {
+          //use driverTreeObj in case DOM refreshes mid check
+          let yesCluster = false;
+          if (arrows[i].end.slice(0, 4) === "tier") {
+            yesCluster = true;
+          }
+          let aEnd =
+            arrows[i].end.slice(0, 4) === "card"
+              ? arrows[i].end.slice(4)
+              : arrows[i].end.slice(12);
+          let fArray = driverTreeObj.flat();
+          if (fArray[0] === null) {
+            fArray.shift();
+          }
+
+          let endTier;
+          if (!yesCluster) {
+            endTier = fArray.find(
+              (card) => card.outcomeDrivers?.driverId === aEnd
+            )?.outcomeDrivers?.tierLevel;
+          } else {
+            endTier = fArray.find((card) => card.clusterId === aEnd)?.tierLevel;
+          }
+          // let endTier = endCard.tierLevel;
+          if (dragEnd === endTier) {
             //make the arrow dashed and use the left attach points since the start and end are on the same tier
             aBody.start = arrows[i].start;
             aBody.end = arrows[i].end;
@@ -570,9 +873,7 @@ const DriverCards = ({
             aBody.startAnchor = { position: "left", offset: { y: 0 } };
             aBody.endAnchor = { position: "left", offset: { y: 0 } };
             aBody.gridBreak = "30%";
-          } else if (
-            dragEnd > document.getElementById(arrows[i].end).dataset.tier
-          ) {
+          } else if (dragEnd > endTier) {
             //make the arrow normal and use the left attach points
             aBody.start = arrows[i].start;
             aBody.end = arrows[i].end;
@@ -591,9 +892,27 @@ const DriverCards = ({
           }
         } else if (arrows[i].end === cardname) {
           //the end card was moved so compare the dropped tier with the start tier then adjust the arrow accordingly
-          if (
-            dragEnd === document.getElementById(arrows[i].start).dataset.tier
-          ) {
+          let yesCluster = false;
+          let aStart =
+            arrows[i].start.slice(0, 4) === "card"
+              ? arrows[i].start.slice(4)
+              : arrows[i].start.slice(12);
+          let fArray = driverTreeObj.flat();
+          if (fArray[0] === null) {
+            fArray.shift();
+          }
+          let startTier;
+          if (!yesCluster) {
+            startTier = fArray.find(
+              (card) => card.outcomeDrivers?.driverId === aStart
+            )?.outcomeDrivers?.tierLevel;
+          } else {
+            startTier = fArray.find(
+              (card) => card.clusterId === aStart
+            )?.tierLevel;
+          }
+
+          if (dragEnd === startTier) {
             //make the arrow dashed and use the left attach points
             aBody.start = arrows[i].start;
             aBody.end = arrows[i].end;
@@ -601,9 +920,7 @@ const DriverCards = ({
             aBody.startAnchor = { position: "left", offset: { y: 0 } };
             aBody.endAnchor = { position: "left", offset: { y: 0 } };
             aBody.gridBreak = "50%";
-          } else if (
-            dragEnd > document.getElementById(arrows[i].start).dataset.tier
-          ) {
+          } else if (dragEnd > startTier) {
             //make the arrow normal and use the left attach points
             aBody.start = arrows[i].end;
             aBody.end = arrows[i].start;
@@ -624,15 +941,17 @@ const DriverCards = ({
           //now update the arrow then go onto the next arrow.
         }
         if (aBody.start) {
-          await updateArrow(arrows[i].id, aBody);
-          getArrows(selOutcome.id).then((data) => {
-            setArrows(data.data);
-          });
+          updateArrow(arrows[i].id, aBody);
           aBody = {};
         }
       }
     }
-
+    body = { modified: "Yes" };
+    //tag the driver as updated since you moved it
+    await updateDriver(driverId, state.userId, body);
+    getArrows(selOutcome.id).then((data) => {
+      setArrows(data.data);
+    });
     await getDriverByOutcome(selOutcome.id).then((data) => {
       setDriverTreeObj(data.data);
     });
@@ -665,39 +984,6 @@ const DriverCards = ({
     setSelOutcome(updatedoutcome.data);
   };
 
-  const goToDriver = async (e) => {
-    e.preventDefault();
-    navigate("/drpage/" + selOutcome.id + "/" + e.target.dataset.cardid);
-  };
-
-  //used to handle the submit of the modals for clusters and arrows
-  const onModalSubmit = (e) => {
-    e.preventDefault();
-    handleClose();
-  };
-
-  //close the modal
-  const handleClose = () => {
-    setArrowModal(false);
-    setArrowMod(false);
-    setCreateDriverModal(false);
-  };
-
-  const handleSelOutcomeChange = async (e) => {
-    e.preventDefault();
-    debugger;
-    let body = { [e.target.name]: e.target.value };
-    await updateOutcome(e.target.dataset.cardid, state.userId, body);
-    getOutcome(selOutcome.id).then((data) => {
-      setSelOutcome(data.data);
-    });
-  };
-
-  const handleClusterChange = (e) => {
-    let body = { [e.target.name]: e.target.value };
-    updateCluster(e.target.dataset.clusterid, body);
-  };
-
   const goToDriverTree = (embeddedOutcomeId) => {
     //goes to the embedded drivertree; the outcome idea is the outcomeId of the target
     setSelOutcome({ id: embeddedOutcomeId });
@@ -723,7 +1009,7 @@ const DriverCards = ({
         await cascadeUpdate(
           arrows,
           e.target.dataset.cardid,
-          e.target.dataset.tier,
+          e.target.dataset.tierlevel,
           e.target.value
         );
       } else {
@@ -739,41 +1025,26 @@ const DriverCards = ({
       setDriverTreeObj(data.data);
     });
   };
+  //close the modal
+  const handleClose = () => {
+    setArrowModal(false);
+    setArrowMod(false);
+    setCreateDriverModal(false);
+  };
 
-  //waits for setSelectedElements to be updated, then calls the CreateAnArrow function to create the arrow
-  useEffect(() => {
-    //first section determines if either the starting or ending arrow is a cluster.  uses the Modal to ask the user if they want to connect to the cluster or the driver then changes the appropriate selectedElement.cluster to 0 using the handle select function
-    //needed for initial render
-    if (selectedElements.length === 0) {
-      return;
-    } else if (selectedElements.length === 1) {
-      if (!selectedElements[0].outcomeTitle && selectedElements[0].clusterId) {
-        setShow(true);
-        return;
-      }
-    } else if (selectedElements.length === 2) {
-      //pop the second element in the array in case the user accidentally clicked twice, otherwise, proceed as normal.
-      if (
-        selectedElements[0].id === selectedElements[1].id &&
-        !selectedElements[0].outcomeTitle &&
-        !selectedElements[1].outcomeTitle
-      ) {
-        selectedElements.pop();
-        return;
-      } else if (selectedElements[1].clusterId) {
-        setShow(true);
-      } else {
-        CreateAnArrow({
-          setCreateAnArrow,
-          selectedElements,
-          selOutcome,
-          setSelOutcome,
-        });
-        setSelectedElements([]);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedElements]);
+  const handleSelOutcomeChange = async (e) => {
+    e.preventDefault();
+    let body = { [e.target.name]: e.target.value };
+    await updateOutcome(e.target.dataset.cardid, state.userId, body);
+    getOutcome(selOutcome.id).then((data) => {
+      setSelOutcome(data.data);
+    });
+  };
+
+  const handleClusterChange = (e) => {
+    let body = { [e.target.name]: e.target.value };
+    updateCluster(e.target.dataset.cluster, body);
+  };
 
   //uses the length of the selected elements array to determine if the user is connecting to a driver or a cluster for the first or second element when making an arrow
   const handleSelect = async (e) => {
@@ -794,10 +1065,73 @@ const DriverCards = ({
     setShow(false);
   };
 
-  //uses the CreateArrow function to make an arrow between two cards
-  const MakeAnArrow = async (e, cardid, type) => {
+  const goToDriver = async (e) => {
     e.preventDefault();
-    setSelectedElements([...selectedElements, cardid]);
+    navigate("/drpage/" + selOutcome.id + "/" + e.target.dataset.cardid);
+  };
+
+  //uses the CreateArrow function to make an arrow between two cards
+  const MakeAnArrow = async (e, cardData, type) => {
+    e.preventDefault();
+    //check to see if you've already selected the card, if so, remove it otherwise add it
+    if (
+      selectedElements.some((item) => item.driverId === cardData.driverId) ===
+      true
+    ) {
+      let newArrowArray = selectedElements.filter(
+        (item) => item.driverId !== cardData.driverId
+      );
+      setSelectedElements(newArrowArray);
+    } else {
+      setSelectedElements([...selectedElements, cardData]);
+    }
+  };
+
+  //makes a cluster from the selected cards
+  const MakeCluster = async (e, cardData) => {
+    //in order once the C is clicked in the bottom right hand corner of every card:
+    //1. check to see if the card is already in a cluster
+    //1a. if it is, open a modal that asks if the user wants to do one of the following:  a.)  remove it from the cluster,  b.)  add it to a new cluster,  c.)  cancel the selection of that card
+    //2.  if the card is not in a cluster, then add it to the clusterSelection array
+    //3.  when the user hits the "Execute" button at the top of the screen, and the clusterArray isnt empty, then create the cluster and update the cards in the database
+    //this function executes step 1 and 2 above, the execute button does step 3.
+    e.preventDefault();
+
+    if (recordLockState) {
+      //kick them out and dont let them drag
+      return;
+    }
+
+    //check to see if the card is already in the clusterArray, if it is, remove it, if not add it
+    if (
+      clusterArray.some((item) => item.driverId === cardData.driverId) === true
+    ) {
+      //remove the card from the clusterArray
+      let newClusterArray = clusterArray.filter(
+        (item) => item.driverId !== cardData.driverId
+      );
+      setClusterArray(newClusterArray);
+    } else {
+      //add driver info to the array
+      setClusterArray([...clusterArray, cardData]);
+    }
+
+    //set the clusterTier if it is not already set
+    if (!clusterTier) {
+      setClusterTier(cardData.tierLevel);
+    } else if (clusterTier !== cardData.tierLevel) {
+      //if the cards are in different tiers, then let the user pick a tier for the cluster
+      //todo:  make the tierModal let them select the tier and then autoplace the cluster in the correct spot
+      // setTierModal(true);
+      alert(
+        "You cannot create a cluster with cards from different tiers.  Please drag them into the same tier and try again."
+      );
+      window.location.reload();
+    }
+    //check if the card is already in a cluster, if it is, open clusterCheckModal, if not, add it to the clusterSelection array
+    if (cardData.clusterId) {
+      setShowClusterModal(true);
+    }
   };
 
   //used to add or remove a card from a view.  also updates / sets the opacity of any arrows that are attached to the card
@@ -868,18 +1202,59 @@ const DriverCards = ({
     setOpacity(val);
   };
 
-  const createNewDriver = async (e) => {
+  //used to handle the submit of the modals for clusters and arrows
+  const onModalSubmit = (e) => {
     e.preventDefault();
-    setDriverTier(e.target.dataset.tier);
-    setCreateDriverModal(true);
+    handleClose();
   };
 
-  function tierButtons(tier) {
+  //used with the cluster-mod-modal to remove a card from the cluster it is in and reload the page
+  const removeCluster = async () => {
+    //remove the clusterId from the driver, update the driver in the database, move it below the cluster, then reload the page
+    let body = { clusterId: null };
+    await updateDriver(
+      clusterArray[clusterArray.length - 1].driverId,
+      state.userId,
+      body
+    );
+
+    let count = 0; //use negative 1 since the driverTreeObj still has the original card in it
+
+    for (let subArray of driverTreeObj) {
+      if (!Array.isArray(subArray)) continue; // Skip the null or non-array elements like the Tier 0
+      for (let driver of subArray) {
+        if (
+          driver.clusterId ===
+            clusterArray[clusterArray.length - 1].clusterId &&
+          driver.subTier > clusterArray[clusterArray.length - 1].subTier
+        ) {
+          count++;
+          await updateOutcomeDriver(
+            selOutcome.id,
+            driver.outcomeDrivers.driverId,
+            state.userId,
+            { subTier: driver.subTier - 1 }
+          );
+        }
+      }
+    }
+
+    //now shift the subtier down by the number of cards in the cluster by using the count feature
+    await updateOutcomeDriver(
+      selOutcome.id,
+      clusterArray[clusterArray.length - 1].driverId,
+      state.userId,
+      { subTier: clusterArray[clusterArray.length - 1].subTier + count }
+    );
+    window.location.reload();
+  };
+
+  function tierButtons(tierLevel) {
     if (state.userRole !== "Stakeholder" && !recordLockState) {
       return (
         <Button
-          className={styles.my_btn}
-          data-tier={`${tier}`}
+          className={styles.tier_btn}
+          data-tierlevel={`${tierLevel}`}
           onClick={(e) => createNewDriver(e)}
         >
           +
@@ -888,24 +1263,24 @@ const DriverCards = ({
     }
   }
 
-  function tierCards(tier, driverTreeObj, { viewObj }) {
+  function tierCards(tierLevel, driverTreeObj, { viewObj }) {
     let viewCheck;
     const arr = []; //just an empty arr that will be filled with driverTreeObj
     let clusterNumber = 0; //this is just used to see how far to expand a cluster
     let clusterName; //doing it this way to so i dont need the logic when dealing with the first element of the array.
     if (!driverTreeObj) {
-      const blankDiv = []
+      const blankDiv = [];
       for (let i = 0; i < 20; i++) {
         //create 20 empty divs for the user to drop a driverCard
         blankDiv.push(
           <div
             className={styles.my_div}
-            data-tier={tier} //this is used by the update arrows logic to compare the ending and starting div of a drag and if an arrow needs to be updated.
+            data-tierlevel={tierLevel} //this is used by the update arrows logic to compare the ending and starting div of a drag and if an arrow needs to be updated.
             data-subtier={i + 1}
-            id={"tier1subTier" + (i + 1)}
+            id={`tier${tierLevel}subTier` + (i + 1)}
             onDragOver={allowDrop}
             onDrop={drop}
-            key={`${tier}div${i + 1}`}
+            key={`${tierLevel}div${i + 1}`}
           ></div>
         );
       }
@@ -913,10 +1288,12 @@ const DriverCards = ({
     } else {
       //find max number of droppable divs needed for any given tier, then size the columns accordingly.  This will let the columns grow with each tier
       let max = 20;
-      for (let i = 0; i < driverTreeObj.length; i++) {
+      for (let i = 0; i < 5; i++) {
         //now get the number of elements in the driverTreeObj and set the max equal to it plus 1
-        if (driverTreeObj[i].subTier >= max) {
-          max = driverTreeObj[i].subTier + 1;
+        if (driverTreeObj[i]) {
+          if (driverTreeObj[i].subTier >= max) {
+            max = driverTreeObj[i].subTier + 1;
+          }
         }
       }
       for (let i = 0; i < max; i++) {
@@ -927,7 +1304,7 @@ const DriverCards = ({
         for (let j = 0; j < driverTreeObj.length; j++) {
           let t = i + 1; //the subtiers for the users start at 1 not 0
           if (
-            driverTreeObj[j].tierLevel === tier &&
+            driverTreeObj[j].tierLevel === tierLevel &&
             driverTreeObj[j].subTier === t
           ) {
             arr[i] = driverTreeObj[j];
@@ -944,12 +1321,12 @@ const DriverCards = ({
           return (
             <div
               className={styles.my_div}
-              data-tier={tier} //this is used by the update arrows logic to compare the ending and starting div of a drag and if an arrow needs to be updated.
+              data-tierlevel={tierLevel} //this is used by the update arrows logic to compare the ending and starting div of a drag and if an arrow needs to be updated.
               data-subtier={index + 1}
-              id={"tier1subTier" + (index + 1)}
+              id={`tier${tierLevel}subTier` + (index + 1)}
               onDragOver={allowDrop}
               onDrop={drop}
-              key={`${tier}div${index + 1}`}
+              key={`${tierLevel}div${index + 1}`}
             ></div>
           );
         } else if (
@@ -960,12 +1337,11 @@ const DriverCards = ({
           //check to see how large the cluster is, then create a div for each card in the cluster
           //create a new array for each driver in the cluster then map the array to create the cards
           clusterNumber = arr[index].clusterId; //update to the current clusterNumber so we can fill the cluster with the correct cards.
-          clusterName = arr[index].cluster.clusterName; //update to the current
-          let objCheck = [];
-
-          objCheck = driverTreeObj.filter(
+          clusterName = arr[index].cluster.clusterName; //update to the current name
+          let objCheck = driverTreeObj.filter(
             (item) => item.clusterId === clusterNumber
           );
+          //this is for the views
           for (let i = 0; i < objCheck.length; i++) {
             if (viewObj && viewObj.length > 0) {
               let idCheck = objCheck[i].outcomeDrivers.driverId;
@@ -981,26 +1357,28 @@ const DriverCards = ({
           for (let j = index; j < arr.length; j++) {
             if (arr[j].clusterId === clusterNumber) {
               clusterArr.push(arr[j]);
-              index++;
+              // index++;
             } else {
               j = arr.length;
-              index++;
+              // index++;
             }
           }
 
           return (
             <div
               className={styles.my_cluster}
-              data-tier={tier}
+              data-tierlevel={tierLevel}
               style={
                 // eslint-disable-next-line eqeqeq
                 clusterViewCheck != -1 ? { opacity: 1 } : { opacity: opacity }
               }
               data-subtier={index + 1}
-              key={`${tier}cluster${clusterNumber}`}
+              key={`${tierLevel}cluster${clusterNumber}`}
               data-cluster={clusterNumber} //this is the clusterId for cluster updates
-              id={`tier${tier}cluster` + clusterNumber} //this is used for the arrow start and end points
+              id={`tier${tierLevel}cluster` + clusterNumber} //this is used for the arrow start and end points
               onClick={delCluster}
+              onDragOver={allowDrop} //lets you drop cards where a cluster is and shift the cluster down out of the way
+              onDrop={drop} //in the drop function youll find the code to detect if it was dropped on a cluster and shift the cards down
             >
               {/* text input for clusterName */}
               {!recordLockState ? (
@@ -1008,7 +1386,7 @@ const DriverCards = ({
                   <Form.Control
                     size="sm"
                     type="text"
-                    data-clusterid={clusterNumber}
+                    data-cluster={clusterNumber}
                     className={styles.my_cluster_name}
                     defaultValue={clusterName}
                     placeholder="Cluster Name"
@@ -1031,7 +1409,7 @@ const DriverCards = ({
                   viewCheck = -1;
                 }
 
-                return DCards(clusterArr[ind], tier, viewCheck);
+                return DCards(clusterArr[ind], tierLevel, viewCheck);
               })}
             </div>
           );
@@ -1048,20 +1426,34 @@ const DriverCards = ({
           return (
             <div
               className={styles.my_div}
-              data-tier={tier}
+              data-tierlevel={tierLevel}
               data-subtier={index + 1}
               id={"tier1subTier" + (index + 1)}
               onDragOver={allowDrop}
               onDrop={drop}
-              key={`${tier}div${index + 1}`}
+              key={`${tierLevel}div${index + 1}`}
             >
-              {DCards(arr[index], tier, viewCheck)}
+              {DCards(arr[index], tierLevel, viewCheck)}
             </div>
           );
         }
       });
     }
   }
+
+  const useDrag = (e) => {
+    if (recordLockState) {
+      //kick them out and dont let them drag
+      return;
+    }
+    const data = {
+      cardid: e.target.dataset.cardid,
+      cardname: e.target.id,
+      tierlevel: e.target.dataset.tierlevel,
+      cluster: e.target.dataset.cluster,
+    };
+    e.dataTransfer.setData("application/json", JSON.stringify(data));
+  };
 
   return (
     <>
@@ -1141,15 +1533,7 @@ const DriverCards = ({
                     ></option>
                   </Form.Control>
                 </Form>
-                {createAnArrow && !PDFState ? (
-                  <FontAwesomeIcon
-                    className={styles.card_arrow}
-                    icon={faArrowUp}
-                    data-cardid={selOutcome.id}
-                    data-type="outcome"
-                    onClick={(e) => MakeAnArrow(e, selOutcome, "outcome")}
-                  />
-                ) : null}
+
                 <Card.Body className={styles.my_card_body}>
                   <Row className={styles.card_row}>
                     <Col className={styles.card_col_abbrev}>
@@ -1181,6 +1565,15 @@ const DriverCards = ({
                       )}
                     </Col>
                   </Row>
+                  {createAnArrow && !PDFState && !recordLockState ? (
+                    <FontAwesomeIcon
+                      className={styles.card_arrow}
+                      icon={faArrowUp}
+                      data-cardid={selOutcome.id}
+                      data-type="outcome"
+                      onClick={(e) => MakeAnArrow(e, selOutcome, "outcome")}
+                    />
+                  ) : null}
                 </Card.Body>
               </Card>
               <Row style={{ minHeight: "500px", width: "100%" }}>
@@ -1250,16 +1643,6 @@ const DriverCards = ({
                   {tierCards(5, driverTreeObj[5], { viewObj })}
                 </Row>
               </Col>
-              {/* <Col className={styles.driver} key="6">
-                <Row>Tier 6 Drivers {tierButtons(6)}</Row>
-                <Row
-                  id={`tier5Cards`}
-                  key={`tier5Cards`}
-                  className={styles.my_row}
-                >
-                  {tierCards(6, driverTreeObj[6], { viewObj })}
-                </Row>
-              </Col> */}
             </>
           ) : null}
           {!loading ? (
@@ -1301,6 +1684,51 @@ const DriverCards = ({
         </Modal.Footer>
       </Modal>
 
+      {/* for creating a cluster */}
+      <Modal
+        name="clusterModal"
+        show={showClusterModal}
+        size="sm"
+        aria-labelledby="contained-modal-title-vcenter"
+        centered
+        backdrop="static"
+        keyboard={false}
+        onHide={() => setShowClusterModal(false)}
+        // className={styles.cluster_modal}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title id="cluster-mod-modal">Card Options</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {/*give three buttons, one button adds the card to the clsuter Array, one button removes the card from it's cluster, the other card gets out of the menu*/}
+          <div style={{ display: "flex" }}>
+            {clusterArray.length === 1 ? (
+              <Button
+                variant="primary"
+                className={styles.my_btn}
+                onClick={() => removeCluster()}
+              >
+                Remove From Cluster
+              </Button>
+            ) : (
+              <Button
+                variant="success"
+                className={styles.my_btn}
+                onClick={() => addToThisCluster()}
+              >
+                Add Cards To This Cluster
+              </Button>
+            )}
+            <Button
+              variant="secondary"
+              className={styles.my_btn}
+              onClick={() => setShowClusterModal(false)}
+            >
+              Cancel
+            </Button>
+          </div>
+        </Modal.Body>
+      </Modal>
       <Modal
         name="clusterModal"
         show={createDriverModal}
@@ -1313,7 +1741,6 @@ const DriverCards = ({
       >
         <Modal.Header closeButton></Modal.Header>
         <Modal.Body>
-          {/*change everything in the signup form components*/}
           <DriverModal
             setDriverTreeObj={setDriverTreeObj}
             selOutcome={selOutcome}
@@ -1321,6 +1748,25 @@ const DriverCards = ({
             driverTier={driverTier}
             state={state}
           />
+          <Button variant="secondary" onClick={handleClose}>
+            Close
+          </Button>
+        </Modal.Body>
+      </Modal>
+
+      <Modal
+        name="tierModal"
+        show={tierModal}
+        size="md"
+        aria-labelledby="contained-modal-title-vcenter"
+        centered
+        backdrop="static"
+        keyboard={false}
+        onHide={() => setTierModal(false)}
+      >
+        <Modal.Header closeButton></Modal.Header>
+        <Modal.Body>
+          <TierModal clusterArray={clusterArray} setTierModal={setTierModal} />
           <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>
@@ -1364,13 +1810,11 @@ const DriverCards = ({
         backdrop="static"
         keyboard={false}
         onHide={() => setArrowMod(false)}
-        // className={styles.cluster_modal}
       >
         <Modal.Header closeButton>
-          <Modal.Title id="cluster-modal">Mod Arrow</Modal.Title>
+          <Modal.Title id="arrow-modal">Mod Arrow</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {/*change everything in the signup form components*/}
           <ModArrows
             onModalSubmit={onModalSubmit}
             arrowID={arrowID}

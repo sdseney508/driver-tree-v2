@@ -28,7 +28,6 @@ const ClusterModal = ({
     await createCluster(body);
     //update the selected drivers with the clusterId
     await getOutcome(selOutcome.id).then((data) => {
-      console.log(data.data);
       setSelOutcome(data.data);
     });
     window.location.reload();

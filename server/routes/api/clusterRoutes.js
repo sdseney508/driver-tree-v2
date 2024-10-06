@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const { clusters, drivers, adminAudit } = require("../../models");
+const { clusters, drivers, outcomeDrivers, adminAudit } = require("../../models");
 const sequelize = require("../../config/connection");
 const { Op } = require("sequelize");
 
@@ -22,7 +22,7 @@ router.post("/new", async (req, res) => {
     const clusterData = await clusters.create(
       { outcomeId: req.body.outcomeId, clusterName: req.body.clusterName }
     );
-    //the below code doesnt work with any trasnactions
+    //the below code doesnt work with any transactions
     for (let i = 0; i < req.body.selDriversArr.length; i++) {
       let tempId;
       if (req.body.selDriversArr[i].driverId) {
@@ -39,9 +39,20 @@ router.post("/new", async (req, res) => {
           },
         }
       );
-    }
 
+      //update the subTier on the outcomeDriver
+      await outcomeDrivers.update(
+        { subTier: req.body.selDriversArr[i].subTier },
+        {
+          where: {
+            outcomeId: req.body.outcomeId,
+            driverId: tempId,
+          },
+        }
+      );
+    }
     res.status(200).json(clusterData);
+
   } catch (err) {
     console.log(err);
     res.status(400).json(err);

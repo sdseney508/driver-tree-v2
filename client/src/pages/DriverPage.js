@@ -20,9 +20,9 @@ import { exportElement } from "../utils/export-element";
 
 import exportToPDF from "../utils/exportToPDF";
 
-//this page will only contain the Driver table, you select the driver from the table then it goes into the form
+//this page will only contain the Driver table, you select the driver from the table then it goes into the form.  the props will be passed from the driver tree page and will contain the table state, viewId, and opacity so if you go back to the driver tree, you have go back to the same view.
 
-const DriverPage = () => {
+const DriverPage = ({props}) => {
   const [state, setState] = useState([]);
   const [users, setUserState] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -75,9 +75,7 @@ const DriverPage = () => {
     getUserData({ navigate, state, setState, outcomeId });
     getAppData();
     getAllUsers();
-    setTimeout(() => {
-      setLoading(true);
-    }, 500);
+    setTimeout(500, setLoading(true));
   }, []);
 
   useEffect(() => {
@@ -339,7 +337,7 @@ const DriverPage = () => {
                 <Form.Control
                   as="textarea"
                   value={selDriver.deliverables || ""}
-                  name="Deliverables"
+                  name="deliverables"
                   //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
                   onChange={handleInputChange}
                   onBlur={handleFormSubmit}

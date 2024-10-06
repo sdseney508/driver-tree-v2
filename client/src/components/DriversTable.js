@@ -6,7 +6,6 @@ import React, {
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
 import {
   getDriverById,
-  getDriverByOutcome,
 } from "../utils/drivers";
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
@@ -124,18 +123,13 @@ function DriverTable( {outcomeId, selDrivers, setSelDrivers, selDriver, setSelDr
   // It then passes the data to the parent component to be displayed in the form.
 
   async function fetchDriverInfo(driverId) {
-    debugger;
-    console.log("driverId", driverId);
     await getDriverById(driverId).then((data) => {
-      debugger;
-      console.log("data", data);
       let top = data.data;
       setSelDriver(top);
     });
   }
 
   const cellClickedListener = async (event) => {
-    debugger;
     let driverId = event.data.driverId;
     await fetchDriverInfo(driverId);
   };

@@ -7,7 +7,7 @@ import html2canvas from "html2canvas";
 const exportToPDF = async (element, title) => {
   const input = document.getElementById(element);
   let pdf;
-  await html2canvas(input, { scale: 3, useCORS: true }).then((canvas) => {
+  await html2canvas(input, { scale: 2, useCORS: true }).then((canvas) => {
     const imgData = canvas.toDataURL("image/png");
 
     // // A4 size in landscape mode
