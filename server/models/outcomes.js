@@ -108,6 +108,7 @@ outcomes.init(
             allowNull: false,
             defaultValue: 0,
         },
+        
         classification: {
             type: DataTypes.STRING,
             allowNull: true,

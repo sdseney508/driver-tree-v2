@@ -1,0 +1,38 @@
+[
+  {
+    "caveates": "CUI",
+    "description": "Controlled Unclassified Information that does not require any special handling or dissemination controls beyond those normally required for the protection of sensitive information."
+  },
+  {
+    "caveates": "CUI//SP-CTI",
+    "description": "CUI - Controlled Technical Information that is subject to export control laws and regulations."
+  },
+  {
+    "caveates": "CUI//SP-NNPI",
+    "description": "CUI - Naval Nuclear Propulsion Information."
+  },
+  {
+    "caveates": "CUI//SP-PSI",
+    "description": "CUI - Priviledged Safety Information."
+  },
+  {
+    "caveates": "CUI//SP-DCNI",
+    "description": "CUI - UNCLASSIFIED Controlled Nuclear Information - Defense."
+  },
+  {
+    "caveates": "CUI//SP-EXPT",
+    "description": "CUI - Export Controlled."
+  },
+  {
+    "caveates": "CUI//SP-EXPTR",
+    "description": "CUI - Export Controlled Research."
+  },
+  {
+    "caveates": "CUI//SP-BUDG",
+    "description": "CUI - Budget Information."
+  },
+  {
+    "caveates": "CUI//SP-INTEL",
+    "description": "CUI - General Intelligence."
+  }
+]

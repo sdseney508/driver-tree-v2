@@ -4,6 +4,7 @@ const arrows = require("./arrows");
 const attachments = require("./attachments");
 const audit = require("./audit");
 const carousel = require("./carousel");
+const caveates = require("./caveates");
 const classification = require('./classification');
 const clusters = require("./clusters");
 const drivers = require("./drivers");

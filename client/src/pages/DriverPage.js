@@ -11,18 +11,19 @@ import {
   updateDriver,
 } from "../utils/drivers";
 import { getAllClassificationDefinitions } from "../utils/classification";
+import Dropdown from "../components/Dropdown";
 import DriverTable from "../components/DriversTable";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopyright } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate, useParams } from "react-router-dom";
 import styles from "./DriverPage.module.css";
 import { exportElement } from "../utils/export-element";
-
+import exportAllToPDF from "../utils/exportAllToPDF";
 import exportToPDF from "../utils/exportToPDF";
 
 //this page will only contain the Driver table, you select the driver from the table then it goes into the form.  the props will be passed from the driver tree page and will contain the table state, viewId, and opacity so if you go back to the driver tree, you have go back to the same view.
 
-const DriverPage = ({props}) => {
+const DriverPage = ({ props }) => {
   const [state, setState] = useState([]);
   const [users, setUserState] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -33,7 +34,7 @@ const DriverPage = ({props}) => {
   const [allquads, setAllQuads] = useState(false);
   const [classificationState, setClassificationState] = useState([]);
   const [selectedClassificationState, setSelectedClassificationState] =
-    useState("CUI");
+    useState(null);
   const [recordLockState, setRecordLockState] = useState(false); //this is used to lock the record while someone is editing it.  It is set to true when someone is editing the record and false when they are not.
   const navigate = useNavigate();
 
@@ -58,9 +59,9 @@ const DriverPage = ({props}) => {
         setSelOutcome(top);
       });
       //TODO:  Open Classification is not working.  Need to fix this.
-      // await getAllClassificationDefinitions().then((data) => {
-      //   setClassificationState(data.data);
-      // })
+      await getAllClassificationDefinitions().then((data) => {
+        setClassificationState(data.data);
+      });
       if (!driverId) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
         driverId = selDrivers[0].id;
@@ -68,6 +69,7 @@ const DriverPage = ({props}) => {
 
       await getDriverById(driverId).then((data) => {
         let top = data.data;
+        setSelectedClassificationState(top.classification);
         setSelDriver(top);
       });
     };
@@ -79,6 +81,7 @@ const DriverPage = ({props}) => {
   }, []);
 
   useEffect(() => {
+    console.log("selDriver", selDriver);
     if (selDriver.id) {
       navigate("/drpage/" + outcomeId + "/" + selDriver.id);
     }
@@ -92,6 +95,17 @@ const DriverPage = ({props}) => {
 
   const backToDriverTree = () => {
     navigate("/drivertree/" + selOutcome.id);
+  };
+
+  //dropdown for classifications
+  const classificationOptions = () => {
+    return classificationState.map((f, index) => {
+      return (
+        <option key={index} value={f.classification}>
+          {f.classification}
+        </option>
+      );
+    });
   };
 
   //this function will create a new driver tree with the selected driver as the outcome.  It will then navigate to the new driver tree.
@@ -108,51 +122,31 @@ const DriverPage = ({props}) => {
     navigate("/drivertree/" + newOutcome.data.id);
   };
 
-  const exportPDFWithMethod = () => {
+  const exportPDFWithMethod = async () => {
     handleClose();
-    exportToPDF("pdf-export");
+    let element = document.querySelector(".pdf-export");
+    //then write all of the elements to the pdf
+    exportElement(element);
+  };
+
+  const exportAllPDFWithMethod = async () => {
+    await setAllQuads(true);
+    let element = document.querySelector(".all-quads");
+    //then write all of the elements to the pdf
+    exportElement(element, {
+      forcePageBreak: ".page-break",
+    });
+    setAllQuads(false);
   };
 
   //this function generates the powerpoint style quad for the pdf export.
   const generateQuad = (selDriver) => {
     return (
-      <Row id="pdf-export" className="pdf-export" style={{ margin: "1px" }}>
+      <Row id="pdf-export" className="pdf-export" style={{paddingTop: "5px"}}>
         <Form className={styles.my_form}>
           <Form.Group>
             <Row className={styles.tier_row}>
-              <Col
-                sm={3}
-                md={3}
-                lg={3}
-                style={{ display: "flex", alignContent: "center" }}
-              >
-                Driver Tier
-                <Form.Control
-                  as="select"
-                  id="tierLevel"
-                  value={selDriver.tierLevel}
-                  //Key Note:  all input fields must have a name that matches the database column name so that the handleInputChange function can update the state properly
-                  name="tierLevel"
-                  onChange={handleInputChange}
-                  onBlur={handleFormSubmit}
-                  style={{ width: "40px" }}
-                >
-                  <option key={1} value={1}>
-                    1
-                  </option>
-                  <option key={2} value={2}>
-                    2
-                  </option>
-                  <option key={3} value={3}>
-                    3
-                  </option>
-                  <option key={4} value={4}>
-                    4
-                  </option>
-                  <option key={5} value={5}>
-                    5
-                  </option>
-                </Form.Control>
+              <Col sm={3} md={3} lg={3} style={{ display: "flex" }}>
               </Col>
               <Col sm={6} md={6} lg={6}>
                 <h2
@@ -161,12 +155,32 @@ const DriverPage = ({props}) => {
                 >
                   Driver Details
                 </h2>
+                <div>
+                  {/* for the CUI Information */}
+                  <Form.Group style={{display: "grid", justifyItems: "center"}}>
+                    <Form.Select
+                      id="classification"
+                      value={selDriver.classification || ""}
+                      name="classification"
+                      onChange={handleFormSubmit}
+                      style={{ width: "200px", textAlign: "center" }}
+                    >
+                      {/* Placeholder option */}
+                      <option value="" disabled>
+                        -- Select a Classification --
+                      </option>
+
+                      {/* Render classification options */}
+                      {classificationOptions()}
+                    </Form.Select>
+                  </Form.Group>
+                </div>
               </Col>
             </Row>
           </Form.Group>
           <Row className={styles.quad_format}>
             <Col className={styles.my_col}>
-              <Form.Group style={{ width: "100%" }}>
+              <Form.Group style={{ width: "100%", padding:"5px" }}>
                 <Form.Label>Problem Statement</Form.Label>
                 <Form.Control
                   as="textarea"
@@ -357,6 +371,10 @@ const DriverPage = ({props}) => {
             </Col>
           </Row>
         </Form>
+        <div style={{display: "grid", justifyItems: "center"}}>
+
+        {selDriver.classification}
+        </div>
         <p className={styles.copyright}>
           <FontAwesomeIcon icon={faCopyright} /> Integrated Program Solutions,
           Inc
@@ -524,14 +542,14 @@ const DriverPage = ({props}) => {
           <Button
             variant="secondary"
             style={{ margin: "20px" }}
-            onClick={exportPDFWithMethod}
+            onClick={() => exportPDFWithMethod()}
           >
             This Driver
           </Button>
           <Button
             variant="secondary"
             style={{ margin: "20px" }}
-            onClick={() => writePDF()}
+            onClick={() => exportAllPDFWithMethod()}
           >
             All Drivers
           </Button>

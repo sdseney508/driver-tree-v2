@@ -652,7 +652,7 @@ const DriverCards = ({
         deleteArrow(arrowid);
       }
     }
- 
+
     deleteCluster(e.target.dataset.cluster);
     await getOutcome(selOutcome.id).then((data) => {
       setSelOutcome(data.data);
@@ -679,12 +679,20 @@ const DriverCards = ({
     let dragEnd = Number(e.currentTarget.dataset.tierlevel); //the ending tier
     let targetSubTier = Number(e.currentTarget.dataset.subtier);
     let clusterId = Number(data.cluster); //will be null if not draggin a cluster
+    let clusterName = clusterId
+      ? "tier" + dragStart + "cluster" + clusterId
+      : null;
     let clusterTarget = Number(e.currentTarget.dataset.cluster);
     let driverId = Number(data.cardid);
-    let tempDriverTree = driverTreeObj[dragEnd].sort((a, b) =>
-      a.subTier > b.subTier ? 1 : -1
-    );
-
+    let tempDriverTree = []; //in case there is a null in the obhect
+    if (driverTreeObj[dragEnd]) {
+      tempDriverTree =
+        driverTreeObj[dragEnd].length > 0
+          ? driverTreeObj[dragEnd].sort((a, b) =>
+              a.subTier > b.subTier ? 1 : -1
+            )
+          : [];
+    }
     if (clusterId > 0) {
       clusterArray = driverTreeObj[dragStart].filter(
         (item) => item.clusterId === clusterId
@@ -696,8 +704,10 @@ const DriverCards = ({
       setLoading(false);
       return;
     }
-    //check if there is a card in the slot, shift the cards down, else, just update the card
+    //check if there is a card in the slot, shift the cards down, else, just update the card, if the card dragged is in a cluster, then update all the cards in the cluster and shift the cards down the needed amount
+    debugger;
     for (const drivers of tempDriverTree) {
+      debugger;
       if (drivers.subTier === targetSubTier) {
         shiftReq = true;
         if (clusterTarget > 0) {
@@ -742,7 +752,7 @@ const DriverCards = ({
       }
     }
     if (shiftReq && isNaN(clusterId)) {
-      //remove the card from the temp array, this frees up thta spot for the moved card
+      //remove the card from the temp array, this frees up that spot for the moved card
       tempDriverTree = tempDriverTree.filter(
         (item) => item.driverId !== Number(driverId)
       );
@@ -800,7 +810,9 @@ const DriverCards = ({
               shift -=
                 tempDriverTree[i + 1].subTier - tempDriverTree[i].subTier;
             }
-            if (shift < 0) {shift =0};
+            if (shift < 0) {
+              shift = 0;
+            }
           }
         } else if (
           tempDriverTree[i].clusterId !== clusterId &&
@@ -808,140 +820,265 @@ const DriverCards = ({
           shift > 0
         ) {
           //now see if the next card needs to shift and shift it then adjust shift
-          if(tempDriverTree[i].subTier < targetSubTier + maxShift){
+          if (tempDriverTree[i].subTier <= targetSubTier + maxShift) {
             body = {
               tierLevel: tempDriverTree[i].tierLevel,
               subTier: tempDriverTree[i].subTier + shift,
             };
+            //now see if you are moving the card down into an empty spot, if you are, shift goes down by one.
+            //now see if the next card needs to shift by the same amount or less if there is a gap
+            if (i < tempDriverTree.length - 1) {
+              if (
+                tempDriverTree[i + 1].subTier - tempDriverTree[i].subTier >
+                1
+              ) {
+                shift -=
+                  tempDriverTree[i + 1].subTier - tempDriverTree[i].subTier;
+              }
+              if (shift < 0) {
+                shift = 0;
+              }
+            }
             await updateOutcomeDriver(
               selOutcome.id,
               tempDriverTree[i].driverId,
               state.userId,
               body
             );
-            shift--;
           }
           if (i < tempDriverTree.length - 1) {
             if (tempDriverTree[i + 1].subTier - tempDriverTree[i].subTier > 1) {
               shift -=
                 tempDriverTree[i + 1].subTier - tempDriverTree[i].subTier;
             }
-            if (shift < 0) {shift =0};
+            if (shift < 0) {
+              shift = 0;
+            }
           }
         }
         //the number of spots to shift depends on whether you are dropping it right on top or offset, calculate the shift value then apply it to the cards below
         //not dropping onto a cluster, so just move them down by shift
       }
     }
-    //look through the arrows state to find any arrows with the affected cardid as a start or endpoint then update.
+    //look through the arrows state to find any arrows with the affected cardid as a start or endpoint then update.  first we create an array that contains the names of the cards in the cluster plus the cluterName before it was moved, then we look through the arrows object for arrows that have a .start or .end with anything in the array and update the arrows accordingly
     if (dragStart !== dragEnd) {
-      //The user moved the card up / down a tier, so the arrows need to be updated to reflect the new tier
-      //cycle through arrow array and update the arrows as needed.  look in the drivertreeobj for the tiers of the other cards as the DOM will be mid refresh so its a challenge grab by element id
-      for (let i = 0; i < arrows.length; i++) {
-        //get aStart and aEnd from the arrows array by getting the element by parsing out the cluster or card from the beginning of the string
-        if (arrows[i].start === cardname) {
-          //pull the outcome or cluster id from the drivertreeobj based on the cardname found in the arrows array
-          //compare the tiers of the start and end points, the starting card moved up a tier so compare the dropped tier with the end tier then adjust the arrow accordingly
-          //use driverTreeObj in case DOM refreshes mid check
-          let yesCluster = false;
-          if (arrows[i].end.slice(0, 4) === "tier") {
-            yesCluster = true;
-          }
-          let aEnd =
-            arrows[i].end.slice(0, 4) === "card"
-              ? arrows[i].end.slice(4)
-              : arrows[i].end.slice(12);
-          let fArray = driverTreeObj.flat();
-          if (fArray[0] === null) {
-            fArray.shift();
-          }
 
-          let endTier;
-          if (!yesCluster) {
+      //The user moved the card up / down a tier, so the arrows need to be updated to reflect the new tier
+
+      //cycle through arrow array and update the arrows as needed.  look in the drivertreeobj for the tiers of the other cards as the DOM will be mid refresh so its a challenge grab by element id
+      //if you drug a cluster, you need to check for arrows that start or end in the cluster plus all the arrows attached to cards in the cluster.  to do this, you need to find all the cards in the cluster and then find all the arrows that have the cluster as a start or end point
+      let itemsToCheck = [];
+      if (clusterId > 0) {
+        for (let item of clusterArray) {
+          itemsToCheck.push("card" + item.driverId);
+        }
+        itemsToCheck.push(clusterName);
+      } else {
+        itemsToCheck.push(cardname);
+      }
+      //now go through the arrows and update them as needed based on the itemsToCheck array filter out all arrows that dont contain the info we are looking for
+
+
+      const matchedArrows = arrows
+        .filter(
+          (arrow) =>
+            itemsToCheck.includes(arrow.start) ||
+            itemsToCheck.includes(arrow.end)
+        )
+        .map((arrow) => ({
+          ...arrow,
+          matchedBy: itemsToCheck.includes(arrow.start) ? "start" : "end",
+        }));
+
+      //now we go through those arrows and update them accordingly.  first we find out the original arrow start and end tiers then compare them to the new start and end tiers to determine how to update the arrow.  if the start and end are on the same tier, the arrow will be dashed and the attach points will be on the left side of the card.  if the start is higher than the end, the arrow will be solid and the attach points will be on the left side of the start card and the right side of the end card.  if the start is lower than the end, the arrow will be solid and the attach points will be on the right side of the start card and the left side of the end card.
+      //now we check if we need to make the arrow dashed because drag
+      let fArray = driverTreeObj.flat();
+      let endTier = "";
+      let startTier = "";
+
+      for (let i = 0; i < matchedArrows.length; i++) {
+        //use driverTreeObj in case DOM refreshes mid check
+        //check if it was matched by start or end then set the start and end variables accordingly
+
+        //if the match is the start, then the endTier is the dragEnd, if the match is the end, then the startTier is the dragEnd
+        if (matchedArrows[i].matchedBy === "start") {
+          startTier = dragEnd;
+          if (matchedArrows[i].end.slice(0, 4) === "card") {
             endTier = fArray.find(
-              (card) => card.outcomeDrivers?.driverId === aEnd
+              (card) => card?.driverId === Number(matchedArrows[i].end.slice(4))
             )?.outcomeDrivers?.tierLevel;
           } else {
-            endTier = fArray.find((card) => card.clusterId === aEnd)?.tierLevel;
+            endTier = fArray.find(
+              (card) =>
+                card?.clusterId === Number(matchedArrows[i].end.slice(12))
+            )?.outcomeDrivers?.tierLevel;
           }
-          // let endTier = endCard.tierLevel;
-          if (dragEnd === endTier) {
-            //make the arrow dashed and use the left attach points since the start and end are on the same tier
-            aBody.start = arrows[i].start;
-            aBody.end = arrows[i].end;
+        } else {
+          endTier = dragEnd;
+          if (matchedArrows[i].end.slice(0, 4) === "card") {
+            startTier = fArray.find(
+              (card) =>
+                card?.driverId === Number(matchedArrows[i].start.slice(4))
+            )?.outcomeDrivers?.tierLevel;
+          } else {
+            startTier = fArray.find(
+              (card) =>
+                card?.clusterId === Number(matchedArrows[i].start.slice(12))
+            )?.outcomeDrivers?.tierLevel;
+          }
+        }
+
+        //set startC or endC to the cluster name if the arrow is in a cluster
+        let endC =
+          matchedArrows[i].end.slice(0, 4) === "card"
+            ? ""
+            : "tier" +
+              endTier +
+              "cluster" +
+              Number(matchedArrows[i].end.slice(12));
+
+        let startC =
+          matchedArrows[i].start.slice(0, 4) === "card"
+            ? ""
+            : "tier" +
+              startTier +
+              "cluster" +
+              Number(matchedArrows[i].start.slice(12));
+        if (matchedArrows[i].matchedBy === "start") {
+          //the start of the arrow was moved so compare the dropped tier with the start tier then adjust the arrow accordingly
+          if (startTier === endTier) {
+            let endC =
+              matchedArrows[i].start.slice(0, 4) === "card"
+                ? ""
+                : "tier" +
+                  endTier +
+                  "cluster" +
+                  Number(matchedArrows[i].end.slice(12));
+
+            let startC =
+              matchedArrows[i].end.slice(0, 4) === "card"
+                ? ""
+                : "tier" +
+                  startTier +
+                  "cluster" +
+                  Number(matchedArrows[i].start.slice(12));
+            //make the arrow dashed and use the left attach points
+            aBody.start = startC ? startC : matchedArrows[i].start;
+            aBody.end = endC ? endC : matchedArrows[i].end;
             aBody.dashness = true;
             aBody.startAnchor = { position: "left", offset: { y: 0 } };
             aBody.endAnchor = { position: "left", offset: { y: 0 } };
-            aBody.gridBreak = "30%";
-          } else if (dragEnd > endTier) {
+            aBody.gridBreak = "50";
+          } else if (startTier > endTier) {
             //make the arrow normal and use the left attach points
-            aBody.start = arrows[i].start;
-            aBody.end = arrows[i].end;
+            //set startC or endC to the cluster name if the arrow is in a cluster
+            //set startC or endC to the cluster name if the arrow is in a cluster, invert them for this use case
+            let endC =
+              matchedArrows[i].start.slice(0, 4) === "card"
+                ? ""
+                : "tier" +
+                  endTier +
+                  "cluster" +
+                  Number(matchedArrows[i].end.slice(12));
+
+            let startC =
+              matchedArrows[i].end.slice(0, 4) === "card"
+                ? ""
+                : "tier" +
+                  startTier +
+                  "cluster" +
+                  Number(matchedArrows[i].start.slice(12));
+            aBody.start = startC ? startC : matchedArrows[i].start;
+            aBody.end = endC ? endC : matchedArrows[i].end;
             aBody.dashness = false;
             aBody.startAnchor = { position: "left", offset: { y: 0 } };
             aBody.endAnchor = { position: "right", offset: { y: 0 } };
-            aBody.gridBreak = "50%"; //reset this in case the arrow was previously dashed
+            aBody.gridBreak = "50";
           } else {
             //make the arrow normal and use the right attach points but swap the start and end cards
-            aBody.start = arrows[i].end;
-            aBody.end = arrows[i].start;
+            let endC =
+              matchedArrows[i].start.slice(0, 4) === "card"
+                ? ""
+                : "tier" +
+                  endTier +
+                  "cluster" +
+                  Number(matchedArrows[i].end.slice(12));
+
+            let startC =
+              matchedArrows[i].end.slice(0, 4) === "card"
+                ? ""
+                : "tier" +
+                  startTier +
+                  "cluster" +
+                  Number(matchedArrows[i].start.slice(12));
+            aBody.start = endC ? endC : matchedArrows[i].end;
+            aBody.end = startC ? startC : matchedArrows[i].start;
             aBody.dashness = false;
             aBody.startAnchor = { position: "left", offset: { y: 0 } };
             aBody.endAnchor = { position: "right", offset: { y: 0 } };
-            aBody.gridBreak = "50%"; //reset this in case the arrow was previously dashed
+            aBody.gridBreak = "50";
           }
-        } else if (arrows[i].end === cardname) {
-          //the end card was moved so compare the dropped tier with the start tier then adjust the arrow accordingly
-          let yesCluster = false;
-          let aStart =
-            arrows[i].start.slice(0, 4) === "card"
-              ? arrows[i].start.slice(4)
-              : arrows[i].start.slice(12);
-          let fArray = driverTreeObj.flat();
-          if (fArray[0] === null) {
-            fArray.shift();
-          }
-          let startTier;
-          if (!yesCluster) {
-            startTier = fArray.find(
-              (card) => card.outcomeDrivers?.driverId === aStart
-            )?.outcomeDrivers?.tierLevel;
-          } else {
-            startTier = fArray.find(
-              (card) => card.clusterId === aStart
-            )?.tierLevel;
-          }
-
-          if (dragEnd === startTier) {
+        } else {
+          //the end card was moved so compare the dropped tier with the end tier then adjust the arrow accordingly
+          if (endTier === startTier) {
             //make the arrow dashed and use the left attach points
-            aBody.start = arrows[i].start;
-            aBody.end = arrows[i].end;
+            let endC =
+              matchedArrows[i].start.slice(0, 4) === "card"
+                ? ""
+                : "tier" +
+                  endTier +
+                  "cluster" +
+                  Number(matchedArrows[i].end.slice(12));
+
+            let startC =
+              matchedArrows[i].end.slice(0, 4) === "card"
+                ? ""
+                : "tier" +
+                  startTier +
+                  "cluster" +
+                  Number(matchedArrows[i].start.slice(12));
+            aBody.start = startC ? startC : matchedArrows[i].start;
+            aBody.end = endC ? endC : matchedArrows[i].end;
             aBody.dashness = true;
             aBody.startAnchor = { position: "left", offset: { y: 0 } };
             aBody.endAnchor = { position: "left", offset: { y: 0 } };
-            aBody.gridBreak = "50%";
-          } else if (dragEnd > startTier) {
+            aBody.gridBreak = "50";
+          } else if (startTier > endTier) {
             //make the arrow normal and use the left attach points
-            aBody.start = arrows[i].end;
-            aBody.end = arrows[i].start;
+            aBody.start = startC ? startC : matchedArrows[i].start;
+            aBody.end = endC ? endC : matchedArrows[i].end;
             aBody.dashness = false;
             aBody.startAnchor = { position: "left", offset: { y: 0 } };
             aBody.endAnchor = { position: "right", offset: { y: 0 } };
-            aBody.gridBreak = "50%"; //reset this in case the arrow was previously dashed
+            aBody.gridBreak = "50";
           } else {
-            //make the arrow normal and use the left attach points
-            aBody.start = arrows[i].start;
-            aBody.end = arrows[i].end;
+            //make the arrow normal and use the right attach points but swap the start and end cards
+            //set startC or endC to the cluster name if the arrow is in a cluster
+            let endC =
+              matchedArrows[i].start.slice(0, 4) === "card"
+                ? ""
+                : "tier" +
+                  endTier +
+                  "cluster" +
+                  Number(matchedArrows[i].end.slice(12));
+
+            let startC =
+              matchedArrows[i].end.slice(0, 4) === "card"
+                ? ""
+                : "tier" +
+                  startTier +
+                  "cluster" +
+                  Number(matchedArrows[i].start.slice(12));
+            aBody.start = endC ? endC : matchedArrows[i].end;
+            aBody.end = startC ? startC : matchedArrows[i].start;
             aBody.dashness = false;
             aBody.startAnchor = { position: "left", offset: { y: 0 } };
             aBody.endAnchor = { position: "right", offset: { y: 0 } };
-            aBody.gridBreak = "50%"; //reset this in case the arrow was previously dashed
+            aBody.gridBreak = "50";
           }
-
-          //now update the arrow then go onto the next arrow.
         }
-        if (aBody.start) {
-          updateArrow(arrows[i].id, aBody);
+        if (aBody.gridBreak) {
+          updateArrow(matchedArrows[i].id, aBody);
           aBody = {};
         }
       }

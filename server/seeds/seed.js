@@ -4,6 +4,7 @@ const {
   accountStatus,
   arrows,
   clusters,
+  caveates,
   drivers,
   outcomes,
   role,
@@ -25,6 +26,7 @@ const statusDefData = require("./statusDefData.json");
 const stateData = require("./stateData.json");
 const statusData = require("./statusData.json");
 const userData = require("./userData.json");
+const cuiData = require("./cuiData.json");
 
 const seedDatabase = async () => {
   await sequelize.sync({ force: true });
@@ -46,7 +48,10 @@ const seedDatabase = async () => {
     returning: true,
   });
 
-  
+  const caveate = await caveates.bulkCreate(cuiData, {    
+    individualHooks: true,
+    returning: true,
+  });
   
   const account = await accountStatus.bulkCreate(accountStatusData, {
     individualHooks: true,

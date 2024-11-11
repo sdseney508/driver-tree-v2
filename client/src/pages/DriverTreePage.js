@@ -244,7 +244,12 @@ const DriverTreePage = () => {
   const makeCluster = async () => {
     //reorder the drivers subtiers using the subtier of the first selected driver and then create the cluster
     //first we need to sort the drivers by tier and subTier
-    let startSubTier = clusterArray[0].subTier;  //find where the cluster starts
+    if (clusterArray.length === 0) {
+      createACluster(false); 
+      return;
+    }
+    
+    let startSubTier = clusterArray[0].subTier; //find where the cluster starts
     let shift = clusterArray.length; //how far we have to shift the other drivers
     let subTier = startSubTier;
 
@@ -283,26 +288,25 @@ const DriverTreePage = () => {
       a.subTier > b.subTier ? 1 : -1
     );
 
-
     //now we go through and see if we have any repeat subTiers, if we do we shift by the delta
 
     let shiftReq = false;
     for (let i = 1; i < tempTree[clusterArray[0].tierLevel].length; i++) {
       if (
         tempTree[clusterArray[0].tierLevel][i].subTier <=
-        tempTree[clusterArray[0].tierLevel][i - 1].subTier && !shiftReq
+          tempTree[clusterArray[0].tierLevel][i - 1].subTier &&
+        !shiftReq
       ) {
         shiftReq = true;
         shift = clusterArray.length;
-      } 
+      }
       if (
-        shiftReq 
-        &&
+        shiftReq &&
         tempTree[clusterArray[0].tierLevel][i].clusterId !== clustId
-      ) //ignore cards in the cluster 
-      {
+      ) {
+        //ignore cards in the cluster
         let body = {
-          subTier: tempTree[clusterArray[0].tierLevel][i].subTier+=shift,
+          subTier: (tempTree[clusterArray[0].tierLevel][i].subTier += shift),
           tierLevel: tempTree[clusterArray[0].tierLevel][i].tierLevel,
         };
         await updateOutcomeDriver(
@@ -661,18 +665,18 @@ const DriverTreePage = () => {
                   </button>
                 ) : cluster === true ? (
                   <>
-                  <button
-                    className={styles.cluster_btn}
-                    onClick={() => makeCluster()}
-                  >
-                    Execute
-                  </button>
-                  <button
-                    className={styles.cancel_cluster_btn}
-                    onClick={() => cancelCluster()}
-                  >
-                    Cancel Cluster
-                  </button>
+                    <button
+                      className={styles.cluster_btn}
+                      onClick={() => makeCluster()}
+                    >
+                      Execute
+                    </button>
+                    <button
+                      className={styles.cancel_cluster_btn}
+                      onClick={() => cancelCluster()}
+                    >
+                      Cancel Cluster
+                    </button>
                   </>
                 ) : null}
                 {selOutcome.state === "Draft" ? (

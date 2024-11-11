@@ -56,6 +56,16 @@
    justify-items: center;
 }
 
+.my_custom_style {
+padding-top: 5px;
+}
+
+.form-control {
+   width: 100%;
+   font-weight: bolder;
+   font-size: 50px !important;
+}
+
 .my_btn {
    align-items: center;
    justify-content: center;
@@ -81,6 +91,7 @@
 .my_form {
    background-color: white;
    margin: 5px;
+   padding: 15px;
 }
 
 .my_modal {

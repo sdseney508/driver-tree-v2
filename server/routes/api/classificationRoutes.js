@@ -1,11 +1,12 @@
 const router = require('express').Router();
 const { classification } = require('../../models');
+const sequelize = require("../../config/connection");
 
 // use /api/classification
 //create a classification.  This should almost never be used outside of the admin page
-router.post('/', async (req, res) => {
+router.post('/new', async (req, res) => {
   try {
-    const classifictionData = await classification.create();
+    const classificationData = await classification.create();
     res.status(200).json(classificationData);
   } catch (err) {
     console.log(err);
@@ -17,9 +18,9 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
     try {
         const classificationData = await classification.findAll();
-        res.status(200).json(classificationsData);
+        res.status(200).json(classificationData);
     } catch (err) {
-        res.status(500).json(err);
+        res.status(405).json(err);
     }
 });
 

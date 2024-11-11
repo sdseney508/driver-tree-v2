@@ -164,7 +164,7 @@ function AdminTables({ selectedTable, setSelectedTable, state }) {
             await modifyStatus(id, body);
             break;
           case "views":
-            await updateView(id, body);
+            await updateView(id, body); 
             break;
           default:
         }
